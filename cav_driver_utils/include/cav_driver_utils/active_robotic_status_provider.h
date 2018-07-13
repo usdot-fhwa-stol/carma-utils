@@ -32,50 +32,83 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include <sstream>
+#include <cav_msgs/RobotEnabled.h>
+#include <ros/ros.h>
+#include <vector>
 #include <string>
+
 namespace cav
 {
-namespace can
-{
-
 
 /**
- * @brief structure to store the socket can ErrorCode and produce a valid message from them
+ * @brief ActiveRoboticStatusProvider Wraps the behavior for managing the control/robot_status API
  */
-struct ErrorCode_t
+class ActiveRoboticStatusProvider
 {
-    unsigned int code = 0;
-    const std::string what() const {
-        std::stringstream ss;
+    ros::NodeHandle pnh_;
+    ros::Publisher pub_;
+    std::vector<std::string> api_;
 
-        if(code & 0x1)
-            ss << "tx timeout|";
-        if(code & 0x2)
-            ss << "lost arbitration|";
-        if(code & 0x4)
-            ss << "controller problems|";
-        if(code & 0x8)
-            ss << "protocol violation|";
-        if(code & 0x10)
-            ss << "transceiver error|";
-        if(code & 0x20)
-            ss << "no ack received|";
-        if(code & 0x40)
-            ss << "bus off|";
-        if(code & 0x80)
-            ss << "bus error|";
-        if(code & 0x100)
-            ss << "controller restarted|";
+    bool active_, enabled_;
+public:
 
-
-        std::string ret(ss.str());
-        ret.pop_back();
-        return ret;
+    ActiveRoboticStatusProvider() : pnh_("~control"), active_(false), enabled_(false)
+    {
+        pub_ = pnh_.advertise<cav_msgs::RobotEnabled>("robot_status", 1);
+        api_.push_back(pub_.getTopic());
     }
-};
 
-}
+    /**
+     * @brief Returns the fully scoped API for control/robot_status
+     * @return
+     */
+    std::vector<std::string>& get_api() { return api_; }
+
+    /**
+     * @brief Publishes the status to ~control/robot_status
+     */
+    void publishState()
+    {
+        cav_msgs::RobotEnabled msg;
+        msg.robot_enabled = enabled_;
+        msg.robot_active = active_;
+
+        pub_.publish(msg);
+    }
+
+    /**
+     * @brief sets the robot_active flag
+     * @param val
+     */
+    void setActive(bool val)
+    {
+        active_ = val;
+
+        publishState();
+    }
+
+    /**
+     * @brief sets the robot_enabled flag
+     * @param val
+     */
+    void setEnabled(bool val)
+    {
+        enabled_ = val;
+
+        publishState();
+    }
+
+    /**
+     * @brief returns the robot_active flag
+     * @return
+     */
+    bool getActive() { return active_; }
+
+    /**
+     * @brief returns the robot_enabled flag
+     * @return
+     */
+    bool getEnabled() { return enabled_; }
+};
 
 }
