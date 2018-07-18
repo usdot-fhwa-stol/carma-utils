@@ -32,50 +32,64 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
+#include "command_mode.h"
 
-#include <sstream>
+#include <ros/ros.h>
+#include <cav_msgs/SpeedAccel.h>
+#include <vector>
 #include <string>
+
 namespace cav
 {
-namespace can
+struct LongitudinalSpeedControllerCommand
 {
-
-
-/**
- * @brief structure to store the socket can ErrorCode and produce a valid message from them
- */
-struct ErrorCode_t
-{
-    unsigned int code = 0;
-    const std::string what() const {
-        std::stringstream ss;
-
-        if(code & 0x1)
-            ss << "tx timeout|";
-        if(code & 0x2)
-            ss << "lost arbitration|";
-        if(code & 0x4)
-            ss << "controller problems|";
-        if(code & 0x8)
-            ss << "protocol violation|";
-        if(code & 0x10)
-            ss << "transceiver error|";
-        if(code & 0x20)
-            ss << "no ack received|";
-        if(code & 0x40)
-            ss << "bus off|";
-        if(code & 0x80)
-            ss << "bus error|";
-        if(code & 0x100)
-            ss << "controller restarted|";
-
-
-        std::string ret(ss.str());
-        ret.pop_back();
-        return ret;
-    }
+    double speed,max_accel;
 };
 
-}
+/**
+ * @brief Wrapper for the control/cmd_speed API
+ *
+ * Manages the topic advertisement and exposes the command through the provided signal
+ */
+class LongitudinalSpeedController : public CommandProvider<LongitudinalSpeedControllerCommand>
+{
 
+    ros::NodeHandle pnh_;
+    ros::Subscriber sub_;
+
+    std::vector<std::string> api_;
+
+    /**
+     * @brief Callback for the control/cmd_speed topic
+     * @param msg
+     */
+    void _cb(const cav_msgs::SpeedAccelConstPtr& msg)
+    {
+        command.speed = msg->speed;
+        command.max_accel = msg->max_accel;
+        onNewCommand(command);
+    }
+
+public:
+
+    typedef LongitudinalSpeedControllerCommand Command;
+    Command command;
+
+    LongitudinalSpeedController() : pnh_("~control")
+    {
+        sub_ =  pnh_.subscribe<cav_msgs::SpeedAccel>("cmd_speed",1,&LongitudinalSpeedController::_cb, this);
+        api_.push_back(sub_.getTopic());
+    }
+
+    /**
+     * @brief Returns the fully qualified ROS api for this class
+     * @return
+     */
+    std::vector<std::string>& get_api()
+    {
+        return api_;
+    }
+
+
+};
 }
