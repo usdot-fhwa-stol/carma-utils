@@ -32,50 +32,69 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include <sstream>
+#include <cav_srvs/SetEnableRobotic.h>
+#include <ros/ros.h>
+#include <boost/signals2/signal.hpp>
+#include <vector>
 #include <string>
+
 namespace cav
 {
-namespace can
-{
-
 
 /**
- * @brief structure to store the socket can ErrorCode and produce a valid message from them
+ * @brief Provides a wrapper to the control/enable_robotic service API
  */
-struct ErrorCode_t
+class EnableRoboticService
 {
-    unsigned int code = 0;
-    const std::string what() const {
-        std::stringstream ss;
+    ros::NodeHandle pnh_;
+    ros::ServiceServer srv_;
+    std::vector<std::string> api_;
 
-        if(code & 0x1)
-            ss << "tx timeout|";
-        if(code & 0x2)
-            ss << "lost arbitration|";
-        if(code & 0x4)
-            ss << "controller problems|";
-        if(code & 0x8)
-            ss << "protocol violation|";
-        if(code & 0x10)
-            ss << "transceiver error|";
-        if(code & 0x20)
-            ss << "no ack received|";
-        if(code & 0x40)
-            ss << "bus off|";
-        if(code & 0x80)
-            ss << "bus error|";
-        if(code & 0x100)
-            ss << "controller restarted|";
+    bool robotic_enabled_;
 
-
-        std::string ret(ss.str());
-        ret.pop_back();
-        return ret;
+    /**
+     * @brief Callback for the control/enable_robotic sservice
+     * @param req
+     * @return
+     */
+    bool _cb(cav_srvs::SetEnableRoboticRequest &req, cav_srvs::SetEnableRoboticRequest&) {
+        bool tmp = robotic_enabled_;
+        robotic_enabled_ = req.set == cav_srvs::SetEnableRoboticRequest::ENABLE;
+        if(tmp != robotic_enabled_)
+            onEnabledChanged(robotic_enabled_);
+        return true;
     }
-};
 
-}
+public:
+
+    /**
+     * @brief Signaled on state change
+     */
+    boost::signals2::signal<void (bool)> onEnabledChanged;
+
+    EnableRoboticService() : pnh_("~control")
+    {
+        pnh_.param<bool>("enabled_at_start", robotic_enabled_, false);
+        srv_ = pnh_.advertiseService("enable_robotic", &EnableRoboticService::_cb, this);
+        api_.push_back(srv_.getService());
+    }
+
+    /**
+     * @brief Returns the enabled flag
+     * @return
+     */
+    bool isEnabled() { return robotic_enabled_; }
+
+    /**
+     * @brief Returns the fully qualified ROS api for this class
+     * @return
+     */
+    std::vector<std::string>& get_api()
+    {
+        return api_;
+    }
+
+
+};
 
 }
