@@ -89,7 +89,7 @@ target_link_libraries(driver_wrapper ${catkin_LIBRARIES})
 # )
 
 ## Mark executables and/or libraries for installation
-install(TARGETS driver_application cav_socketcan_interface ros_socketcan_interface
+install(TARGETS driver_application driver_wrapper cav_socketcan_interface ros_socketcan_interface
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 # RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -97,17 +97,22 @@ install(TARGETS driver_application cav_socketcan_interface ros_socketcan_interfa
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/driver_application/
-    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-    FILES_MATCHING PATTERN "*.h"
-    PATTERN ".svn" EXCLUDE
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+        FILES_MATCHING PATTERN "*.h"
+        PATTERN ".svn" EXCLUDE
 )
 
 install(DIRECTORY include/cav_driver_utils/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
         FILES_MATCHING PATTERN "*.h"
         PATTERN ".svn" EXCLUDE
-        )
+)
 
+install(DIRECTORY include/driver_wrapper/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+        FILES_MATCHING PATTERN "*.h"
+        PATTERN ".svn" EXCLUDE
+)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
