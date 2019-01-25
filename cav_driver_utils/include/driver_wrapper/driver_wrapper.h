@@ -54,6 +54,7 @@ protected:
 
     std::shared_ptr<ros::NodeHandle> nh_, private_nh_;
     cav_msgs::DriverStatus status_;
+    int spin_rate_;
 
 private:
 
@@ -90,7 +91,6 @@ private:
     // Initialize necessary publishers and subscribers
     ros::Publisher  driver_status_pub_;
     ros::Subscriber system_alert_sub_;
-    int spin_rate_;
     bool shutdown_;
 
 };
