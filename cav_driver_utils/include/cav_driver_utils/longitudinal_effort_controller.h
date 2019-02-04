@@ -74,7 +74,7 @@ public:
     typedef LongitudinalEffortControllerCommand Command;
     Command command;
 
-    LongitudinalEffortController() : pnh_("~control")
+    LongitudinalEffortController() : pnh_("/control")
     {
         sub_ =  pnh_.subscribe<std_msgs::Float32>("cmd_longitudinal_effort",1,&LongitudinalEffortController::_cb, this);
         api_.push_back(sub_.getTopic());
