@@ -52,7 +52,7 @@ class ActiveRoboticStatusProvider
     bool active_, enabled_;
 public:
 
-    ActiveRoboticStatusProvider() : pnh_("~control"), active_(false), enabled_(false)
+    ActiveRoboticStatusProvider() : pnh_("/control"), active_(false), enabled_(false)
     {
         pub_ = pnh_.advertise<cav_msgs::RobotEnabled>("robot_status", 1);
         api_.push_back(pub_.getTopic());
