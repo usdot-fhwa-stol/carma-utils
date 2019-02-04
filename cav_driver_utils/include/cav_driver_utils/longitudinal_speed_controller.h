@@ -75,7 +75,7 @@ public:
     typedef LongitudinalSpeedControllerCommand Command;
     Command command;
 
-    LongitudinalSpeedController() : pnh_("~control")
+    LongitudinalSpeedController() : pnh_("/control")
     {
         sub_ =  pnh_.subscribe<cav_msgs::SpeedAccel>("cmd_speed",1,&LongitudinalSpeedController::_cb, this);
         api_.push_back(sub_.getTopic());
