@@ -72,7 +72,7 @@ public:
      */
     boost::signals2::signal<void (bool)> onEnabledChanged;
 
-    EnableRoboticService() : pnh_("~control")
+    EnableRoboticService() : pnh_("/control")
     {
         pnh_.param<bool>("enabled_at_start", robotic_enabled_, false);
         srv_ = pnh_.advertiseService("enable_robotic", &EnableRoboticService::_cb, this);
