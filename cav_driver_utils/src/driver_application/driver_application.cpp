@@ -77,12 +77,14 @@ int DriverApplication::run()
 bool DriverStatusEquals(cav_msgs::DriverStatus a, cav_msgs::DriverStatus b)
 {
     return a.status == b.status &&
-            a.position == b.position &&
-            a.can_bus == b.can_bus &&
+            a.can == b.can &&
+            a.gnss == b.gnss &&
+            a.lidar == b.lidar &&
+            a.roadway_sensor == b.roadway_sensor &&
             a.comms == b.comms &&
-            a.lon_controller == b.lon_controller &&
-            a.lat_controller == b.lat_controller &&
-            a.sensor == b.sensor;
+            a.controller == b.controller &&
+            a.camera == b.camera &&
+            a.imu == b.imu;
 }
 
 void DriverApplication::setStatus(cav_msgs::DriverStatus status)
