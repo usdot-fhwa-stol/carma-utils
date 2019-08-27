@@ -1,5 +1,5 @@
-# CARMADriverUtils
-CARMADriverUtils contains packages relevent to or useful for developing device drivers for usage with the CARMAPlatform  
+# CARMAUtils
+CARMAUtils contains packages relevent to or useful for developing device drivers for usage with the CARMAPlatform  
 
 This package is required to build most of the CARMAPlatform device drivers
 
