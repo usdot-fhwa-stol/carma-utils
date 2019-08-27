@@ -229,6 +229,10 @@ TEST(CARMANodeHandleTests, testCARMANodeHandleConstructor)
     "g",
     remappings 
   );
+
+  NodeHandle nh;
+
+  CARMANodeHandle cnh5(nh);
 }
 
 TEST(CARMANodeHandleTests, testCARMANodeHandleSubscriber)
