@@ -1,9 +1,9 @@
-# CARMADriverUtils
-CARMADriverUtils contains packages relevent to or useful for developing device drivers for usage with the CARMAPlatform  
+# CARMAUtils
+CARMAUtils contains packages relevent to or useful for developing components for usage with the CARMAPlatform  
 
-This package is required to build most of the CARMAPlatform device drivers
+This package is required to build the CARMAPlatform repo and many of the device drivers
 
-To add this driver to your CARMAPlatform project simply clone this repository into your Catkin workspace
+To add this repo to your CARMAPlatform project simply clone this repository into your Catkin workspace
 
 # CARMAPlatform
 The primary CARMAPlatform repository can be found [here](https://github.com/usdot-fhwa-stol/CARMAPlatform) and is part of the [USDOT FHWA STOL](https://github.com/usdot-fhwa-stol/)
