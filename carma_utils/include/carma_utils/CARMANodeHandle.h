@@ -243,6 +243,8 @@ namespace ros {
         const M_string & 	remappings = M_string() 
       );	
 
+      CARMANodeHandle	(	const NodeHandle & 	rhs	);
+
       CARMANodeHandle	(	const CARMANodeHandle & 	rhs	);
 
       CARMANodeHandle	(	const CARMANodeHandle & 	parent,

@@ -46,6 +46,12 @@ namespace ros {
 
    CARMANodeHandle::SpinCB CARMANodeHandle::spin_cb_;
 
+  CARMANodeHandle::CARMANodeHandle( const NodeHandle & 	rhs	) 
+    : NodeHandle(rhs) 
+  {
+    initPubSub();
+  }
+
   CARMANodeHandle::CARMANodeHandle(	const std::string & ns, const M_string & 	remappings)
     : NodeHandle(ns, remappings) 
   {
