@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(cav_driver_utils)
 add_compile_options(-std=c++11)
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 
 find_package(catkin REQUIRED COMPONENTS
   bondcpp
