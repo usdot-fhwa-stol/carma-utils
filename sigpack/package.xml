@@ -20,7 +20,7 @@
   <url type="repository">https://sourceforge.net/projects/sigpack/</url>
   <url type="bugtracker">https://sourceforge.net/p/sigpack/discussion/general/</url>
 
-  <buildtool_depend>cmake</buildtool_depend>
+  <buildtool_depend>catkin</buildtool_depend>
 
   <depend>fftw3</depend>
   <depend>Armadillo</depend> 
