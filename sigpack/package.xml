@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package format="2">
+
+  <name>sigpack</name>
+  <version>1.2.7</version>
+  <description>SigPack is a C++ signal processing library using the Armadillo library as a base. The API will be 
+    familiar for those who has used IT++ and Octave/Matlab. The intention is to keep it small and only 
+    implement the fundamental signal processing algorithms.
+    The distrubution of SigPack which includes this package.xml file is used by the CARMAPlatform https://github.com/usdot-fhwa-stol/CARMAPlatform 
+    and includes some modifications to improve the build process for that system.
+  </description>
+
+
+  <maintainer email="carma@todo.todo">todo</maintainer>
+  <author>crolen</author> <!-- Origional SigPack author user name on SourceForge. No email is provided -->
+
+  <license>Mozilla Public License 2.0</license>
+
+  <url type="website">http://sigpack.sourceforge.net/index.html</url>
+  <url type="repository">https://sourceforge.net/projects/sigpack/</url>
+  <url type="bugtracker">https://sourceforge.net/p/sigpack/discussion/general/</url>
+
+  <buildtool_depend>cmake</buildtool_depend>
+
+  <depend>fftw3</depend>
+  <depend>Armadillo</depend> 
+</package>
