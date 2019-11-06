@@ -10,7 +10,9 @@ set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/findFFTW)
 
 find_package(FFTW REQUIRED)
-find_package(Armadillo REQUIRED)
+find_package(Armadillo REQUIRED) 
+# The Armadillo name is case sensative and should be camel case here and all caps everywhere else
+
 
 ###########
 ## Build ##
@@ -21,12 +23,24 @@ find_package(Armadillo REQUIRED)
 ##
 include_directories(
  sigpack
+ ${catkin_INCLUDE_DIRS}
+ ${FFTW_INCLUDE_DIRS}
+ ${ARMADILLO_INCLUDE_DIRS}
 )
+
+message(STATUS "INCLUDE DIRS" ${INCLUDE_DIRECTORIES})
+message(STATUS "ARMADILLO" ${ARMADILLO_INCLUDE_DIRS})
+message(STATUS "FFTW" ${FFTW_INCLUDE_DIRS})
+
+message(STATUS "LIBS" ${INCLUDE_DIRECTORIES})
+message(STATUS "ARMADILLO" ${ARMADILLO_LIBRARIES})
+message(STATUS "FFTW" ${FFTW_LIBRARIES})
 
 # Mark as catkin package so other packages can easily find this
 catkin_package(
-  INCLUDE_DIRS ${INCLUDE_DIRECTORIES}
-  DEPENDS FFTW Armadillo
+  INCLUDE_DIRS sigpack ${ARMADILLO_INCLUDE_DIRS} ${FFTW_INCLUDE_DIRS}
+  LIBRARIES ${ARMADILLO_LIBRARIES} ${FFTW_LIBRARIES}
+  DEPENDS FFTW ARMADILLO
 )
 
 #############
@@ -34,7 +48,7 @@ catkin_package(
 #############
 
 ## Install header files
-install(DIRECTORY ${INCLUDE_DIRECTORIES}
+install(DIRECTORY sigpack
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
