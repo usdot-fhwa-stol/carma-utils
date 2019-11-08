@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>wgs84_utils</name>
-  <version>0.1.5</version>
+  <version>1.0.0</version>
   <description>The wgs84_utils package</description>
   <maintainer email="carma@todo.todo">carma</maintainer>
   <license>BSD</license>
