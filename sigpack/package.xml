@@ -22,6 +22,4 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>fftw3</depend>
-  <depend>Armadillo</depend> 
 </package>
