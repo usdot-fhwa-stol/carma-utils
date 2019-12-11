@@ -2,7 +2,7 @@
 <package format="2">
 
   <name>sigpack</name>
-  <version>1.2.7</version>
+  <version>1.3.0</version>
   <description>SigPack is a C++ signal processing library using the Armadillo library as a base. The API will be 
     familiar for those who has used IT++ and Octave/Matlab. The intention is to keep it small and only 
     implement the fundamental signal processing algorithms.
