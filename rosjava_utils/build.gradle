@@ -158,11 +158,11 @@ def nodeProjects() {
  */
 gradle.projectsEvaluated {
     configure(nodeProjects()) {
-        task cleanScripts(dependsOn: 'installApp') << {
+        task cleanScripts(dependsOn: 'install') << {
             file('build/scripts').deleteDir()
         }
 
-        installApp.finalizedBy(cleanScripts)
+        install.finalizedBy(cleanScripts)
     }
 }
 

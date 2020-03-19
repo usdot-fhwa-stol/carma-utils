@@ -14,4 +14,4 @@
  * the License.
  */
 
-include 'rosutils'
+include 'rosjava_utils'

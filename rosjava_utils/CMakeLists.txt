@@ -19,7 +19,7 @@
 ##############################################################################
 
 cmake_minimum_required(VERSION 2.8.3)
-project(carma)
+project(rosjava_utils)
 
 ##############################################################################
 # Catkin
@@ -37,7 +37,7 @@ find_package(catkin REQUIRED
 #   catkin_rosjava_setup(installApp)
 # Note that the catkin_create_rosjava_xxx scripts will usually automatically
 # add tasks to this for you when you create subprojects.
-catkin_rosjava_setup(installApp publish)
+catkin_rosjava_setup(install publish)
 
 
 # make sure messages get built first if genjava is enabled
@@ -51,10 +51,10 @@ catkin_package()
 
 # Change this to match the maven group name you have specified in the
 # allprojects closure the root build.gradle
-install(DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_MAVEN_DESTINATION}/gov/dot/fhwa/saxton/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_GLOBAL_MAVEN_DESTINATION}/gov/dot/fhwa/saxton/${PROJECT_NAME})
+install(DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_MAVEN_DESTINATION}/gov/dot/fhwa/saxton/carma/
+        DESTINATION ${CATKIN_GLOBAL_MAVEN_DESTINATION}/gov/dot/fhwa/saxton/carma)
 
 # Instal Binaries from Gradle Build folder
 install(DIRECTORY
-        rosutils/build
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/message)
+        rosjava_utils/build
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/rosjava_utils)

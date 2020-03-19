@@ -1,6 +1,6 @@
 #!/bin/bash
 tests=(
-     'rosutils'
+     'rosjava_utils'
    )
 for test in "${tests[@]}"
 do
