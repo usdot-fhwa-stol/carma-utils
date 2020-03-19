@@ -14,7 +14,7 @@
  * the License.
  */
 
-package gov.dot.fhwa.saxton.carma.rosutils;
+package gov.dot.fhwa.saxton.carma.rosjava_utils;
 
 import java.util.concurrent.*;
 
