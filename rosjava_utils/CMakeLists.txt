@@ -43,7 +43,9 @@ catkin_rosjava_setup(install publish)
 # make sure messages get built first if genjava is enabled
 add_dependencies(gradle-${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
-catkin_package()
+catkin_package(
+  CATKIN_DEPENDS rosjava_build_tools rosjava_messages cav_msgs cav_srvs j2735_msgs
+)
 
 ##############################################################################
 # Installation
