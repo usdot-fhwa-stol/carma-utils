@@ -28,7 +28,7 @@ jobs:
     # Pull docker image from docker hub
     # XTERM used for better catkin_make output
     docker:
-      - image: usdotfhwastol/carma-base:3.4.0
+      - image: usdotfhwastol/carma-base:3.7.0
         user: carma
         environment:
           TERM: xterm # use xterm to get full display output from build
@@ -50,17 +50,37 @@ jobs:
           name: Pull CARMAMsgs
           command: |
             source ${INIT_ENV}
-            git clone -b CARMAMsgs_1.1.0 --depth 1 git@github.com:usdot-fhwa-stol/CARMAMsgs.git src/CARMAMsgs
+            git clone -b develop --depth 1 git@github.com:usdot-fhwa-stol/CARMAMsgs.git src/CARMAMsgs
       - run:
           name: Build Driver
           command: |
             source ${INIT_ENV}
+            export ROS_PARALLEL_JOBS='-j1 -l1' # Try to reduce memory consumption on build
             build-wrapper-linux-x86-64 --out-dir /opt/carma/bw-output bash make_with_coverage.bash -m -e /opt/carma/ -o ./coverage_reports/gcov
       - run:
           name: Run C++ Tests
           command: |
             source ${INIT_ENV}
+            export ROS_PARALLEL_JOBS='-j1 -l1' # Try to reduce memory consumption on build
             bash make_with_coverage.bash -t -e /opt/carma/ -o ./coverage_reports/gcov
+      - run:
+          name: Run Java Tests
+          command: |
+            source ${INIT_ENV}
+            source /opt/carma/devel/setup.bash
+            export ROS_PARALLEL_JOBS='-j1 -l1' # Try to reduce memory consumption on build
+            cd src/CARMAUtils/rosjava_utils/
+            ./gradlew jacocoCombinedReport --info
+            ./gradlew testReport --info
+      - run:
+          name: Save Java Test results
+          command: |
+            source ${INIT_ENV}
+            mkdir -p ~/junit/ 
+            sudo mkdir -p /reports/tests
+            sudo mv src/CARMAUtils/rosjava_utils/build/reports/allTests/* /reports/tests/
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/junit/ \;
+          when: always
       # Run SonarCloud analysis
       # PR Branchs and number extracted from Circle variables and github api
       # Circle CI seems to make a change to the base branch, so we must fetch --force to ensure correct git file change stats
