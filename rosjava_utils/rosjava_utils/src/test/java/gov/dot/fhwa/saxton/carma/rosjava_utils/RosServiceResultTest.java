@@ -80,8 +80,8 @@ public class RosServiceResultTest {
 
     assertTrue("testVal not yet modified", testVal[0]);
     try {
-      Object o = result.get(5000, TimeUnit.MILLISECONDS);
-      assertTrue("testVal not yet modified, after sleep", testVal[0]);
+      Object o = result.get(100, TimeUnit.MILLISECONDS);
+      assertTrue("testVal modified, after sleep", testVal[0]);
       assertEquals(null, o);
     } catch (InterruptedException e) {
       fail();
