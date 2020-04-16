@@ -6,7 +6,7 @@
   <description>SigPack is a C++ signal processing library using the Armadillo library as a base. The API will be 
     familiar for those who has used IT++ and Octave/Matlab. The intention is to keep it small and only 
     implement the fundamental signal processing algorithms.
-    The distrubution of SigPack which includes this package.xml file is used by the CARMAPlatform https://github.com/usdot-fhwa-stol/CARMAPlatform 
+    The distrubution of SigPack which includes this package.xml file is used by the CARMAPlatform https://github.com/usdot-fhwa-stol/carma-platform 
     and includes some modifications to improve the build process for that system.
   </description>
 
