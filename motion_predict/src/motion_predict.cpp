@@ -15,6 +15,7 @@
  */
 
 #include "motion_predict.h"
+#include <math.h>
 
 namespace motion_predict{
 
