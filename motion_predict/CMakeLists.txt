@@ -90,5 +90,10 @@ install(DIRECTORY include/
 #############
 
 ## Add gtest based cpp test target and link libraries
-catkin_add_gmock(${PROJECT_NAME}-test test/main.cpp test/test_motion_predict.cpp)
+catkin_add_gmock(${PROJECT_NAME}-test 
+  test/main.cpp 
+  test/test_motion_predict.cpp
+  test/test_predict_ctrv.cpp
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test # Add test directory as working directory for unit tests
+)
 target_link_libraries(${PROJECT_NAME}-test motion_predict ${catkin_LIBRARIES})

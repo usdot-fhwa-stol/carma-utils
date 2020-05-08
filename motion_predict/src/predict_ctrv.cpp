@@ -29,18 +29,37 @@ struct CTRV_State
   double yaw_rate = 0;
 };
 
+std::tuple<double,double> localVelOrientationAndMagnitude(const double v_x, const double v_y)
+{
+	Eigen::Vector2f x_y_vel(v_x, v_y);
+  double v_mag = x_y_vel.norm();
+
+  double local_v_orientation;  // The orientation of the velocity vector in the local object frame
+  if (fabs(v_mag) < 0.0000001)
+  {
+    local_v_orientation = 0;
+  }
+  else
+  {
+    local_v_orientation = asin(v_y / v_mag);
+  }
+	return std::make_tuple(local_v_orientation, v_mag);
+}
+
 CTRV_State buildCTRVState(const geometry_msgs::Pose& pose, const geometry_msgs::Twist& twist)
 {
   geometry_msgs::Quaternion quat = pose.orientation;
   Eigen::Quaternionf e_quat(quat.w, quat.x, quat.y, quat.z);
   Eigen::Vector3f rpy = e_quat.toRotationMatrix().eulerAngles(0, 1, 2);
-  Eigen::Vector2f x_y_vel(twist.linear.x, twist.linear.y);
+
+	auto vel_angle_and_mag = localVelOrientationAndMagnitude(twist.linear.x, twist.linear.y);
 
   CTRV_State state;
   state.x = pose.position.x;
   state.y = pose.position.y;
-  state.yaw = rpy[2];
-  state.v = x_y_vel.norm();
+  state.yaw = rpy[2] + std::get<0>(vel_angle_and_mag);  // The yaw is relative to the velocity vector so take the heading and add
+                                             // it to the angle of the velocity vector in the local frame
+  state.v = std::get<1>(vel_angle_and_mag);
   state.yaw_rate = twist.angular.z;
 
   return state;
@@ -61,10 +80,12 @@ cav_msgs::PredictedState buildPredictionFromCTRVState(const CTRV_State& state, c
                                    original_pose.orientation.y, original_pose.orientation.z);
   Eigen::Vector3f original_rpy = original_quat.toRotationMatrix().eulerAngles(0, 1, 2);
 
+	auto vel_angle_and_mag = localVelOrientationAndMagnitude(original_twist.linear.x, original_twist.linear.y);
+
   Eigen::Quaternionf final_quat;
   final_quat = Eigen::AngleAxisf(original_rpy[0], Eigen::Vector3f::UnitX()) *
                Eigen::AngleAxisf(original_rpy[1], Eigen::Vector3f::UnitY()) *
-               Eigen::AngleAxisf(state.yaw, Eigen::Vector3f::UnitZ());
+               Eigen::AngleAxisf(state.yaw - std::get<0>(vel_angle_and_mag), Eigen::Vector3f::UnitZ());
 
   pobj.predicted_position.orientation.x = final_quat.x();
   pobj.predicted_position.orientation.y = final_quat.y();
@@ -81,7 +102,20 @@ cav_msgs::PredictedState buildPredictionFromCTRVState(const CTRV_State& state, c
 CTRV_State CTRVPredict(const CTRV_State& state, const double delta_t)
 {
   CTRV_State next_state;
-	// TODO implement divide by 0 logic here https://winfriedauner.de/projects/unscented/ctrv/
+  // TODO implement divide by 0 logic here https://winfriedauner.de/projects/unscented/ctrv/
+
+  // Handle divide by 0 case
+  if (fabs(state.yaw_rate) < 0.0000001)
+  {
+    next_state.x = state.x + state.v * cos(state.yaw) * delta_t;
+    next_state.y = state.y + state.v * sin(state.yaw) * delta_t;
+    next_state.yaw = state.yaw;
+    next_state.v = state.v;
+    next_state.yaw_rate = state.yaw_rate;
+
+    return next_state;
+  }
+
   double v_w = state.v / state.yaw_rate;
   double sin_yaw = sin(state.yaw);
   double wT = state.yaw_rate * delta_t;
@@ -125,6 +159,10 @@ cav_msgs::PredictedState predictStep(const cav_msgs::ExternalObject& obj, const 
   pobj.predicted_position_confidence = mp.Mapping(position_process_noise_avg, process_noise_max) * confidence_drop_rate;
   pobj.predicted_velocity_confidence = mp.Mapping(velocity_process_noise_avg, process_noise_max) * confidence_drop_rate;
 
+  // Update header
+  pobj.header = obj.header;
+  pobj.header.stamp += ros::Duration(delta_t);
+
   return pobj;
 }
 
@@ -145,18 +183,25 @@ cav_msgs::PredictedState predictStep(const cav_msgs::PredictedState& obj, const 
   // Map process noise average to confidence
   pobj.predicted_position_confidence = obj.predicted_position_confidence * confidence_drop_rate;
   pobj.predicted_velocity_confidence = obj.predicted_velocity_confidence * confidence_drop_rate;
+
+  // Update header
+  pobj.header = obj.header;
+  pobj.header.stamp += ros::Duration(delta_t);
 }
 
 std::vector<cav_msgs::PredictedState> predictPeriod(const cav_msgs::ExternalObject& obj, const double delta_t,
-                                                    const double period, const float process_noise_max, const double confidence_drop_rate)
+                                                    const double period, const float process_noise_max,
+                                                    const double confidence_drop_rate)
 {
-	std::vector<cav_msgs::PredictedState> predicted_states = { predictStep(obj, delta_t, process_noise_max, confidence_drop_rate) };
+  std::vector<cav_msgs::PredictedState> predicted_states = { predictStep(obj, delta_t, process_noise_max,
+                                                                         confidence_drop_rate) };
 
-	double t = delta_t;
-	while (t < period) {
-		predicted_states.emplace_back( predictStep( predicted_states.back(), delta_t, confidence_drop_rate) );
-		t += delta_t;
-	}
+  double t = delta_t;
+  while (t < period)
+  {
+    predicted_states.emplace_back(predictStep(predicted_states.back(), delta_t, confidence_drop_rate));
+    t += delta_t;
+  }
 }
 
 }  // namespace ctrv
