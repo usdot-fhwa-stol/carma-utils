@@ -52,38 +52,89 @@ namespace Motion
         EXPECT_NEAR(0.74975, mp.Mapping(input,process_noise_max),0.00001);
     }
 
+    TEST(MotionPredictTest, testpredictState)
+    {
+        geometry_msgs::Pose pose;
+        pose.position.x = 1.3;
+        pose.position.y = 1.4;
+        pose.position.z = 2.5;
 
- /*  TEST(MotionPredictTest, testCVPredict)
+        geometry_msgs::Twist twist;
+        twist.linear.x = 4.5;
+        twist.linear.y = 2;
+        twist.linear.z = 5;
+
+        MotionPredict mp;
+        double delta_t=0.1;
+
+        cav_msgs::PredictedState pobj = mp.predictState(pose,twist,delta_t);
+                 
+        EXPECT_NEAR(2, pobj.predicted_position.position.x ,0.00001);
+        EXPECT_NEAR(2.05,  pobj.predicted_position.position.y,0.00001);
+        EXPECT_NEAR(2.5,  pobj.predicted_position.position.z,0.00001);
+
+        EXPECT_NEAR(3,pobj.predicted_velocity.linear.x ,0.00001);
+        EXPECT_NEAR(5.5, pobj.predicted_velocity.linear.y,0.00001);
+        EXPECT_NEAR(5,  pobj.predicted_velocity.linear.z,0.00001);
+    }
+
+
+   
+
+    TEST(MotionPredictTest, testexternalPredict)
     {
         MotionPredict mp;
+       
+        double delta_t=0.1;
+        double ax=10;
+        double ay=10;
+        float process_noise_max=1000;
 
         cav_msgs::ExternalObject obj;
 
-        obj.pose.pose.position.x=
-        obj.pose.pose.position.y=
-        obj.pose.pose.position.z=
-        obj.velocity.twist.linear.x=
-        obj.velocity.twist.linear.y=
-        obj.velocity.twist.linear.z=
+        mp.externalPredict(obj,delta_t,ax,ay,process_noise_max);        
+                 
+        EXPECT_NEAR(2, pobj.predicted_position_confidence ,0.00001);
+        EXPECT_NEAR(2.05, pobj.predicted_velocity_confidence,0.00001);
 
-        obj.pose.covariance[0]=1;
-        obj.pose.covariance[7]=1;
-        obj.velocity.covariance[0]=1000;
-        obj.velocity.covariance[7]=1000;
+    }
 
-        cav_msgs::PredictedState pobj;
 
-        pobj=mp.CVPredict(obj,1,9,9,1000);
+   /* TEST(MotionPredictTest, testexternalPredict)
+    {
+        MotionPredict mp;
+       
+        double delta_t=0.1;
+        double ax=10;
+        double ay=10;
+        float process_noise_max=1000;
 
-        EXPECT_EQ(1, pobj.predicted_position.position.x);
-        EXPECT_EQ(2, pobj.predicted_position.position.y);
-        EXPECT_EQ(3, pobj.predicted_position.position.z);
-        EXPECT_EQ(4, pobj.predicted_position_confidence);
+        cav_msgs::ExternalObject obj;
 
-        EXPECT_EQ(5, pobj.predicted_velocity.linear.x);
-        EXPECT_EQ(6, pobj.predicted_velocity.linear.y);
-        EXPECT_EQ(7, pobj.predicted_velocity.linear.z);
-        EXPECT_EQ(8, pobj.predicted_velocity_confidence);
-    }*/
+        mp.externalPredict(obj,delta_t,ax,ay,process_noise_max);        
+                 
+        EXPECT_NEAR(2, pobj.predicted_position_confidence ,0.00001);
+        EXPECT_NEAR(2.05, pobj.predicted_velocity_confidence,0.00001);
+
+    }
+
+
+    TEST(MotionPredictTest, testexternalPredict)
+    {
+        MotionPredict mp;
+       
+        double delta_t=0.1;
+        double ax=10;
+        double ay=10;
+        float process_noise_max=1000;
+
+        cav_msgs::ExternalObject obj;
+
+        mp.externalPredict(obj,delta_t,ax,ay,process_noise_max);        
+                 
+        EXPECT_NEAR(2, pobj.predicted_position_confidence ,0.00001);
+        EXPECT_NEAR(2.05, pobj.predicted_velocity_confidence,0.00001);
+
+    } */
 
 }
