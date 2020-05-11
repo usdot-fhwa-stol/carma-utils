@@ -16,9 +16,24 @@
 
 #include "motion_predict.h"
 
-namespace Motion{
+namespace motion_predict{
 
-cav_msgs::PredictedState MotionPredict::predictState(const geometry_msgs::Pose& pose, const geometry_msgs::Twist& twist,const double delta_t)
+namespace cv{
+
+double Mapping(const double input,const double process_noise_max)
+{
+  // Note as the value of the covariance increases confidence value increase.
+
+  double input_start = 1; // The lowest number of the range input.
+  double input_end = process_noise_max; // The largest number of the range input.
+  double output_start = 0; // The lowest number of the range output.
+  double output_end = 1; // The largest number of the range ouput.
+  double output = (input - input_start) / (input_end - input_start) * (output_end - output_start) + output_start;
+  
+  return output;
+}  
+
+cav_msgs::PredictedState predictState(const geometry_msgs::Pose& pose, const geometry_msgs::Twist& twist,const double delta_t)
 {
   Eigen::VectorXd x(4); // State Vector
 
@@ -40,16 +55,25 @@ cav_msgs::PredictedState MotionPredict::predictState(const geometry_msgs::Pose& 
   pobj.predicted_position.position.y=x(1); // Predicted Position Y
   pobj.predicted_position.position.z=pose.position.z; // Predicted Position Z
 
+  pobj.predicted_position.orientation.x=pose.orientation.x;
+  pobj.predicted_position.orientation.y=pose.orientation.y;
+  pobj.predicted_position.orientation.z=pose.orientation.z;
+  pobj.predicted_position.orientation.w=pose.orientation.w;
+
   pobj.predicted_velocity.linear.x=x(2); // Predicted Linear Velocity X
   pobj.predicted_velocity.linear.y=x(3); // Predicted Linear Velocity Y
   pobj.predicted_velocity.linear.z=twist.linear.z; // Predicted Linear Velocity Z
+
+  pobj.predicted_velocity.angular.x=twist.angular.x;
+  pobj.predicted_velocity.angular.y=twist.angular.y;
+  pobj.predicted_velocity.angular.z=twist.angular.y;
 
   return pobj;
 } 
 
 
 // Forward predict an external object
-cav_msgs::PredictedState MotionPredict::externalPredict(const cav_msgs::ExternalObject &obj,const double delta_t,const double ax,const double ay,const float process_noise_max)
+cav_msgs::PredictedState externalPredict(const cav_msgs::ExternalObject &obj,const double delta_t,const double ax,const double ay,const double process_noise_max)
 {
 
   cav_msgs::PredictedState pobj = predictState(obj.pose.pose, obj.velocity.twist,delta_t);
@@ -80,11 +104,11 @@ cav_msgs::PredictedState MotionPredict::externalPredict(const cav_msgs::External
     
   P = F * P * Ft + Q; //State Covariance Matrix
 
-  float position_process_noise_avg=(P(0,0)+P(1,1))/2; // Position process noise average
+  double position_process_noise_avg=(P(0,0)+P(1,1))/2; // Position process noise average
 
   pobj.predicted_position_confidence=Mapping(position_process_noise_avg,process_noise_max); // Position process noise confidence
 
-  float velocity_process_noise_avg=(P(2,2)+P(3,3))/2; // Position velocity process noise average
+  double velocity_process_noise_avg=(P(2,2)+P(3,3))/2; // Position velocity process noise average
 
   pobj.predicted_velocity_confidence=Mapping(velocity_process_noise_avg,process_noise_max); // Velocity process noise confidence
 
@@ -96,24 +120,8 @@ cav_msgs::PredictedState MotionPredict::externalPredict(const cav_msgs::External
 
 }
 
-
-std::vector<cav_msgs::PredictedState> MotionPredict::predictPeriod(const cav_msgs::ExternalObject& obj, const double delta_t, const double period,const double ax,const double ay ,const float process_noise_max,const double confidence_drop_rate)
-{
-  std::vector<cav_msgs::PredictedState> predicted_states = { externalPredict(obj,delta_t,ax,ay,process_noise_max) };
-
-  double t = delta_t;
-  while (t < period)
-  {
-    predicted_states.emplace_back(predictStep(predicted_states.back(), delta_t, confidence_drop_rate));
-    t += delta_t;
-  }
-
-  return predicted_states;
-}
-
-
 // Forward predict a prediction
-cav_msgs::PredictedState MotionPredict::predictStep(const cav_msgs::PredictedState& obj, const double delta_t, const double confidence_drop_rate)
+cav_msgs::PredictedState predictStep(const cav_msgs::PredictedState& obj, const double delta_t, const double confidence_drop_rate)
 {
   // Predict Motion
   cav_msgs::PredictedState pobj = predictState(obj.predicted_position, obj.predicted_velocity,delta_t);
@@ -129,19 +137,20 @@ cav_msgs::PredictedState MotionPredict::predictStep(const cav_msgs::PredictedSta
   return pobj;
 }
 
-
-float MotionPredict::Mapping(const float input,const float process_noise_max)
+std::vector<cav_msgs::PredictedState> predictPeriod(const cav_msgs::ExternalObject& obj, const double delta_t, const double period,const double ax,const double ay ,const double process_noise_max,const double confidence_drop_rate)
 {
-  // Note as the value of the covariance increases confidence value increase.
+  std::vector<cav_msgs::PredictedState> predicted_states = { externalPredict(obj,delta_t,ax,ay,process_noise_max) };
 
-  float input_start = 1; // The lowest number of the range input.
-  float input_end = process_noise_max; // The largest number of the range input.
-  float output_start = 0; // The lowest number of the range output.
-  float output_end = 1; // The largest number of the range ouput.
-  float output = (input - input_start) / (input_end - input_start) * (output_end - output_start) + output_start;
-  
-  return output;
+  double t = delta_t;
+  while (t < period)
+  {
+    predicted_states.emplace_back(predictStep(predicted_states.back(), delta_t, confidence_drop_rate));
+    t += delta_t;
+  }
+
+  return predicted_states;
 }
 
+}//cv
 
-}
+}//motion_predict

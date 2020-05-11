@@ -17,39 +17,34 @@
 #include "motion_predict.h"
 #include <gtest/gtest.h>
 
-namespace Motion
-{
+namespace motion_predict{
+
+namespace cv{
 
     TEST(MotionPredictTest, testMappingMid)
     {
-        MotionPredict mp;
-
-        float input=500;
-        float process_noise_max=1000;
+        double input=500;
+        double process_noise_max=1000;
                 
-        EXPECT_NEAR(0.499499, mp.Mapping(input,process_noise_max),0.00001);
+        EXPECT_NEAR(0.499499,Mapping(input,process_noise_max),0.00001);
      
     }
 
     TEST(MotionPredictTest, testMappingLow)
     {
-        MotionPredict mp;
-        
-        float input=25;
-        float process_noise_max=1000;
-       
-        
-        EXPECT_NEAR(0.024024, mp.Mapping(input,process_noise_max),0.00001);
+        double input=25;
+        double process_noise_max=1000;
+               
+        EXPECT_NEAR(0.024024,Mapping(input,process_noise_max),0.00001);
     }
 
     TEST(MotionPredictTest, testMappingHigh)
     {
-        MotionPredict mp;
-        
-        float input=750;
-        float process_noise_max=1000;
           
-        EXPECT_NEAR(0.74975, mp.Mapping(input,process_noise_max),0.00001);
+        double input=750;
+        double process_noise_max=1000;
+          
+        EXPECT_NEAR(0.74975,Mapping(input,process_noise_max),0.00001);
     }
 
     TEST(MotionPredictTest, testpredictState)
@@ -63,11 +58,10 @@ namespace Motion
         twist.linear.x = 4.5;
         twist.linear.y = 2;
         twist.linear.z = 5;
-
-        MotionPredict mp;
+  
         double delta_t=0.1;
 
-        cav_msgs::PredictedState pobj = mp.predictState(pose,twist,delta_t);
+        cav_msgs::PredictedState pobj = predictState(pose,twist,delta_t);
                  
         EXPECT_NEAR(1.75, pobj.predicted_position.position.x ,0.00001);
         EXPECT_NEAR(1.6,  pobj.predicted_position.position.y,0.00001);
@@ -80,12 +74,11 @@ namespace Motion
    
     TEST(MotionPredictTest, testexternalPredictLowCovariancePositionHighCovarianceVelocity)
     {
-        MotionPredict mp;
-       
+          
         double delta_t=0.1;
         double ax=9;
         double ay=9;
-        float process_noise_max=1000;
+        double process_noise_max=1000;
 
         cav_msgs::ExternalObject obj;
 
@@ -94,7 +87,7 @@ namespace Motion
         obj.velocity.covariance[0]=999; // Vx
         obj.velocity.covariance[7]=999; // Vy
 
-       cav_msgs::PredictedState pobj=mp.externalPredict(obj,delta_t,ax,ay,process_noise_max);        
+       cav_msgs::PredictedState pobj=externalPredict(obj,delta_t,ax,ay,process_noise_max);        
                  
         EXPECT_NEAR(0.0100002, pobj.predicted_position_confidence ,0.00001);
         EXPECT_NEAR(0.999089, pobj.predicted_velocity_confidence,0.00001);
@@ -104,12 +97,10 @@ namespace Motion
 
     TEST(MotionPredictTest, testexternalPredictHighCovariancePositionLowCovarianceVelocity)
     {
-        MotionPredict mp;
-       
         double delta_t=0.1;
         double ax=9;
         double ay=9;
-        float process_noise_max=1000;
+        double process_noise_max=1000;
 
         cav_msgs::ExternalObject obj;
 
@@ -118,7 +109,7 @@ namespace Motion
         obj.velocity.covariance[0]=1; // Vx
         obj.velocity.covariance[7]=1; // Vy
 
-       cav_msgs::PredictedState pobj=mp.externalPredict(obj,delta_t,ax,ay,process_noise_max);        
+        cav_msgs::PredictedState pobj=externalPredict(obj,delta_t,ax,ay,process_noise_max);        
                  
         EXPECT_NEAR(0.999009, pobj.predicted_position_confidence ,0.00001);
         EXPECT_NEAR(9.00901e-005, pobj.predicted_velocity_confidence,0.00001);
@@ -127,12 +118,10 @@ namespace Motion
 
     TEST(MotionPredictTest, testexternalPredictDeltaT1)
     {
-        MotionPredict mp;
-       
         double delta_t=1;
         double ax=9;
         double ay=9;
-        float process_noise_max=1000;
+        double process_noise_max=1000;
 
         cav_msgs::ExternalObject obj;
 
@@ -141,7 +130,7 @@ namespace Motion
         obj.velocity.covariance[0]=999; // Vx
         obj.velocity.covariance[7]=999; // Vy
 
-       cav_msgs::PredictedState pobj=mp.externalPredict(obj,delta_t,ax,ay,process_noise_max);        
+        cav_msgs::PredictedState pobj=externalPredict(obj,delta_t,ax,ay,process_noise_max);        
                  
         EXPECT_NEAR(1.00225, pobj.predicted_position_confidence ,0.00001);
         EXPECT_NEAR(1.00801, pobj.predicted_velocity_confidence,0.00001);
@@ -151,8 +140,7 @@ namespace Motion
 
     TEST(MotionPredictTest, testpredictStep)
     {
-        MotionPredict mp;
-       
+        
         double delta_t=0.1;
         double confidence_drop_rate=0.1;
 
@@ -169,7 +157,7 @@ namespace Motion
         pobj.predicted_position_confidence=0.0100002; // Position process noise confidence
         pobj.predicted_velocity_confidence=0.999089; // Velocity process noise confidence
 
-        pobj=mp.predictStep(pobj,delta_t,confidence_drop_rate);   
+        pobj=predictStep(pobj,delta_t,confidence_drop_rate);   
 
         EXPECT_NEAR(1.75, pobj.predicted_position.position.x ,0.00001);
         EXPECT_NEAR(1.6,  pobj.predicted_position.position.y,0.0001);
@@ -185,12 +173,10 @@ namespace Motion
 
     TEST(MotionPredictTest, testpredictPeriod)
     {
-        MotionPredict mp;
-       
         double delta_t=0.1;
         double ax=9;
         double ay=9;
-        float process_noise_max=1000;
+        double process_noise_max=1000;
         double confidence_drop_rate=0.1;
         double period=1.0;
 
@@ -208,7 +194,7 @@ namespace Motion
         obj.velocity.covariance[0]=999; // Vx
         obj.velocity.covariance[7]=999; // Vy
  
-        std::vector<cav_msgs::PredictedState> plist=mp.predictPeriod(obj,delta_t,period,ax,ay ,process_noise_max,confidence_drop_rate);        
+        std::vector<cav_msgs::PredictedState> plist=predictPeriod(obj,delta_t,period,ax,ay ,process_noise_max,confidence_drop_rate);        
                  
         EXPECT_NEAR(1.75, plist[0].predicted_position.position.x ,0.00001);
         EXPECT_NEAR(1.6,  plist[0].predicted_position.position.y,0.0001);
@@ -233,4 +219,6 @@ namespace Motion
         EXPECT_NEAR(0.0999089, plist[1].predicted_velocity_confidence,0.0001);
     }
 
-}
+}//cv
+
+}//motion_predict

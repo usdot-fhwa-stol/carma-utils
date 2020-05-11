@@ -45,7 +45,7 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-add_library(motion_predict src/main.cpp src/motion_predict.cpp)
+add_library(motion_predict src/motion_predict.cpp)
 
 ##add_library(motion_predict_lib src/motion_predict.cpp)
 add_dependencies(motion_predict ${catkin_EXPORTED_TARGETS})
