@@ -46,7 +46,6 @@ include_directories(
 )
 
 add_library(motion_predict 
-  src/main.cpp 
   src/motion_predict.cpp
   src/predict_ctrv.cpp
 )
