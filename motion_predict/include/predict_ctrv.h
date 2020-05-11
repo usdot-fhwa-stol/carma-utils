@@ -24,25 +24,45 @@ namespace predict
 {
 namespace ctrv
 {
-std::vector<cav_msgs::PredictedState> predictPeriod(const cav_msgs::ExternalObject& obj, const double delta_t,
-                                                    const double period, const float process_noise_max, const double confidence_drop_rate);
 /*!
- * \fn CTRVPredict(const cav_msgs::ExternalObject &obj)
- * \brief CTRVPredict populates motion prediction with future pose and velocity.
- *     The predicted motion is
+ * \brief Generates a set of motion predictions seperated by the given time step size for the given period.
+ *        Predictions are made using a CTRV motion model.
+ *
+ * \param  obj external object to predict
+ * \param  delta_t prediction time step size in seconds
+ * \param  period The total prediction period in seconds
+ * \param  process_noise_max is the maximum process noise of the system
+ *
+ * \return The predicted state of the external object at time t + delta_t
+ */
+std::vector<cav_msgs::PredictedState> predictPeriod(const cav_msgs::ExternalObject& obj, const double delta_t,
+                                                    const double period, const float process_noise_max,
+                                                    const double confidence_drop_rate);
+/*!
+ * \brief predictStep populates motion prediction with future pose and velocity.
+ *     The predicted motion is created using a CTRV motion model
  *
  * \param  obj external object.
- * \param  delta_t prediction time into the future
+ * \param  delta_t prediction time into the future in seconds
  * \param  process_noise_max is the maximum process noise of the system
  *
  * \return The predicted state of the external object at time t + delta_t
  */
 
-// Forward predict an external object
 cav_msgs::PredictedState predictStep(const cav_msgs::ExternalObject& obj, const double delta_t,
                                      const float process_noise_max);
 
-// Forward predict a prediction // TODO comment
+/*!
+ * \brief predictStep populates motion prediction with future pose and velocity.
+ *     The predicted motion is created using a CTRV motion model.
+ *
+ * \param  obj previous prediction object.
+ * \param  delta_t prediction time into the future in seconds
+ * \param  process_noise_max is the maximum process noise of the system
+ *
+ * \return The predicted state of the external object at time t + delta_t
+ */
+
 cav_msgs::PredictedState predictStep(const cav_msgs::PredictedState& obj, const double delta_t,
                                      const double confidence_drop_rate);
 
