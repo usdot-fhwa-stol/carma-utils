@@ -57,8 +57,6 @@ add_dependencies(motion_predict ${catkin_EXPORTED_TARGETS})
 ## Specify libraries to link a library or executable target against
 target_link_libraries(motion_predict ${catkin_LIBRARIES})
 
-##target_link_libraries(motion_predict motion_predict_lib ${catkin_LIBRARIES})
-
 #############
 ## Install ##
 #############
@@ -76,13 +74,6 @@ install(DIRECTORY include/
         FILES_MATCHING PATTERN "*.h"
         PATTERN ".svn" EXCLUDE
 )
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-#install(DIRECTORY
-        #launch
-      ##config
-    #    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-#)
 
 
 #############
