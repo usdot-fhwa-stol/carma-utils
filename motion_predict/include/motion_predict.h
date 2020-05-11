@@ -27,7 +27,7 @@ namespace motion_predict{
 
 namespace cv{
 
-        /*! 
+    /*! 
     \brief  Mapping is used to map input range to an output range of different bandwidth.
     \param  input is the current value of the process noise.
     \param  process_noise_max is the maxium process noise of the system

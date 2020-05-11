@@ -45,15 +45,16 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-add_library(motion_predict src/motion_predict.cpp)
+add_library(motion_predict 
+  src/motion_predict.cpp
+  src/predict_ctrv.cpp
+)
 
 ##add_library(motion_predict_lib src/motion_predict.cpp)
 add_dependencies(motion_predict ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(motion_predict ${catkin_LIBRARIES})
-
-##target_link_libraries(motion_predict motion_predict_lib ${catkin_LIBRARIES})
 
 #############
 ## Install ##
@@ -73,18 +74,16 @@ install(DIRECTORY include/
         PATTERN ".svn" EXCLUDE
 )
 
-## Mark other files for installation (e.g. launch and bag files, etc.)
-#install(DIRECTORY
-        #launch
-      ##config
-    #    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-#)
-
 
 #############
 ## Testing ##
 #############
 
 ## Add gtest based cpp test target and link libraries
-catkin_add_gmock(${PROJECT_NAME}-test test/main.cpp test/test_motion_predict.cpp)
+catkin_add_gmock(${PROJECT_NAME}-test 
+  test/main.cpp 
+  test/test_motion_predict.cpp
+  test/test_predict_ctrv.cpp
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test # Add test directory as working directory for unit tests
+)
 target_link_libraries(${PROJECT_NAME}-test motion_predict ${catkin_LIBRARIES})
