@@ -26,7 +26,7 @@ namespace cv{
         double input=500;
         double process_noise_max=1000;
                 
-        EXPECT_NEAR(0.499499,Mapping(input,process_noise_max),0.00001);
+        EXPECT_NEAR(0.500501,Mapping(input,process_noise_max),0.00001);
      
     }
 
@@ -35,7 +35,7 @@ namespace cv{
         double input=25;
         double process_noise_max=1000;
                
-        EXPECT_NEAR(0.024024,Mapping(input,process_noise_max),0.00001);
+        EXPECT_NEAR(0.975976,Mapping(input,process_noise_max),0.00001);
     }
 
     TEST(MotionPredictTest, testMappingHigh)
@@ -44,7 +44,7 @@ namespace cv{
         double input=750;
         double process_noise_max=1000;
           
-        EXPECT_NEAR(0.74975,Mapping(input,process_noise_max),0.00001);
+        EXPECT_NEAR(0.25025,Mapping(input,process_noise_max),0.00001);
     }
 
     TEST(MotionPredictTest, testpredictState)
@@ -89,8 +89,8 @@ namespace cv{
 
        cav_msgs::PredictedState pobj=externalPredict(obj,delta_t,ax,ay,process_noise_max);        
                  
-        EXPECT_NEAR(0.0100002, pobj.predicted_position_confidence ,0.00001);
-        EXPECT_NEAR(0.999089, pobj.predicted_velocity_confidence,0.00001);
+        EXPECT_NEAR(0.99, pobj.predicted_position_confidence ,0.00001);
+        EXPECT_NEAR(0.000910911, pobj.predicted_velocity_confidence,0.00001);
 
     }
 
@@ -111,8 +111,8 @@ namespace cv{
 
         cav_msgs::PredictedState pobj=externalPredict(obj,delta_t,ax,ay,process_noise_max);        
                  
-        EXPECT_NEAR(0.999009, pobj.predicted_position_confidence ,0.00001);
-        EXPECT_NEAR(9.00901e-005, pobj.predicted_velocity_confidence,0.00001);
+        EXPECT_NEAR(0.000990766, pobj.predicted_position_confidence ,0.00001);
+        EXPECT_NEAR(0.99991, pobj.predicted_velocity_confidence,0.00001);
 
     }
 
@@ -132,8 +132,8 @@ namespace cv{
 
         cav_msgs::PredictedState pobj=externalPredict(obj,delta_t,ax,ay,process_noise_max);        
                  
-        EXPECT_NEAR(1.00225, pobj.predicted_position_confidence ,0.00001);
-        EXPECT_NEAR(1.00801, pobj.predicted_velocity_confidence,0.00001);
+        EXPECT_NEAR(-0.00225225, pobj.predicted_position_confidence ,0.00001);
+        EXPECT_NEAR(-0.00800801, pobj.predicted_velocity_confidence,0.00001);
 
     }
 
@@ -154,8 +154,8 @@ namespace cv{
         pobj.predicted_velocity.linear.y=2; // Predicted Linear Velocity Y
         pobj.predicted_velocity.linear.z=5; // Predicted Linear Velocity Z
 
-        pobj.predicted_position_confidence=0.0100002; // Position process noise confidence
-        pobj.predicted_velocity_confidence=0.999089; // Velocity process noise confidence
+        pobj.predicted_position_confidence=0.99; // Position process noise confidence
+        pobj.predicted_velocity_confidence=0.000910911; // Velocity process noise confidence
 
         pobj=predictStep(pobj,delta_t,confidence_drop_rate);   
 
@@ -167,8 +167,8 @@ namespace cv{
         EXPECT_NEAR(2, pobj.predicted_velocity.linear.y,0.0001);
         EXPECT_NEAR(5,  pobj.predicted_velocity.linear.z,0.0001);     
             
-        EXPECT_NEAR(0.00100002, pobj.predicted_position_confidence ,0.0001);
-        EXPECT_NEAR(0.0999089, pobj.predicted_velocity_confidence,0.0001);
+        EXPECT_NEAR(0.099, pobj.predicted_position_confidence ,0.0001);
+        EXPECT_NEAR(0.0000910911, pobj.predicted_velocity_confidence,0.0001);
     }
 
     TEST(MotionPredictTest, testpredictPeriod)
@@ -204,8 +204,8 @@ namespace cv{
         EXPECT_NEAR(2, plist[0].predicted_velocity.linear.y,0.0001);
         EXPECT_NEAR(5,  plist[0].predicted_velocity.linear.z,0.0001);     
             
-        EXPECT_NEAR(0.0100002, plist[0].predicted_position_confidence ,0.0001);
-        EXPECT_NEAR(0.999089, plist[0].predicted_velocity_confidence,0.0001);
+        EXPECT_NEAR(0.99, plist[0].predicted_position_confidence ,0.0001);
+        EXPECT_NEAR(0.000910911, plist[0].predicted_velocity_confidence,0.0001);
 
         EXPECT_NEAR(2.2, plist[1].predicted_position.position.x ,0.00001);
         EXPECT_NEAR(1.8,  plist[1].predicted_position.position.y,0.0001);
@@ -215,8 +215,8 @@ namespace cv{
         EXPECT_NEAR(2, plist[1].predicted_velocity.linear.y,0.0001);
         EXPECT_NEAR(5,  plist[1].predicted_velocity.linear.z,0.0001);     
             
-        EXPECT_NEAR(0.00100002, plist[1].predicted_position_confidence ,0.0001);
-        EXPECT_NEAR(0.0999089, plist[1].predicted_velocity_confidence,0.0001);
+        EXPECT_NEAR(0.099, plist[1].predicted_position_confidence ,0.0001);
+        EXPECT_NEAR(0.0000910911, plist[1].predicted_velocity_confidence,0.0001);
     }
 
 }//cv
