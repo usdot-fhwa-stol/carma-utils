@@ -14,9 +14,12 @@
  * the License.
  */
 
+#include "predict_ctrv.h"
 #include "motion_predict.h"
+#include "Eigen/Dense"
 
-namespace predict
+
+namespace motion_predict
 {
 namespace ctrv
 {
@@ -29,9 +32,9 @@ struct CTRV_State
   double yaw_rate = 0;
 };
 
-std::tuple<double,double> localVelOrientationAndMagnitude(const double v_x, const double v_y)
+std::tuple<double, double> localVelOrientationAndMagnitude(const double v_x, const double v_y)
 {
-	Eigen::Vector2f x_y_vel(v_x, v_y);
+  Eigen::Vector2f x_y_vel(v_x, v_y);
   double v_mag = x_y_vel.norm();
 
   double local_v_orientation;  // The orientation of the velocity vector in the local object frame
@@ -43,7 +46,7 @@ std::tuple<double,double> localVelOrientationAndMagnitude(const double v_x, cons
   {
     local_v_orientation = asin(v_y / v_mag);
   }
-	return std::make_tuple(local_v_orientation, v_mag);
+  return std::make_tuple(local_v_orientation, v_mag);
 }
 
 CTRV_State buildCTRVState(const geometry_msgs::Pose& pose, const geometry_msgs::Twist& twist)
@@ -52,13 +55,14 @@ CTRV_State buildCTRVState(const geometry_msgs::Pose& pose, const geometry_msgs::
   Eigen::Quaternionf e_quat(quat.w, quat.x, quat.y, quat.z);
   Eigen::Vector3f rpy = e_quat.toRotationMatrix().eulerAngles(0, 1, 2);
 
-	auto vel_angle_and_mag = localVelOrientationAndMagnitude(twist.linear.x, twist.linear.y);
+  auto vel_angle_and_mag = localVelOrientationAndMagnitude(twist.linear.x, twist.linear.y);
 
   CTRV_State state;
   state.x = pose.position.x;
   state.y = pose.position.y;
-  state.yaw = rpy[2] + std::get<0>(vel_angle_and_mag);  // The yaw is relative to the velocity vector so take the heading and add
-                                             // it to the angle of the velocity vector in the local frame
+  state.yaw =
+      rpy[2] + std::get<0>(vel_angle_and_mag);  // The yaw is relative to the velocity vector so take the heading and
+                                                // add it to the angle of the velocity vector in the local frame
   state.v = std::get<1>(vel_angle_and_mag);
   state.yaw_rate = twist.angular.z;
 
@@ -80,7 +84,7 @@ cav_msgs::PredictedState buildPredictionFromCTRVState(const CTRV_State& state, c
                                    original_pose.orientation.y, original_pose.orientation.z);
   Eigen::Vector3f original_rpy = original_quat.toRotationMatrix().eulerAngles(0, 1, 2);
 
-	auto vel_angle_and_mag = localVelOrientationAndMagnitude(original_twist.linear.x, original_twist.linear.y);
+  auto vel_angle_and_mag = localVelOrientationAndMagnitude(original_twist.linear.x, original_twist.linear.y);
 
   Eigen::Quaternionf final_quat;
   final_quat = Eigen::AngleAxisf(original_rpy[0], Eigen::Vector3f::UnitX()) *
@@ -143,21 +147,20 @@ cav_msgs::PredictedState predictStep(const cav_msgs::ExternalObject& obj, const 
 
   // Compute confidence values
 
-  double x_x = obj.pose.covariance[0]; // X
-  double y_y = obj.pose.covariance[7]; // Y
-  double yaw_yaw = obj.pose.covariance[35]; // Yaw
-  double vx_vx = obj.velocity.covariance[0]; // Vx
-  double vy_vy = obj.velocity.covariance[7]; // Vy
-  double yawrate_yawrate = obj.velocity.covariance[35]; // Yaw rate
+  double x_x = obj.pose.covariance[0];                   // X
+  double y_y = obj.pose.covariance[7];                   // Y
+  double yaw_yaw = obj.pose.covariance[35];              // Yaw
+  double vx_vx = obj.velocity.covariance[0];             // Vx
+  double vy_vy = obj.velocity.covariance[7];             // Vy
+  double yawrate_yawrate = obj.velocity.covariance[35];  // Yaw rate
 
   // Average diagonal of process noise
   double position_process_noise_avg = (x_x + y_y + yaw_yaw) / 3;
   double velocity_process_noise_avg = (vx_vx + vy_vy + yawrate_yawrate) / 3;
 
   // Map process noise average to confidence
-  Motion::MotionPredict mp;
-  pobj.predicted_position_confidence = mp.Mapping(position_process_noise_avg, process_noise_max) * confidence_drop_rate;
-  pobj.predicted_velocity_confidence = mp.Mapping(velocity_process_noise_avg, process_noise_max) * confidence_drop_rate;
+  pobj.predicted_position_confidence = motion_predict::cv::Mapping(position_process_noise_avg, process_noise_max) * confidence_drop_rate;
+  pobj.predicted_velocity_confidence = motion_predict::cv::Mapping(velocity_process_noise_avg, process_noise_max) * confidence_drop_rate;
 
   // Update header
   pobj.header = obj.header;
@@ -210,4 +213,4 @@ std::vector<cav_msgs::PredictedState> predictPeriod(const cav_msgs::ExternalObje
 
 }  // namespace ctrv
 
-}  // namespace predict
+}  // namespace motion_predict

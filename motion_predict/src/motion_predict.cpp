@@ -31,7 +31,7 @@ double Mapping(const double input,const double process_noise_max)
   double output_end = 1; // The largest number of the range ouput.
   double output = (input - input_start) / (input_end - input_start) * (output_end - output_start) + output_start;
   
-  return output;
+  return 1 - output;
 }  
 
 cav_msgs::PredictedState predictState(const geometry_msgs::Pose& pose, const geometry_msgs::Twist& twist,const double delta_t)

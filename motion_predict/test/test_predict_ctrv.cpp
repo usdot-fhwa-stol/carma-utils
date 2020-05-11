@@ -18,7 +18,7 @@
 #include "../src/predict_ctrv.cpp"
 #include <gtest/gtest.h>
 
-namespace predict
+namespace motion_predict
 {
 namespace ctrv
 {
@@ -148,7 +148,7 @@ TEST(predict_ctrv, predictStepExternal)
   obj.velocity.covariance[7] = 999;
   obj.velocity.covariance[35] = 999;
 
-  cav_msgs::PredictedState result = predict::ctrv::predictStep(obj, 0.1, 1000, 0.99);
+  cav_msgs::PredictedState result = motion_predict::ctrv::predictStep(obj, 0.1, 1000, 0.99);
 
   ASSERT_NEAR(5.0, result.predicted_position.position.x, 0.00001);  // Verify update functions were called
   ASSERT_NEAR(0.99, result.predicted_position_confidence, 0.01);
@@ -169,7 +169,7 @@ TEST(predict_ctrv, predictStep)
   obj.predicted_position_confidence = 1;
   obj.predicted_velocity_confidence = 0.5;
 
-  cav_msgs::PredictedState result = predict::ctrv::predictStep(obj, 0.1, 0.99);
+  cav_msgs::PredictedState result = motion_predict::ctrv::predictStep(obj, 0.1, 0.99);
 
   ASSERT_NEAR(5.0, result.predicted_position.position.x, 0.00001);  // Verify update functions were called
   ASSERT_NEAR(0.99, result.predicted_position_confidence, 0.01);
@@ -195,7 +195,7 @@ TEST(predict_ctrv, predictPeriod)
   obj.velocity.covariance[7] = 999;
   obj.velocity.covariance[35] = 999;
 
-  std::vector<cav_msgs::PredictedState> results = predict::ctrv::predictPeriod(obj, 0.1, 0.21, 1000, 0.99);
+  std::vector<cav_msgs::PredictedState> results = motion_predict::ctrv::predictPeriod(obj, 0.1, 0.21, 1000, 0.99);
 
   ASSERT_NEAR(5.1, results[0].predicted_position.position.x, 0.00001);  // Verify update functions were called
   ASSERT_NEAR(0.99, results[0].predicted_position_confidence, 0.01);
@@ -215,4 +215,4 @@ TEST(predict_ctrv, predictPeriod)
 }
 
 }  // namespace ctrv
-}  // namespace predict
+}  // namespace motion_predict
