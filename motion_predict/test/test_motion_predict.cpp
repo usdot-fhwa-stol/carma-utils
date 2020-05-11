@@ -148,13 +148,13 @@ namespace Motion
 
     }
 
-/*
+
     TEST(MotionPredictTest, testpredictStep)
     {
         MotionPredict mp;
        
         double delta_t=0.1;
-        double confidence_drop_rate=0.01;
+        double confidence_drop_rate=0.1;
 
         cav_msgs::PredictedState pobj;
 
@@ -169,7 +169,6 @@ namespace Motion
         pobj.predicted_position_confidence=0.0100002; // Position process noise confidence
         pobj.predicted_velocity_confidence=0.999089; // Velocity process noise confidence
 
-        //predictStep(const cav_msgs::PredictedState& obj, const double delta_t, const double confidence_drop_rate)
         pobj=mp.predictStep(pobj,delta_t,confidence_drop_rate);   
 
         EXPECT_NEAR(1.75, pobj.predicted_position.position.x ,0.00001);
@@ -230,8 +229,8 @@ namespace Motion
         EXPECT_NEAR(2, plist[1].predicted_velocity.linear.y,0.0001);
         EXPECT_NEAR(5,  plist[1].predicted_velocity.linear.z,0.0001);     
             
-       EXPECT_NEAR(0.000100002, plist[1].predicted_position_confidence ,0.0001);
-       EXPECT_NEAR(0.00999089, plist[1].predicted_velocity_confidence,0.0001);
-    }*/
+        EXPECT_NEAR(0.000100002, plist[1].predicted_position_confidence ,0.0001);
+        EXPECT_NEAR(0.00999089, plist[1].predicted_velocity_confidence,0.0001);
+    }
 
 }
