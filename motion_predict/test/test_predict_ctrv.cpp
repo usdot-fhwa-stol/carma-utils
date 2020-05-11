@@ -22,26 +22,6 @@ namespace predict
 {
 namespace ctrv
 {
-/*
-struct CTRV_State
-{
-double x = 0;
-double y = 0;
-double yaw = 0;
-double v = 0;  // magnitude of the speed
-double yaw_rate = 0;
-};
-
-cav_msgs::PredictedState predictStep(const cav_msgs::ExternalObject& obj, const double delta_t,
-                                 const float process_noise_max, const double confidence_drop_rate);
-
-cav_msgs::PredictedState predictStep(const cav_msgs::PredictedState& obj, const double delta_t,
-                                 const double confidence_drop_rate);
-
-std::vector<cav_msgs::PredictedState> predictPeriod(const cav_msgs::ExternalObject& obj, const double delta_t,
-                                                const double period, const float process_noise_max, const double
-confidence_drop_rate);
-*/
 TEST(predict_ctrv, buildCTRVState)
 {
   geometry_msgs::Pose pose;
@@ -152,6 +132,86 @@ TEST(predict_ctrv, CTRVPredict)
   ASSERT_NEAR(result.yaw, 1.5708, 0.00001);
   ASSERT_NEAR(result.v, state.v, 0.00001);
   ASSERT_NEAR(result.yaw_rate, state.yaw_rate, 0.00001);
+}
+
+TEST(predict_ctrv, predictStepExternal)
+{
+  cav_msgs::ExternalObject obj;
+  obj.header.stamp = ros::Time(5.0);
+  obj.header.frame_id = "my_frame";
+  obj.pose.pose.position.x = 5.0;
+  obj.pose.pose.orientation.w = 1.0;
+  obj.pose.covariance[0] = 1;
+  obj.pose.covariance[7] = 1;
+  obj.pose.covariance[35] = 1;
+  obj.velocity.covariance[0] = 999;
+  obj.velocity.covariance[7] = 999;
+  obj.velocity.covariance[35] = 999;
+
+  cav_msgs::PredictedState result = predict::ctrv::predictStep(obj, 0.1, 1000, 0.99);
+
+  ASSERT_NEAR(5.0, result.predicted_position.position.x, 0.00001);  // Verify update functions were called
+  ASSERT_NEAR(0.99, result.predicted_position_confidence, 0.01);
+  ASSERT_NEAR(0.001, result.predicted_velocity_confidence, 0.001);
+  ros::Time new_time = obj.header.stamp + ros::Duration(0.1);
+  ASSERT_EQ(result.header.stamp.sec, new_time.sec);
+  ASSERT_EQ(result.header.stamp.nsec, new_time.nsec);
+  ASSERT_EQ(result.header.frame_id, obj.header.frame_id);
+}
+
+TEST(predict_ctrv, predictStep)
+{
+  cav_msgs::PredictedState obj;
+  obj.header.stamp = ros::Time(5.0);
+  obj.header.frame_id = "my_frame";
+  obj.predicted_position.position.x = 5.0;
+  obj.predicted_position.orientation.w = 1.0;
+  obj.predicted_position_confidence = 1;
+  obj.predicted_velocity_confidence = 0.5;
+
+  cav_msgs::PredictedState result = predict::ctrv::predictStep(obj, 0.1, 0.99);
+
+  ASSERT_NEAR(5.0, result.predicted_position.position.x, 0.00001);  // Verify update functions were called
+  ASSERT_NEAR(0.99, result.predicted_position_confidence, 0.01);
+  ASSERT_NEAR(0.495, result.predicted_velocity_confidence, 0.0001);
+  ros::Time new_time = obj.header.stamp + ros::Duration(0.1);
+  ASSERT_EQ(result.header.stamp.sec, new_time.sec);
+  ASSERT_EQ(result.header.stamp.nsec, new_time.nsec);
+  ASSERT_EQ(result.header.frame_id, obj.header.frame_id);
+}
+
+TEST(predict_ctrv, predictPeriod)
+{
+  cav_msgs::ExternalObject obj;
+  obj.header.stamp = ros::Time(5.0);
+  obj.header.frame_id = "my_frame";
+  obj.pose.pose.position.x = 5.0;
+  obj.pose.pose.orientation.w = 1.0;
+  obj.velocity.twist.linear.x = 1.0;
+  obj.pose.covariance[0] = 1;
+  obj.pose.covariance[7] = 1;
+  obj.pose.covariance[35] = 1;
+  obj.velocity.covariance[0] = 999;
+  obj.velocity.covariance[7] = 999;
+  obj.velocity.covariance[35] = 999;
+
+  std::vector<cav_msgs::PredictedState> results = predict::ctrv::predictPeriod(obj, 0.1, 0.21, 1000, 0.99);
+
+  ASSERT_NEAR(5.1, results[0].predicted_position.position.x, 0.00001);  // Verify update functions were called
+  ASSERT_NEAR(0.99, results[0].predicted_position_confidence, 0.01);
+  ASSERT_NEAR(0.001, results[0].predicted_velocity_confidence, 0.001);
+  ros::Time new_time = obj.header.stamp + ros::Duration(0.1);
+  ASSERT_EQ(results[0].header.stamp.sec, new_time.sec);
+  ASSERT_EQ(results[0].header.stamp.nsec, new_time.nsec);
+  ASSERT_EQ(results[0].header.frame_id, obj.header.frame_id);
+
+  ASSERT_NEAR(5.2, results[1].predicted_position.position.x, 0.00001);  // Verify update functions were called
+  ASSERT_NEAR(0.9801, results[1].predicted_position_confidence, 0.01);
+  ASSERT_NEAR(0.00099, results[1].predicted_velocity_confidence, 0.00001);
+  new_time = obj.header.stamp + ros::Duration(0.2);
+  ASSERT_EQ(results[1].header.stamp.sec, new_time.sec);
+  ASSERT_EQ(results[1].header.stamp.nsec, new_time.nsec);
+  ASSERT_EQ(results[1].header.frame_id, obj.header.frame_id);
 }
 
 }  // namespace ctrv

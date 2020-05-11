@@ -102,7 +102,6 @@ cav_msgs::PredictedState buildPredictionFromCTRVState(const CTRV_State& state, c
 CTRV_State CTRVPredict(const CTRV_State& state, const double delta_t)
 {
   CTRV_State next_state;
-  // TODO implement divide by 0 logic here https://winfriedauner.de/projects/unscented/ctrv/
 
   // Handle divide by 0 case
   if (fabs(state.yaw_rate) < 0.0000001)
@@ -143,16 +142,17 @@ cav_msgs::PredictedState predictStep(const cav_msgs::ExternalObject& obj, const 
   cav_msgs::PredictedState pobj = buildPredictionFromCTRVState(next_state, obj.pose.pose, obj.velocity.twist);
 
   // Compute confidence values
-  Eigen::MatrixXd P(4, 4);
 
-  P(0, 0) = obj.pose.covariance[0];
-  P(1, 1) = obj.pose.covariance[7];
-  P(2, 2) = obj.velocity.covariance[0];
-  P(3, 3) = obj.velocity.covariance[7];
+  double x_x = obj.pose.covariance[0]; // X
+  double y_y = obj.pose.covariance[7]; // Y
+  double yaw_yaw = obj.pose.covariance[35]; // Yaw
+  double vx_vx = obj.velocity.covariance[0]; // Vx
+  double vy_vy = obj.velocity.covariance[7]; // Vy
+  double yawrate_yawrate = obj.velocity.covariance[35]; // Yaw rate
 
   // Average diagonal of process noise
-  double position_process_noise_avg = (P(0, 0) + P(1, 1)) / 2;
-  double velocity_process_noise_avg = (P(2, 2) + P(3, 3)) / 2;
+  double position_process_noise_avg = (x_x + y_y + yaw_yaw) / 3;
+  double velocity_process_noise_avg = (vx_vx + vy_vy + yawrate_yawrate) / 3;
 
   // Map process noise average to confidence
   Motion::MotionPredict mp;
@@ -187,6 +187,8 @@ cav_msgs::PredictedState predictStep(const cav_msgs::PredictedState& obj, const 
   // Update header
   pobj.header = obj.header;
   pobj.header.stamp += ros::Duration(delta_t);
+
+  return pobj;
 }
 
 std::vector<cav_msgs::PredictedState> predictPeriod(const cav_msgs::ExternalObject& obj, const double delta_t,
@@ -202,6 +204,8 @@ std::vector<cav_msgs::PredictedState> predictPeriod(const cav_msgs::ExternalObje
     predicted_states.emplace_back(predictStep(predicted_states.back(), delta_t, confidence_drop_rate));
     t += delta_t;
   }
+
+  return predicted_states;
 }
 
 }  // namespace ctrv
