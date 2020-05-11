@@ -16,6 +16,7 @@
 
 #include "predict_ctrv.h"
 #include "motion_predict.h"
+#include <math.h>
 #include "Eigen/Dense"
 
 
