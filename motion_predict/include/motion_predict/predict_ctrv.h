@@ -20,7 +20,7 @@
 #include <cav_msgs/ExternalObject.h>
 #include <cav_msgs/PredictedState.h>
 
-namespace predict
+namespace motion_predict
 {
 namespace ctrv
 {

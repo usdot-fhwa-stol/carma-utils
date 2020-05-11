@@ -14,8 +14,8 @@
  * the License.
  */
 
-#include "predict_ctrv.h"
-#include "motion_predict.h"
+#include "motion_predict/predict_ctrv.h"
+#include "motion_predict/motion_predict.h"
 #include <math.h>
 #include "Eigen/Dense"
 

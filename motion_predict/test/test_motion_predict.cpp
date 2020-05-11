@@ -14,7 +14,7 @@
  * the License.
  */
 
-#include "motion_predict.h"
+#include "motion_predict/motion_predict.h"
 #include <gtest/gtest.h>
 
 namespace motion_predict{

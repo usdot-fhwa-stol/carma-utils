@@ -14,7 +14,7 @@
  * the License.
  */
 
-#include "predict_ctrv.h"
+#include "motion_predict/predict_ctrv.h"
 #include "../src/predict_ctrv.cpp"
 #include <gtest/gtest.h>
 

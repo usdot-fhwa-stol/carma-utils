@@ -27,10 +27,9 @@ find_package(Eigen3 REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  #LIBRARIES motion_predict
+  LIBRARIES motion_predict
   CATKIN_DEPENDS cav_msgs roscpp
-  DEPENDS Eigen3
-#  DEPENDS system_lib
+  DEPENDS EIGEN3 # Eigen is a special case where is needs to be in caps here but not in find_package
 )
 
 ###########
@@ -50,7 +49,6 @@ add_library(motion_predict
   src/predict_ctrv.cpp
 )
 
-##add_library(motion_predict_lib src/motion_predict.cpp)
 add_dependencies(motion_predict ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
@@ -68,10 +66,8 @@ install(TARGETS motion_predict
 )
 
 ## Mark cpp header files for installation
-install(DIRECTORY include/
+install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-        FILES_MATCHING PATTERN "*.h"
-        PATTERN ".svn" EXCLUDE
 )
 
 
