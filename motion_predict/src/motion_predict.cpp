@@ -26,8 +26,8 @@ double Mapping(const double input,const double process_noise_max)
 
   double input_start = 1; // The lowest number of the range input.
   double input_end = process_noise_max; // The largest number of the range input.
-  double output_start = 0; // The lowest number of the range output.
-  double output_end = 1; // The largest number of the range ouput.
+  double output_start = 1; // The lowest number of the range output.
+  double output_end = 0; // The largest number of the range ouput.
   double output = (input - input_start) / (input_end - input_start) * (output_end - output_start) + output_start;
   
   return output;
