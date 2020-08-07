@@ -99,17 +99,17 @@ install(TARGETS driver_application driver_wrapper cav_socketcan_interface ros_so
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/driver_application/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
        
 )
 
 install(DIRECTORY include/cav_driver_utils/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
        
 )
 
 install(DIRECTORY include/driver_wrapper/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
       
 )
 
