@@ -372,6 +372,6 @@ namespace ros {
 
 // Template functions cannot be linked unless the implementation is provided
 // Therefore include implementation to allow for template functions
-#include "../../src/carma_utils/CARMANodeHandle.tpp"
+#include "internal/CARMANodeHandle.tpp"
 
 #endif // CARMA_UTILS_CARMA_NODE_HANDLE_H

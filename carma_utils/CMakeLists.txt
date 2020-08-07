@@ -49,7 +49,8 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(${PROJECT_NAME} src/${PROJECT_NAME}/CARMANodeHandle.cpp)
+add_library(${PROJECT_NAME} src/${PROJECT_NAME}/CARMANodeHandle.cpp
+                            )
 add_dependencies( ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
@@ -75,10 +76,9 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 ## Mark cpp header files for installation
-install(DIRECTORY include
+install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.h"
-  PATTERN ".svn" EXCLUDE
+  
 )
 
 #############
