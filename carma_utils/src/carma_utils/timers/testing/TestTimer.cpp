@@ -23,7 +23,7 @@ namespace timers
 namespace testing
 {
 // Initialize static variables
-std::mutex TestTimer::clock_mutex_;  // TODO should this be static?
+std::mutex TestTimer::clock_mutex_;
 
 ros::Time TestTimer::getTime()
 {
@@ -72,10 +72,15 @@ void TestTimer::startImpl()
   }
   start_time_ = getTime();
 
+  // Before creating a new thread verify that the current thread is properly closed
+  if (timer_thread_.joinable()) {
+    timer_thread_.join();
+  }
+
   running_.store(true);
 
   timer_thread_ = std::thread([this]() {
-    while (running_.load()) // TODO might need more robust check on timer_mutex_ here
+    while (running_.load())
     {
       const std::lock_guard<std::mutex> lock_timer(timer_mutex_);
       if (!running_.load()) { // Need to check running flag again after mutex loc to support start/stop operations

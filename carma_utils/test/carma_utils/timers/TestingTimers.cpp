@@ -92,6 +92,13 @@ TEST(TestingTimers, buildTimer)
   ASSERT_FALSE(carma_utils::testing::waitForEqOrTimeout(2.0, 4, call_count));  // Expect timer to NOT trigger after
                                                                                // stopping
   ASSERT_EQ(3, call_count.load());
+
+  timer->start();
+  timer->start(); // Run start twice; This requires visual inspection of output to verify
+
+  // // Verify duplicate initialization throw
+  ASSERT_THROW(timer->initializeTimer(ros::Duration(1.0), [&](const ros::TimerEvent&){}), std::invalid_argument);
+
 }
 }  // namespace testing
 }  // namespace timers

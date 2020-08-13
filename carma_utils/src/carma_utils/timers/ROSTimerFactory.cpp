@@ -15,6 +15,7 @@
  */
 #include <carma_utils/timers/ROSTimerFactory.h>
 
+// <SONAR_IGNORE_START> // Disable sonar cloud analysis for ROS dependant logic
 namespace carma_utils
 {
 namespace timers
