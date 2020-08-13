@@ -49,7 +49,13 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(${PROJECT_NAME} src/${PROJECT_NAME}/CARMANodeHandle.cpp)
+add_library(${PROJECT_NAME} 
+  src/${PROJECT_NAME}/CARMANodeHandle.cpp
+  src/${PROJECT_NAME}/timers/ROSTimer.cpp
+  src/${PROJECT_NAME}/timers/ROSTimerFactory.cpp
+  src/${PROJECT_NAME}/timers/testing/TestTimer.cpp
+  src/${PROJECT_NAME}/timers/testing/TestTimerFactory.cpp
+)
 add_dependencies( ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
@@ -59,13 +65,6 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
-
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
 
 ## Mark executables and/or libraries for installation
 install(TARGETS ${PROJECT_NAME}
@@ -90,6 +89,7 @@ if(CATKIN_ENABLE_TESTING)
   # Add gtest based cpp test target and link libraries
   add_rostest_gtest(${PROJECT_NAME}_CARMANodeHandle_test test/${PROJECT_NAME}/CARMANodeHandle.test
     test/${PROJECT_NAME}/CARMANodeHandleTest.cpp
+    test/${PROJECT_NAME}/timers/TestingTimers.cpp
   )
   target_link_libraries(${PROJECT_NAME}_CARMANodeHandle_test ${PROJECT_NAME} ${catkin_LIBRARIES})
   add_dependencies( ${PROJECT_NAME}_CARMANodeHandle_test ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
