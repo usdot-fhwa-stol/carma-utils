@@ -51,7 +51,7 @@ message(STATUS "FFTW" ${FFTW_LIBRARIES})
 #############
 
 ## Install header files
-install(DIRECTORY sigpack
+install(DIRECTORY sigpack/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 

@@ -8,7 +8,6 @@ find_package(catkin REQUIRED COMPONENTS
   bondcpp
   cav_msgs
   cav_srvs
-  can_msgs
   roscpp
   std_msgs
 )
@@ -43,7 +42,7 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(driver_application
+add_library(driver_application SHARED
     src/driver_application/driver_application.cpp
     include/driver_application/driver_application.h)
 
@@ -98,7 +97,7 @@ install(TARGETS driver_application driver_wrapper cav_socketcan_interface ros_so
 )
 
 ## Mark cpp header files for installation
-install(DIRECTORY include/driver_application/
+install(DIRECTORY include/driver_application
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
        
 )
