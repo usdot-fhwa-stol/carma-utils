@@ -16,7 +16,11 @@
  */
 
 /**
- * Convienance file for including carma_utils headers.
+ * Convienance file for including carma_utils headers. Does not include testing headers.
  */ 
 
 #include "CARMANodeHandle.h"
+#include "timers/Timer.h"
+#include "timers/TimerFactory.h"
+#include "timers/ROSTimer.h"
+#include "timers/ROSTimerFactory.h"
