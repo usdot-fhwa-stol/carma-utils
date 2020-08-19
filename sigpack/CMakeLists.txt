@@ -22,13 +22,13 @@ find_package(Armadillo REQUIRED)
 ## Sigpack is a header only library so there is no compilation step
 ##
 catkin_package(
-  INCLUDE_DIRS sigpack ${ARMADILLO_INCLUDE_DIRS} ${FFTW_INCLUDE_DIRS}
+  INCLUDE_DIRS include ${ARMADILLO_INCLUDE_DIRS} ${FFTW_INCLUDE_DIRS}
   LIBRARIES ${ARMADILLO_LIBRARIES} ${FFTW_LIBRARIES}
   DEPENDS FFTW ARMADILLO
 )
 
 include_directories(
- sigpack
+ #sigpack
  ${catkin_INCLUDE_DIRS}
  ${FFTW_INCLUDE_DIRS}
  ${ARMADILLO_INCLUDE_DIRS}
@@ -51,7 +51,7 @@ message(STATUS "FFTW" ${FFTW_LIBRARIES})
 #############
 
 ## Install header files
-install(DIRECTORY sigpack/
+install(DIRECTORY include
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
