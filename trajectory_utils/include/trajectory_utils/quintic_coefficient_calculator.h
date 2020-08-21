@@ -24,7 +24,7 @@
 namespace quintic_coefficient_calculator {
     
     /*! 
-    \brief  Mapping is used to map input range to an output range of different bandwidth.
+    \brief  quintic_coefficient_calculator is used to solve quintic_coefficient for object avoidance .
     \param x0 position at time t0
     \param xt position at time t
     \param v0 velocity at time t0
