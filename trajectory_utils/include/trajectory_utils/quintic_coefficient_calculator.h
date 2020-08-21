@@ -22,6 +22,15 @@
 #include <Eigen/Dense>
 
 namespace quintic_coefficient_calculator {
+    
+    // x0 position at time t0
+    // xt position at time t
+    // v0 velocity at time t0
+    // vt velocity at time t
+    // a0 acceleration at time t0
+    // at acceleration at time t
+    // t0 initial time
+    // tt goal time
 
     std::vector<double> quintic_coefficient_calculator(double x0, double xt, double v0, double vt, double a0, double at, __uint64_t t0, __uint64_t tt);
 
