@@ -73,16 +73,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
 ## Testing ##
 #############
 
-# ## Add gtest based cpp test target and link libraries
-# catkin_add_gmock(${PROJECT_NAME}-test 
-#   test/${PROJECT_NAME}/main.cpp 
-#   test/${PROJECT_NAME}/quintic_coefficient_calculator_test.cpp
-#   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test # Add test directory as working directory for unit tests
-# )
-# target_link_libraries(${PROJECT_NAME}-test trajectory_utils ${catkin_LIBRARIES})
-
-
-
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 catkin_add_gmock(${PROJECT_NAME}-test test/${PROJECT_NAME}/main.cpp test/${PROJECT_NAME}/quintic_coefficient_calculator_test.cpp)
 if(TARGET ${PROJECT_NAME}-test)
