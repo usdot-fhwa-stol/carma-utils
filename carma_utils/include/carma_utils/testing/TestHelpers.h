@@ -24,12 +24,10 @@ namespace testing
 /**
  * \brief Helper function which waits until the provided atomic matches the expected value or the timeout expires.
  *        This function is NOT intended for production use as it does not support simulated time.
- *
+ * 
  * \param timeout_s The timeout in seconds
  * \param expected The expected value to occur before the timeout
  * \param actual The atomic variable to compare against expected until timeout occurs
- *
- * \return False if the timeout expired. True if the provided atomics matched within the timeout period.
  */
 template <class T1, class T2>
 inline bool waitForEqOrTimeout(double timeout_s, T1 expected, std::atomic<T2>& actual)
@@ -41,35 +39,6 @@ inline bool waitForEqOrTimeout(double timeout_s, T1 expected, std::atomic<T2>& a
   while (elapsed_seconds < sec)
   {
     if (actual.load() == expected)
-    {
-      return true;
-    }
-    elapsed_seconds = std::chrono::system_clock::now() - start;
-    auto period = std::chrono::milliseconds(10);
-    std::this_thread::sleep_for(period);
-  }
-
-  return false;
-}
-
-/**
- * \brief Helper function which waits until the provided callback returns true or the provided timeout expires
- *
- * \param timeout_s The timeout in seconds
- * \param expected The expected value to occur before the timeout
- * \param actual The atomic variable to compare against expected until timeout occurs
- *
- * \return False if the timeout expired. True if the provided callback returned true within the timeout period
- */
-inline bool waitForCallbackOrTimeout(double timeout_s, std::function<bool()> callback)
-{
-  auto start = std::chrono::system_clock::now();
-  std::chrono::duration<double, std::ratio<1, 1>> sec(timeout_s);
-  auto elapsed_seconds = std::chrono::duration<double>(std::chrono::system_clock::now() - start);
-
-  while (elapsed_seconds < sec)
-  {
-    if (callback())
     {
       return true;
     }
