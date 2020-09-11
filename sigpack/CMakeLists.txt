@@ -50,7 +50,7 @@ message(STATUS "FFTW" ${FFTW_LIBRARIES})
 #############
 
 ## Install header files
-install(DIRECTORY include
+install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
