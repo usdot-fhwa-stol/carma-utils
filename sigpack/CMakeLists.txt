@@ -28,7 +28,6 @@ catkin_package(
 )
 
 include_directories(
- #sigpack
  ${catkin_INCLUDE_DIRS}
  ${FFTW_INCLUDE_DIRS}
  ${ARMADILLO_INCLUDE_DIRS}
