@@ -42,7 +42,7 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(driver_application SHARED
+add_library(driver_application
     src/driver_application/driver_application.cpp
     include/driver_application/driver_application.h)
 
