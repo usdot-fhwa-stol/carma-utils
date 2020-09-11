@@ -102,12 +102,12 @@ install(DIRECTORY include/driver_application
        
 )
 
-install(DIRECTORY include/cav_driver_utils/
+install(DIRECTORY include/cav_driver_utils
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
        
 )
 
-install(DIRECTORY include/driver_wrapper/
+install(DIRECTORY include/driver_wrapper
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
       
 )
