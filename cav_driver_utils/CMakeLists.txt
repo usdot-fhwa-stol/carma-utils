@@ -44,7 +44,7 @@ include_directories(
 ## Declare a C++ library
 add_library(driver_application
     src/driver_application/driver_application.cpp
-    include/driver_application/driver_application.h)
+)
 
 add_dependencies(driver_application ${catkin_EXPORTED_TARGETS})
 
@@ -53,7 +53,7 @@ target_link_libraries(driver_application ${catkin_LIBRARIES})
 
 add_library(cav_socketcan_interface
         src/socketcan_interface/socketcan_interface.cpp
-        include/cav_driver_utils/can/socketcan_interface/socketcan_interface.h)
+)
 
 add_dependencies(cav_socketcan_interface ${catkin_EXPORTED_TARGETS})
 
@@ -61,7 +61,7 @@ target_link_libraries(cav_socketcan_interface ${Boost_LIBRARIES})
 
 add_library(ros_socketcan_interface
         src/ros_socketcan_bridge/ros_socketcan_bridge.cpp
-        include/cav_driver_utils/can/ros_socketcan_bridge/ros_socketcan_bridge.h)
+)
 
 add_dependencies(ros_socketcan_interface ${catkin_EXPORTED_TARGETS})
 
@@ -69,7 +69,7 @@ target_link_libraries(ros_socketcan_interface ${Boost_LIBRARIES})
 
 add_library(driver_wrapper
     src/driver_wrapper/driver_wrapper.cpp
-    include/driver_wrapper/driver_wrapper.h)
+)
 
 add_dependencies(driver_wrapper ${catkin_EXPORTED_TARGETS})
 
@@ -94,13 +94,6 @@ install(DIRECTORY include/cav_driver_utils/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION} 
 )
 
-install(DIRECTORY include/driver_application
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION} 
-)
-
-install(DIRECTORY include/driver_wrapper
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION} 
-)
 
 #############
 ## Testing ##

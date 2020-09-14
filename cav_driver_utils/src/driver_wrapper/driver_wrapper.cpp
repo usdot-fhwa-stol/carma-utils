@@ -14,7 +14,7 @@
  * the License.
  */
 
-#include <driver_wrapper/driver_wrapper.h>
+#include <cav_driver_utils/driver_wrapper/driver_wrapper.h>
 
 namespace cav {
 
