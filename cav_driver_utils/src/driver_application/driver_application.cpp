@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <driver_application/driver_application.h>
+#include <cav_driver_utils/driver_application/driver_application.h>
 
 namespace cav
 {
