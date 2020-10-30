@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(trajectory_utils)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+## Compile as C++14
+add_compile_options(-std=c++14)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
+  cav_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -27,7 +27,6 @@ find_package(Eigen3 REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES trajectory_utils
-  CATKIN_DEPENDS roscpp
   DEPENDS EIGEN3 # Eigen is a special case where is needs to be in caps here but not in find_package
 )
 
@@ -45,6 +44,7 @@ include_directories(
 
 add_library(trajectory_utils 
   src/trajectory_utils/quintic_coefficient_calculator.cpp
+  src/trajectory_utils/conversions/conversions.cpp
 )
 
 add_dependencies(trajectory_utils ${catkin_EXPORTED_TARGETS})
