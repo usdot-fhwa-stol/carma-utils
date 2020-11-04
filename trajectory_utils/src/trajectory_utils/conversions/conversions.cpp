@@ -34,21 +34,24 @@ double compute_2d_distance(double x1, double y1, double x2, double y2)
 }
 }  // namespace
 void trajectory_to_downtrack_time(const std::vector<cav_msgs::TrajectoryPlanPoint>& traj_points, double start_time,
-                                  std::vector<double>* downtrack, std::vector<double>* times)
+                                  std::vector<double>* downtracks, std::vector<double>* times)
 {
+  if (traj_points.size() == 0) {
+    return;
+  }
+  
   times->reserve(traj_points.size());
-
-  std::vector<double> downtracks;
-  downtracks.reserve(traj_points.size());
+  downtracks->reserve(traj_points.size());
 
   times->push_back(start_time);
-  downtracks.push_back(0);
+  downtracks->push_back(0);
 
   for (int i = 1; i < traj_points.size(); i++)
   {
     double delta_d = compute_2d_distance(traj_points[i - 1].x, traj_points[i - 1].y,
                                          traj_points[i].x, traj_points[i].y);
-    downtracks.push_back(downtracks.back() + delta_d);
+    downtracks->push_back(downtracks->back() + delta_d);
+    times->push_back(traj_points[i].target_time.toSec());
   }
 }
 

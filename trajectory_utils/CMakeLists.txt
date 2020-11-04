@@ -75,7 +75,11 @@ install(DIRECTORY include/${PROJECT_NAME}/
 #############
 
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-catkin_add_gmock(${PROJECT_NAME}-test test/${PROJECT_NAME}/main.cpp test/${PROJECT_NAME}/quintic_coefficient_calculator_test.cpp)
+catkin_add_gmock(${PROJECT_NAME}-test 
+  test/${PROJECT_NAME}/main.cpp 
+  test/${PROJECT_NAME}/quintic_coefficient_calculator_test.cpp
+  test/${PROJECT_NAME}/test_conversions.cpp
+)
 if(TARGET ${PROJECT_NAME}-test)
   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 endif()
