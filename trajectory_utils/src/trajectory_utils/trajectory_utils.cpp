@@ -102,10 +102,10 @@ std::vector<double> apply_accel_limits_by_distance(std::vector<double> downtrack
 
   output.push_back(speeds[0]);  // First point will be unchanged
 
-  for (int i = 1; i < downtracks.size(); i++)
+  for (size_t i = 1; i < downtracks.size(); i++)
   {
     double delta_d = downtracks[i] - downtracks[i - 1];
-    double prev_speed = speeds[i - 1];
+    double prev_speed = output.back();
     double cur_speed = speeds[i];
     double new_speed = cur_speed;
     if (cur_speed > prev_speed)
@@ -116,10 +116,8 @@ std::vector<double> apply_accel_limits_by_distance(std::vector<double> downtrack
     {  // Deceleration case
       new_speed = std::max(cur_speed, sqrt(prev_speed * prev_speed - 2 * decel_limit * delta_d));
     }
-    else
-    {  // No change case
-      new_speed = std::max(0.0, new_speed);
-    }
+
+    new_speed = std::max(0.0, new_speed);
 
     output.push_back(new_speed);
   }
@@ -150,10 +148,10 @@ std::vector<double> apply_accel_limits_by_time(std::vector<double> times, std::v
 
   output.push_back(speeds[0]);  // First point will be unchanged
 
-  for (int i = 1; i < times.size(); i++)
+  for (size_t i = 1; i < times.size(); i++)
   {
     double delta_t = times[i] - times[i - 1];
-    double prev_speed = speeds[i - 1];
+    double prev_speed = output.back();
     double cur_speed = speeds[i];
     double new_speed = cur_speed;
     if (cur_speed > prev_speed)

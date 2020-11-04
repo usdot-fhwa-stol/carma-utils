@@ -171,10 +171,5 @@ TEST(trajectory_utils_conversions_test, time_to_speed)
 
 }
 
-// void speed_to_time(const std::vector<double>& downtrack, const std::vector<double>& speeds, std::vector<double>* times);
-
-// void time_to_speed(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
-//                    std::vector<double>* speeds);
-
 }  // namespace conversions
 }  // namespace trajectory_utils

@@ -79,6 +79,7 @@ catkin_add_gmock(${PROJECT_NAME}-test
   test/${PROJECT_NAME}/main.cpp 
   test/${PROJECT_NAME}/quintic_coefficient_calculator_test.cpp
   test/${PROJECT_NAME}/test_conversions.cpp
+  test/${PROJECT_NAME}/test_trajectory_utils.cpp
 )
 if(TARGET ${PROJECT_NAME}-test)
   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
