@@ -39,7 +39,7 @@ void trajectory_to_downtrack_time(const std::vector<cav_msgs::TrajectoryPlanPoin
   if (traj_points.size() == 0) {
     return;
   }
-  
+
   times->reserve(traj_points.size());
   downtracks->reserve(traj_points.size());
 
@@ -78,7 +78,7 @@ void speed_to_time(const std::vector<double>& downtrack, const std::vector<doubl
   for (int i = 1; i < downtrack.size(); i++)
   {
     double cur_pos = downtrack[i];
-    double cur_speed = speeds[0];
+    double cur_speed = speeds[i];
     double delta_d = cur_pos - prev_position;
     double dt = (2 * delta_d) / (cur_speed + prev_speed);
     double cur_time = dt + prev_time;
@@ -93,7 +93,7 @@ void speed_to_time(const std::vector<double>& downtrack, const std::vector<doubl
 void time_to_speed(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
                    std::vector<double>* speeds)
 {
-  if (downtrack.size() != speeds->size())
+  if (downtrack.size() != times.size())
   {
     throw std::invalid_argument("Input vector sizes do not match");
   }
@@ -116,7 +116,7 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
     double dt = cur_time - prev_time;
     double delta_d = cur_pos - prev_position;
 
-    double cur_speed = prev_speed + 2 * (delta_d - prev_speed * dt) / dt;
+    double cur_speed = (2.0 * delta_d / dt) - prev_speed; 
     speeds->push_back(cur_speed);
 
     prev_position = cur_pos;

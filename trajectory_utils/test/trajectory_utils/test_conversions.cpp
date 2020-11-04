@@ -87,5 +87,94 @@ TEST(trajectory_utils_conversions_test, trajectory_to_downtrack_time)
   ASSERT_EQ(downtracks.size(), times.size());
   ASSERT_EQ(downtracks.size(), traj_points.size());
 }
+
+TEST(trajectory_utils_conversions_test, speed_to_time)
+{
+  // Nominal case
+  std::vector<double> downtracks = {0, 1, 2, 3 };
+  std::vector<double> speeds = {1,1,1,1};
+  std::vector<double> times;
+
+  speed_to_time(downtracks, speeds, &times);
+
+  ASSERT_EQ(downtracks.size(), times.size());
+  for (size_t i = 0; i < times.size(); i++)
+  {
+    ASSERT_NEAR(times[i], (double)i, 0.0000000001);
+  }
+
+  // 0 input case
+  downtracks = {};
+  speeds = {};
+  times = {};
+  ASSERT_THROW(speed_to_time(downtracks, speeds, &times), std::invalid_argument);
+
+  // Unequal input case
+  downtracks = {1, 2};
+  speeds = {1};
+  times = {};
+  ASSERT_THROW(speed_to_time(downtracks, speeds, &times), std::invalid_argument);
+
+  // Complex case
+  downtracks = {2, 4, 7};
+  speeds = {1, 3, 1};
+  times = {};
+
+  speed_to_time(downtracks, speeds, &times);
+
+  ASSERT_EQ(downtracks.size(), times.size());
+  ASSERT_NEAR(times[0], 0.0, 0.0000001);
+  ASSERT_NEAR(times[1], 1.0, 0.0000001);
+  ASSERT_NEAR(times[2], 2.5, 0.0000001);
+
+}
+
+TEST(trajectory_utils_conversions_test, time_to_speed)
+{
+  // Nominal case
+  std::vector<double> downtracks = {0, 1, 2, 3 };
+  std::vector<double> times = {1,2,3,4};
+  std::vector<double> speeds;
+
+
+  time_to_speed(downtracks, times, 1.0, &speeds);
+
+  ASSERT_EQ(downtracks.size(), speeds.size());
+  for (size_t i = 0; i < speeds.size(); i++)
+  {
+    ASSERT_NEAR(speeds[i], 1.0, 0.0000000001);
+  }
+
+  // 0 input case
+  downtracks = {};
+  speeds = {};
+  times = {};
+  ASSERT_THROW(time_to_speed(downtracks, times, 1.0, &speeds), std::invalid_argument);
+
+  // Unequal input case
+  downtracks = {1, 2};
+  speeds = {1};
+  times = {};
+  ASSERT_THROW(time_to_speed(downtracks, times, 1.0, &speeds), std::invalid_argument);
+
+  // Complex case
+  downtracks = {2, 4, 7};
+  times = {0.0, 1.0, 2.5};
+  speeds = {};
+  
+  time_to_speed(downtracks, times, 1.0, &speeds);
+  
+  ASSERT_EQ(downtracks.size(), times.size());
+  ASSERT_NEAR(speeds[0], 1.0, 0.0000001);
+  ASSERT_NEAR(speeds[1], 3.0, 0.0000001);
+  ASSERT_NEAR(speeds[2], 1.0, 0.0000001);
+
+}
+
+// void speed_to_time(const std::vector<double>& downtrack, const std::vector<double>& speeds, std::vector<double>* times);
+
+// void time_to_speed(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
+//                    std::vector<double>* speeds);
+
 }  // namespace conversions
 }  // namespace trajectory_utils
