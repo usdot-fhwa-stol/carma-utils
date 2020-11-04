@@ -16,6 +16,7 @@
  */
 
 #include <vector>
+#include <cav_msgs/TrajectoryPlanPoint.h>
 
 namespace trajectory_utils
 {

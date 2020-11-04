@@ -45,6 +45,7 @@ include_directories(
 add_library(trajectory_utils 
   src/trajectory_utils/quintic_coefficient_calculator.cpp
   src/trajectory_utils/conversions/conversions.cpp
+  src/trajectory_utils/trajectory_utils.cpp
 )
 
 add_dependencies(trajectory_utils ${catkin_EXPORTED_TARGETS})

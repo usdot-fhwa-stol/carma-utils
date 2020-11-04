@@ -20,20 +20,23 @@
  */
 
 #include <vector>
-
+namespace carma_utils
+{
 namespace containers
 {
-  template<class T>
-  std::vector<T> downsample_vector(const std::vector<T>& input, unsigned int n) {
-    std::vector<PointSpeedPair> output;
+template <class T>
+std::vector<T> downsample_vector(const std::vector<T>& input, unsigned int n)
+{
+  std::vector<T> output;
 
-    output.reserve((input.size() / n) + 1);
+  output.reserve((input.size() / n) + 1);
 
-    for (int i = 0; i < input.size(); i += n)
-    {
-      output.push_back(points[i]);
-    }
-
-    return output;
+  for (int i = 0; i < input.size(); i += n)
+  {
+    output.push_back(input[i]);
   }
-};
+
+  return output;
+}
+};  // namespace containers
+};  // namespace carma_utils

@@ -15,7 +15,7 @@
  */
 
 #include <vector>
-#include <trajectory_utils.h>
+#include <trajectory_utils/trajectory_utils.h>
 #include <exception>
 #include <stdexcept>
 #include <math.h>
@@ -23,6 +23,62 @@
 
 namespace trajectory_utils
 {
+size_t time_boundary_index(const std::vector<double>& downtracks, const std::vector<double>& speeds, double time_span)
+{
+  if (downtracks.size() != speeds.size())
+  {
+    throw std::invalid_argument("Input vectors must be of equal size");
+  }
+
+  if (downtracks.size() == 0 || time_span <= 0.0)
+  {
+    return 0;
+  }
+
+  std::vector<double> times;
+  conversions::speed_to_time(downtracks, speeds, &times);
+
+  double current_time = 0;
+  for (size_t i = 0; i < times.size(); i++)
+  {
+    if (times[i] > time_span)
+    {
+      return i;
+    }
+  }
+
+  return times.size();
+}
+
+double constrain_speed_for_curvature(double curvature, double lateral_accel_limit)
+{
+  // Check at compile time for infinity availability
+  static_assert(std::numeric_limits<double>::has_infinity, "This code requires compilation using a system that "
+                                                           "supports IEEE 754 for access to positive infinity values");
+
+  // Solve a = v^2/r (k = 1/r) for v
+  // a = v^2 * k
+  // a / k = v^2
+  // v = sqrt(a / k)
+
+  if (fabs(curvature) < 0.00000001)
+  {  // Check for curvature of 0.
+    return std::numeric_limits<double>::infinity();
+  }
+  return std::sqrt(fabs(lateral_accel_limit / curvature));
+}
+
+std::vector<double> constrained_speeds_for_curvatures(std::vector<double> curvatures, double lateral_accel_limit)
+{
+  std::vector<double> out;
+  for (double k : curvatures)
+  {
+    out.push_back(trajectory_utils::constrain_speed_for_curvature(k, lateral_accel_limit));
+  }
+
+  return out;
+}
+
 std::vector<double> apply_accel_limits_by_distance(std::vector<double> downtracks, std::vector<double> speeds,
                                                    double accel_limit, double decel_limit)
 {

@@ -17,11 +17,6 @@
 #include <vector>
 #include <exception>
 #include <stdexcept>
-#include <boost/geometry/algorithms/distance.hpp>
-#include <boost/geometry/geometries/geometries.hpp>
-#include <boost/geometry/geometries/register/point.hpp>
-#include <boost/geometry/strategies/strategies.hpp>
-
 #include <cav_msgs/TrajectoryPlanPoint.h>
 #include <trajectory_utils/conversions/conversions.h>
 

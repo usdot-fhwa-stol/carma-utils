@@ -16,9 +16,17 @@
  */
 
 #include <vector>
+#include "conversions/conversions.h"
 
 namespace trajectory_utils
 {
+// TODO comments
+size_t time_boundary_index(const std::vector<double>& downtracks, const std::vector<double>& speeds, double time_span);
+
+double constrain_speed_for_curvature(double curvature, double lateral_accel_limit);
+
+std::vector<double> constrained_speeds_for_curvatures(std::vector<double> curvatures, double lateral_accel_limit);
+
 std::vector<double> apply_accel_limits_by_distance(std::vector<double> downtracks, std::vector<double> speeds,
                                                    double accel_limit, double decel_limit);
 
