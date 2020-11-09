@@ -16,7 +16,7 @@
  */
 
 /**
- * Convienance file for including carma_utils headers. Does not include testing headers.
+ * Containers namespace contains utility functions that can be used with C++ containers.
  */
 
 #include <vector>
@@ -24,6 +24,16 @@ namespace carma_utils
 {
 namespace containers
 {
+/**
+ * \brief Downsamples an input vector by saving only each nth element.
+ * For example, given an input vector of { 0, 1, 2, 3, 4, 5 } and n = 2
+ * The output vector will be {0, 2, 4}
+ * 
+ * \param input The input vector to downsample
+ * \param n The count of the elements to save
+ * // TODO write unit tests for this
+ * \return The downsampled vector
+ */ 
 template <class T>
 std::vector<T> downsample_vector(const std::vector<T>& input, unsigned int n)
 {

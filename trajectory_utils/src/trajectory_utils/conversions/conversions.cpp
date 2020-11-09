@@ -26,6 +26,7 @@ namespace conversions
 {
 namespace
 {
+// Helper function for computing 2d distance
 double compute_2d_distance(double x1, double y1, double x2, double y2)
 {
   double dx = x2 - x1;
@@ -33,6 +34,8 @@ double compute_2d_distance(double x1, double y1, double x2, double y2)
   return sqrt(dx * dx + dy * dy);
 }
 }  // namespace
+
+
 void trajectory_to_downtrack_time(const std::vector<cav_msgs::TrajectoryPlanPoint>& traj_points,
                                   std::vector<double>* downtracks, std::vector<double>* times)
 {
