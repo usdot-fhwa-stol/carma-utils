@@ -47,7 +47,7 @@ TEST(trajectory_utils_conversions_test, trajectory_to_downtrack_time)
 
   traj_points = { p1, p2, p3 };
 
-  trajectory_to_downtrack_time(traj_points, start_time, &downtracks, &times);
+  trajectory_to_downtrack_time(traj_points, &downtracks, &times);
 
   ASSERT_EQ(downtracks.size(), times.size());
   ASSERT_EQ(downtracks.size(), traj_points.size());
@@ -66,7 +66,7 @@ TEST(trajectory_utils_conversions_test, trajectory_to_downtrack_time)
 
   traj_points[0].target_time = ros::Time(start_time);
 
-  trajectory_to_downtrack_time(traj_points, start_time, &downtracks, &times);
+  trajectory_to_downtrack_time(traj_points, &downtracks, &times);
 
   ASSERT_EQ(downtracks.size(), times.size());
   ASSERT_EQ(downtracks.size(), traj_points.size());
@@ -82,7 +82,7 @@ TEST(trajectory_utils_conversions_test, trajectory_to_downtrack_time)
   downtracks = {};
   times = {};
 
-  trajectory_to_downtrack_time(traj_points, start_time, &downtracks, &times);
+  trajectory_to_downtrack_time(traj_points, &downtracks, &times);
 
   ASSERT_EQ(downtracks.size(), times.size());
   ASSERT_EQ(downtracks.size(), traj_points.size());

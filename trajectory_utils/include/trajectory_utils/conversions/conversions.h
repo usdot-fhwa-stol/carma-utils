@@ -27,7 +27,7 @@ void speed_to_time(const std::vector<double>& downtrack, const std::vector<doubl
 void time_to_speed(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
                    std::vector<double>* speeds);
 
-void trajectory_to_downtrack_time(const std::vector<cav_msgs::TrajectoryPlanPoint>& traj_points, double start_time,
+void trajectory_to_downtrack_time(const std::vector<cav_msgs::TrajectoryPlanPoint>& traj_points,
                                   std::vector<double>* downtrack, std::vector<double>* times);
 };  // namespace conversions
 };  // namespace trajectory_utils

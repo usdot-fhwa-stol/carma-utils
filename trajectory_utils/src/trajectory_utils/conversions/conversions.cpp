@@ -33,23 +33,24 @@ double compute_2d_distance(double x1, double y1, double x2, double y2)
   return sqrt(dx * dx + dy * dy);
 }
 }  // namespace
-void trajectory_to_downtrack_time(const std::vector<cav_msgs::TrajectoryPlanPoint>& traj_points, double start_time,
+void trajectory_to_downtrack_time(const std::vector<cav_msgs::TrajectoryPlanPoint>& traj_points,
                                   std::vector<double>* downtracks, std::vector<double>* times)
 {
-  if (traj_points.size() == 0) {
+  if (traj_points.size() == 0)
+  {
     return;
   }
 
   times->reserve(traj_points.size());
   downtracks->reserve(traj_points.size());
 
-  times->push_back(start_time);
+  times->push_back(traj_points[0].target_time.toSec());
   downtracks->push_back(0);
 
   for (int i = 1; i < traj_points.size(); i++)
   {
-    double delta_d = compute_2d_distance(traj_points[i - 1].x, traj_points[i - 1].y,
-                                         traj_points[i].x, traj_points[i].y);
+    double delta_d =
+        compute_2d_distance(traj_points[i - 1].x, traj_points[i - 1].y, traj_points[i].x, traj_points[i].y);
     downtracks->push_back(downtracks->back() + delta_d);
     times->push_back(traj_points[i].target_time.toSec());
   }
@@ -116,7 +117,7 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
     double dt = cur_time - prev_time;
     double delta_d = cur_pos - prev_position;
 
-    double cur_speed = (2.0 * delta_d / dt) - prev_speed; 
+    double cur_speed = (2.0 * delta_d / dt) - prev_speed;
     speeds->push_back(cur_speed);
 
     prev_position = cur_pos;
