@@ -9,13 +9,14 @@ set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
+set(ROS_DEPS
   roscpp
-  std_msgs
-  std_srvs
   cav_msgs
   cav_srvs
   message_filters
+)
+find_package(catkin REQUIRED COMPONENTS
+  ${ROS_DEPS}
 )
 
 ## System dependencies are found with CMake's conventions
@@ -33,8 +34,8 @@ find_package(Boost REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp
-#  DEPENDS system_lib
+  CATKIN_DEPENDS ${ROS_DEPS}
+#  DEPENDS Boost
 )
 
 ###########
