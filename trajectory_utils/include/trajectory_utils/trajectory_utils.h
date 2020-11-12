@@ -121,4 +121,29 @@ std::vector<T> shift_by_lookahead(std::vector<T> values, unsigned int lookahead_
   return output;
 }
 
+double get_lookahead(double velocity){
+  // lookahead:
+  // v<10kph:  5m
+  // 10kph<v<50kph:  0.5*v
+  // v>50kph:  25m
+
+  double out = 0;
+
+  double v_low = 5;//2.8 m/s
+  double v_high = 50; //13.9 m/s
+  double lookahead_low = 5;//m
+  double lookahead_high = 25;//m
+
+  if (velocity <= v_low){
+    out = lookahead_low;
+  }
+  else if (velocity >= v_low && velocity < v_high){
+    out = 0.5*velocity;
+  }
+  else{
+    out = lookahead_high;
+  }
+
+}
+
 };  // namespace trajectory_utils

@@ -40,6 +40,42 @@ TEST(trajectory_utils_test, shift_by_lookahead)
 
 }
 
+TEST(trajectory_utils_test, adaptive_lookahead2)
+{
+
+  std::vector<double> x = {-32.2275,-32.9451,-33.7889,-34.6362,-37.6845,-38.5269,-39.3471,-40.1668,-40.9865,-41.7977,-42.5936,-43.3935,
+    -44.2032,-45.0063,-45.7982,-46.5973,-47.3826,-48.1593,-48.8992,-49.602};
+  std::vector<double> y = {43.3619,44.3048,45.4042,46.4835,50.3516,51.3965,52.4607,53.5275,54.5867,55.6295,56.684,57.7326,58.7774,59.8203,
+    60.8619,61.8803,62.894,63.8828,64.8561,65.8323};
+  std::vector<double> v = {36.2213,36.1335,36.0107,35.8571,35.628,35.2642,35.1134,34.9891,34.8161,34.6563,34.5101,34.3622,34.2016,34.041,
+    33.8296,33.6189,33.1606,32.6554,32.0566,31.4245};
+
+  int idx = 1;
+
+  double adaptive_lookahead = get_lookahead(v[idx]);
+  double adaptive_speed = 0.0;
+  
+  for (int i = idx+1; i<v.size(); i++){
+    double dist = sqrt(pow(x[i]-x[idx], 2) + pow(y[i]-y[idx], 2));
+    if (abs(dist - adaptive_lookahead)<1.0){
+      adaptive_speed = v[i];
+    }
+  }
+
+  EXPECT_NEAR(adaptive_lookahead, 18, 0.5);
+  EXPECT_NEAR(adaptive_speed, 34, 0.5);
+  
+
+  std::vector<double> shifted_v = shift_by_lookahead(v, 8);
+  std::vector<double> shifted_x = shift_by_lookahead(x, 8);
+  std::vector<double> shifted_y = shift_by_lookahead(y, 8);
+  double shifted_lookahead = sqrt(pow(shifted_x[0]-x[idx],2)+pow(shifted_y[0]-y[idx],2));
+  EXPECT_NEAR(shifted_lookahead, 13, 0.1);
+  EXPECT_NEAR(shifted_v[0], 34.8, 0.1);
+
+
+}
+
 TEST(trajectory_utils_test, time_boundary_index)
 {
   // Nominal case
