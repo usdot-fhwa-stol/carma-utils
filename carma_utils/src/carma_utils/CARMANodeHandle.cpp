@@ -30,7 +30,7 @@ namespace ros {
    std::mutex CARMANodeHandle::spin_mutex_;
    bool CARMANodeHandle::shutting_down_ = false;
    bool CARMANodeHandle::allow_node_shutdown_ = true;
-   std::string CARMANodeHandle::system_alert_topic_ = "system_alert";
+   std::string CARMANodeHandle::system_alert_topic_ = "/system_alert";
    double CARMANodeHandle::default_spin_rate_ = 20.0;
 
    std::mutex CARMANodeHandle::static_pub_sub_mutex_;
