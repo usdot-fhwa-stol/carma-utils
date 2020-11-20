@@ -31,7 +31,6 @@ namespace containers
  * 
  * \param input The input vector to downsample
  * \param n The count of the elements to save
- * // TODO write unit tests for this
  * \return The downsampled vector
  */ 
 template <class T>
