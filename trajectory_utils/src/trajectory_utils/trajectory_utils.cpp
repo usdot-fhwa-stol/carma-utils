@@ -162,10 +162,8 @@ std::vector<double> apply_accel_limits_by_time(std::vector<double> times, std::v
     {  // Deceleration case
       new_speed = std::max(cur_speed, prev_speed - decel_limit * delta_t);
     }
-    else
-    {  // No change case
-      new_speed = std::max(0.0, new_speed);
-    }
+
+    new_speed = std::max(0.0, new_speed);
 
     output.push_back(new_speed);
   }
