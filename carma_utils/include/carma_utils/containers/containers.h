@@ -38,6 +38,10 @@ std::vector<T> downsample_vector(const std::vector<T>& input, unsigned int n)
 {
   std::vector<T> output;
 
+  if (n == 0 || input.empty()) {
+    return output;
+  }
+
   output.reserve((input.size() / n) + 1);
 
   for (int i = 0; i < input.size(); i += n)

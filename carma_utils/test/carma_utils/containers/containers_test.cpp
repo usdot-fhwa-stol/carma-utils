@@ -32,6 +32,11 @@ TEST(containers_test, downsample_vector_test)
   ASSERT_EQ(3, out[1]);
   ASSERT_EQ(6, out[2]);
   ASSERT_EQ(9, out[3]);
+
+  out = downsample_vector(vec, 0);
+  ASSERT_EQ(0, out.size());
+  out = downsample_vector<int>({}, 4);
+  ASSERT_EQ(0, out.size());
 }
 }  // namespace containers
 }  // namespace carma_utils
