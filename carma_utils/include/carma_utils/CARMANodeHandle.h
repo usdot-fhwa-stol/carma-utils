@@ -1,7 +1,7 @@
 #ifndef CARMA_UTILS_CARMA_NODE_HANDLE_H
 #define CARMA_UTILS_CARMA_NODE_HANDLE_H
 /*
- * Copyright (C) 2018-2019 LEIDOS.
+ * Copyright (C) 2018-2020 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -372,6 +372,6 @@ namespace ros {
 
 // Template functions cannot be linked unless the implementation is provided
 // Therefore include implementation to allow for template functions
-#include "../../src/carma_utils/CARMANodeHandle.tpp"
+#include "internal/CARMANodeHandle.tpp"
 
 #endif // CARMA_UTILS_CARMA_NODE_HANDLE_H

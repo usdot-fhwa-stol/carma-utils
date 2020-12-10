@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>uncertainty_tools</name>
   <version>1.3.0</version>
   <description>The uncertainty_tools contains useful functions for dealing with uncertainty in calculations </description>

@@ -9,13 +9,14 @@ set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
+set(ROS_DEPS
   roscpp
-  std_msgs
-  std_srvs
   cav_msgs
   cav_srvs
   message_filters
+)
+find_package(catkin REQUIRED COMPONENTS
+  ${ROS_DEPS}
 )
 
 ## System dependencies are found with CMake's conventions
@@ -33,8 +34,8 @@ find_package(Boost REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp
-#  DEPENDS system_lib
+  CATKIN_DEPENDS ${ROS_DEPS}
+  DEPENDS Boost
 )
 
 ###########
@@ -49,7 +50,13 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(${PROJECT_NAME} src/${PROJECT_NAME}/CARMANodeHandle.cpp)
+add_library(${PROJECT_NAME} 
+  src/${PROJECT_NAME}/CARMANodeHandle.cpp
+  src/${PROJECT_NAME}/timers/ROSTimer.cpp
+  src/${PROJECT_NAME}/timers/ROSTimerFactory.cpp
+  src/${PROJECT_NAME}/timers/testing/TestTimer.cpp
+  src/${PROJECT_NAME}/timers/testing/TestTimerFactory.cpp
+)
 add_dependencies( ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
@@ -60,13 +67,6 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
 ## Mark executables and/or libraries for installation
 install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -75,10 +75,9 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 ## Mark cpp header files for installation
-install(DIRECTORY include
+install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.h"
-  PATTERN ".svn" EXCLUDE
+  
 )
 
 #############
@@ -90,6 +89,7 @@ if(CATKIN_ENABLE_TESTING)
   # Add gtest based cpp test target and link libraries
   add_rostest_gtest(${PROJECT_NAME}_CARMANodeHandle_test test/${PROJECT_NAME}/CARMANodeHandle.test
     test/${PROJECT_NAME}/CARMANodeHandleTest.cpp
+    test/${PROJECT_NAME}/timers/TestingTimers.cpp
   )
   target_link_libraries(${PROJECT_NAME}_CARMANodeHandle_test ${PROJECT_NAME} ${catkin_LIBRARIES})
   add_dependencies( ${PROJECT_NAME}_CARMANodeHandle_test ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})

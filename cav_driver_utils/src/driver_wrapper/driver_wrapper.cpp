@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 LEIDOS.
+ * Copyright (C) 2019-2020 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,7 +14,7 @@
  * the License.
  */
 
-#include <driver_wrapper/driver_wrapper.h>
+#include <cav_driver_utils/driver_wrapper/driver_wrapper.h>
 
 namespace cav {
 
@@ -29,7 +29,7 @@ int DriverWrapper::run()
 
     //Initialize pubs and subs
     driver_status_pub_ = nh_->advertise<cav_msgs::DriverStatus>("driver_discovery", 1);
-    system_alert_sub_ = nh_->subscribe("system_alert", 10, &DriverWrapper::system_alert_cb, this);
+    system_alert_sub_ = nh_->subscribe("/system_alert", 10, &DriverWrapper::system_alert_cb, this);
     ros::Timer timer = private_nh_->createTimer(ros::Duration(1), &DriverWrapper::status_publish_timer, this);
 
     ROS_INFO_STREAM("Driver Initializing");

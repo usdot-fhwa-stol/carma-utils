@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 LEIDOS.
+ * Copyright (C) 2018-2020 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License") { you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,7 +30,7 @@ namespace ros {
    std::mutex CARMANodeHandle::spin_mutex_;
    bool CARMANodeHandle::shutting_down_ = false;
    bool CARMANodeHandle::allow_node_shutdown_ = true;
-   std::string CARMANodeHandle::system_alert_topic_ = "system_alert";
+   std::string CARMANodeHandle::system_alert_topic_ = "/system_alert";
    double CARMANodeHandle::default_spin_rate_ = 20.0;
 
    std::mutex CARMANodeHandle::static_pub_sub_mutex_;

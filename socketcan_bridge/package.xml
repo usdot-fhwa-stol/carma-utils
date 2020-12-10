@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>socketcan_bridge</name>
   <version>1.3.0</version>
   <description>Provides nodes to convert messages from SocketCAN to a ROS Topic and vice versa.</description>

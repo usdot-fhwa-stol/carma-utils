@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <driver_application/driver_application.h>
+#include <cav_driver_utils/driver_application/driver_application.h>
 
 namespace cav
 {
@@ -54,7 +54,7 @@ int DriverApplication::run()
     ros::ServiceServer driver_status_svs = pnh_->advertiseService("get_status", &DriverApplication::get_status_cb,this);
 
     driver_status_pub_ = nh_->advertise<cav_msgs::DriverStatus>("driver_discovery",1);
-    system_alert_sub_ = nh_->subscribe("system_alert",10,&DriverApplication::system_alert_cb, this);
+    system_alert_sub_ = nh_->subscribe("/system_alert",10,&DriverApplication::system_alert_cb, this);
     ros::Timer timer = pnh_->createTimer(ros::Duration(1), &DriverApplication::status_publish_timer,this);
     ROS_INFO("Driver services initialized");
 

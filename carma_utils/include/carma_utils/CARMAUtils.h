@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright (C) 2018-2019 LEIDOS.
+ * Copyright (C) 2018-2020 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,7 +16,11 @@
  */
 
 /**
- * Convienance file for including carma_utils headers.
+ * Convienance file for including carma_utils headers. Does not include testing headers.
  */ 
 
 #include "CARMANodeHandle.h"
+#include "timers/Timer.h"
+#include "timers/TimerFactory.h"
+#include "timers/ROSTimer.h"
+#include "timers/ROSTimerFactory.h"
