@@ -1,6 +1,3 @@
-
-
-
 #include "sigpack.h"
 using namespace arma;
 using namespace sp;

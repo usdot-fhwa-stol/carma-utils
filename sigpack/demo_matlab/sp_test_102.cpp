@@ -1,5 +1,5 @@
-
-
+// Verified using Matlab 2014b and Microsoft Visual Studio 2010
+// Armadillo version 4.320.2
 
 #include "armaMex.hpp"
 #include "sigpack.h"
