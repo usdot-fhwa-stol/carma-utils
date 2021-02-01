@@ -1,47 +1,32 @@
 
-/*------------------------------------------------------------------------------
-* Copyright (C) 2020-2021 LEIDOS.
-*
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not
-* use this file except in compliance with the License. You may obtain a copy of
-* the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-* WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-* License for the specific language governing permissions and limitations under
-* the License.
 
-------------------------------------------------------------------------------*/
 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // Version
-//  1.0.1	Claes Rolén		2014-11-30	First version
-//  1.0.2	Claes Rolén		2015-01-11	Added 'angle','specgram','fd_filter','gplot'
+//  1.0.1	Claes Rolï¿½n		2014-11-30	First version
+//  1.0.2	Claes Rolï¿½n		2015-01-11	Added 'angle','specgram','fd_filter','gplot'
 //                                      Changed file structure
-//  1.0.3	Claes Rolén		2015-04-26	Added 'parser' class, 'err_handler','wrn_handler'
+//  1.0.3	Claes Rolï¿½n		2015-04-26	Added 'parser' class, 'err_handler','wrn_handler'
 //                                      'freqz','phasez'
-//  1.0.4	Claes Rolén		2015-08-01	Added FFTW class, 'unwrap', 'update_coeffs' + commenting for Doxygen
-//  1.0.5	Claes Rolén		2015-10-11	Added plot to file in gplot
-//  1.0.6	Claes Rolén		2015-12-30	Added support for importing/exporting Wisdom in FFTW
-//  1.0.7	Claes Rolén		2016-10-20	Added support for FFTW 2-D and simple image I/O
-//  1.0.8   Claes Rolén     2016-11-15  Added adaptive filters - LMS, N-LMS and RLS. New line plot function of matrix data.
-//  1.1.1   Claes Rolén     2017-01-20  Cleanup, added Kalman and Newton adaptive filters
-//  1.1.2   Claes Rolén     2017-03-07  Added Kalman tracking and control
-//  1.2.1   Claes Rolén     2017-03-13  Updated for Gnuplot 5.0, plot(..) changes to plot_add(..) plus plot_show()
-//  1.2.2   Claes Rolén     2017-07-13  Added EKF and UKF classes, Non class functions set to arma_inline.
-//  1.2.3   Claes Rolén     2017-08-08  Updated FIR design functions, support for highpass, bandpass and bandstop.
-//  1.2.4   Claes Rolén     2018-03-17  Updated resampling class, added goertzel and timevec functions.
-//  1.2.5   Claes Rolén     2019-01-04  Removed warnings in Visual Studio. Bug fix in PNM class write_header().
+//  1.0.4	Claes Rolï¿½n		2015-08-01	Added FFTW class, 'unwrap', 'update_coeffs' + commenting for Doxygen
+//  1.0.5	Claes Rolï¿½n		2015-10-11	Added plot to file in gplot
+//  1.0.6	Claes Rolï¿½n		2015-12-30	Added support for importing/exporting Wisdom in FFTW
+//  1.0.7	Claes Rolï¿½n		2016-10-20	Added support for FFTW 2-D and simple image I/O
+//  1.0.8   Claes Rolï¿½n     2016-11-15  Added adaptive filters - LMS, N-LMS and RLS. New line plot function of matrix data.
+//  1.1.1   Claes Rolï¿½n     2017-01-20  Cleanup, added Kalman and Newton adaptive filters
+//  1.1.2   Claes Rolï¿½n     2017-03-07  Added Kalman tracking and control
+//  1.2.1   Claes Rolï¿½n     2017-03-13  Updated for Gnuplot 5.0, plot(..) changes to plot_add(..) plus plot_show()
+//  1.2.2   Claes Rolï¿½n     2017-07-13  Added EKF and UKF classes, Non class functions set to arma_inline.
+//  1.2.3   Claes Rolï¿½n     2017-08-08  Updated FIR design functions, support for highpass, bandpass and bandstop.
+//  1.2.4   Claes Rolï¿½n     2018-03-17  Updated resampling class, added goertzel and timevec functions.
+//  1.2.5   Claes Rolï¿½n     2019-01-04  Removed warnings in Visual Studio. Bug fix in PNM class write_header().
 //                                      Added flush_buf()/draw_now() in gplot
-//  1.2.6   Claes Rolén     2019-08-01  Added fast_plot(), improved performance for image(), mesh() and surf(). 
+//  1.2.6   Claes Rolï¿½n     2019-08-01  Added fast_plot(), improved performance for image(), mesh() and surf(). 
 //                                      Removed need of -Dunix flag.
-//  1.2.7   Claes Rolén     2019-09-24  Bug fix in sp_version(), made it inline. 
+//  1.2.7   Claes Rolï¿½n     2019-09-24  Bug fix in sp_version(), made it inline. 
 
 
 
