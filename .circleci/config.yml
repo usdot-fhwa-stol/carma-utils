@@ -56,7 +56,7 @@ jobs:
           command: |
             source ${INIT_ENV}
             export ROS_PARALLEL_JOBS='-j1 -l1' # Try to reduce memory consumption on build
-            export JAVA_HOME=/usr/bin/java
+            export JAVA_HOME=/usr/lib/jvm/openjdk-11
             export PATH=$PATH:$JAVA_HOME
             build-wrapper-linux-x86-64 --out-dir /opt/carma/bw-output bash make_with_coverage.bash -m -e /opt/carma/ -o ./coverage_reports/gcov
       - run:
@@ -64,7 +64,7 @@ jobs:
           command: |
             source ${INIT_ENV}
             export ROS_PARALLEL_JOBS='-j1 -l1' # Try to reduce memory consumption on build
-            export JAVA_HOME=/usr/bin/java
+            export JAVA_HOME=/usr/lib/jvm/openjdk-11
             export PATH=$PATH:$JAVA_HOME
             bash make_with_coverage.bash -t -e /opt/carma/ -o ./coverage_reports/gcov
       # Run SonarCloud analysis
@@ -81,7 +81,7 @@ jobs:
           name: Run Sonar Scanner
           command: |
             source ${INIT_ENV}
-            export JAVA_HOME=/usr/bin/java
+            export JAVA_HOME=/usr/lib/jvm/openjdk-11
             export PATH=$PATH:$JAVA_HOME
             java -version
             if [ -z "${CIRCLE_PULL_REQUEST}" ]; then
