@@ -123,11 +123,12 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
     double cur_speed;
     double jerk_min = 0.01;
     if(isStopandWait[i] && decel_jerk > jerk_min){
-      
+      std::cout<<"Stop and wait type point, jerk greater than min"<<std::endl;
       if(prev_speed == 0){
         cur_speed =0;
       }
-      cur_speed = prev_speed - 0.5* decel_jerk*pow(cur_time-times[0],2);
+      cur_speed = prev_speed - 0.5* decel_jerk*pow(dt,2);
+      std::cout<<"Speed:"<<cur_speed<<std::endl;
 
     }
     else{
