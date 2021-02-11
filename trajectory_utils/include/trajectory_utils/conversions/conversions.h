@@ -40,9 +40,11 @@ void speed_to_time(const std::vector<double>& downtrack, const std::vector<doubl
  * \param initial_speed 
  * \param speeds Output parameter which points to the vector which will store the speeds at each point. 
  *              The first speed will always be initial_speed
+ * \param isStopandWait A boolean vector for all points along downtrack, which defines whether they are part of the stop and wait maneuver or not
+ * \param decel_jerk
  */
 void time_to_speed(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
-                   std::vector<double>* speeds);
+                   std::vector<double>* speeds , std::vector<bool> isStopandWait, double decel_jerk);
 
 /**
  * \brief Converts the trajectory points of a TrajectoryPlan message into equal sized vectors of downtrack distance and time
