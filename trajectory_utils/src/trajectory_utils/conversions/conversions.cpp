@@ -127,7 +127,7 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
       if(prev_speed == 0){
         cur_speed =0;
       }
-      cur_speed = prev_speed - 0.5* decel_jerk*pow(dt,2);
+      cur_speed = prev_speed - 0.5* decel_jerk*pow(cur_time-times[0],2);
 
     }
     else{
