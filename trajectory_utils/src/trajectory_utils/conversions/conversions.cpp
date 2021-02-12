@@ -137,9 +137,15 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
 
     }
     else if(isStopandWait[i] && (prev_speed == 0 || delta_d ==0)){
+      std::cout<<"Stop and wait, zero speed"<<std::endl;
       cur_speed = 0;
     }
+    else if(isStopandWait[i] && decel_jerk<jerk_min){
+      std::cout<<"Stop and wait, jerk less than min"<<std::endl;
+      cur_speed = prev_speed;
+    }
     else{
+      std::cout<<"Lane follow type const accleration"<<std::endl;
       cur_speed = (2.0 * delta_d / dt) - prev_speed;
     }
     speeds->push_back(cur_speed);
