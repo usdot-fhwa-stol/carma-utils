@@ -128,7 +128,7 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
       std::cout<<"Speed:"<<cur_speed<<std::endl;
 
     }
-    else if(isStopandWait[i] && prev_speed == 0){
+    else if(isStopandWait[i] && (prev_speed == 0 || delta_d ==0){
       cur_speed = 0;
     }
     else{
