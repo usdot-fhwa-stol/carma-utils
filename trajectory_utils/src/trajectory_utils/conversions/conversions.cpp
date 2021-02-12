@@ -129,6 +129,9 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
       else{
         cur_speed = prev_speed - 0.5* decel_jerk*pow(dt,2);
       }
+      if(cur_speed < 0){
+        cur_speed = 0;
+      }
       std::cout<<"Stop and wait type point, jerk greater than min"<<std::endl;
       std::cout<<"Speed:"<<cur_speed<<std::endl;
 
