@@ -133,8 +133,8 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
           }
       }
 
-      ROS_DEBUG_STREAM("Stop and wait type point, jerk greater than min");
-      ROS_DEBUG_STREAM("Speed:"<<cur_speed);
+      std::cout<<"Stop and wait type point, jerk greater than min"<<std::endl;
+      std::cout<<"Speed:"<<cur_speed<<std::endl;
 
     }
     else if(isStopandWait[i] && decel_jerk<jerk_min){
@@ -144,10 +144,10 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
       else{
         cur_speed = prev_speed;
       }
-      ROS_DEBUG_STREAM("Stop and wait, jerk less than min");
+      std::cout<<"Stop and wait, jerk less than min"<<std::endl;
     }
     else{
-      ROS_DEBUG_STREAM("Lane follow type const accleration");
+      std::cout<<"Lane follow type const accleration"<<std::endl;
       cur_speed = (2.0 * delta_d / dt) - prev_speed;
     }
     speeds->push_back(cur_speed);
