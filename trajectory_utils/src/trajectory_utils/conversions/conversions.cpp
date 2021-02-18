@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2020 LEIDOS.
+ * Copyright (C) 2018-2021 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -128,14 +128,12 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
 
       if(delta_d == 0){
         cur_speed =0;
-        break;
+        continue;
       }
 
       if(decel_jerk > jerk_min){
         cur_speed = prev_speed - 0.5* decel_jerk*pow(dt,2);
-        if(cur_speed < 0){
-          cur_speed = 0;
-        }
+        cur_speed = std::max(0.0,cur_speed);
       }
       else{
         // stop and wait plugin doesn't create slow down traj for very low jerk requirement
