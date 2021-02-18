@@ -95,7 +95,7 @@ void speed_to_time(const std::vector<double>& downtrack, const std::vector<doubl
 }
 
 void time_to_speed(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
-                   std::vector<double>* speeds)
+                   std::vector<double>* speeds,std::vector<bool> isStopandWait, double decel_jerk)
 {
   if (downtrack.size() != times.size())
   {
@@ -120,7 +120,33 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
     double dt = cur_time - prev_time;
     double delta_d = cur_pos - prev_position;
 
-    double cur_speed = (2.0 * delta_d / dt) - prev_speed;
+    double cur_speed;
+    double jerk_min = 0.01; //Min stop and wait jerk
+    
+    //if stop and wait, use constant jerk equations
+    if(isStopandWait[i]){
+
+      if(delta_d == 0){
+        cur_speed =0;
+        break;
+      }
+
+      if(decel_jerk > jerk_min){
+        cur_speed = prev_speed - 0.5* decel_jerk*pow(dt,2);
+        if(cur_speed < 0){
+          cur_speed = 0;
+        }
+      }
+      else{
+        // stop and wait plugin doesn't create slow down traj for very low jerk requirement
+        cur_speed = prev_speed;
+      }
+      
+    }
+    //else use const acceleration equations
+    else{
+      cur_speed = (2.0 * delta_d / dt) - prev_speed;
+    }
     speeds->push_back(cur_speed);
 
     prev_position = cur_pos;
