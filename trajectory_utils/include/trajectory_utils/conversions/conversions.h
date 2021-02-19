@@ -44,7 +44,11 @@ void speed_to_time(const std::vector<double>& downtrack, const std::vector<doubl
  * \param decel_jerk
  */
 void time_to_speed(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
-                   std::vector<double>* speeds , std::vector<bool> isStopandWait, double decel_jerk);
+                   std::vector<double>* speeds);
+
+
+void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
+                   std::vector<double>* speeds , double decel_jerk);
 
 /**
  * \brief Converts the trajectory points of a TrajectoryPlan message into equal sized vectors of downtrack distance and time
