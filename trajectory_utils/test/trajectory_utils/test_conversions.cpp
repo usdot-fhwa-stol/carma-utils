@@ -140,7 +140,7 @@ TEST(trajectory_utils_conversions_test, time_to_speed)
   isStopandWait.resize(downtracks.size(),0);
   double jerk = 0;
 
-  time_to_speed(downtracks, times, 1.0, &speeds, isStopandWait, jerk);
+  time_to_speed(downtracks, times, 1.0, &speeds);
 
   ASSERT_EQ(downtracks.size(), speeds.size());
   for (size_t i = 0; i < speeds.size(); i++)
@@ -153,21 +153,21 @@ TEST(trajectory_utils_conversions_test, time_to_speed)
   speeds = {};
   times = {};
   isStopandWait.resize(downtracks.size(),0);
-  ASSERT_THROW(time_to_speed(downtracks, times, 1.0, &speeds, isStopandWait, jerk), std::invalid_argument);
+  ASSERT_THROW(time_to_speed(downtracks, times, 1.0, &speeds), std::invalid_argument);
 
   // Unequal input case
   downtracks = {1, 2};
   speeds = {1};
   times = {};
   isStopandWait.resize(downtracks.size(),0);
-  ASSERT_THROW(time_to_speed(downtracks, times, 1.0, &speeds, isStopandWait, jerk), std::invalid_argument);
+  ASSERT_THROW(time_to_speed(downtracks, times, 1.0, &speeds), std::invalid_argument);
 
   // Complex case
   downtracks = {2, 4, 7};
   times = {0.0, 1.0, 2.5};
   speeds = {};
   isStopandWait.resize(downtracks.size(),0);
-  time_to_speed(downtracks, times, 1.0, &speeds, isStopandWait, jerk);
+  time_to_speed(downtracks, times, 1.0, &speeds);
   
   ASSERT_EQ(downtracks.size(), times.size());
   ASSERT_NEAR(speeds[0], 1.0, 0.0000001);
