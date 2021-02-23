@@ -160,11 +160,6 @@ void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::ve
 
     double cur_speed;
     double jerk_min = 0.01; //Min stop and wait jerk
-    
-    if(delta_d == 0){
-      cur_speed = 0;
-      continue;
-    }
 
     if(decel_jerk > jerk_min){
       cur_speed = prev_speed - 0.5* decel_jerk*pow(dt,2);
@@ -173,6 +168,10 @@ void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::ve
     else{
       // stop and wait plugin doesn't create slow down traj for very low jerk
       cur_speed = prev_speed;
+    }
+    
+    if(delta_d == 0){
+      cur_speed = 0;
     }
       
     speeds->push_back(cur_speed);
