@@ -142,7 +142,7 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
         cur_speed = 0;
       }
       else{
-        cur_speed = prev_speed;
+       cur_speed = (2.0 * delta_d / dt) - prev_speed;
       }
       std::cout<<"Stop and wait, jerk less than min"<<std::endl;
     }
