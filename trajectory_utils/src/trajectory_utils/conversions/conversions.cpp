@@ -95,7 +95,7 @@ void speed_to_time(const std::vector<double>& downtrack, const std::vector<doubl
 }
 
 void time_to_speed(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
-                   std::vector<double>* speeds,std::vector<bool> isStopandWait, double decel_jerk)
+                   std::vector<double>* speeds)
 {
   if (downtrack.size() != times.size())
   {
@@ -121,7 +121,6 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
     double delta_d = cur_pos - prev_position;
 
     double cur_speed;
-    double jerk_min = 0.01; //Min stop and wait jerk
 
     cur_speed = (2.0 * delta_d / dt) - prev_speed;
     

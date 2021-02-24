@@ -136,8 +136,6 @@ TEST(trajectory_utils_conversions_test, time_to_speed)
   std::vector<double> times = {1,2,3,4};
   std::vector<double> speeds;
 
-  std::vector<bool> isStopandWait;
-  isStopandWait.resize(downtracks.size(),0);
   double jerk = 0;
 
   time_to_speed(downtracks, times, 1.0, &speeds);
@@ -152,21 +150,18 @@ TEST(trajectory_utils_conversions_test, time_to_speed)
   downtracks = {};
   speeds = {};
   times = {};
-  isStopandWait.resize(downtracks.size(),0);
   ASSERT_THROW(time_to_speed(downtracks, times, 1.0, &speeds), std::invalid_argument);
 
   // Unequal input case
   downtracks = {1, 2};
   speeds = {1};
   times = {};
-  isStopandWait.resize(downtracks.size(),0);
   ASSERT_THROW(time_to_speed(downtracks, times, 1.0, &speeds), std::invalid_argument);
 
   // Complex case
   downtracks = {2, 4, 7};
   times = {0.0, 1.0, 2.5};
   speeds = {};
-  isStopandWait.resize(downtracks.size(),0);
   time_to_speed(downtracks, times, 1.0, &speeds);
   
   ASSERT_EQ(downtracks.size(), times.size());
