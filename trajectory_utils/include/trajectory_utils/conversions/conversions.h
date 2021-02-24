@@ -40,13 +40,21 @@ void speed_to_time(const std::vector<double>& downtrack, const std::vector<doubl
  * \param initial_speed 
  * \param speeds Output parameter which points to the vector which will store the speeds at each point. 
  *              The first speed will always be initial_speed
- * \param isStopandWait A boolean vector for all points along downtrack, which defines whether they are part of the stop and wait maneuver or not
- * \param decel_jerk
  */
 void time_to_speed(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
                    std::vector<double>* speeds);
 
-
+/**
+ * \brief Converts a list of times to a list of speeds for the corresponding downtrack points using constant jerk equations
+ * 
+ * \param downtracks The downtrack points where each speed and time will be
+ * \param times The time at each downtrack point. Must have the same length as the downtracks list
+ * \param initial_speed 
+ * \param speeds Output parameter which points to the vector which will store the speeds at each point. 
+ *              The first speed will always be initial_speed
+ * \param isStopandWait A boolean vector for all points along downtrack, which defines whether they are part of the stop and wait maneuver or not
+ * \param decel_jerk The decelerating constant jerk used in calculation
+ */
 void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
                    std::vector<double>* speeds , double decel_jerk);
 

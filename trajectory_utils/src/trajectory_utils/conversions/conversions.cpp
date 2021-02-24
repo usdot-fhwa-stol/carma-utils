@@ -170,8 +170,8 @@ void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::ve
       cur_speed = prev_speed;
     }
     
-    if(delta_d == 0){
-      cur_speed =0;
+    if(delta_d == 0.0001){
+      cur_speed =0.0;
     }
       
     speeds->push_back(cur_speed);
