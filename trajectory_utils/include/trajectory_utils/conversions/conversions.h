@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright (C) 2021 LEIDOS.
+ * Copyright (C) 2020-2021 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -52,10 +52,9 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
  * \param initial_speed 
  * \param speeds Output parameter which points to the vector which will store the speeds at each point. 
  *              The first speed will always be initial_speed
- * \param isStopandWait A boolean vector for all points along downtrack, which defines whether they are part of the stop and wait maneuver or not
  * \param decel_jerk The decelerating constant jerk used in calculation
  */
-void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
+void time_to_speed_constjerk(const std::vector<double>& downtracks, const std::vector<double>& times, double initial_speed,
                    std::vector<double>* speeds , double decel_jerk);
 
 /**

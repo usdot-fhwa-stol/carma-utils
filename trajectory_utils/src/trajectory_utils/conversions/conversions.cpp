@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 LEIDOS.
+ * Copyright (C) 2020-2021 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -170,7 +170,7 @@ void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::ve
       cur_speed = prev_speed;
     }
     
-    if(delta_d == 0.0001){
+    if(std::abs(delta_d) <= 0.0001){
       cur_speed =0.0;
     }
       
