@@ -122,29 +122,9 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
 
     double cur_speed;
     double jerk_min = 0.01; //Min stop and wait jerk
+
+    cur_speed = (2.0 * delta_d / dt) - prev_speed;
     
-    //if stop and wait, use constant jerk equations
-    if(isStopandWait[i]){
-
-
-      if(decel_jerk > jerk_min){
-        cur_speed = prev_speed - 0.5* decel_jerk*pow(dt,2);
-        cur_speed = std::max(0.0,cur_speed);
-      }
-      else{
-        // stop and wait plugin doesn't create slow down traj for very low jerk requirement
-        cur_speed = prev_speed;
-      }
-      
-      if(delta_d == 0){
-        cur_speed =0;
-      }
-      
-    }
-    //else use const acceleration equations
-    else{
-      cur_speed = (2.0 * delta_d / dt) - prev_speed;
-    }
     speeds->push_back(cur_speed);
 
     prev_position = cur_pos;
@@ -152,5 +132,56 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
     prev_speed = cur_speed;
   }
 }
+
+void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
+                   std::vector<double>* speeds, double decel_jerk)
+{
+  if (downtrack.size() != times.size())
+  {
+    throw std::invalid_argument("Input vector sizes do not match");
+  }
+
+  if (downtrack.size() == 0)
+  {
+    throw std::invalid_argument("Input vectors are empty");
+  }
+
+  speeds->reserve(downtrack.size());
+
+  double prev_position = downtrack[0];
+  double prev_speed = initial_speed;
+  double prev_time = times[0];
+  speeds->push_back(prev_speed);
+  for (int i = 1; i < downtrack.size(); i++)
+  {
+    double cur_pos = downtrack[i];
+    double cur_time = times[i];
+    double dt = cur_time - prev_time;
+    double delta_d = cur_pos - prev_position;
+
+    double cur_speed;
+    double jerk_min = 0.01; //Min stop and wait jerk
+    
+    if(decel_jerk > jerk_min){
+      cur_speed = prev_speed - 0.5* decel_jerk*pow(dt,2);
+      cur_speed = std::max(0.0,cur_speed);
+    }
+    else{
+      // stop and wait plugin doesn't create slow down traj for very low jerk requirement
+      cur_speed = prev_speed;
+    }
+    
+    if(delta_d == 0){
+      cur_speed =0;
+    }
+      
+    speeds->push_back(cur_speed);
+
+    prev_position = cur_pos;
+    prev_time = cur_time;
+    prev_speed = cur_speed;
+  }
+}
+
 };  // namespace conversions
 };  // namespace trajectory_utils
