@@ -33,7 +33,7 @@ namespace containers
  * \param n The count of the elements to save
  * \return The downsampled vector
  */ 
-template <class T, class A>
+template <class T, class A = std::allocator<T>>
 std::vector<T, A> downsample_vector(const std::vector<T, A>& input, unsigned int n)
 {
   std::vector<T, A> output;
