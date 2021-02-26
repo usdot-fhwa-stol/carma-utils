@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2021 LEIDOS.
+ * Copyright (C) 2020-2021 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -121,7 +121,7 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
     double delta_d = cur_pos - prev_position;
 
     double cur_speed;
-    
+
     cur_speed = (2.0 * delta_d / dt) - prev_speed;
     
     speeds->push_back(cur_speed);
@@ -151,6 +151,7 @@ void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::ve
   double prev_speed = initial_speed;
   double prev_time = times[0];
   speeds->push_back(prev_speed);
+  ROS_INFO_STREAM("Conversions");
   for (int i = 1; i < downtrack.size(); i++)
   {
     double cur_pos = downtrack[i];
@@ -160,20 +161,23 @@ void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::ve
 
     double cur_speed;
     double jerk_min = 0.01; //Min stop and wait jerk
-
+    
     if(decel_jerk > jerk_min){
       cur_speed = prev_speed - 0.5* decel_jerk*pow(dt,2);
-      cur_speed = std::max(0.0,cur_speed); 
+      cur_speed = std::max(0.0,cur_speed);
+      ROS_INFO_STREAM("Jerk greater than min:"<<decel_jerk);
+
     }
     else{
-      // stop and wait plugin doesn't create slow down traj for very low jerk
-       cur_speed = (2.0 * delta_d / dt) - prev_speed;
+      // stop and wait plugin doesn't create slow down traj for very low jerk requirement
+      cur_speed = prev_speed;
+      ROS_INFO_STREAM("Jerk lower than min, const speed");
     }
     
-    if(delta_d < 0.001){
-      cur_speed = 0.0;
+    if(std::abs(delta_d) <= 0.0001){
+      cur_speed =0.0;
     }
-      
+    ROS_INFO_STREAM("cur speed:"<<cur_speed << " cur position:"<<cur_pos); 
     speeds->push_back(cur_speed);
 
     prev_position = cur_pos;
@@ -181,5 +185,6 @@ void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::ve
     prev_speed = cur_speed;
   }
 }
+
 };  // namespace conversions
 };  // namespace trajectory_utils
