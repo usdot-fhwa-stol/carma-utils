@@ -147,6 +147,10 @@ void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::ve
 
   speeds->reserve(downtrack.size());
 
+  if(downtracks.size() == 1){
+    speeds->push_back(0.0);
+    return;
+  }
   double prev_position = downtrack[0];
   double prev_speed = initial_speed;
   double prev_time = times[0];
