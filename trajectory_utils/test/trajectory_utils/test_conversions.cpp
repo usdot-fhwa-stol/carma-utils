@@ -136,7 +136,6 @@ TEST(trajectory_utils_conversions_test, time_to_speed)
   std::vector<double> times = {1,2,3,4};
   std::vector<double> speeds;
 
-
   time_to_speed(downtracks, times, 1.0, &speeds);
 
   ASSERT_EQ(downtracks.size(), speeds.size());
@@ -161,7 +160,6 @@ TEST(trajectory_utils_conversions_test, time_to_speed)
   downtracks = {2, 4, 7};
   times = {0.0, 1.0, 2.5};
   speeds = {};
-  
   time_to_speed(downtracks, times, 1.0, &speeds);
   
   ASSERT_EQ(downtracks.size(), times.size());

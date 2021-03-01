@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright (C) 2018-2020 LEIDOS.
+ * Copyright (C) 2020-2021 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -43,6 +43,19 @@ void speed_to_time(const std::vector<double>& downtrack, const std::vector<doubl
  */
 void time_to_speed(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
                    std::vector<double>* speeds);
+
+/**
+ * \brief Converts a list of times to a list of speeds for the corresponding downtrack points using constant jerk equations
+ * 
+ * \param downtracks The downtrack points where each speed and time will be
+ * \param times The time at each downtrack point. Must have the same length as the downtracks list
+ * \param initial_speed 
+ * \param speeds Output parameter which points to the vector which will store the speeds at each point. 
+ *              The first speed will always be initial_speed
+ * \param decel_jerk The decelerating constant jerk used in calculation
+ */
+void time_to_speed_constjerk(const std::vector<double>& downtracks, const std::vector<double>& times, double initial_speed,
+                   std::vector<double>* speeds , double decel_jerk);
 
 /**
  * \brief Converts the trajectory points of a TrajectoryPlan message into equal sized vectors of downtrack distance and time
