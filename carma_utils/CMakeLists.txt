@@ -90,6 +90,7 @@ if(CATKIN_ENABLE_TESTING)
   add_rostest_gtest(${PROJECT_NAME}_CARMANodeHandle_test test/${PROJECT_NAME}/CARMANodeHandle.test
     test/${PROJECT_NAME}/CARMANodeHandleTest.cpp
     test/${PROJECT_NAME}/timers/TestingTimers.cpp
+    test/${PROJECT_NAME}/containers/containers_test.cpp
   )
   target_link_libraries(${PROJECT_NAME}_CARMANodeHandle_test ${PROJECT_NAME} ${catkin_LIBRARIES})
   add_dependencies( ${PROJECT_NAME}_CARMANodeHandle_test ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
