@@ -59,7 +59,7 @@ namespace ros {
       static std::mutex static_pub_sub_mutex_;
       static bool shutting_down_; // Shutdown flag
       static std::string system_alert_topic_;
-      static boost::optional<double> spin_rate_; // Rate in seconds of spin loop. If this is not set then system will use event driven spin
+      static boost::optional<double> spin_rate_; // Rate in Hz of spin loop. If this is not set then system will use event driven spin
       // System alert pub/sub
       static volatile bool common_pub_sub_set_;
       static Subscriber system_alert_sub_;
