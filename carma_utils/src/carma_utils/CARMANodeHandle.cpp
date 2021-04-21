@@ -131,7 +131,6 @@ namespace ros {
     if (!spin_rate_) {
       handleException(std::invalid_argument("Tried to set a spin callback however the spin_rate is not set. "));
       return;
-      //throw std::invalid_argument("Tried to set a spin callback however the spin_rate is not set. "); TODO remove
     }
     ROS_WARN_STREAM("SPIN RATE " << spin_rate_.get());
     validateCallback(cb);
