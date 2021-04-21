@@ -215,9 +215,6 @@ TEST(CARMANodeHandleTests, testCARMANodeHandleConstructor)
 
   cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr& msg) -> void {});
 
-  cnh.setSpinRate(20.0);
-  cnh.setSpinCallback([]() -> bool {return true;});
-
   CARMANodeHandle cnh2(cnh);
 
   CARMANodeHandle cnh3(cnh, "h");
