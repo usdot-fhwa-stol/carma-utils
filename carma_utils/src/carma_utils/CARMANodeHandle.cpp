@@ -20,6 +20,7 @@
 
 #include <sstream>
 #include "carma_utils/CARMANodeHandle.h"
+#include <ros/callback_queue.h>
 
 namespace ros {
   // Initialize default static values
@@ -31,7 +32,7 @@ namespace ros {
    bool CARMANodeHandle::shutting_down_ = false;
    bool CARMANodeHandle::allow_node_shutdown_ = true;
    std::string CARMANodeHandle::system_alert_topic_ = "/system_alert";
-   double CARMANodeHandle::default_spin_rate_ = 20.0;
+   boost::optional<double> CARMANodeHandle::spin_rate_;
 
    std::mutex CARMANodeHandle::static_pub_sub_mutex_;
    volatile bool CARMANodeHandle::common_pub_sub_set_ = false;
@@ -127,6 +128,10 @@ namespace ros {
 
   void CARMANodeHandle::setSpinCallback(SpinCB cb) {
     std::lock_guard<std::mutex> lock(spin_mutex_);
+    if (!spin_rate_) {
+      handleException(std::invalid_argument("Tried to set a spin callback however the spin_rate is not set. "));
+      return;
+    }
     validateCallback(cb);
     spin_cb_ = cb;
   }
@@ -151,33 +156,55 @@ namespace ros {
 
   void CARMANodeHandle::setSpinRate(double hz) {
     std::lock_guard<std::mutex> lock(spin_mutex_);
-    default_spin_rate_ = hz;
+    if (hz <= 0.0) {
+      ROS_DEBUG("Unsetting spin rate as provided with 0 or negative frequency.");
+      spin_rate_ = boost::none;
+      return;
+    }
+    spin_rate_ = hz;
   }
 
   void CARMANodeHandle::spin() {
     ROS_INFO("Entered Spin: Waiting for any other calls to spin to complete");
     std::lock_guard<std::mutex> lock(spin_mutex_);
     ROS_INFO("Obtained lock. Starting spin");
-    // Continuosly process callbacks for default_nh_ using the GlobalCallbackQueue
-    ros::Rate r(default_spin_rate_);
-    while (ros::ok() && !shutting_down_)
-    {
-      ros::spinOnce();
-      try {
-        if (validFunctionPtr(spin_cb_) && !spin_cb_()) {
-          cav_msgs::SystemAlert alert_msg;
-          alert_msg.type = cav_msgs::SystemAlert::WARNING;
-          alert_msg.description = "Node: " + ros::this_node::getName() + " cleanly shutting down using CARMANodeHandle after spin callback returned false";
-          ROS_WARN_STREAM(alert_msg.description); // Log notice
 
-          system_alert_pub_.publish(alert_msg); // Notify the rest of the system
-          shutdown();
+    if (spin_rate_) {
+      ROS_INFO_STREAM("Using rate controlled spin at frequency: " << spin_rate_.get());
+      // Continuosly process callbacks for default_nh_ using the GlobalCallbackQueue
+      ros::Rate r(*spin_rate_);
+      while (ros::ok() && !shutting_down_)
+      {
+        ros::spinOnce();
+        try {
+          if (validFunctionPtr(spin_cb_) && !spin_cb_()) {
+            cav_msgs::SystemAlert alert_msg;
+            alert_msg.type = cav_msgs::SystemAlert::WARNING;
+            alert_msg.description = "Node: " + ros::this_node::getName() + " cleanly shutting down using CARMANodeHandle after spin callback returned false";
+            ROS_WARN_STREAM(alert_msg.description); // Log notice
+
+            system_alert_pub_.publish(alert_msg); // Notify the rest of the system
+            shutdown();
+          }
+        }
+        catch(const std::exception& e) {
+          handleException(e);
+        }
+        r.sleep();
+      }
+    } else {
+
+      ROS_INFO("Using event driven spin");
+      while (ros::ok() && !shutting_down_) // Default spin implementation with added exception handling based off implementation shown here http://wiki.ros.org/roscpp/Overview/Callbacks%20and%20Spinning and https://github.com/ros/ros_comm/blob/25af588f9971c3dee7f5a79f8ce143ad0c4644df/clients/roscpp/src/libros/spinner.cpp#L156
+      {
+        try {
+          ros::getGlobalCallbackQueue()->callAvailable(ros::WallDuration(0.1));
+        }
+        catch(const std::exception& e) {
+          handleException(e);
         }
       }
-      catch(const std::exception& e) {
-        handleException(e);
-      }
-      r.sleep();
+
     }
     
     { // Empty scope for applying lock_guard for shutdown

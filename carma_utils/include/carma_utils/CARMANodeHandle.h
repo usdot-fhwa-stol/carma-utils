@@ -23,6 +23,7 @@
 #include <mutex>
 #include <memory>
 #include <cav_msgs/SystemAlert.h>
+#include <boost/optional.hpp>
 
 namespace ros {
   /**
@@ -58,8 +59,7 @@ namespace ros {
       static std::mutex static_pub_sub_mutex_;
       static bool shutting_down_; // Shutdown flag
       static std::string system_alert_topic_;
-      static double default_spin_rate_; // Rate in seconds of spin loop
-
+      static boost::optional<double> spin_rate_; // Rate in Hz of spin loop. If this is not set then system will use event driven spin
       // System alert pub/sub
       static volatile bool common_pub_sub_set_;
       static Subscriber system_alert_sub_;
@@ -193,14 +193,17 @@ namespace ros {
        * This callback will be triggered after each call to spinOnce()
        * If the callback function returns false the node will attempt to shutdown 
        * 
+       * @throw std::invalid_argument if the spin rate has not been set with setSpinRate(). This exception is caught internally but will cause the node to shutdown.
+       * 
        * @param cb Callback function
        */ 
       static void setSpinCallback(SpinCB cb);
       /**
        * @brief Exception safe replacement for ros::spin(). 
        * 
-       * Loops continuously at the rate set by setSpinRate();
-       * On each loop ros::spinOnce() is called then the spinCallback is triggered
+       * Equivalent to ros::spin() if setSpinRate() has not been called. 
+       * If it has been called then, this loops continuously at the rate set by setSpinRate();
+       * On rate controlled loop ros::spinOnce() is called then the spinCallback is triggered
        * This loop will exit and attempt to shutdown the node if the spin callback returns false
        * 
        */ 
@@ -218,6 +221,7 @@ namespace ros {
        * @brief Sets the spin rate of the spin() function
        * 
        * @param hz The rate in Hz at which the spin() function will call ros::spinOnce();
+       *           If set to 0.0 or a negative value it is equivalent to unsetting the rate so spin() will behave like ros::spin().
        * 
        */ 
       static void setSpinRate(double hz);

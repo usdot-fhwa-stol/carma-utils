@@ -31,7 +31,6 @@ namespace driver_shutdown
     void DriverShutdown::run()
     {
     	initialize();
-        ros::CARMANodeHandle::setSpinRate(10.0);
         ros::CARMANodeHandle::spin();
 
     }
