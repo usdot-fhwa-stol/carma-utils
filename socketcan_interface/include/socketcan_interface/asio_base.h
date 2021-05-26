@@ -23,7 +23,7 @@ template<typename Socket> class AsioDriver : public DriverInterface{
     
 protected:
     boost::asio::io_service io_service_;
-    boost::asio::strand strand_;
+    boost::asio::io_service::strand strand_;
     Socket socket_;
     Frame input_;
     
