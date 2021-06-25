@@ -32,6 +32,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Eigen3 REQUIRED)
+find_package(Boost REQUIRED)
 
 
 catkin_package(
@@ -56,7 +57,7 @@ include_directories(
 
 file(GLOB_RECURSE headers */*.hpp */*.h)
 
-add_library(wgs84_utils_library src/wgs84_utils/wgs84_utils.cpp)
+add_library(wgs84_utils_library src/wgs84_utils/wgs84_utils.cpp src/wgs84_utils/proj_tools.cpp)
 target_link_libraries(wgs84_utils_library)
 add_dependencies(wgs84_utils_library ${catkin_EXPORTED_TARGETS})
 
@@ -83,11 +84,10 @@ add_dependencies(wgs84_utils_library ${catkin_EXPORTED_TARGETS})
 ## Test ##
 ##########
 
-# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-# catkin_add_gtest(transform_maintainer_test test/transform_maintainer_test.cpp)
+catkin_add_gmock(wgs84_uitls_test test/test_main.cpp test/proj_tools_test.cpp)
 
-# target_link_libraries( transform_maintainer_test
-#         wgs84_utils_library
-#         ${Boost_LIBRARIES} 
-#         ${catkin_LIBRARIES}
-#         )
+target_link_libraries( wgs84_uitls_test
+  wgs84_utils_library
+  ${Boost_LIBRARIES} 
+  ${catkin_LIBRARIES}
+)
