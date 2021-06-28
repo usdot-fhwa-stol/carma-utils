@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2020 LEIDOS.
+ * Copyright (C) 2018-2021 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License") { you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -214,8 +214,6 @@ TEST(CARMANodeHandleTests, testCARMANodeHandleConstructor)
   cnh.setShutdownCallback([]() -> void {});
 
   cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr& msg) -> void {});
-
-  cnh.setSpinCallback([]() -> bool {return true;});
 
   CARMANodeHandle cnh2(cnh);
 
@@ -575,7 +573,7 @@ TEST (CARMANodeHandleTests, testCARMANodeHandleSpin) {
   cnh.setShutdownCallback([]() -> void {});
 
   cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr& msg) -> void {});
-
+  cnh.setSpinRate(20.0);
   cnh.setSpinCallback([]() -> bool {
     static int callCount = 0;
     CallRecorder::markCalled("testCARMANodeHandleSpin","::spinLambda1");
@@ -592,6 +590,25 @@ TEST (CARMANodeHandleTests, testCARMANodeHandleSpin) {
 
   cnh.spin(); // Blocks until spin callback returns false
   ASSERT_EQ(CallRecorder::callCount("testCARMANodeHandleSpin", "::spinLambda1"), 4);
+}
+
+TEST(CARMANodeHandleTests, testSetSpinException)
+{
+  CARMANodeHandle cnh;
+  cnh.setSpinRate(0.0);
+
+  bool gotException = false;
+  bool shutdown_called = false;
+  cnh.setExceptionCallback([&gotException](const std::exception& exp) -> void { gotException = true; });
+
+  cnh.setShutdownCallback([&shutdown_called]() -> void { shutdown_called = true; });
+
+  cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr& msg) -> void {});
+
+  cnh.setSpinCallback([]() -> bool {return true;});
+
+  ASSERT_TRUE(gotException);
+  ASSERT_TRUE(shutdown_called);
 }
 
 int main(int argc, char **argv)
