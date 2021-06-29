@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <package format="3">
-
   <name>sigpack</name>
   <version>1.3.0</version>
   <description>SigPack is a C++ signal processing library using the Armadillo library as a base. The API will be 
@@ -9,17 +8,11 @@
     The distrubution of SigPack which includes this package.xml file is used by the CARMAPlatform https://github.com/usdot-fhwa-stol/carma-platform 
     and includes some modifications to improve the build process for that system.
   </description>
-
-
   <maintainer email="carma@todo.todo">todo</maintainer>
-  <author>crolen</author> <!-- Origional SigPack author user name on SourceForge. No email is provided -->
-<buildtool_depend>catkin</buildtool_depend>
   <license>Mozilla Public License 2.0</license>
-
   <url type="website">http://sigpack.sourceforge.net/index.html</url>
   <url type="repository">https://sourceforge.net/projects/sigpack/</url>
   <url type="bugtracker">https://sourceforge.net/p/sigpack/discussion/general/</url>
-
-  
-
+  <author>crolen</author> <!-- Origional SigPack author user name on SourceForge. No email is provided -->
+  <buildtool_depend>catkin</buildtool_depend>
 </package>
