@@ -21,6 +21,7 @@ set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 
 find_package(catkin REQUIRED COMPONENTS
   bondcpp
+  can_msgs
   cav_msgs
   cav_srvs
   roscpp
@@ -41,7 +42,7 @@ find_package(Boost REQUIRED system)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES driver_application cav_socketcan_interface ros_socketcan_interface driver_wrapper
-  CATKIN_DEPENDS bondcpp cav_msgs cav_srvs roscpp std_msgs
+  CATKIN_DEPENDS bondcpp can_msgs cav_msgs cav_srvs roscpp std_msgs
 #  DEPENDS system_lib
 )
 
