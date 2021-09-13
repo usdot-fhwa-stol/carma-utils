@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>carma_ros2_utils</name>
+  <version>1.0.0</version>
+  <description>TODO</description>
+  <maintainer email="michael.jeronimo@openrobotics.org">Michael Jeronimo</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>libboost-program-options-dev</build_depend>
+
+  <depend>action_msgs</depend>
+  <depend>carma_common</depend>
+  <depend>geometry_msgs</depend>
+  <depend>launch</depend>
+  <depend>launch_testing_ament_cmake</depend>
+  <depend>lifecycle_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>rclcpp_action</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>rclcpp_components</depend>
+  <depend>rcutils</depend>
+  <depend>ros2_lifecycle_manager_msgs</depend>
+  <depend>ros2_utils</depend>
+  <depend>test_msgs</depend>
+  <depend>cav_msgs</depend>
+
+  <exec_depend>libboost-program-options</exec_depend>
+
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>launch</test_depend>
+  <test_depend>launch_testing_ament_cmake</test_depend>
+  <test_depend>std_srvs</test_depend>
+  <test_depend>action_msgs</test_depend>
+  <test_depend>launch_testing_ros</test_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
