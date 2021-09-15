@@ -16,8 +16,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(trajectory_utils)
 
-## Compile as C++14
-add_compile_options(-std=c++14)
+find_package(carma_cmake_common REQUIRED)
+carma_check_ros_version(2)
+carma_package()
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
