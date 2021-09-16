@@ -6,7 +6,6 @@ carma_check_ros_version(2)
 carma_package()
 
 find_package(ament_cmake REQUIRED)
-find_package(carma_common REQUIRED)
 find_package(ros2_lifecycle_manager_msgs REQUIRED)
 find_package(ros2_utils REQUIRED)
 find_package(nav_msgs REQUIRED)

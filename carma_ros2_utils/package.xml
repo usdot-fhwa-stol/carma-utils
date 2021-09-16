@@ -12,7 +12,6 @@
   <build_depend>carma_cmake_common</build_depend>
 
   <depend>action_msgs</depend>
-  <depend>carma_common</depend>
   <depend>geometry_msgs</depend>
   <depend>launch</depend>
   <depend>launch_testing_ament_cmake</depend>
