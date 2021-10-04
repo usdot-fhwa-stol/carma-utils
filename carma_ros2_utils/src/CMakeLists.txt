@@ -1,7 +1,5 @@
 add_library(${library_name} SHARED
-  carma_node.cpp
   carma_lifecycle_node.cpp
-  carma_executor.cpp
 )
 
 set(node_plugins "")

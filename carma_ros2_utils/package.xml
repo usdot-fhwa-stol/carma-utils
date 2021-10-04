@@ -22,10 +22,8 @@
   <depend>rclcpp_lifecycle</depend>
   <depend>rclcpp_components</depend>
   <depend>rcutils</depend>
-  <depend>ros2_lifecycle_manager_msgs</depend>
-  <depend>ros2_utils</depend>
   <depend>test_msgs</depend>
-  <depend>cav_msgs</depend>
+  <depend>carma_msgs</depend>
 
   <exec_depend>libboost-program-options</exec_depend>
 

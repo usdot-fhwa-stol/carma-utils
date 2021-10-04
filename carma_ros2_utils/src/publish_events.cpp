@@ -20,7 +20,7 @@
 
 #include <memory>
 
-#include "cav_msgs/msg/system_alert.hpp"
+#include "carma_msgs/msg/system_alert.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 // Based off of: https://github.com/sukha-cn/turtlesim-ros2/blob/master/tutorials/teleop_turtle_key.cpp
@@ -43,13 +43,13 @@ public:
 
 private:
   std::shared_ptr<rclcpp::Node> nh_;
-  rclcpp::Publisher<cav_msgs::msg::SystemAlert>::SharedPtr event_pub_;
+  rclcpp::Publisher<carma_msgs::msg::SystemAlert>::SharedPtr event_pub_;
 };
 
 CarmaEventPub::CarmaEventPub(std::shared_ptr<rclcpp::Node> nh)
 : nh_(nh)
 {
-  event_pub_ = nh_->create_publisher<cav_msgs::msg::SystemAlert>("/system_alert", 1);
+  event_pub_ = nh_->create_publisher<carma_msgs::msg::SystemAlert>("/system_alert", 1);
 }
 
 void CarmaEventPub::keyLoop()
@@ -78,32 +78,32 @@ void CarmaEventPub::keyLoop()
       exit(-1);
     }
 
-    cav_msgs::msg::SystemAlert new_msg;
+    carma_msgs::msg::SystemAlert new_msg;
 
     switch (c) {
       case KEYCODE_1:
         std::cout << "CAUTION" << std::endl;
-        new_msg.type = cav_msgs::msg::SystemAlert::CAUTION;
+        new_msg.type = carma_msgs::msg::SystemAlert::CAUTION;
         break;
       case KEYCODE_2:
         std::cout << "WARNING" << std::endl;
-        new_msg.type = cav_msgs::msg::SystemAlert::WARNING;
+        new_msg.type = carma_msgs::msg::SystemAlert::WARNING;
         break;
       case KEYCODE_3:
         std::cout << "FATAL" << std::endl;
-        new_msg.type = cav_msgs::msg::SystemAlert::FATAL;
+        new_msg.type = carma_msgs::msg::SystemAlert::FATAL;
         break;
       case KEYCODE_4:
         std::cout << "NOT_READY" << std::endl;
-        new_msg.type = cav_msgs::msg::SystemAlert::NOT_READY;
+        new_msg.type = carma_msgs::msg::SystemAlert::NOT_READY;
         break;
       case KEYCODE_5:
         std::cout << "DRIVERS_READY" << std::endl;
-        new_msg.type = cav_msgs::msg::SystemAlert::DRIVERS_READY;
+        new_msg.type = carma_msgs::msg::SystemAlert::DRIVERS_READY;
         break;
       case KEYCODE_6:
         std::cout << "SHUTDOWN" << std::endl;
-        new_msg.type = cav_msgs::msg::SystemAlert::SHUTDOWN;
+        new_msg.type = carma_msgs::msg::SystemAlert::SHUTDOWN;
         break;
       default:
         return;

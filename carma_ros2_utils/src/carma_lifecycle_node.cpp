@@ -18,7 +18,8 @@
 #include <string>
 #include <vector>
 
-#include "lifecycle_msgs/msg/state.hpp"
+#include "lifecycle_msgs/msg/State.hpp"
+#include "lifecycle_msgs/msg/Transition.hpp"
 #include "rclcpp_components/register_node_macro.hpp"
 
 namespace carma_ros2_utils
@@ -27,7 +28,7 @@ namespace carma_ros2_utils
 CarmaLifecycleNode::CarmaLifecycleNode(const rclcpp::NodeOptions & options)
 : rclcpp_lifecycle::LifecycleNode("carma_node", "", options)
 {
-  RCLCPP_INFO(get_logger(), "Lifecycle node launched, waiting on state transition requests");
+  RCLCPP_INFO(get_logger(), "CarmaLifecycleNode node launched, waiting on state transition requests");
 }
 
 CarmaLifecycleNode::~CarmaLifecycleNode()
@@ -41,47 +42,84 @@ CarmaLifecycleNode::~CarmaLifecycleNode()
   }
 }
 
-carma_ros2_utils::CallbackReturn
-CarmaLifecycleNode::on_configure(const rclcpp_lifecycle::State & /*state*/)
+CallbackReturn
+CarmaLifecycleNode::on_configure(const rclcpp_lifecycle::State & prev_state)
 {
-  system_alert_pub_ = create_publisher<cav_msgs::msg::SystemAlert>(
+  system_alert_pub_ = create_publisher<carma_msgs::msg::SystemAlert>(
     system_alert_topic_, 10);
 
-  system_alert_sub_ = create_subscription<cav_msgs::msg::SystemAlert>(
+  system_alert_sub_ = create_subscription<carma_msgs::msg::SystemAlert>(
     system_alert_topic_, 1,
     std::bind(&CarmaLifecycleNode::on_system_alert, this, std::placeholders::_1));
 
-  return carma_ros2_utils::CallbackReturn::SUCCESS;
+
+  return handle_on_configure(state);
 }
 
-carma_ros2_utils::CallbackReturn
-CarmaLifecycleNode::on_activate(const rclcpp_lifecycle::State & /*state*/)
+CallbackReturn
+CarmaLifecycleNode::on_activate(const rclcpp_lifecycle::State & prev_state)
 {
-  system_alert_pub_->on_activate();
-  return carma_ros2_utils::CallbackReturn::SUCCESS;
+  activate_publishers();
+  return handle_on_activate(state);
 }
 
-carma_ros2_utils::CallbackReturn
-CarmaLifecycleNode::on_deactivate(const rclcpp_lifecycle::State & /*state*/)
+CallbackReturn
+CarmaLifecycleNode::on_deactivate(const rclcpp_lifecycle::State & prev_state)
 {
-  system_alert_pub_->on_deactivate();
-  return carma_ros2_utils::CallbackReturn::SUCCESS;
+  if (caught_exception_) { // Handling exceptions from Active state will result in a deactivate call which will then return an error to transition us to on_error();
+    return CallbackReturn::TRANSITION_CALLBACK_ERROR;
+  }
+
+  deactivate_publishers();
+  return handle_on_deactivate(state);
 }
 
-carma_ros2_utils::CallbackReturn
-CarmaLifecycleNode::on_cleanup(const rclcpp_lifecycle::State & /*state*/)
+CallbackReturn
+CarmaLifecycleNode::on_cleanup(const rclcpp_lifecycle::State & prev_state)
 {
-  system_alert_pub_.reset();
-  return carma_ros2_utils::CallbackReturn::SUCCESS;
+  cleanup_publishers();
+  cleanup_timers();
+  return handle_on_cleanup(state);
 }
 
-carma_ros2_utils::CallbackReturn
-CarmaLifecycleNode::on_error(const rclcpp_lifecycle::State & /*state*/)
+CallbackReturn
+CarmaLifecycleNode::on_error(const rclcpp_lifecycle::State & prev_state)
 {
-  system_alert_pub_.reset();
-  rclcpp_lifecycle::Transition error_transition(0, "transition_error"); // a transition_error is technically meant to be thrown from within a transition state, but we are trying to force the change to the ErrorProcessing state
-  this->trigger_transition(error_transition);
-  return carma_ros2_utils::CallbackReturn::SUCCESS;
+  std::string error_string;
+  if (caught_exception_) {
+    
+    error_string = caught_exception_.get();
+    RCLCPP_ERROR_STREAM(get_logger(), caught_exception_.get());
+    caught_exception_ = boost::none;
+  } 
+  else {
+    error_string = "Exception occurred during lifecycle state transitions. Look for 'Caught exception' in the logs for details.";
+    RCLCPP_ERROR_STREAM(get_logger(), error_string);
+    
+    try {
+
+      send_error_alert_msg_for_string(error_string);
+      RCLCPP_ERROR_STREAM(get_logger(), "Sent on_error system alert");
+    
+    } catch (const std::exception& e) {
+     
+      RCLCPP_ERROR_STREAM(get_logger(), "Failed to send on_error system alert. Forcing shutdown.");
+      return CallbackReturn::FAILURE;
+    }
+    
+  }
+
+  cleanup_publishers();
+  cleanup_timers();
+  return handle_on_error(state, const std::string& exception_string); // TODO should the user method be called here
+}
+
+CallbackReturn
+CarmaLifecycleNode::on_shutdown(const rclcpp_lifecycle::State & prev_state)
+{
+  cleanup_publishers();
+  cleanup_timers();
+  return handle_on_shutdown(state);
 }
 
 std::shared_ptr<carma_ros2_utils::CarmaLifecycleNode>
@@ -92,31 +130,127 @@ CarmaLifecycleNode::shared_from_this()
 }
 
 void
-CarmaLifecycleNode::publish_system_alert(const cav_msgs::msg::SystemAlert::SharedPtr msg)
+CarmaLifecycleNode::publish_system_alert(const carma_msgs::msg::SystemAlert& msg)
 {
-  system_alert_pub_->publish(*msg);
+  system_alert_pub_->publish(msg);
 }
 
 void
-CarmaLifecycleNode::on_system_alert(const cav_msgs::msg::SystemAlert::SharedPtr msg)
+CarmaLifecycleNode::on_system_alert(const carma_msgs::msg::SystemAlert::SharedPtr msg)
 {
   RCLCPP_INFO(get_logger(), "Received SystemAlert message of type: %u", msg->type);
 }
 
-void
-CarmaLifecycleNode::create_rclcpp_node(const rclcpp::NodeOptions & options)
-{
-  std::vector<std::string> new_args = options.arguments();
-  new_args.push_back("--ros-args");
-  new_args.push_back("-r");
-  new_args.push_back(std::string("__node:=") + get_name() + "_rclcpp_node");
-  new_args.push_back("--");
-  rclcpp_node_ = std::make_shared<rclcpp::Node>(
-    "_", get_namespace(), rclcpp::NodeOptions(options).arguments(new_args));
-  rclcpp_thread_ = std::make_unique<ros2_utils::NodeThread>(rclcpp_node_);
+void send_error_alert_msg_for_string(const std::string& alert_string) {
+    carma_msgs::msg::SystemAlert alert_msg;
+    alert_msg.type = carma_msgs::msg::SystemAlert::FATAL;
+    alert_msg.description = alert_string;
+
+    publish_system_alert(alert_msg); // Notify the rest of the system
 }
+
+void CarmaLifecycleNode::handle_primary_state_exception(const std::exception& e) {
+    std::lock_guard<std::mutex> lock(exception_mutex_);
+
+    rclcpp_lifecycle::State state_at_exception = get_current_state();
+
+    if(get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) // If the exception was caught in the ACTIVE state we can try to gracefully fail to on_error, by transitioning to deactivate and then throwning an exception
+    {
+      std::string error_msg = "Uncaught Exception from node: " + std::string(get_name()) + " exception: " + e.what() + " while in ACTIVE state.";
+      caught_exception_ = error_msg;
+      deactivate();
+    } 
+    else 
+    {
+      std::string error_msg = "Uncaught Exception from node: " + std::string(get_name()) + " caught exception: " + e.what() + " while in unsupported exception handling state: " + std::to_string(get_current_state().id());
+      
+      RCLCPP_ERROR_STREAM(get_logger(), error_msg); // Log exception
+
+      try {
+
+        send_error_alert_msg_for_string(error_msg);
+        RCLCPP_ERROR_STREAM(get_logger(), "Sent handle_primary_state_exception system alert");
+    
+      } catch (const std::exception& e) {
+      
+        RCLCPP_ERROR_STREAM(get_logger(), "Failed to send handle_primary_state_exception system alert. Forcing shutdown.");
+      }
+
+      shutdown();
+      
+      // TODO comment cleanup: reaching this case from a state other than ACTIVE should not be possible. 
+      //      As all transitions are wrapped by LifecycleNode exception handling and all other primary states are no-op. 
+    }
+
+  }
+
+  void CarmaLifecycleNode::activate_publishers() {
+    for (auto pub : lifecycle_publishers_) {
+      if (!pub)
+        continue;
+      pub->on_activate();
+    }
+  }
+  void CarmaLifecycleNode::deactivate_publishers() {
+    for (auto pub : lifecycle_publishers_) {
+      if (!pub)
+        continue;
+      pub->on_deactivate();
+    }
+  }
+  void CarmaLifecycleNode::cleanup_publishers() {
+    for (auto pub : lifecycle_publishers_) {
+      pub.reset();
+    }
+  }
+  void CarmaLifecycleNode::cleanup_timers() {
+    for (auto timer : timers_) {
+      timer->cancel();
+      timer.reset();
+    }
+  }
+
+  rclcpp_lifecycle::LifecycleNode::OnSetParametersCallbackHandle::SharedPtr
+  CarmaLifecycleNode::add_on_set_parameters_callback(
+    rclcpp_lifecycle::LifecycleNode::OnParametersSetCallbackType callback) {
+      return rclcpp_lifecycle::LifecycleNode::add_on_set_parameters_callback(
+        [&callback, this] (auto params) {
+          try {
+            
+            return callback(params);
+          
+          } catch (const std::exception& e) {
+            
+            handle_primary_state_exception(e);
+            
+            rcl_interfaces::msg::SetParametersResult msg;
+            msg.successful = false;
+            msg.reason = e.what();
+
+            return msg;
+          }
+        }
+      );
+    }
+
+  virtual CallbackReturn handle_on_configure(const rclcpp_lifecycle::State & prev_state) {
+    return CallbackReturn::SUCCESS;
+  }
+  virtual CallbackReturn handle_on_activate(const rclcpp_lifecycle::State & prev_state) {
+    return CallbackReturn::SUCCESS;
+  }
+  virtual CallbackReturn handle_on_deactivate(const rclcpp_lifecycle::State & prev_state) {
+    return CallbackReturn::SUCCESS;
+  }
+  virtual CallbackReturn handle_on_cleanup(const rclcpp_lifecycle::State & prev_state) {
+    return CallbackReturn::SUCCESS;
+  }
+  virtual CallbackReturn handle_on_error(const rclcpp_lifecycle::State & prev_state, const std::string& exception_string) {
+    return CallbackReturn::FAILURE; // By default an error will take us into the finalized sate.
+  }
+  virtual CallbackReturn handle_on_shutdown(const rclcpp_lifecycle::State & prev_state) {
+    return CallbackReturn::SUCCESS; // By default shutdown will take us into the finalized state.
+  }
 
 }  // namespace carma_ros2_utils
 
-// Register the component with class_loader
-RCLCPP_COMPONENTS_REGISTER_NODE(carma_ros2_utils::CarmaLifecycleNode)
