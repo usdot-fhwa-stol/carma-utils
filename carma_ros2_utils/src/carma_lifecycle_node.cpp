@@ -139,6 +139,23 @@ void
 CarmaLifecycleNode::on_system_alert(const carma_msgs::msg::SystemAlert::SharedPtr msg)
 {
   RCLCPP_INFO(get_logger(), "Received SystemAlert message of type: %u", msg->type);
+  
+  if (msg->type == carma_msgs::msg::SystemAlert::SHUTDOWN) {
+    if (get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED) {
+      RCLCPP_INFO(get_logger(), "Shutdown alert received but node is already FINALIZED"); // Not sure if we can ever actually hit this case
+    } else {
+      RCLCPP_INFO_STREAM(get_logger(), "Shutdown alert received while in state: " << get_current_state().id());
+      shutdown();
+    }
+  }
+
+  handle_on_system_alert(msg);
+}
+
+void
+CarmaLifecycleNode::handle_on_system_alert(const carma_msgs::msg::SystemAlert::SharedPtr msg)
+{
+  return; // NO-OP method which can be overriden by extending classes
 }
 
 void send_error_alert_msg_for_string(const std::string& alert_string) {
