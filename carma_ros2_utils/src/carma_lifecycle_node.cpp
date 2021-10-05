@@ -133,6 +133,13 @@ namespace carma_ros2_utils
   void
   CarmaLifecycleNode::publish_system_alert(const carma_msgs::msg::SystemAlert &msg)
   {
+    carma_msgs::msg::SystemAlert pub_msg = msg;
+
+    if (!get_node_base_interface())
+      throw std::runtime_error("get_node_base_interface() returned null pointer. May indicate ROS2 bug.");
+
+    pub_msg.source_node = get_node_base_interface()->get_fully_qualified_name(); // The the source name for the message
+
     system_alert_pub_->publish(msg);
   }
 

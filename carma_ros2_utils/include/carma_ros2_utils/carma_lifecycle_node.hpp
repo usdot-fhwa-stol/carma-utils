@@ -156,7 +156,7 @@ namespace carma_ros2_utils
 
     /**
    * \brief Publishes a SystemAlert message to the rest of the carma-platform system.
-   * 
+   *        NOTE: This callback will automatically populate the msg.source_node field based on this node name.
    * \param msg The message to publish
    */
     void publish_system_alert(const carma_msgs::msg::SystemAlert &msg);
