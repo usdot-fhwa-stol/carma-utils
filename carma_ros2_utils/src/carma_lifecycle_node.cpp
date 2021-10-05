@@ -38,6 +38,7 @@ namespace carma_ros2_utils
     // In case this lifecycle node wasn't properly shut down, do it here
     if (get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE)
     {
+      RCLCPP_WARN(get_logger(), "Destructor called while in ACTIVE state. Attempting to cleanup");
       on_deactivate(get_current_state());
       on_cleanup(get_current_state());
     }
