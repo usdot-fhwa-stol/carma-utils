@@ -148,16 +148,6 @@ namespace carma_ros2_utils
     virtual carma_ros2_utils::CallbackReturn handle_on_shutdown(const rclcpp_lifecycle::State &prev_state);
 
     /**
-   * \brief Callback for SystemAlert messages. 
-   * 
-   * NOTE: CarmaLifecycleNode will automatically handle the system alert shutdown behavior prior to calling this callback.
-   * 
-   * \param msg The message which was provided
-   * 
-   */
-    virtual void handle_on_system_alert(const carma_msgs::msg::SystemAlert::SharedPtr msg);
-
-    /**
    * \brief Convenience method to build a shared pointer from this object.
    * 
    * \return A shared pointer which points to this object
@@ -174,7 +164,7 @@ namespace carma_ros2_utils
     /**
      * \brief Override of parent method. See descriptive comments here:
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L230
-     */ 
+     */
     template <
         typename MessageT,
         typename CallbackT,
@@ -197,7 +187,7 @@ namespace carma_ros2_utils
     /**
      * \brief Override of parent method. See descriptive comments here:
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L201
-     */ 
+     */
     template <typename MessageT, typename AllocatorT = std::allocator<void>>
     std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<MessageT, AllocatorT>>
     create_publisher(
@@ -205,11 +195,10 @@ namespace carma_ros2_utils
         const rclcpp::QoS &qos,
         const rclcpp_lifecycle::PublisherOptionsWithAllocator<AllocatorT> &options = (rclcpp_lifecycle::create_default_publisher_options<AllocatorT>()));
 
-
     /**
      * \brief Override of parent method. See descriptive comments here:
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L463
-     */ 
+     */
     rclcpp_lifecycle::LifecycleNode::OnSetParametersCallbackHandle::SharedPtr
     add_on_set_parameters_callback(
         rclcpp_lifecycle::LifecycleNode::OnParametersSetCallbackType callback);
@@ -217,7 +206,7 @@ namespace carma_ros2_utils
     /**
      * \brief Override of parent method. See descriptive comments here:
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L249
-     */ 
+     */
     template <typename DurationRepT = int64_t, typename DurationT = std::milli, typename CallbackT>
     std::shared_ptr<rclcpp::TimerBase> // NOTE: TimerBase must be used here to account for the fact that the exception handling lambda will have a different type from the input callback type due to being a possible differnet location in code (member vs non-member method etc.).
                                        // Therefore the old return statement of typename rclcpp::WallTimer<CallbackT>::SharedPtr is replaced with TimerBase
@@ -238,8 +227,8 @@ namespace carma_ros2_utils
      * 
      *  \return A pointer to an intialized timer. The timer will be cancled when this node transitions through a deactivate/cleanup sequence
      *
-     */ 
-    template <typename CallbackT>  
+     */
+    template <typename CallbackT>
     typename rclcpp::TimerBase::SharedPtr
     create_timer(
         rclcpp::Clock::SharedPtr clock,
@@ -247,14 +236,12 @@ namespace carma_ros2_utils
         CallbackT &&callback,
         rclcpp::CallbackGroup::SharedPtr group = nullptr);
 
-
-
     /**
      * \brief Override of rclcpp method. See descriptive comments here:
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L271
      *  
      *  NOTE: In foxy the LifecycleNode api is slightly out of sync with the node api so there is not a create_timer method there. We use rclcpp directly here
-     */ 
+     */
     template <typename ServiceT, typename CallbackT>
     typename rclcpp::Service<ServiceT>::SharedPtr
     create_service(
@@ -273,6 +260,13 @@ namespace carma_ros2_utils
    * \param e The exception to be handled
    */
     void handle_primary_state_exception(const std::exception &e);
+
+    /**
+   * \brief Helper method to publish a system alert of type FATAL with the provided error string.
+   * 
+   * \param alert_string The message description to send.
+   */
+    void send_error_alert_msg_for_string(const std::string &alert_string);
 
     /**
    * \brief Activate all publishers to allow publication
@@ -294,19 +288,8 @@ namespace carma_ros2_utils
    */
     void cleanup_timers();
 
-    /**
-   * \brief Callback for SystemAlert messages. Calls the handle_on_system_alert method when complete.
-   *  
-   * \param msg The message which was provided
-   * 
-   */
-    void on_system_alert(const carma_msgs::msg::SystemAlert::SharedPtr msg);
-
     //! Topic to subscribe to by default for SystemAlert messages
     const std::string system_alert_topic_{"/system_alert"};
-
-    //! System alert subscriber
-    rclcpp::Subscription<carma_msgs::msg::SystemAlert>::SharedPtr system_alert_sub_;
 
     //! System alert publisher
     std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<carma_msgs::msg::SystemAlert>>
