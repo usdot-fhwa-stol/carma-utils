@@ -6,21 +6,19 @@ carma_check_ros_version(2)
 carma_package()
 
 find_package(ament_cmake REQUIRED)
-find_package(nav_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(rcutils REQUIRED)
-find_package(action_msgs REQUIRED)
+find_package(action_msgs REQUIRED) #TODO do we need to add action handling as well to the lifecycle node?
 find_package(carma_msgs REQUIRED)
 
 set(dependencies
     action_msgs
     carma_msgs
     lifecycle_msgs
-    nav_msgs
     rclcpp
     rclcpp_action
     rclcpp_lifecycle

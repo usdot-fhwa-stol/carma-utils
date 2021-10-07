@@ -16,7 +16,6 @@
   <depend>launch</depend>
   <depend>launch_testing_ament_cmake</depend>
   <depend>lifecycle_msgs</depend>
-  <depend>nav_msgs</depend>
   <depend>rclcpp_action</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
