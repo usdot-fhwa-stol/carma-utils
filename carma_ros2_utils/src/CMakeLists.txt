@@ -8,19 +8,11 @@ target_compile_definitions(${library_name}
 rclcpp_components_register_nodes(${library_name} "carma_ros2_utils::CarmaNode")
 set(node_plugins "${node_plugins}carma_ros2_utils::CarmaNode;$<TARGET_FILE:carma_ros2_utils_core>\n")
 
-add_executable(event_pub
-  publish_events.cpp
-)
-
-ament_target_dependencies(event_pub
-  ${dependencies}
-)
-
 ament_target_dependencies(${library_name}
   ${dependencies}
 )
 
-install(TARGETS ${library_name} event_pub
+install(TARGETS ${library_name}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
