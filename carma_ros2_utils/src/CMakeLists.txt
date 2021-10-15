@@ -13,7 +13,5 @@ ament_target_dependencies(${library_name}
 )
 
 install(TARGETS ${library_name}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
+DESTINATION lib/${PROJECT_NAME}
 )
