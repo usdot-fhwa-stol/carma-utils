@@ -11,7 +11,6 @@
   <build_depend>libboost-program-options-dev</build_depend>
   <build_depend>carma_cmake_common</build_depend>
 
-  <depend>action_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>launch</depend>
   <depend>launch_testing_ament_cmake</depend>
@@ -32,7 +31,6 @@
   <test_depend>launch</test_depend>
   <test_depend>launch_testing_ament_cmake</test_depend>
   <test_depend>std_srvs</test_depend>
-  <test_depend>action_msgs</test_depend>
   <test_depend>launch_testing_ros</test_depend>
   <test_depend>ament_cmake_pytest</test_depend>
 
