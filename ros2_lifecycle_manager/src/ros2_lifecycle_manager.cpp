@@ -90,7 +90,7 @@ namespace ros2_lifecycle_manager
     {
       RCLCPP_ERROR_STREAM(
           node_logging_->get_logger(), "Server time out while getting current state for node with name: " << node_name);
-      return false;
+      return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
     }
 
     return future_result.get()->current_state.id;
