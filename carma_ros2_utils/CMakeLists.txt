@@ -29,8 +29,9 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_cmake_pytest REQUIRED)
   find_package(ros2_lifecycle_manager REQUIRED)
+  find_package(std_srvs REQUIRED)
 
-  set(dependencies ${dependencies} ros2_lifecycle_manager)
+  set(dependencies ${dependencies} ros2_lifecycle_manager std_srvs)
 
 
   add_executable(test_carma_lifecycle_node
@@ -69,6 +70,31 @@ if(BUILD_TESTING)
     TIMEOUT 30
     ENV
       TEST_EXECUTABLE=$<TARGET_FILE:test_lifecycle_gtest>
+  )
+  
+  ament_add_gtest(test_carma_lifecycle_gtest
+    test/test_carma_lifecycle_exceptions.cpp
+  )
+
+  target_include_directories(test_carma_lifecycle_gtest
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  )
+
+  target_link_libraries(test_carma_lifecycle_gtest ${PROJECT_NAME})
+
+  ament_target_dependencies(test_carma_lifecycle_gtest
+    ${dependencies}
+  )
+
+  install(
+    TARGETS test_lifecycle_gtest test_carma_lifecycle_node test_carma_lifecycle_gtest
+    # EXPORT should not be needed for unit tests
+    LIBRARY DESTINATION lib/${PROJECT_NAME} # In Ament, Executables are installed to lib/${PROJECT_NAME} not bin 
+    ARCHIVE DESTINATION lib/${PROJECT_NAME}
+    RUNTIME DESTINATION lib/${PROJECT_NAME}
+    INCLUDES DESTINATION include
   )
 
 endif()

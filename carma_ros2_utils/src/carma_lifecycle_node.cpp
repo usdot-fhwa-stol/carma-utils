@@ -140,7 +140,7 @@ namespace carma_ros2_utils
 
     pub_msg.source_node = get_node_base_interface()->get_fully_qualified_name(); // The the source name for the message
 
-    system_alert_pub_->publish(msg);
+    system_alert_pub_->publish(msg); 
   }
 
   void CarmaLifecycleNode::send_error_alert_msg_for_string(const std::string &alert_string)
