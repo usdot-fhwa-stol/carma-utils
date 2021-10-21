@@ -110,9 +110,12 @@ namespace carma_ros2_utils
       }
     }
 
+    // Call the user error handling before clean up of the publishers to allow them to publish if needed
+    auto return_val = handle_on_error(prev_state, error_string); 
+    
     cleanup_publishers();
     cleanup_timers();
-    return handle_on_error(prev_state, error_string); // TODO should the user method be called here
+    return  return_val;
   }
 
   CallbackReturn
@@ -182,10 +185,7 @@ namespace carma_ros2_utils
         RCLCPP_ERROR_STREAM(get_logger(), "Failed to send handle_primary_state_exception system alert. Forcing shutdown.");
       }
 
-      shutdown();
-
-      // TODO comment cleanup: reaching this case from a state other than ACTIVE should not be possible.
-      //      As all transitions are wrapped by LifecycleNode exception handling and all other primary states are no-op.
+      shutdown(); // Shutdown as an exception while in a non-active state is very likely not recoverable and notification to the larger system may not work
     }
   }
 

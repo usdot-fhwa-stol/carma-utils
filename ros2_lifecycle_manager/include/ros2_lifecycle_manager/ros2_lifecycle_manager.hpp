@@ -40,16 +40,17 @@ namespace ros2_lifecycle_manager
      * \param node_name The fully qualified node name
      * \param change_state_client The service client to use for accessing the change state service
      * \param get_state_client The service client to use for accessing the get state service
-     */ 
+     */
     ManagedNode(const std::string &node_name, std::shared_ptr<ChangeStateClient> change_state_client, std::shared_ptr<GetStateClient> get_state_client) : node_name(node_name), change_state_client(change_state_client), get_state_client(get_state_client){};
 
     //! The fully qualified name of this node
     std::string node_name;
+
     //! The service client to use for the change_state service
     std::shared_ptr<ChangeStateClient> change_state_client;
+
     //! The service client to use for the get_state service
     std::shared_ptr<GetStateClient> get_state_client;
-
   };
 
   /**
@@ -68,13 +69,12 @@ namespace ros2_lifecycle_manager
      * 
      * \param node_logging The base logging interface
      * \param node_services The base service providing interface
-     */ 
+     */
     Ros2LifecycleManager(
-      rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
-      rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph,
-      rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
-      rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services
-    );
+        rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
+        rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph,
+        rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
+        rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services);
 
     ~Ros2LifecycleManager() = default;
 
@@ -112,7 +112,7 @@ namespace ros2_lifecycle_manager
      * \param timeout The timeout in nanoseconds to wait on the client
      * 
      * \return True if the service is available within the provided timeout. False otherwise.
-     */ 
+     */
     template <class T>
     bool waitForService(std::shared_ptr<rclcpp::Client<T>> client, const std_nanosec &timeout)
     {
@@ -133,17 +133,18 @@ namespace ros2_lifecycle_manager
      * 
      * \param service_name The name of the service
      * \return A pointer to the initialized service
-     */ 
+     */
     template <class ServiceT>
     typename rclcpp::Client<ServiceT>::SharedPtr
-    create_client(const std::string service_name) {
+    create_client(const std::string service_name)
+    {
       return rclcpp::create_client<ServiceT>(
-        node_base_,
-        node_graph_,
-        node_services_,
-        service_name,
-        rmw_qos_profile_services_default,
-        service_callback_group_); // Use the interface specific callbackgroup
+          node_base_,
+          node_graph_,
+          node_services_,
+          service_name,
+          rmw_qos_profile_services_default,
+          service_callback_group_); // Use the interface specific callbackgroup
     }
 
     /**
@@ -153,26 +154,32 @@ namespace ros2_lifecycle_manager
      * \param timeout The timeout in nanoseconds to wait
      * 
      * \return True if the future returned and had the correct value. False otherwise.
-     */ 
+     */
     bool wait_on_change_state_future(const ChangeStateSharedFutureWithRequest &future,
-                                   const std_nanosec &timeout);
+                                     const std_nanosec &timeout);
 
     //! The service base name used for ROS2 Lifecycle Node's change state operation
     const std::string change_state_topic_ = "/change_state";
+
     //! The service base name used for ROS2 Lifecycle Node's get state operation
     const std::string get_state_topic_ = "/get_state";
+
     //! The list of managed nodes
     std::vector<ManagedNode> managed_nodes_;
+
     //! The list of managed node fully qualified names
     std::vector<std::string> managed_node_names_;
+
     //! HashMap of node names with index for fast access
     std::unordered_map<std::string, size_t> node_map_;
+
     //! The required node interfaces
     rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_;
     rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph_;
     rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging_;
     rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services_;
-    //! Reentrant callback group to use with service calls. Setup this way so that this classes functions 
+
+    //! Reentrant callback group to use with service calls. Setup this way so that this classes functions
     //  can be called from topic callbacks
     rclcpp::CallbackGroup::SharedPtr service_callback_group_;
   };

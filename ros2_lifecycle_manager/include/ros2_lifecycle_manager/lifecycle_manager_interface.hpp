@@ -1,3 +1,6 @@
+#ifndef ROS2_LIFECYCLE_MANAGER__LIFECYCLE_MANAGER_INTERFACE_HPP_
+#define ROS2_LIFECYCLE_MANAGER__LIFECYCLE_MANAGER_INTERFACE_HPP_
+
 /*
  * Copyright (C) 2021 LEIDOS.
  *
@@ -13,9 +16,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
-#ifndef ROS2_LIFECYCLE_MANAGER__LIFECYCLE_MANAGER_INTERFACE_HPP_
-#define ROS2_LIFECYCLE_MANAGER__LIFECYCLE_MANAGER_INTERFACE_HPP_
 
 #include <memory>
 #include <string>
@@ -37,7 +37,6 @@ namespace ros2_lifecycle_manager
   class LifecycleManagerInterface
   {
   public:
-
     /**
      * @brief Virtual destructor to ensure delete safety for pointers to implementing classes
      *
@@ -49,17 +48,19 @@ namespace ros2_lifecycle_manager
      * 
      * \param nodes The list of Fully Qualified Names for nodes to manage.
      *              The order of these nodes will be obeyed in the transition methods if the ordered argument is used.
-     */ 
+     */
     virtual void set_managed_nodes(const std::vector<std::string> &nodes) = 0;
 
     /**
      * \brief Returns the list of managed node's Fully Qualified Names
-     */ 
+     */
     virtual std::vector<std::string> get_managed_nodes() = 0;
 
     /**
      * \brief Returns the Lifecycle state of the provided node
-     */ 
+     *      
+     * NOTE: This call has a 10ms timeout
+     */
     virtual uint8_t get_managed_node_state(const std::string &node) = 0;
 
     /**

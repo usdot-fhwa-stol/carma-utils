@@ -23,10 +23,11 @@ namespace ros2_lifecycle_manager
       rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
       rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph,
       rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
-      rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services
-    ) : node_base_(node_base), node_graph_(node_graph), node_logging_(node_logging), node_services_(node_services) {
-      service_callback_group_ = node_base_->create_callback_group(rclcpp::callback_group::CallbackGroupType::Reentrant);
-    }
+      rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services)
+      : node_base_(node_base), node_graph_(node_graph), node_logging_(node_logging), node_services_(node_services)
+  {
+    service_callback_group_ = node_base_->create_callback_group(rclcpp::callback_group::CallbackGroupType::Reentrant);
+  }
 
   void Ros2LifecycleManager::set_managed_nodes(const std::vector<std::string> &nodes)
   {
@@ -73,7 +74,7 @@ namespace ros2_lifecycle_manager
     auto node = managed_nodes_.at((*it).second);
 
     // Check for service. If not read return unknown
-    if (!node.get_state_client->service_is_ready()) 
+    if (!node.get_state_client->service_is_ready())
     {
       RCLCPP_ERROR_STREAM(
           node_logging_->get_logger(), "State for node: " << node_name << " could not be provided as that node's service is not ready ");
@@ -125,18 +126,20 @@ namespace ros2_lifecycle_manager
     success = success || transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_INACTIVE_SHUTDOWN, ordered, connection_timeout, call_timeout);
     success = success || transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN, ordered, connection_timeout, call_timeout);
     return success;
-    // transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_DESTROY, ordered, connection_timeout, call_timeout); // TODO not clear if this is needed yet
   }
 
   bool Ros2LifecycleManager::transition_multiplex(uint8_t transition, bool ordered, const std_nanosec &connection_timeout, const std_nanosec &call_timeout)
   {
     auto request = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
+
     lifecycle_msgs::msg::Transition t_msg;
     t_msg.id = transition;
-    request->transition = t_msg;
-    bool clean_result = true;
 
-    // If ordered argument was true then we will transition the nodes in sequence 
+    request->transition = t_msg;
+
+    bool clean_result = true; // Flag will indicate if any of the calls fail
+
+    // If ordered argument was true then we will transition the nodes in sequence
     if (ordered)
     {
       // Iterate over each node and transition them
@@ -147,18 +150,18 @@ namespace ros2_lifecycle_manager
         if (!waitForService<lifecycle_msgs::srv::ChangeState>(node.change_state_client, connection_timeout))
         {
           clean_result = false;
-          continue; 
+          continue;
         }
 
         RCLCPP_INFO_STREAM(
-          node_logging_->get_logger(), "Calling node: " << node.node_name);
+            node_logging_->get_logger(), "Calling node: " << node.node_name);
 
         // Call service
         ChangeStateSharedFutureWithRequest future_result = node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {});
 
         // Wait for response
         if (!wait_on_change_state_future(future_result, call_timeout))
-        { 
+        {
           clean_result = false;
         }
       }
@@ -174,11 +177,11 @@ namespace ros2_lifecycle_manager
         if (!waitForService<lifecycle_msgs::srv::ChangeState>(node.change_state_client, connection_timeout))
         {
           clean_result = false;
-          continue; 
+          continue;
         }
 
         RCLCPP_INFO_STREAM(
-          node_logging_->get_logger(), "Calling node a-sync: " << node.node_name);
+            node_logging_->get_logger(), "Calling node a-sync: " << node.node_name);
 
         // Call service
         futures.emplace_back(node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {}));
@@ -186,7 +189,7 @@ namespace ros2_lifecycle_manager
       for (auto future : futures)
       {
         if (!wait_on_change_state_future(future, call_timeout))
-        { 
+        {
           clean_result = false;
         }
       }
@@ -196,12 +199,13 @@ namespace ros2_lifecycle_manager
   }
 
   bool Ros2LifecycleManager::wait_on_change_state_future(const rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFutureWithRequest &future,
-                                   const std_nanosec &timeout)
+                                                         const std_nanosec &timeout)
   {
     // Let's wait until we have the answer from the node.
     // If the request times out, we return an unknown state.
     RCLCPP_ERROR(
-          node_logging_->get_logger(), "Waiting for future");
+        node_logging_->get_logger(), "Waiting for future");
+      
     auto future_status = future.wait_for(timeout);
 
     if (future_status != std::future_status::ready)
