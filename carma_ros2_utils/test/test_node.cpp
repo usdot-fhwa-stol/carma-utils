@@ -21,7 +21,6 @@
 class CarmaLifecycleNodeTest : public carma_ros2_utils::CarmaLifecycleNode
 {
 public:
-  //using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
   CarmaLifecycleNodeTest(const rclcpp::NodeOptions &options)
       : CarmaLifecycleNode(options) {}
 
