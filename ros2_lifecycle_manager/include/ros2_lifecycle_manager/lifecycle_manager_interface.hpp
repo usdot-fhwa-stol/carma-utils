@@ -71,21 +71,22 @@ namespace ros2_lifecycle_manager
      * \param ordered If true then the nodes will be transitioned in order of the list provided by set_managed_nodes. 
      *                If false the nodes will all be triggered at once.
      * 
-     * \return True if all nodes successfully transitioned. False otherwise. 
+     * \return A list of any nodes that failed to execute the requested transition
      */
-    virtual bool configure(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
+    virtual std::vector<std::string> configure(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
 
     //! \brief Same as configure() except for Cleanup transition
-    virtual bool cleanup(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
+    virtual std::vector<std::string> cleanup(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
 
     //! \brief Same as configure() except for Activate transition
-    virtual bool activate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
+    virtual std::vector<std::string> activate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
 
     //! \brief Same as configure() except for Deactivate transition
-    virtual bool deactivate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
+    virtual std::vector<std::string> deactivate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
 
     //! \brief Same as configure() except for Shutdown transition
-    virtual bool shutdown(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
+    // NOTE: The set of returned nodes may not be as meaningful as the other methods due to the nature of the shutdown transition.
+    virtual std::vector<std::string> shutdown(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
   };
 
 } // namespace ros2_lifecycle_manager

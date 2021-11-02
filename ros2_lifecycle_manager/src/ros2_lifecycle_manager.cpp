@@ -99,38 +99,38 @@ namespace ros2_lifecycle_manager
     return future_result.get()->current_state.id;
   }
 
-  bool Ros2LifecycleManager::configure(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered)
+  std::vector<std::string> Ros2LifecycleManager::configure(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered)
   {
     return transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE, ordered, connection_timeout, call_timeout);
   }
 
-  bool Ros2LifecycleManager::cleanup(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered)
+  std::vector<std::string> Ros2LifecycleManager::cleanup(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered)
   {
     return transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP, ordered, connection_timeout, call_timeout);
   }
 
-  bool Ros2LifecycleManager::activate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered)
+  std::vector<std::string> Ros2LifecycleManager::activate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered)
   {
     return transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE, ordered, connection_timeout, call_timeout);
   }
 
-  bool Ros2LifecycleManager::deactivate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered)
+  std::vector<std::string> Ros2LifecycleManager::deactivate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered)
   {
     return transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE, ordered, connection_timeout, call_timeout);
   }
 
-  bool Ros2LifecycleManager::shutdown(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered)
+  std::vector<std::string> Ros2LifecycleManager::shutdown(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered)
   {
     // To avoid having to track all the node sates and pick the appropriate shutdown we will simply shut down in order of most dangeorus
-    // Active is shutdown first to avoid more data being published, this is followed by inactive and finally unconfigured
-    bool success = false;
-    success = success || transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVE_SHUTDOWN, ordered, connection_timeout, call_timeout);
-    success = success || transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_INACTIVE_SHUTDOWN, ordered, connection_timeout, call_timeout);
-    success = success || transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN, ordered, connection_timeout, call_timeout);
-    return success;
+    // Active is shutdown first to avoid more data being published, this is followed by inactive and finally unconfigured    
+    auto failed_nodes = transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVE_SHUTDOWN, ordered, connection_timeout, call_timeout);
+    transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_INACTIVE_SHUTDOWN, ordered, connection_timeout, call_timeout);
+    transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN, ordered, connection_timeout, call_timeout);
+    
+    return failed_nodes; 
   }
 
-  bool Ros2LifecycleManager::transition_multiplex(uint8_t transition, bool ordered, const std_nanosec &connection_timeout, const std_nanosec &call_timeout)
+  std::vector<std::string> Ros2LifecycleManager::transition_multiplex(uint8_t transition, bool ordered, const std_nanosec &connection_timeout, const std_nanosec &call_timeout)
   {
     auto request = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
 
@@ -139,7 +139,7 @@ namespace ros2_lifecycle_manager
 
     request->transition = t_msg;
 
-    bool clean_result = true; // Flag will indicate if any of the calls fail
+    std::vector<std::string> failed_nodes; // Store failed nodes
 
     // If ordered argument was true then we will transition the nodes in sequence
     if (ordered)
@@ -151,7 +151,7 @@ namespace ros2_lifecycle_manager
         // Wait for service
         if (!waitForService<lifecycle_msgs::srv::ChangeState>(node.change_state_client, connection_timeout))
         {
-          clean_result = false;
+          failed_nodes.push_back(node.node_name);
           continue;
         }
 
@@ -164,7 +164,7 @@ namespace ros2_lifecycle_manager
         // Wait for response
         if (!wait_on_change_state_future(future_result, call_timeout))
         {
-          clean_result = false;
+          failed_nodes.push_back(node.node_name);
         }
       }
     }
@@ -172,32 +172,36 @@ namespace ros2_lifecycle_manager
     {
       std::vector<ChangeStateSharedFutureWithRequest> futures;
       futures.reserve(managed_nodes_.size());
+      std::unordered_map<size_t, std::string> future_node_map; // Map of future index to node name for error tracking
 
       for (auto node : managed_nodes_)
       {
         // Wait for service
         if (!waitForService<lifecycle_msgs::srv::ChangeState>(node.change_state_client, connection_timeout))
         {
-          clean_result = false;
+          failed_nodes.push_back(node.node_name);
           continue;
         }
 
         RCLCPP_INFO_STREAM(
             node_logging_->get_logger(), "Calling node a-sync: " << node.node_name);
 
-        // Call service
+        // Call service and record future
         futures.emplace_back(node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {}));
+        future_node_map.emplace(futures.size() - 1, node.node_name);
       }
+      size_t i = 0;
       for (auto future : futures)
       {
         if (!wait_on_change_state_future(future, call_timeout))
         {
-          clean_result = false;
+          failed_nodes.push_back(future_node_map.at(i));
         }
+        i++;
       }
     }
 
-    return clean_result;
+    return failed_nodes;
   }
 
   bool Ros2LifecycleManager::wait_on_change_state_future(const rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFutureWithRequest &future,

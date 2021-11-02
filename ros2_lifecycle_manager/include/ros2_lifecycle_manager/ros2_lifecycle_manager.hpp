@@ -84,11 +84,11 @@ namespace ros2_lifecycle_manager
     void set_managed_nodes(const std::vector<std::string> &nodes) override;
     std::vector<std::string> get_managed_nodes() override;
     uint8_t get_managed_node_state(const std::string &node) override;
-    bool configure(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) override;
-    bool cleanup(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) override;
-    bool activate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) override;
-    bool deactivate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) override;
-    bool shutdown(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) override;
+    std::vector<std::string> configure(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) override;
+    std::vector<std::string> cleanup(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) override;
+    std::vector<std::string> activate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) override;
+    std::vector<std::string> deactivate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) override;
+    std::vector<std::string> shutdown(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) override;
 
   protected:
     /**
@@ -99,9 +99,9 @@ namespace ros2_lifecycle_manager
      * \param ordered If true then the nodes will be transitioned in order of the list provided by set_managed_nodes. 
      *                If false the nodes will all be triggered at once.
      * 
-     * \return True if all nodes successfully transitioned. False otherwise. 
+     * \return List of any nodes which failed to transition
      */
-    bool transition_multiplex(uint8_t transition, bool ordered, const std_nanosec &connection_timeout, const std_nanosec &call_timeout);
+    std::vector<std::string> transition_multiplex(uint8_t transition, bool ordered, const std_nanosec &connection_timeout, const std_nanosec &call_timeout);
 
     /**
      * \brief Helper function to wait on the provided service client for the provided period of time.
