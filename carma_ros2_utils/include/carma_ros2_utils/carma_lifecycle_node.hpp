@@ -164,6 +164,9 @@ namespace carma_ros2_utils
     /**
      * \brief Override of parent method. See descriptive comments here:
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L230
+     * 
+     * NOTE: The function object passed to this method will be moved using std::move. 
+     *       The user should therefore assume ownership of this function object has been relinquished
      */
     template <
         typename MessageT,

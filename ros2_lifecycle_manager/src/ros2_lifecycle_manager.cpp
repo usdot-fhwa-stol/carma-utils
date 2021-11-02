@@ -44,6 +44,8 @@ namespace ros2_lifecycle_manager
     for (const auto &node : nodes)
     {
 
+      // Create a new ManagedNode instance
+      RCLCPP_INFO_STREAM(node_logging_->get_logger(), "Creating Managed Node with topics: " << (node + change_state_topic_) << " and " << (node + get_state_topic_));
       ManagedNode managed_node(node,
                                create_client<lifecycle_msgs::srv::ChangeState>(node + change_state_topic_),
                                create_client<lifecycle_msgs::srv::GetState>(node + get_state_topic_));
@@ -203,7 +205,7 @@ namespace ros2_lifecycle_manager
   {
     // Let's wait until we have the answer from the node.
     // If the request times out, we return an unknown state.
-    RCLCPP_ERROR(
+    RCLCPP_INFO(
         node_logging_->get_logger(), "Waiting for future");
       
     auto future_status = future.wait_for(timeout);

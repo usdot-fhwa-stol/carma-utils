@@ -75,9 +75,10 @@ namespace carma_ros2_utils
   CallbackReturn
   CarmaLifecycleNode::on_cleanup(const rclcpp_lifecycle::State &prev_state)
   {
+    auto result = handle_on_cleanup(prev_state);
     cleanup_publishers();
     cleanup_timers();
-    return handle_on_cleanup(prev_state);
+    return result;
   }
 
   CallbackReturn
@@ -121,9 +122,10 @@ namespace carma_ros2_utils
   CallbackReturn
   CarmaLifecycleNode::on_shutdown(const rclcpp_lifecycle::State &prev_state)
   {
+    auto result = handle_on_shutdown(prev_state);
     cleanup_publishers();
     cleanup_timers();
-    return handle_on_shutdown(prev_state);
+    return result;
   }
 
   std::shared_ptr<carma_ros2_utils::CarmaLifecycleNode>
@@ -218,7 +220,9 @@ namespace carma_ros2_utils
   {
     for (auto timer : timers_)
     {
-      timer->cancel();
+      if (timer) {
+        timer->cancel();
+      }
       timer.reset();
     }
   }

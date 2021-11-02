@@ -40,7 +40,13 @@ namespace carma_ros2_utils
 
     return rclcpp_lifecycle::LifecycleNode::create_subscription<MessageT>(
         topic_name, qos,
-        [&callback, this](std::unique_ptr<MessageT> m)
+        // The move capture "callback = std::move(callback)" is specifically needed
+        // here because of the unique_ptr<> in the callback arguments 
+        // when the callback is provided with std::bind
+        // the returned functor degrades to be move-constructable not copy-constructable
+        // https://www.cplusplus.com/reference/functional/bind/
+        // using &callback instead can result in a non-deterministic seg fault
+        [callback = std::move(callback), this](std::unique_ptr<MessageT> m)
         {
           try
           {
