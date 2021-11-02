@@ -253,6 +253,22 @@ namespace carma_ros2_utils
         const rmw_qos_profile_t &qos_profile = rmw_qos_profile_services_default,
         rclcpp::CallbackGroup::SharedPtr group = nullptr);
 
+    /**
+     * \brief Override of parent method. See descriptive comments here:
+     *  https://github.com/ros2/rclcpp/blob/d7804e1b3fd9676d302ec72f02c49ba04cbed5e6/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L260
+     * 
+     * VERY IMPORTANT NOTE: While the callback group default appears to be nullptr this is not actually the case. 
+     *                      On call the group will be set to the Reentrant CallbackGroup this->service_callback_group_ 
+     *                      This group is created explicitly for services to support a synchronous callback paradigm similar to ROS1. 
+     *                      Care should be taken when changing this default group value.
+     *                      If the user needs nullptr as the actual input they can call the parent method rclcpp_lifecycle::LifecycleNode::create_client
+     */
+    template <class ServiceT>
+    typename rclcpp::Client<ServiceT>::SharedPtr
+    create_client(const std::string service_name, 
+        const rmw_qos_profile_t & qos_profile = rmw_qos_profile_services_default,
+        rclcpp::CallbackGroup::SharedPtr group = nullptr);
+
   protected:
     /**
    * \brief Helper method to handle exceptions which occurred in primary states.
@@ -309,6 +325,10 @@ namespace carma_ros2_utils
 
     //! Optional caught exception description which serves as a workaround for adding exception handling to primary states
     boost::optional<std::string> caught_exception_;
+
+    //! Reentrant callback group to use with service calls. Setup this way so that this class' functions
+    //  can be called from topic callbacks
+    rclcpp::CallbackGroup::SharedPtr service_callback_group_;
   };
 
 } // namespace carma_ros2_utils

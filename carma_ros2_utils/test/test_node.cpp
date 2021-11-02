@@ -16,6 +16,7 @@
 #include <chrono>
 #include "rclcpp/rclcpp.hpp"
 #include "carma_ros2_utils/carma_lifecycle_node.hpp"
+#include "lifecycle_msgs/srv/get_state.hpp"
 
 // This is a test node to support unit tests for the carma_lifecycle_node
 class CarmaLifecycleNodeTest : public carma_ros2_utils::CarmaLifecycleNode
@@ -29,6 +30,9 @@ public:
   carma_ros2_utils::CallbackReturn handle_on_configure(const rclcpp_lifecycle::State & /*state*/) override
   {
     RCLCPP_INFO(get_logger(), "CARMA Lifecycle Test node is Configured!");
+
+    auto client = create_client<lifecycle_msgs::srv::GetState>("/my_service"); // Test that service clients can be created
+
     return CallbackReturn::SUCCESS;
   }
 

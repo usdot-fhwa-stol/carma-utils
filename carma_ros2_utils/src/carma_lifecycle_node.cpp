@@ -29,6 +29,10 @@ namespace carma_ros2_utils
       : rclcpp_lifecycle::LifecycleNode("carma_node", "", options)
   {
     RCLCPP_INFO(get_logger(), "CarmaLifecycleNode node launched, waiting on state transition requests");
+
+    // NOTE: When creating this callback group it was not immediately clear if it should go in on_configure or the constructor
+    //       Further usage of callback groups may elucidate this in the future
+    service_callback_group_ = get_node_base_interface()->create_callback_group(rclcpp::callback_group::CallbackGroupType::Reentrant);
   }
 
   CarmaLifecycleNode::~CarmaLifecycleNode()
@@ -47,6 +51,7 @@ namespace carma_ros2_utils
   CallbackReturn
   CarmaLifecycleNode::on_configure(const rclcpp_lifecycle::State &prev_state)
   {
+
     system_alert_pub_ = create_publisher<carma_msgs::msg::SystemAlert>(
         system_alert_topic_, 10);
 

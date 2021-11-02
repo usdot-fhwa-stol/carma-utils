@@ -150,6 +150,27 @@ namespace carma_ros2_utils
         qos_profile, group);
   }
 
+  template <class ServiceT>
+  typename rclcpp::Client<ServiceT>::SharedPtr
+  CarmaLifecycleNode::create_client (
+    const std::string service_name, 
+    const rmw_qos_profile_t & qos_profile,
+    rclcpp::CallbackGroup::SharedPtr group
+  )
+  {
+    // nullptr is the default argument for group
+    // when nullptr is provided use the class level service group
+    // this is needed instead of a default argument because you cannot change default arguments in overrides
+    if (group == nullptr) { 
+      group = this->service_callback_group_;
+    }
+
+    return rclcpp_lifecycle::LifecycleNode::create_client<ServiceT>(
+        service_name,
+        qos_profile,
+        group); // Our override specifies a different default callback group
+  }
+
 } // namespace carma_ros2_utils
 
 #endif // CARMA_ROS2_UTILS__CARMA_LIFECYCLE_NODE_HPP_"
