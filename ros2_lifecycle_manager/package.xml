@@ -15,7 +15,7 @@
   <depend>rclcpp_lifecycle</depend>
   <depend>ros2_lifecycle_manager_msgs</depend>
   <depend>ros2_utils</depend>
-  <depend>carma_cmake_common</depend>
+  <build_depend>carma_cmake_common</build_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
