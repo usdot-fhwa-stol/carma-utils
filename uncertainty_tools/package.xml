@@ -7,4 +7,5 @@
   <license>Apache License 2.0</license>
   <author email="carma@todo.todo">carma</author>
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>carma_cmake_common</build_depend>
 </package>
