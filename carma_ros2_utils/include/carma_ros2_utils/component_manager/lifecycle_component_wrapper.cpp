@@ -30,7 +30,7 @@ using namespace std::placeholders;
 namespace rclcpp_components
 {
 
-ComponentManager::ComponentManager(
+LifecycleComponentManager::LifecycleComponentManager(
   std::weak_ptr<rclcpp::Executor> executor,
   std::string node_name,
   const rclcpp::NodeOptions & node_options)
@@ -39,23 +39,16 @@ ComponentManager::ComponentManager(
 {
   loadNode_srv_ = create_service<LoadNode>(
     "~/_container/load_node",
-    std::bind(&ComponentManager::on_load_node, this, _1, _2, _3));
+    std::bind(&LifecycleComponentManager::on_load_node, this, _1, _2, _3));
   unloadNode_srv_ = create_service<UnloadNode>(
     "~/_container/unload_node",
-    std::bind(&ComponentManager::on_unload_node, this, _1, _2, _3));
+    std::bind(&LifecycleComponentManager::on_unload_node, this, _1, _2, _3));
   listNodes_srv_ = create_service<ListNodes>(
     "~/_container/list_nodes",
-    std::bind(&ComponentManager::on_list_nodes, this, _1, _2, _3));
+    std::bind(&LifecycleComponentManager::on_list_nodes, this, _1, _2, _3));
 }
 
-// Anytime load_node is called the full message can be cached
-// from this cached message it is possible to unload and then reload the node later
-// Using this mechanism. The message can be cached and the load delayed until the on_configure operation occurs
-// Similarly the unload can occur on the deactivate operation
-
-
-
-ComponentManager::~ComponentManager()
+LifecycleComponentManager::~LifecycleComponentManager()
 {
   if (node_wrappers_.size()) {
     RCLCPP_DEBUG(get_logger(), "Removing components from executor");
@@ -67,8 +60,8 @@ ComponentManager::~ComponentManager()
   }
 }
 
-std::vector<ComponentManager::ComponentResource>
-ComponentManager::get_component_resources(
+std::vector<LifecycleComponentManager::ComponentResource>
+LifecycleComponentManager::get_component_resources(
   const std::string & package_name, const std::string & resource_index) const
 {
   std::string content;
@@ -98,7 +91,7 @@ ComponentManager::get_component_resources(
 }
 
 std::shared_ptr<rclcpp_components::NodeFactory>
-ComponentManager::create_component_factory(const ComponentResource & resource)
+LifecycleComponentManager::create_component_factory(const ComponentResource & resource)
 {
   std::string library_path = resource.second;
   std::string class_name = resource.first;
@@ -129,7 +122,7 @@ ComponentManager::create_component_factory(const ComponentResource & resource)
 }
 
 rclcpp::NodeOptions
-ComponentManager::create_node_options(const std::shared_ptr<LoadNode::Request> request)
+LifecycleComponentManager::create_node_options(const std::shared_ptr<LoadNode::Request> request)
 {
   std::vector<rclcpp::Parameter> parameters;
   for (const auto & p : request->parameters) {
@@ -174,12 +167,31 @@ ComponentManager::create_node_options(const std::shared_ptr<LoadNode::Request> r
 }
 
 void
-ComponentManager::on_load_node(
+LifecycleComponentManager::on_load_node(
   const std::shared_ptr<rmw_request_id_t> request_header,
   const std::shared_ptr<LoadNode::Request> request,
-  std::shared_ptr<LoadNode::Response> response)
+  std::shared_ptr<LoadNode::Response> response, boost::optional<uint64_t> internal_id)
 {
   (void) request_header;
+
+  ///// CARMA CHANGE /////
+  // If this was an external request and we are NOT in the ACTIVE state
+  // then we should not load the node and simply cache it for load on activate
+  if (!internal_id && get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
+    
+    RCLCPP_INFO_STREAM(get_logger(), "Got request to load node: " << request->node_name <<
+      " but we are not in the active state, caching for later lifecycle based activation.");
+
+    auto node_id = unique_id_++; // This ID needs to be preserved when this method is called a second time
+                                 // But how to do this? We can detect if called again
+    load_node_requests_.emplace(node_id, std::make_pair(request_header.get(), request.get()));
+
+    return;
+  }
+
+  // This is an internal request, or we are in the active state, so we can actually load the node
+
+  ///// END CARMA CHANGE /////
 
   try {
     auto resources = get_component_resources(request->package_name);
@@ -195,7 +207,11 @@ ComponentManager::on_load_node(
       }
 
       auto options = create_node_options(request);
-      auto node_id = unique_id_++;
+      ///// CARMA CHANGE /////
+      // If a id was provided then we are an internal request and we should use it
+      // else update our unique id counter and set the node id to that
+      auto node_id = internal_id ? internal_id.get() : unique_id_++;
+      ///// END CARMA CHANGE /////
 
       if (0 == node_id) {
         // This puts a technical limit on the number of times you can add a component.
@@ -244,12 +260,21 @@ ComponentManager::on_load_node(
 }
 
 void
-ComponentManager::on_unload_node(
+LifecycleComponentManager::on_unload_node(
   const std::shared_ptr<rmw_request_id_t> request_header,
   const std::shared_ptr<UnloadNode::Request> request,
-  std::shared_ptr<UnloadNode::Response> response)
+  std::shared_ptr<UnloadNode::Response> response, bool internal_call)
 {
   (void) request_header;
+
+  ///// CARMA CHANGE /////
+  // Before unloading the node we need to check if it still exists in our load cache. If it does then remove it.
+  if (load_node_requests_.find(request->unique_id) != load_node_requests_.end()) {
+
+    load_node_requests_.erase(request->unique_id);
+  }
+
+  ///// END CARMA CHANGE /////
 
   auto wrapper = node_wrappers_.find(request->unique_id);
 
@@ -269,7 +294,7 @@ ComponentManager::on_unload_node(
 }
 
 void
-ComponentManager::on_list_nodes(
+LifecycleComponentManager::on_list_nodes(
   const std::shared_ptr<rmw_request_id_t> request_header,
   const std::shared_ptr<ListNodes::Request> request,
   std::shared_ptr<ListNodes::Response> response)
@@ -283,5 +308,79 @@ ComponentManager::on_list_nodes(
       wrapper.second.get_node_base_interface()->get_fully_qualified_name());
   }
 }
+
+///// CARMA CHANGE /////
+
+carma_ros2_utils::CallbackReturn LifecycleComponentManager::handle_on_activate(const rclcpp_lifecycle::State &prev_state) {
+
+  bool success = true;
+
+  for (auto & request : load_node_requests_) {
+    
+    auto response = std::make_shared<LoadNode::Response>();
+    on_load_node(request.second.first, request.second.second, response, request.first);
+
+    if (!response->success) {
+
+      RCLCPP_ERROR_STREAM(get_logger(), "Failed to load node: " << response->error_message);
+
+      success = false;
+    }
+  }
+  load_node_requests_.clear();
+
+  return success ? carma_ros2_utils::CallbackReturn::SUCCESS : carma_ros2_utils::CallbackReturn::FAILURE;
+}
+
+carma_ros2_utils::CallbackReturn LifecycleComponentManager::handle_on_deactivate(const rclcpp_lifecycle::State &prev_state) {
+
+  return unload_all_nodes() ? carma_ros2_utils::CallbackReturn::SUCCESS : carma_ros2_utils::CallbackReturn::FAILURE;
+
+}
+
+virtual carma_ros2_utils::CallbackReturn LifecycleComponentManager::handle_on_cleanup(const rclcpp_lifecycle::State &prev_state) {
+
+  return unload_all_nodes() ? carma_ros2_utils::CallbackReturn::SUCCESS : carma_ros2_utils::CallbackReturn::FAILURE;
+
+}
+
+virtual carma_ros2_utils::CallbackReturn LifecycleComponentManager::handle_on_error(const rclcpp_lifecycle::State &prev_state, const std::string &exception_string) {
+
+  return unload_all_nodes() ? carma_ros2_utils::CallbackReturn::SUCCESS : carma_ros2_utils::CallbackReturn::FAILURE;
+}
+
+virtual carma_ros2_utils::CallbackReturn LifecycleComponentManager::handle_on_shutdown(const rclcpp_lifecycle::State &prev_state) {
+
+  return unload_all_nodes() ? carma_ros2_utils::CallbackReturn::SUCCESS : carma_ros2_utils::CallbackReturn::FAILURE;
+}
+
+bool unload_all_nodes() {
+  bool success = true;
+
+  // On deactivation we will unload all nodes that are currently tracked
+  for (auto & wrapper : node_wrappers_) {
+
+    std::shared_ptr<UnloadNode::Request> request;
+    request->unique_id = wrapper.first;
+
+    auto response = std::make_shared<UnloadNode::Response>();
+      
+
+    on_unload_node(std::make_shared<rmw_request_id_t>(),
+                  request, response, true); // Unload our nodes and mark as internal call
+
+    if (!response->success) {
+
+      RCLCPP_ERROR_STREAM(get_logger(), "Failed to unload node: " << response->error_message);
+
+      success = false; // If one of the nodes failed to unload we will track this and return a transition failure
+                       // However, to improve system stability we will continue to unload the rest of the nodes
+    }
+  }
+
+  return success;
+}
+
+///// END CARMA CHANGE /////
 
 }  // namespace rclcpp_components

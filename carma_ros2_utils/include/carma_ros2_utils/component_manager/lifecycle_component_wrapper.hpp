@@ -17,7 +17,7 @@
 
 /** \mainpage rclcpp_components: Package containing tools for dynamically loadable components.
  *
- * - ComponentManager: Node to manage components. It has the services to load, unload and list
+ * - LifecycleComponentManager: Node to manage components. It has the services to load, unload and list
  *   current components.
  *   - rclcpp_components/lifecycle_component_wrapper.hpp) 
  * - Node factory: The NodeFactory interface is used by the class loader to instantiate components.
@@ -57,6 +57,8 @@
 #include "rclcpp/executor.hpp"
 #include "rclcpp/node_options.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include <carma_ros2_utils/carma_lifecycle_node.hpp>
+#include <rclcpp_components/component_manager.hpp>
 
 #include "rclcpp_components/node_factory.hpp"
 #include "rclcpp_components/visibility_control.hpp"
@@ -69,8 +71,8 @@ class ClassLoader;
 namespace rclcpp_components
 {
 
-/// ComponentManager handles the services to load, unload, and get the list of loaded components.
-class ComponentManager : public rclcpp::Node
+/// LifecycleComponentManager handles the services to load, unload, and get the list of loaded components.
+class LifecycleComponentManager : public carma_ros2_utils::CarmaLifecycleNode
 {
 public:
   using LoadNode = composition_interfaces::srv::LoadNode;
@@ -93,15 +95,15 @@ public:
    * \param node_options additional options to control creation of the node.
    */
   RCLCPP_COMPONENTS_PUBLIC
-  ComponentManager(
+  LifecycleComponentManager(
     std::weak_ptr<rclcpp::Executor> executor,
-    std::string node_name = "ComponentManager",
+    std::string node_name = "LifecycleComponentManager",
     const rclcpp::NodeOptions & node_options = rclcpp::NodeOptions()
     .start_parameter_services(false)
     .start_parameter_event_publisher(false));
 
   RCLCPP_COMPONENTS_PUBLIC
-  virtual ~ComponentManager();
+  virtual ~LifecycleComponentManager();
 
   /// Return a list of valid loadable components in a given package.
   /**
@@ -143,6 +145,12 @@ protected:
    * \param request_header unused
    * \param request information with the node to load
    * \param response
+   * 
+   * ///// CARMA CHANGE /////
+   * \param internal_call Optional parameter which if set means that the node should be loaded with the specified unique_id. 
+   *                      This is used internally to track deferred node loading.  
+   * ///// END CARMA CHANGE /////
+   * 
    * \throws std::overflow_error if node_id suffers an overflow. Very unlikely to happen at 1 kHz
    *   (very optimistic rate). it would take 585 years.
    * \throws ComponentManagerException In the case that the component constructor throws an
@@ -153,7 +161,7 @@ protected:
   on_load_node(
     const std::shared_ptr<rmw_request_id_t> request_header,
     const std::shared_ptr<LoadNode::Request> request,
-    std::shared_ptr<LoadNode::Response> response);
+    std::shared_ptr<LoadNode::Response> response, boost::optional<uint64_t> internal_id = boost::none);
 
   /**
    * \deprecated Use on_load_node() instead
@@ -164,9 +172,9 @@ protected:
   OnLoadNode(
     const std::shared_ptr<rmw_request_id_t> request_header,
     const std::shared_ptr<LoadNode::Request> request,
-    std::shared_ptr<LoadNode::Response> response)
+    std::shared_ptr<LoadNode::Response> response, boost::optional<uint64_t> internal_id = boost::none);
   {
-    on_load_node(request_header, request, response);
+    on_load_node(request_header, request, response, internal_call);
   }
 
   /// Service callback to unload a node in the component
@@ -175,6 +183,7 @@ protected:
    * \param request unique identifier to remove from the component
    * \param response true on the success field if the node unload was succefully, otherwise false
    *   and the error_message field contains the error.
+   * 
    */
   RCLCPP_COMPONENTS_PUBLIC
   virtual void
@@ -226,6 +235,19 @@ protected:
     on_list_nodes(request_header, request, response);
   }
 
+  ///// CARMA CHANGE /////
+
+  /**
+   * \brief Helper method to unload all the currently loaded nodes
+   * 
+   * The primary unloading logic is propagated to the on_unload_node
+   * 
+   * \return True if all nodes were successfully unloaded. False is otherwise
+   */ 
+  bool unload_all_nodes();
+
+  ///// END CARMA CHANGE /////
+
 private:
   std::weak_ptr<rclcpp::Executor> executor_;
 
@@ -236,6 +258,13 @@ private:
   rclcpp::Service<LoadNode>::SharedPtr loadNode_srv_;
   rclcpp::Service<UnloadNode>::SharedPtr unloadNode_srv_;
   rclcpp::Service<ListNodes>::SharedPtr listNodes_srv_;
+
+  ///// CARMA CHANGE /////
+
+  //! A record of all the node load requests organized by their unique id
+  std::unordered_map<uint64_t, std::pair<rmw_request_id_t, LoadNode>> load_node_requests_;
+
+  ///// END CARMA CHANGE /////
 };
 
 }  // namespace rclcpp_components
