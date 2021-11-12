@@ -81,7 +81,7 @@ namespace carma_ros2_utils
   {
 
     // Local copy of the callback has to be made here because the method is not written to take an rvalue reference
-    auto callack_func = [&callback, this]() -> void
+    auto callack_func = [callback = std::move(callback), this]() -> void
     {
       try
       {
@@ -110,7 +110,7 @@ namespace carma_ros2_utils
         this,
         clock,
         period,
-        [&callback, this]() -> void
+        [callback = std::move(callback), this]() -> void
         {
           try
           {
@@ -136,11 +136,13 @@ namespace carma_ros2_utils
       rclcpp::CallbackGroup::SharedPtr group)
   {
     return rclcpp_lifecycle::LifecycleNode::create_service<ServiceT>(
-        service_name, [&callback, this](std::shared_ptr<rmw_request_id_t> header, std::shared_ptr<typename ServiceT::Request> req, std::shared_ptr<typename ServiceT::Response> resp)
+        service_name, [callback = std::move(callback), this](std::shared_ptr<rmw_request_id_t> header, std::shared_ptr<typename ServiceT::Request> req, std::shared_ptr<typename ServiceT::Response> resp)
         {
           try
           {
+            RCLCPP_INFO(this->get_logger(), "Service request received");
             callback(header, req, resp);
+            RCLCPP_INFO(this->get_logger(), "Service request completed");
           }
           catch (const std::exception &e)
           {

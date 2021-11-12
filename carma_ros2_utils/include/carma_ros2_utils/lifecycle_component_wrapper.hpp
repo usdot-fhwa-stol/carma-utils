@@ -12,12 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO add modification notice to this file
+/**
+ * Modifications copyright (C) 2021 Leidos
+ * - Converted into Lifecycle Component Wrapper
+ * 
+ */ 
+
 // TODO Cleanup comments and namespace
 
 /** \mainpage rclcpp_components: Package containing tools for dynamically loadable components.
  *
- * - LifecycleComponentManager: Node to manage components. It has the services to load, unload and list
+ * - LifecycleComponentWrapper: Node to manage components. It has the services to load, unload and list
  *   current components.
  *   - rclcpp_components/lifecycle_component_wrapper.hpp) 
  * - Node factory: The NodeFactory interface is used by the class loader to instantiate components.
@@ -41,38 +46,42 @@
  *    The passed library can contain multiple nodes each registered via macro.
  */
 
-#ifndef RCLCPP_COMPONENTS__LIFECYCLE_COMPONENT_WRAPPER_HPP__
-#define RCLCPP_COMPONENTS__LIFECYCLE_COMPONENT_WRAPPER_HPP__
+#ifndef CARMA_ROS2_UTILS__LIFECYCLE_COMPONENT_WRAPPER_HPP__
+#define CARMA_ROS2_UTILS__LIFECYCLE_COMPONENT_WRAPPER_HPP__
 
 #include <map>
+#include <unordered_map>
+#include <tuple>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
+#include <boost/optional.hpp>
 
-#include "composition_interfaces/srv/load_node.hpp"
-#include "composition_interfaces/srv/unload_node.hpp"
-#include "composition_interfaces/srv/list_nodes.hpp"
+#include <composition_interfaces/srv/load_node.hpp>
+#include <composition_interfaces/srv/unload_node.hpp>
+#include <composition_interfaces/srv/list_nodes.hpp>
 
-#include "rclcpp/executor.hpp"
-#include "rclcpp/node_options.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include <carma_ros2_utils/carma_lifecycle_node.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/executor.hpp>
+#include <rclcpp/node_options.hpp>
 #include <rclcpp_components/component_manager.hpp>
 
-#include "rclcpp_components/node_factory.hpp"
-#include "rclcpp_components/visibility_control.hpp"
+#include <rclcpp_components/node_factory.hpp>
+#include <rclcpp_components/visibility_control.hpp>
+
+#include "carma_ros2_utils/carma_lifecycle_node.hpp"
 
 namespace class_loader
 {
 class ClassLoader;
 }  // namespace class_loader
 
-namespace rclcpp_components
+namespace carma_ros2_utils
 {
 
-/// LifecycleComponentManager handles the services to load, unload, and get the list of loaded components.
-class LifecycleComponentManager : public carma_ros2_utils::CarmaLifecycleNode
+/// LifecycleComponentWrapper handles the services to load, unload, and get the list of loaded components.
+class LifecycleComponentWrapper : public carma_ros2_utils::CarmaLifecycleNode
 {
 public:
   using LoadNode = composition_interfaces::srv::LoadNode;
@@ -90,20 +99,28 @@ public:
    * Initializes the component manager. It creates the services: load node, unload node
    * and list nodes.
    *
-   * \param executor the executor which will spin the node.
-   * \param node_name the name of the node that the data originates from.
    * \param node_options additional options to control creation of the node.
    */
   RCLCPP_COMPONENTS_PUBLIC
-  LifecycleComponentManager(
-    std::weak_ptr<rclcpp::Executor> executor,
-    std::string node_name = "LifecycleComponentManager",
+  LifecycleComponentWrapper(
     const rclcpp::NodeOptions & node_options = rclcpp::NodeOptions()
     .start_parameter_services(false)
     .start_parameter_event_publisher(false));
 
+
+  /**
+   * \brief Method to initialize the component management services.
+   *        NOTE: It is critical to call this method before .spin()
+   * 
+   * The reason this method is not part of the constructor is to conform to the CarmaLifecycleNode API.
+   * 
+   * \param executor the executor which will spin the node.
+   */ 
   RCLCPP_COMPONENTS_PUBLIC
-  virtual ~LifecycleComponentManager();
+  void initialize(std::weak_ptr<rclcpp::Executor> executor);
+
+  RCLCPP_COMPONENTS_PUBLIC
+  virtual ~LifecycleComponentWrapper();
 
   /// Return a list of valid loadable components in a given package.
   /**
@@ -172,9 +189,9 @@ protected:
   OnLoadNode(
     const std::shared_ptr<rmw_request_id_t> request_header,
     const std::shared_ptr<LoadNode::Request> request,
-    std::shared_ptr<LoadNode::Response> response, boost::optional<uint64_t> internal_id = boost::none);
+    std::shared_ptr<LoadNode::Response> response, boost::optional<uint64_t> internal_id = boost::none)
   {
-    on_load_node(request_header, request, response, internal_call);
+    on_load_node(request_header, request, response, internal_id);
   }
 
   /// Service callback to unload a node in the component
@@ -246,6 +263,14 @@ protected:
    */ 
   bool unload_all_nodes();
 
+  ///// Overrides /////
+  // handle_on_configure is not used
+  carma_ros2_utils::CallbackReturn handle_on_activate(const rclcpp_lifecycle::State &prev_state) override;
+  carma_ros2_utils::CallbackReturn handle_on_deactivate(const rclcpp_lifecycle::State &prev_state) override;
+  carma_ros2_utils::CallbackReturn handle_on_cleanup(const rclcpp_lifecycle::State &prev_state) override;
+  carma_ros2_utils::CallbackReturn handle_on_error(const rclcpp_lifecycle::State &prev_state, const std::string &exception_string) override;
+  carma_ros2_utils::CallbackReturn handle_on_shutdown(const rclcpp_lifecycle::State &prev_state) override;
+
   ///// END CARMA CHANGE /////
 
 private:
@@ -262,11 +287,11 @@ private:
   ///// CARMA CHANGE /////
 
   //! A record of all the node load requests organized by their unique id
-  std::unordered_map<uint64_t, std::pair<rmw_request_id_t, LoadNode>> load_node_requests_;
+  std::unordered_map<uint64_t, std::pair<rmw_request_id_t, LoadNode::Request>> load_node_requests_;
 
   ///// END CARMA CHANGE /////
 };
 
-}  // namespace rclcpp_components
+}  // namespace carma_ros2_utils
 
-#endif  // RCLCPP_COMPONENTS__LIFECYCLE_COMPONENT_WRAPPER_HPP__
+#endif  // CARMA_ROS2_UTILS__LIFECYCLE_COMPONENT_WRAPPER_HPP__

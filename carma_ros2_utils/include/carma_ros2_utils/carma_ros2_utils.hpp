@@ -21,3 +21,4 @@
 
 #include "carma_lifecycle_node.hpp"
 #include "visibility_control.hpp"
+#include "lifecycle_component_wrapper.hpp"
