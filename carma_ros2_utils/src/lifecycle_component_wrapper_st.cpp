@@ -30,9 +30,7 @@ int main(int argc, char * argv[])
   rclcpp::init(argc, argv);
   auto exec = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
   auto node = std::make_shared<carma_ros2_utils::LifecycleComponentWrapper>();
-  RCLCPP_INFO(node->get_logger(), "Constructed");
   node->initialize(exec);
-  RCLCPP_INFO(node->get_logger(), "Initialized");
   exec->add_node(node->get_node_base_interface());
   exec->spin();
 }
