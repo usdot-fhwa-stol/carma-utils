@@ -140,9 +140,7 @@ namespace carma_ros2_utils
         {
           try
           {
-            RCLCPP_INFO(this->get_logger(), "Service request received");
             callback(header, req, resp);
-            RCLCPP_INFO(this->get_logger(), "Service request completed");
           }
           catch (const std::exception &e)
           {
