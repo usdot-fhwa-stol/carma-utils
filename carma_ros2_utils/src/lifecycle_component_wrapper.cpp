@@ -378,14 +378,18 @@ bool LifecycleComponentWrapper::unload_all_nodes() {
   bool success = true;
 
   // On deactivation we will unload all nodes that are currently tracked
-  for (auto & wrapper : node_wrappers_) {
+  // We use an iterator loop here because we are modifying the node_wrappers_ map while iterating via the on_unload_node callback
+  for (auto it = node_wrappers_.cbegin(), next_it = it; it != node_wrappers_.cend(); it = next_it)
+  {
+    ++next_it;
 
-    std::shared_ptr<UnloadNode::Request> request;
-    request->unique_id = wrapper.first;
+    auto request = std::make_shared<UnloadNode::Request>();
+    request->unique_id = it->first;
 
     auto response = std::make_shared<UnloadNode::Response>();
       
 
+    // NOTE: This call will erase "it" so do not access it beyond this line
     on_unload_node(std::make_shared<rmw_request_id_t>(),
                   request, response); // Unload our node
 
