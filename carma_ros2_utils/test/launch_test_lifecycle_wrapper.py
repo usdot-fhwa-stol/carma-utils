@@ -52,7 +52,7 @@ def generate_test_description():
                 ComposableNode(
                     package='carma_ros2_utils',
                     plugin='carma_ros2_utils_testing::MinimalNode',
-                    name='talker'
+                    name='minimal_node'
                 ),
             ]
         ),
@@ -71,33 +71,38 @@ class TestRuntime(unittest.TestCase):
     def test_nominal_lifecycle(self, proc_output):
         
         # Check that that the wrapper has started and did not load any nodes on startup
-        proc_output.assertWaitFor("Loaded node '' in container '/wrapper_container'", process='wrapper_container', strict_proc_matching=True,timeout=5)
+        proc_output.assertWaitFor("Got request to load node: minimal_node but we are not in the active state, caching for later lifecycle based activation.", process='wrapper_container', strict_proc_matching=True,timeout=5)
         
 
         d = dict(os.environ)   # Make a copy of the current environment
         completed_proc = subprocess.run(['ros2', 'lifecycle', 'set', '/wrapper_container', 'configure'], env=d, capture_output=True, timeout=8)
 
-        self.assertEqual(completed_proc.stdout, 'Transitioning successful')
+        output_str = completed_proc.stdout.decode()
+        self.assertTrue( output_str == 'Transitioning successful\n') # For whatever reason == must be specified manually instead of calling assertEquals which does not play well with the decoded string
 
         completed_proc = subprocess.run(['ros2', 'lifecycle', 'set', '/wrapper_container', 'activate'], env=d, capture_output=True, timeout=8)
 
-        self.assertEqual(completed_proc.stdout, 'Transitioning successful')
+        output_str = completed_proc.stdout.decode()
+        self.assertTrue(output_str == 'Transitioning successful\n')
 
-        proc_output.assertWaitFor("Load Library: /workspaces/carma_ws/install/carma_ros2_lifecycle/lib/test_minimal_node.so", process='wrapper_container', strict_proc_matching=True,timeout=5)
+        proc_output.assertWaitFor("libtest_minimal_node.so", process='wrapper_container', strict_proc_matching=True,timeout=5)
         proc_output.assertWaitFor("Found class: rclcpp_components::NodeFactoryTemplate<carma_ros2_utils_testing::MinimalNode>", process='wrapper_container', strict_proc_matching=True,timeout=5)
         proc_output.assertWaitFor("Instantiate class: rclcpp_components::NodeFactoryTemplate<carma_ros2_utils_testing::MinimalNode>", process='wrapper_container', strict_proc_matching=True,timeout=5)
         
         completed_proc = subprocess.run(['ros2', 'lifecycle', 'set', '/wrapper_container', 'deactivate'], env=d, capture_output=True, timeout=8)
 
-        self.assertEqual(completed_proc.stdout, 'Transitioning successful')
+        output_str = completed_proc.stdout.decode()
+        self.assertTrue(output_str == 'Transitioning successful\n')
 
         completed_proc = subprocess.run(['ros2', 'lifecycle', 'set', '/wrapper_container', 'shutdown'], env=d, capture_output=True, timeout=8)
 
-        self.assertEqual(completed_proc.stdout, 'Transitioning successful')
+        output_str = completed_proc.stdout.decode()
+        self.assertTrue(output_str == 'Transitioning successful\n')
 
         completed_proc = subprocess.run(['ros2', 'lifecycle', 'get', '/wrapper_container'], env=d, capture_output=True, timeout=8)
 
-        self.assertEqual(completed_proc.stdout, 'finalized [4]') # Verify nodes are shutdown
+        output_str = completed_proc.stdout.decode()
+        self.assertTrue(output_str == 'finalized [4]\n')  # Verify nodes are shutdown
 
 
 # All tests in this class will run on shutdown

@@ -32,8 +32,6 @@ ament_target_dependencies(test_minimal_node
   rclcpp_components
 )
 
-rclcpp_components_register_nodes(test_minimal_node "carma_ros2_utils_testing::MinimalNode")
-
 add_launch_test(
   launch_test_lifecycle_wrapper.py
 )
@@ -81,8 +79,12 @@ ament_target_dependencies(test_carma_lifecycle_gtest
 install(
   TARGETS test_lifecycle_gtest test_carma_lifecycle_node test_carma_lifecycle_gtest test_minimal_node
   # EXPORT should not be needed for unit tests
-  LIBRARY DESTINATION lib/${PROJECT_NAME} # In Ament, Executables are installed to lib/${PROJECT_NAME} not bin 
+  LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib/${PROJECT_NAME}
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  RUNTIME DESTINATION lib/${PROJECT_NAME} # In Ament, Executables are installed to lib/${PROJECT_NAME} not bin 
   INCLUDES DESTINATION include
 )
+
+# This is a bit of a hack to allow for rclcpp_component registration in this subdirectory 
+# Based off sloretz's answer from ROS Answers here https://answers.ros.org/question/361289/ros2-components-registration-from-subdirectory-cmakelists-file/
+#set(AMENT_EXTENSIONS_ament_package ${AMENT_EXTENSIONS_ament_package} PARENT_SCOPE)

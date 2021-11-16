@@ -54,6 +54,8 @@ if(BUILD_TESTING)
 
   add_subdirectory(test)
 
+  rclcpp_components_register_nodes(test_minimal_node "carma_ros2_utils_testing::MinimalNode")
+
 endif()
 
 ament_package()
