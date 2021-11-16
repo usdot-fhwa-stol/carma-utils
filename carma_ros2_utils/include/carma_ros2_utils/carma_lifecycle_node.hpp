@@ -1,16 +1,18 @@
-// Copyright 2021 Open Source Robotics Foundation, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * Copyright (C) 2021 LEIDOS.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 #ifndef CARMA_ROS2_UTILS__CARMA_LIFECYCLE_NODE_HPP_
 #define CARMA_ROS2_UTILS__CARMA_LIFECYCLE_NODE_HPP_
@@ -201,6 +203,9 @@ namespace carma_ros2_utils
     /**
      * \brief Override of parent method. See descriptive comments here:
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L463
+     * 
+     * NOTE: The function object passed to this method will be moved using std::move. 
+     *       The user should therefore assume ownership of this function object has been relinquished
      */
     rclcpp_lifecycle::LifecycleNode::OnSetParametersCallbackHandle::SharedPtr
     add_on_set_parameters_callback(
@@ -209,6 +214,9 @@ namespace carma_ros2_utils
     /**
      * \brief Override of parent method. See descriptive comments here:
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L249
+     *
+     * NOTE: The function object passed to this method will be moved using std::move. 
+     *       The user should therefore assume ownership of this function object has been relinquished
      */
     template <typename DurationRepT = int64_t, typename DurationT = std::milli, typename CallbackT>
     std::shared_ptr<rclcpp::TimerBase> // NOTE: TimerBase must be used here to account for the fact that the exception handling lambda will have a different type from the input callback type due to being a possible differnet location in code (member vs non-member method etc.).
@@ -230,6 +238,9 @@ namespace carma_ros2_utils
      * 
      *  \return A pointer to an intialized timer. The timer will be cancled when this node transitions through a deactivate/cleanup sequence
      *
+     * NOTE: The function object passed to this method will be moved using std::move. 
+     *       The user should therefore assume ownership of this function object has been relinquished
+     * 
      */
     template <typename CallbackT>
     typename rclcpp::TimerBase::SharedPtr
@@ -244,6 +255,9 @@ namespace carma_ros2_utils
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L271
      *  
      *  NOTE: In foxy the LifecycleNode api is slightly out of sync with the node api so there is not a create_timer method there. We use rclcpp directly here
+     *
+     * NOTE: The function object passed to this method will be moved using std::move. 
+     *       The user should therefore assume ownership of this function object has been relinquished
      */
     template <typename ServiceT, typename CallbackT>
     typename rclcpp::Service<ServiceT>::SharedPtr
