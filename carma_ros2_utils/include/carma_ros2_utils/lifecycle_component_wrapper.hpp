@@ -18,8 +18,6 @@
  * 
  */ 
 
-// TODO Cleanup comments and namespace
-
 /** \mainpage rclcpp_components: Package containing tools for dynamically loadable components.
  *
  * - LifecycleComponentWrapper: Node to manage components. It has the services to load, unload and list
@@ -29,6 +27,8 @@
  *   - rclcpp_components/node_factory.hpp)
  *   - It allows for classes not derived from `rclcpp::Node` to be used as components.
  *   - It allows derived constructors to be called when components are loaded.
+ *   - NOTE: CARMA Change The nodes will be loaded on activation of this lifecycle node and unloaded on deactivation.
+ *           This means that this component wrapper can be used to give non-lifecycle nodes a minimal form of lifecycle management.
  *
  * Some useful abstractions and utilities:
  * - [RCLCPP_COMPONENTS_REGISTER_NODE: Register a component that can be dynamically loaded
