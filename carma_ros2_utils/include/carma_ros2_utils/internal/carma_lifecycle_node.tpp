@@ -171,6 +171,83 @@ namespace carma_ros2_utils
         group); // Our override specifies a different default callback group
   }
 
+  template<typename T>
+  boost::optional<std::string> CarmaLifecycleNode::update_params(const std::unordered_map<std::string, std::reference_wrapper<T>>& update_targets,
+                   const std::vector< rclcpp::Parameter > & new_params) {
+
+    for (auto param : new_params) {
+
+      if (update_targets.find(param.get_name()) == update_targets.end()) {
+        // We are not interested in this parameter
+        continue;
+      }
+
+      auto& target = param.at(param.get_name());
+
+      switch (param.get_type())
+      {
+        case rclcpp::ParameterType::PARAMETER_BOOL:
+          if (std::is_same_v<T, bool>) {
+            target = param.get_value();
+          }
+          continue;
+        
+        case rclcpp::ParameterType::PARAMETER_INTEGER:
+          if (std::is_same_v<T, int>) {
+            target = param.get_value();
+          }
+          continue;
+
+        case rclcpp::ParameterType::PARAMETER_DOUBLE:
+          if (std::is_same_v<T, double>) {
+            target = param.get_value();
+          }
+          continue;
+
+        case rclcpp::ParameterType::PARAMETER_STRING:
+          if (std::is_same_v<T, std::string>) {
+            target = param.get_value();
+          }
+          continue;
+
+        case rclcpp::ParameterType::PARAMETER_BYTE_ARRAY:
+          if (std::is_same_v<T, std::vector<uint8_t>>) {
+            target = param.get_value();
+          }
+          continue;
+
+        case rclcpp::ParameterType::PARAMETER_BOOL_ARRAY:
+          if (std::is_same_v<T, std::vector<bool>>) {
+            target = param.get_value();
+          }
+          continue;
+
+        case rclcpp::ParameterType::PARAMETER_INTEGER_ARRAY:
+          if (std::is_same_v<T, std::vector<int>>) {
+            target = param.get_value();
+          }
+          continue;
+
+        case rclcpp::ParameterType::PARAMETER_STRING_ARRAY:
+          if (std::is_same_v<T, std::vector<std::string>>) {
+            target = param.get_value();
+          }
+          continue;
+      
+      default:
+        break;
+      }
+      
+      std::string error = "Cannot update parameter " + param.get_name() + " it has mismatched type " + typeid(T).name() + " and " + param.get_type_name()
+      RCLCPP_ERROR_STREAM(get_logger(), error);
+      
+      return string;
+    }
+
+    return boost::none;
+
+  }
+
 } // namespace carma_ros2_utils
 
 #endif // CARMA_ROS2_UTILS__CARMA_LIFECYCLE_NODE_HPP_"
