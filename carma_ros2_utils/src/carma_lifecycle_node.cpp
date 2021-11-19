@@ -238,11 +238,11 @@ namespace carma_ros2_utils
   {
 
     auto handle = rclcpp_lifecycle::LifecycleNode::add_on_set_parameters_callback(
-        [&callback, this](auto params)
+        [callback = std::move(callback), this](auto params)
         {
           try
           {
-
+            
             return callback(params);
           }
           catch (const std::exception &e)
