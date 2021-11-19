@@ -13,6 +13,7 @@
   <build_depend>carma_cmake_common</build_depend>
 
   <build_depend>rcpputils</build_depend>
+  <build_depend>ament_cmake_auto</build_depend>
 
   <depend>launch</depend>
   <depend>lifecycle_msgs</depend>
@@ -24,6 +25,7 @@
   <depend>ament_index_cpp</depend>
   <depend>class_loader</depend>
   <depend>composition_interfaces</depend>
+  <depend>Boost</depend>
 
 
   <exec_depend>libboost-program-options</exec_depend>

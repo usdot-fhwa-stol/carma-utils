@@ -5,50 +5,46 @@ find_package(carma_cmake_common REQUIRED)
 carma_check_ros_version(2)
 carma_package()
 
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(lifecycle_msgs REQUIRED)
-find_package(rclcpp_lifecycle REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(rcutils REQUIRED)
-find_package(carma_msgs REQUIRED)
-find_package(ament_index_cpp REQUIRED)
-find_package(class_loader REQUIRED)
-find_package(composition_interfaces REQUIRED)
-find_package(rcpputils REQUIRED)
-find_package(Boost REQUIRED)
+find_package(ament_cmake_auto REQUIRED)
+ament_auto_find_build_dependencies()
 
-set(dependencies
-    carma_msgs
-    lifecycle_msgs
-    rclcpp
-    rclcpp_lifecycle
-    rcutils
-    rclcpp_components
-    ament_index_cpp
-    class_loader
-    composition_interfaces
-    rcpputils
-    Boost
+
+# Includes
+include_directories(
+  include
 )
 
-carma_define_ament_library(${PROJECT_NAME} "${dependencies}" src/carma_lifecycle_node.cpp)
+# Build
+ament_auto_add_library(${PROJECT_NAME} SHARED
+  src/carma_lifecycle_node.cpp
+)
 
-set(lifecycle_wrapper_dependencies
-  ${dependencies}
+ament_auto_add_library(lifecycle_component_wrapper SHARED
+  src/lifecycle_component_wrapper.cpp
+)
+
+ament_auto_add_executable(lifecycle_component_wrapper_st
+  src/lifecycle_component_wrapper_st.cpp
+)
+
+ament_auto_add_executable(lifecycle_component_wrapper_mt
+  src/lifecycle_component_wrapper_mt.cpp
+)
+
+# Link local targets
+target_link_libraries(lifecycle_component_wrapper
   ${PROJECT_NAME}
 )
 
-carma_define_ament_library(lifecycle_component_wrapper "${lifecycle_wrapper_dependencies}" src/lifecycle_component_wrapper.cpp)
-
-set(wrapper_node_dependencies
-  ${lifecycle_wrapper_dependencies}
+target_link_libraries(lifecycle_component_wrapper_st
   lifecycle_component_wrapper
+  ${PROJECT_NAME}
 )
 
-carma_define_ament_executable(lifecycle_component_wrapper_st "${wrapper_node_dependencies}" src/lifecycle_component_wrapper_st.cpp)
-
-carma_define_ament_executable(lifecycle_component_wrapper_mt "${wrapper_node_dependencies}" src/lifecycle_component_wrapper_mt.cpp)
+target_link_libraries(lifecycle_component_wrapper_mt
+  lifecycle_component_wrapper
+  ${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
 
@@ -58,4 +54,4 @@ if(BUILD_TESTING)
 
 endif()
 
-ament_package()
+ament_auto_package()

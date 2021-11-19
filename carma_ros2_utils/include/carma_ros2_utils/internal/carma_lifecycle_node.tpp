@@ -182,55 +182,71 @@ namespace carma_ros2_utils
         continue;
       }
 
-      auto& target = param.at(param.get_name());
+      T& target = update_targets.at(param.get_name());
 
       switch (param.get_type())
       {
         case rclcpp::ParameterType::PARAMETER_BOOL:
           if (std::is_same_v<T, bool>) {
-            target = param.get_value();
+            T temp = target;
+            target = param.get_value<T>();
+            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
           }
           continue;
         
         case rclcpp::ParameterType::PARAMETER_INTEGER:
           if (std::is_same_v<T, int>) {
-            target = param.get_value();
+            T temp = target;
+            target = param.get_value<T>();
+            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
           }
           continue;
 
         case rclcpp::ParameterType::PARAMETER_DOUBLE:
           if (std::is_same_v<T, double>) {
-            target = param.get_value();
+            T temp = target;
+            target = param.get_value<T>();
+            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
           }
           continue;
 
         case rclcpp::ParameterType::PARAMETER_STRING:
           if (std::is_same_v<T, std::string>) {
-            target = param.get_value();
+            T temp = target;
+            target = param.get_value<T>();
+            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
           }
           continue;
 
         case rclcpp::ParameterType::PARAMETER_BYTE_ARRAY:
           if (std::is_same_v<T, std::vector<uint8_t>>) {
-            target = param.get_value();
+            T temp = target;
+            target = param.get_value<T>();
+            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
           }
           continue;
 
         case rclcpp::ParameterType::PARAMETER_BOOL_ARRAY:
           if (std::is_same_v<T, std::vector<bool>>) {
-            target = param.get_value();
+            T temp = target;
+            target = param.get_value<T>();
+            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
           }
           continue;
 
         case rclcpp::ParameterType::PARAMETER_INTEGER_ARRAY:
           if (std::is_same_v<T, std::vector<int>>) {
-            target = param.get_value();
+            T temp = target;
+            target = param.get_value<T>();
+            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
           }
           continue;
 
         case rclcpp::ParameterType::PARAMETER_STRING_ARRAY:
           if (std::is_same_v<T, std::vector<std::string>>) {
-            target = param.get_value();
+            T temp = target;
+            target = param.get_value<T>();
+            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
           }
           continue;
       
@@ -238,10 +254,10 @@ namespace carma_ros2_utils
         break;
       }
       
-      std::string error = "Cannot update parameter " + param.get_name() + " it has mismatched type " + typeid(T).name() + " and " + param.get_type_name()
+      std::string error = "Cannot update parameter " + param.get_name() + " it has mismatched type " + typeid(T).name() + " and " + param.get_type_name();
       RCLCPP_ERROR_STREAM(get_logger(), error);
       
-      return string;
+      return error;
     }
 
     return boost::none;
