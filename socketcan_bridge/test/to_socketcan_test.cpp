@@ -100,7 +100,10 @@ TEST(TopicToSocketCANTest, checkCorrectData)
   EXPECT_EQ(received.is_extended, msg.is_extended);
   EXPECT_EQ(received.is_rtr, msg.is_rtr);
   EXPECT_EQ(received.is_error, msg.is_error);
-  EXPECT_EQ(received.data, msg.data);
+  ASSERT_EQ(received.data.size(), msg.data.size());
+  for (size_t i = 0; i < msg.data.size(); i++) {
+    EXPECT_EQ(received.data[i], msg.data[i]);
+  }
 }
 
 TEST(TopicToSocketCANTest, checkInvalidFrameHandling)

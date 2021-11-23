@@ -95,7 +95,10 @@ TEST(SocketCANToTopicTest, checkCorrectData)
   EXPECT_EQ(received.is_extended, f.is_extended);
   EXPECT_EQ(received.is_rtr, f.is_rtr);
   EXPECT_EQ(received.is_error, f.is_error);
-  EXPECT_EQ(received.data, f.data);
+  ASSERT_EQ(received.data.size(), f.data.size());
+  for (size_t i = 0; i < f.data.size(); i++) {
+    EXPECT_EQ(received.data[i], f.data[i]);
+  }
 }
 
 TEST(SocketCANToTopicTest, checkInvalidFrameHandling)
