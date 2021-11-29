@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>bsm_helper</name>
+  <version>0.0.0</version>
+  <description>The bsm_helper package</description>
+  <maintainer email="carma@dot.gov">carma</maintainer>
+  <license>Apache2</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>cav_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_export_depend>cav_msgs</build_export_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <exec_depend>cav_msgs</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+  <export>
+  </export>
+</package>
