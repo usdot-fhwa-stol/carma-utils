@@ -40,3 +40,31 @@ public:
   // For this example there is no reason to override the other transition handlers
 };
 ```
+
+## Lifecycle Component Wrapper
+
+The lifecycle component wrapper provides a mechanism for launch time wrapping of component rclcpp::Node to make them adhere to the ROS2 Lifecycle node state machine in a minimal way. A ROS2 component node can be thought of as having 2 possible overarching states: Loaded and Unloaded This means that they can be conceptually mapped onto the Lifecycle node state machine. Specifically, nodes can be loaded on activation and unloaded on deactivation/error/shutdown. While loading/unloading a node may incur a fair bit of overhead, it has the benefit of ensuring to the user that the non-lifecycle node will not actively interfere with other nodes in the system unless in the ACTIVE state. Under such a system the only new requirement would be a node container capable of enforcing this architecture. This would effectively be an alternative to the component_managers currently available in rclcpp. Then the user could wrap their external nodes with the existing launch commands used for component loading. The LifecycleComponentWrapper class in this package is this alternative component manager. Examples of how to use it are shown below.
+
+### Example
+
+```python
+def generate_launch_description():
+  
+    lifecycle_container = ComposableNodeContainer( # Standard setup for using ROS2 components
+        package='rclcpp_components',
+        name='lifecycle_component_wrapper', 
+        executable='lifecycle_component_wrapper_mt', # Select a multi-threaded (_mt) or single threaded (_st) wrapper lifecycle executable
+        namespace="/",
+        composable_node_descriptions=[
+            ComposableNode( # This non-lifecycle node is now a exposed as a lifecycle node thanks to the wrapper
+                package='cool_pkg',
+                name='regular_node',
+                plugin='cool_pkg_namespace::MyRegularNode',
+            ),
+        ]
+    )
+
+    return LaunchDescription([
+        lifecycle_container,
+    ])
+```

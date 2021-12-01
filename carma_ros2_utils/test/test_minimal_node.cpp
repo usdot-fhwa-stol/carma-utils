@@ -1,4 +1,3 @@
-#pragma once
 /*
  * Copyright (C) 2021 LEIDOS.
  *
@@ -15,10 +14,22 @@
  * the License.
  */
 
-/**
- * Convienance file for including carma_ros2_utils headers. Does not include testing headers.
- */ 
+#include "rclcpp/rclcpp.hpp"
 
-#include "carma_lifecycle_node.hpp"
-#include "visibility_control.hpp"
-#include "lifecycle_component_wrapper.hpp"
+namespace carma_ros2_utils_testing {
+
+// No-Op node for testing the lifecycle_component_wrapper
+class MinimalNode : public rclcpp::Node
+{
+    public:
+        MinimalNode(const rclcpp::NodeOptions&)
+            : Node("minimal_node") {}
+
+};
+
+} // carma_ros2_utils_testing
+
+#include "rclcpp_components/register_node_macro.hpp"
+
+// Register the component with class_loader
+RCLCPP_COMPONENTS_REGISTER_NODE(carma_ros2_utils_testing::MinimalNode)
