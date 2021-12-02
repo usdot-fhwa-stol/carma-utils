@@ -95,10 +95,11 @@ install(DIRECTORY include/${PROJECT_NAME}/
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_bsm_helper.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
+## Add gtest based cpp test target and link libraries
+catkin_add_gmock(${PROJECT_NAME}-test 
+  test/main.cpp 
+  test/test_bsm_helper.cpp
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test # Add test directory as working directory for unit tests
+)
+target_link_libraries(${PROJECT_NAME}-test bsm_helper ${catkin_LIBRARIES})
 
-## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)

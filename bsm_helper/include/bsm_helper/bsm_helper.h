@@ -7,7 +7,7 @@
 #include <cav_msgs/BSMCoreData.h>
 #include <boost/optional.hpp>
 
-namespace ros {
+namespace BSMHelper {
 
     class BSMHelper
     {
@@ -19,14 +19,6 @@ namespace ros {
              * @return The converted id in hex string
             */
             static std::string bsmIDtoString(std::vector<uint8_t, std::allocator<uint8_t>> id);
-
-            /**
-             * @brief Converts value from integer to hexadecimal
-             * @param n The number to be converted
-             * @return The converted number as a hex string
-            */
-           static std::string decTohex(int n);
-
 
 
     };
