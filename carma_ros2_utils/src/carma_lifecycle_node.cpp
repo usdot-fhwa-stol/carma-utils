@@ -259,12 +259,13 @@ namespace carma_ros2_utils
   CarmaLifecycleNode::add_on_set_parameters_callback(
       rclcpp_lifecycle::LifecycleNode::OnParametersSetCallbackType callback)
   {
-    return rclcpp_lifecycle::LifecycleNode::add_on_set_parameters_callback(
-        [&callback, this](auto params)
+
+    auto handle = rclcpp_lifecycle::LifecycleNode::add_on_set_parameters_callback(
+        [callback = std::move(callback), this](auto params)
         {
           try
           {
-
+            
             return callback(params);
           }
           catch (const std::exception &e)
@@ -279,6 +280,10 @@ namespace carma_ros2_utils
             return msg;
           }
         });
+
+    param_callback_handles_.push_back(handle);
+    
+    return handle;
   }
 
   CallbackReturn CarmaLifecycleNode::handle_on_configure(const rclcpp_lifecycle::State &)

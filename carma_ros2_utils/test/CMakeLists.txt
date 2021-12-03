@@ -62,6 +62,7 @@ ament_add_test(test_lifecycle
 
 ament_add_gtest(test_carma_lifecycle_gtest
   test_carma_lifecycle_exceptions.cpp
+  test_carma_lifecycle_helpers.cpp
 )
 
 target_include_directories(test_carma_lifecycle_gtest
