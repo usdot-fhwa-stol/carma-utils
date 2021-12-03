@@ -77,7 +77,7 @@ public:
 
     // Initial declaration and load of the parameters
     my_param_ = this->declare_parameter<int>("my_param", my_param_);
-    my_param_ = this->declare_parameter<int>("my_private_param", my_private_param_);
+    my_private_param_ = this->declare_parameter<int>("my_private_param", my_private_param_);
 
     // Create parameter callbacks for runtime updates
     add_on_set_parameters_callback(
