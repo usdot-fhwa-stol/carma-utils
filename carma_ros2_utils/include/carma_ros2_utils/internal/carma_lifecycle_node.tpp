@@ -171,8 +171,69 @@ namespace carma_ros2_utils
         group); // Our override specifies a different default callback group
   }
 
+  /**
+   * \brief Internal helper method to compare a ParameterType with a template argument
+   * \tparam T The compiled type to compare
+   * \param type The ROS ParameterType to compare
+   * 
+   * \return true if the ParameterType matches the template argument. False otherwise.
+   */ 
+  template<typename T>
+  bool same_param_type(const rclcpp::ParameterType& type)
+  {
+    switch (type)
+    {
+      case rclcpp::ParameterType::PARAMETER_BOOL:
+        return std::is_same_v<T, bool>;
+
+      case rclcpp::ParameterType::PARAMETER_INTEGER:
+        return std::is_same_v<T, int>;
+
+      case rclcpp::ParameterType::PARAMETER_DOUBLE:
+        return std::is_same_v<T, double>;
+
+      case rclcpp::ParameterType::PARAMETER_STRING:
+        return std::is_same_v<T, std::string>;
+
+      case rclcpp::ParameterType::PARAMETER_BYTE_ARRAY:
+        return std::is_same_v<T, std::vector<uint8_t>>;
+
+      case rclcpp::ParameterType::PARAMETER_BOOL_ARRAY:
+        return std::is_same_v<T, std::vector<bool>>;
+
+      case rclcpp::ParameterType::PARAMETER_INTEGER_ARRAY:
+        return std::is_same_v<T, std::vector<int>>;
+
+      case rclcpp::ParameterType::PARAMETER_STRING_ARRAY:
+        return std::is_same_v<T, std::vector<std::string>>;
+    
+      default:
+        return false;
+    }
+  }
+
   template<typename T>
   boost::optional<std::string> CarmaLifecycleNode::update_params(const std::unordered_map<std::string, std::reference_wrapper<T>>& update_targets,
+                   const std::vector< rclcpp::Parameter > & new_params) 
+  {
+    std::unordered_map<std::string, std::function<T(T)>> func_map;
+    func_map.reserve(update_targets.size());
+
+    // Create setter methods for all reference parameters
+    for (auto& pair : update_targets) {
+      func_map[pair.first] = [&pair](T t) { 
+        
+        T temp = pair.second;
+        pair.second.get() = t; // Assign to the reference
+        return temp; 
+
+      };
+    }
+    return update_params<T>(func_map, new_params);
+  }
+
+  template<typename T>
+  boost::optional<std::string> CarmaLifecycleNode::update_params(const std::unordered_map<std::string, std::function<T(T)>>& update_targets,
                    const std::vector< rclcpp::Parameter > & new_params) {
 
     for (auto param : new_params) {
@@ -182,82 +243,22 @@ namespace carma_ros2_utils
         continue;
       }
 
-      T& target = update_targets.at(param.get_name());
+      // Verify the parameter being set has the same type as the target
+      if (!same_param_type<T>(param.get_type())) {
 
-      switch (param.get_type())
-      {
-        case rclcpp::ParameterType::PARAMETER_BOOL:
-          if (std::is_same_v<T, bool>) {
-            T temp = target;
-            target = param.get_value<T>();
-            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
-          }
-          continue;
-        
-        case rclcpp::ParameterType::PARAMETER_INTEGER:
-          if (std::is_same_v<T, int>) {
-            T temp = target;
-            target = param.get_value<T>();
-            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
-          }
-          continue;
-
-        case rclcpp::ParameterType::PARAMETER_DOUBLE:
-          if (std::is_same_v<T, double>) {
-            T temp = target;
-            target = param.get_value<T>();
-            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
-          }
-          continue;
-
-        case rclcpp::ParameterType::PARAMETER_STRING:
-          if (std::is_same_v<T, std::string>) {
-            T temp = target;
-            target = param.get_value<T>();
-            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
-          }
-          continue;
-
-        case rclcpp::ParameterType::PARAMETER_BYTE_ARRAY:
-          if (std::is_same_v<T, std::vector<uint8_t>>) {
-            T temp = target;
-            target = param.get_value<T>();
-            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
-          }
-          continue;
-
-        case rclcpp::ParameterType::PARAMETER_BOOL_ARRAY:
-          if (std::is_same_v<T, std::vector<bool>>) {
-            T temp = target;
-            target = param.get_value<T>();
-            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
-          }
-          continue;
-
-        case rclcpp::ParameterType::PARAMETER_INTEGER_ARRAY:
-          if (std::is_same_v<T, std::vector<int>>) {
-            T temp = target;
-            target = param.get_value<T>();
-            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
-          }
-          continue;
-
-        case rclcpp::ParameterType::PARAMETER_STRING_ARRAY:
-          if (std::is_same_v<T, std::vector<std::string>>) {
-            T temp = target;
-            target = param.get_value<T>();
-            RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << temp << " to " << target);
-          }
-          continue;
+        std::string error = "Cannot update parameter " + param.get_name() + " it has mismatched type " + typeid(T).name() + " and " + param.get_type_name();
+        RCLCPP_ERROR_STREAM(get_logger(), error);
       
-      default:
-        break;
+        return error;
       }
-      
-      std::string error = "Cannot update parameter " + param.get_name() + " it has mismatched type " + typeid(T).name() + " and " + param.get_type_name();
-      RCLCPP_ERROR_STREAM(get_logger(), error);
-      
-      return error;
+
+      // Get and call the update function for the current parameter
+      auto update_func = update_targets.at(param.get_name());
+
+      T new_val = param.get_value<T>();
+      T old = update_func(new_val);
+      RCLCPP_INFO_STREAM(get_logger(), "Updated parameter " << param.get_name() << " from " << old << " to " << new_val);
+
     }
 
     return boost::none;

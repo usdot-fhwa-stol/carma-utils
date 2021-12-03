@@ -294,9 +294,40 @@ namespace carma_ros2_utils
         const rmw_qos_profile_t & qos_profile = rmw_qos_profile_services_default,
         rclcpp::CallbackGroup::SharedPtr group = nullptr);
 
-    // TODO comments
+    /**
+     * \brief Helper method for setting parameters based on the input to a parameter callback as used by add_on_set_parameters_callback()
+     *        This method will take a map of parameter name and the parameter variable (passed as reference) and set the parameter.
+     * 
+     * NOTE: This method is templated and should be called once for each parameter type which needs to be set.
+     * 
+     * \tparam T The type of the parameter to set. Must be one of the ROS supported parameter types. If not then this method will return an error.
+     * \param update_targets A map of parameter names and the parameter variable (passed as reference) to set
+     * \param new_params The list of new parameters that provided by the input to a parameter callback. 
+     *                   Parameters not listed in both the update_targets and new_params will be ignored.
+     * 
+     * \return boost::optional<std::string> A string containing the error description if a parameter could not be set. 
+     *         If boost::none then no error occurred
+     */ 
     template<typename T>
     boost::optional<std::string> update_params(const std::unordered_map<std::string, std::reference_wrapper<T>>& update_targets,
+                   const std::vector< rclcpp::Parameter > & new_params);
+
+    /**
+     * \brief Helper method for setting parameters based on the input to a parameter callback as used by add_on_set_parameters_callback()
+     *        This method will take a map of parameter name and a setter function which will set the named parameter.
+     * 
+     * NOTE: This method is templated and should be called once for each parameter type which needs to be set.
+     * 
+     * \tparam T The type of the parameter to set. Must be one of the ROS supported parameter types. If not then this method will return an error.
+     * \param update_targets A map of parameter names and a setter function which will set the named parameter. The setter function should return the old value;
+     * \param new_params The list of new parameters that provided by the input to a parameter callback. 
+     *                   Parameters not listed in both the update_targets and new_params will be ignored.
+     * 
+     * \return boost::optional<std::string> A string containing the error description if a parameter could not be set. 
+     *         If boost::none then no error occurred
+     */ 
+    template<typename T>
+    boost::optional<std::string> update_params(const std::unordered_map<std::string, std::function<T(T)>>& update_targets,
                    const std::vector< rclcpp::Parameter > & new_params);
 
   protected:
