@@ -15,7 +15,7 @@ namespace BSMHelper{
 
         std::stringstream int_id(id_test);
 
-        int id_num;
+        unsigned long id_num;
 
         int_id >> id_num;
 
