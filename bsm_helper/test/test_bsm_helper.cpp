@@ -20,6 +20,9 @@ namespace BSMHelper{
         input.push_back(54);
         input.push_back(22);
         input.push_back(19);
+        input.push_back(45);
+        EXPECT_THROW(BSMHelper::bsmIDtoString(input), std::invalid_argument);
+        input.pop_back();
         std::string output = BSMHelper::bsmIDtoString(input);        
         ASSERT_TRUE(output.size() <= 8);
         ASSERT_EQ(output, "1f08e0b" );
