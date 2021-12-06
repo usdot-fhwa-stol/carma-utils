@@ -23,7 +23,15 @@ namespace BSMHelper{
         unsigned long id_num = 0;
         for(size_t i = 0; i < id.size(); i++)
         {
-          id_num = (id_num * pow(10, 2)) + id.at(i) ;
+
+            int x = id.at(i);
+            int digits = 0;
+            while(x != 0)
+            {
+                x/=10;
+                digits++;
+            }
+          id_num = (id_num * pow(10, digits)) + id.at(i);
         }
 
 
