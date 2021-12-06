@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2021 LEIDOS.
+# Copyright (C) 2021 LEIDOS.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -22,7 +22,7 @@ add_compile_options(-std=c++14)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  cav_msgs
+  
   roscpp
 )
 ## System dependencies are found with CMake's conventions
@@ -41,7 +41,7 @@ find_package(Eigen3 REQUIRED)
 catkin_package(
 INCLUDE_DIRS include
   LIBRARIES bsm_helper
-  CATKIN_DEPENDS cav_msgs roscpp
+  CATKIN_DEPENDS  roscpp
   DEPENDS EIGEN3 # Eigen is a special case where is needs to be in caps here but not in find_package
 )
 
