@@ -16,16 +16,17 @@ namespace BSMHelper{
     TEST(BSMHelper_Test, bsmIDToString_Test)
     {
         std::vector<u_int8_t> input;
-        input.push_back(32);
-        input.push_back(54);
-        input.push_back(22);
-        input.push_back(19);
-        input.push_back(45);
+        input.push_back(240);
+        input.push_back(58);
+        input.push_back(214);
+        input.push_back(16);
+
+        input.push_back(45); //Throw test
         EXPECT_THROW(BSMHelper::bsmIDtoString(input), std::invalid_argument);
         input.pop_back();
         std::string output = BSMHelper::bsmIDtoString(input);        
         ASSERT_TRUE(output.size() <= 8);
-        ASSERT_EQ(output, "1f08e0b" );
+        ASSERT_EQ(output, "f03ad610" );
 
     }
 

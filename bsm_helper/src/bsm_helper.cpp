@@ -15,23 +15,19 @@ namespace BSMHelper{
 
     std::string BSMHelper::bsmIDtoString(std::vector<uint8_t, std::allocator<uint8_t>> id)
     {
-        if(id.size() > 4)
+        if(id.size() != 4)
         {
             throw std::invalid_argument("Invalid id value");
         }
 
         unsigned long id_num = 0;
         for(size_t i = 0; i < id.size(); i++)
-        {
+        {     
 
-            int x = id.at(i);
-            int digits = 0;
-            while(x != 0)
-            {
-                x/=10;
-                digits++;
-            }
-          id_num = (id_num * pow(10, digits)) + id.at(i);
+            id_num = (id_num << 8) | id.at(i);
+            std::cout << id_num << std::endl;
+            std::cout<< std::hex << static_cast<int>(id.at(i)) << std::endl;
+
         }
 
 
