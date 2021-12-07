@@ -23,11 +23,7 @@ namespace BSMHelper{
         unsigned long id_num = 0;
         for(size_t i = 0; i < id.size(); i++)
         {     
-
             id_num = (id_num << 8) | id.at(i);
-            std::cout << id_num << std::endl;
-            std::cout<< std::hex << static_cast<int>(id.at(i)) << std::endl;
-
         }
 
 
