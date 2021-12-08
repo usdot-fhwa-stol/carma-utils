@@ -25,6 +25,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <boost/algorithm/string.hpp> // CARMA CHANGE
 
 #include <ament_index_cpp/get_resource.hpp>
 #include <class_loader/class_loader.hpp>
