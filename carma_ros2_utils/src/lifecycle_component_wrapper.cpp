@@ -175,7 +175,7 @@ LifecycleComponentWrapper::create_node_options(const std::shared_ptr<LoadNode::R
       RCLCPP_INFO(get_logger(), "Found log-level argument: %s", extra_argument.get_value<std::string>().c_str());
 
       if (extra_argument.get_type() != rclcpp::ParameterType::PARAMETER_STRING) {
-        throw ComponentManagerException(
+        throw rclcpp_components::ComponentManagerException(
           "Extra component argument 'log-level' must be a string");
       }
 
