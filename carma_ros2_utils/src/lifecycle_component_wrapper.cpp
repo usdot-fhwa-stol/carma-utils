@@ -161,6 +161,32 @@ LifecycleComponentWrapper::create_node_options(const std::shared_ptr<LoadNode::R
     remap_rules.push_back("__ns:=" + request->node_namespace);
   }
 
+  /////
+  // CARMA CHANGE START
+  /////
+  // Here we check if the log-level has been set on this component
+  // If it has, then add it to the argument list.
+  for (const auto & a : request->extra_arguments) {
+    const rclcpp::Parameter extra_argument = rclcpp::Parameter::from_parameter_msg(a);
+
+    if (extra_argument.get_name() == "--log-level") {
+
+      RCLCPP_INFO(get_logger(), "Found log-level argument: %s", extra_argument.get_value<std::string>().c_str());
+
+      if (extra_argument.get_type() != rclcpp::ParameterType::PARAMETER_STRING) {
+        throw ComponentManagerException(
+          "Extra component argument 'log-level' must be a string");
+      }
+
+      remap_rules.push_back("--log-level");
+      remap_rules.push_back(extra_argument.get_value<std::string>());
+    }
+  }
+
+  /////
+  // CARMA CHANGE END
+  /////
+
   auto options = rclcpp::NodeOptions()
     .use_global_arguments(false)
     .parameter_overrides(parameters)
@@ -265,6 +291,41 @@ LifecycleComponentWrapper::on_load_node(
 
       try {
         node_wrappers_[node_id] = factory->create_node_instance(options);
+
+        /////
+        // CARMA CHANGE START
+        /////
+        // Here we check if the log-level argument has been set on this component's options
+        // If the argument has been set then we set the log level for the default logger of this component
+        auto log_level_arg_it = std::find(options.arguments().begin(), options.arguments().end(), "--log-level");
+
+        if (log_level_arg_it != options.arguments().end() && log_level_arg_it + 1 != options.arguments().end()) {
+          // If the log-level has been set on this component then try to set it for the specific logger
+          RCUTILS_LOG_SEVERITY sev = RCUTILS_LOG_SEVERITY_WARN;
+
+          std::advance(log_level_arg_it, 1);
+          std::string log_level = *log_level_arg_it;
+          boost::algorithm::to_lower(log_level);
+
+          // Identify the severity with warning as default
+          if (log_level == "debug") {
+            sev = RCUTILS_LOG_SEVERITY_DEBUG;
+          } else if (log_level == "info") {
+            sev = RCUTILS_LOG_SEVERITY_INFO;
+          } else if (log_level == "error") {
+            sev = RCUTILS_LOG_SEVERITY_ERROR;
+          } else if (log_level == "fatal") {
+            sev = RCUTILS_LOG_SEVERITY_FATAL;
+          } else {
+            sev = RCUTILS_LOG_SEVERITY_WARN;
+          }
+          // Set the log level
+          rcutils_logging_set_logger_level(node_wrappers_[node_id].get_node_base_interface()->get_name(), sev);
+        }
+        /////
+        // CARMA CHANGE END
+        /////
+
       } catch (const std::exception & ex) {
         // In the case that the component constructor throws an exception,
         // rethrow into the following catch block.
