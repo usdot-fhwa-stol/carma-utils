@@ -201,28 +201,7 @@ LifecycleComponentWrapper::create_node_options(const std::shared_ptr<LoadNode::R
       }
       options.use_intra_process_comms(extra_argument.get_value<bool>());
     }
-    /////
-    // CARMA CHANGE START
-    /////
-    // Here we check if the log-level has been set on this component
-    // If it has, then add it to the argument list.
-    // After the loop completes the list will be reapplied to this component's options
-    if (extra_argument.get_name() == "log-level") {
-      if (extra_argument.get_type() != rclcpp::ParameterType::PARAMETER_STRING) {
-        throw rclcpp_components::ComponentManagerException(
-          "Extra component argument 'log-level' must be a string");
-      }
-
-      remap_rules.push_back("--log-level");
-      remap_rules.push_back(extra_argument.get_value<std::string>());
-    }
   }
-
-  options.arguments(remap_rules);
-
-  //////
-  // CARMA CHANGE END
-  //////
 
   return options;
 }
