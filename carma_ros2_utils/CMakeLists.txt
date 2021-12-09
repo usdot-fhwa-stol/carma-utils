@@ -23,12 +23,24 @@ ament_auto_add_library(lifecycle_component_wrapper SHARED
   src/lifecycle_component_wrapper.cpp
 )
 
+ament_auto_add_library(carma_component_manager SHARED
+  src/component_manager.cpp
+)
+
 ament_auto_add_executable(lifecycle_component_wrapper_st
   src/lifecycle_component_wrapper_st.cpp
 )
 
 ament_auto_add_executable(lifecycle_component_wrapper_mt
   src/lifecycle_component_wrapper_mt.cpp
+)
+
+ament_auto_add_executable(carma_component_container
+  src/component_container.cpp
+)
+
+ament_auto_add_executable(carma_component_container_mt
+  src/component_container_mt.cpp
 )
 
 # Link local targets
@@ -44,6 +56,14 @@ target_link_libraries(lifecycle_component_wrapper_st
 target_link_libraries(lifecycle_component_wrapper_mt
   lifecycle_component_wrapper
   ${PROJECT_NAME}
+)
+
+target_link_libraries(carma_component_container
+  carma_component_manager
+)
+
+target_link_libraries(carma_component_container_mt
+  carma_component_manager
 )
 
 if(BUILD_TESTING)

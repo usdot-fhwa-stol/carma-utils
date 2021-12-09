@@ -14,11 +14,11 @@
 
 /**
  * Modifications copyright (C) 2021 Leidos
- * - Converted into Lifecycle Component Wrapper
+ * - Converted into CARMA Component Manager by adding log-level support
  * 
  */ 
 
-#include "carma_ros2_utils/lifecycle_component_wrapper.hpp"
+#include "carma_ros2_utils/component_manager.hpp"
 
 #include <functional>
 #include <memory>
@@ -27,43 +27,44 @@
 #include <vector>
 #include <boost/algorithm/string.hpp> // CARMA CHANGE
 
-#include <ament_index_cpp/get_resource.hpp>
-#include <class_loader/class_loader.hpp>
-#include <rcpputils/filesystem_helper.hpp>
-#include <rcpputils/split.hpp>
+#include "ament_index_cpp/get_resource.hpp"
+#include "class_loader/class_loader.hpp"
+#include "rcpputils/filesystem_helper.hpp"
+#include "rcpputils/split.hpp"
+#include "rcutils/logging.h"
 
 using namespace std::placeholders;
+
+/////
+// CARMA CHANGE START
+using namespace rclcpp_components;
 
 namespace carma_ros2_utils
 {
 
-///// CARMA CHANGE /////
-LifecycleComponentWrapper::LifecycleComponentWrapper(const rclcpp::NodeOptions & node_options)
-: carma_ros2_utils::CarmaLifecycleNode(node_options)
+/////
+// CARMA CHANGE END
+/////
+
+ComponentManager::ComponentManager(
+  std::weak_ptr<rclcpp::Executor> executor,
+  std::string node_name,
+  const rclcpp::NodeOptions & node_options)
+: Node(std::move(node_name), node_options),
+  executor_(executor)
 {
-  // Do nothing
-}
-
-void LifecycleComponentWrapper::initialize(std::weak_ptr<rclcpp::Executor> executor) {
-  executor_ = executor;
-
   loadNode_srv_ = create_service<LoadNode>(
     "~/_container/load_node",
-    std::bind(&LifecycleComponentWrapper::on_load_node, this, _1, _2, _3, boost::none));
-
+    std::bind(&ComponentManager::on_load_node, this, _1, _2, _3));
   unloadNode_srv_ = create_service<UnloadNode>(
     "~/_container/unload_node",
-    std::bind(&LifecycleComponentWrapper::on_unload_node, this, _1, _2, _3));
-
+    std::bind(&ComponentManager::on_unload_node, this, _1, _2, _3));
   listNodes_srv_ = create_service<ListNodes>(
     "~/_container/list_nodes",
-    std::bind(&LifecycleComponentWrapper::on_list_nodes, this, _1, _2, _3));
-
+    std::bind(&ComponentManager::on_list_nodes, this, _1, _2, _3));
 }
 
-////// END CARMA CHANGE /////
-
-LifecycleComponentWrapper::~LifecycleComponentWrapper()
+ComponentManager::~ComponentManager()
 {
   if (node_wrappers_.size()) {
     RCLCPP_DEBUG(get_logger(), "Removing components from executor");
@@ -75,8 +76,8 @@ LifecycleComponentWrapper::~LifecycleComponentWrapper()
   }
 }
 
-std::vector<LifecycleComponentWrapper::ComponentResource>
-LifecycleComponentWrapper::get_component_resources(
+std::vector<ComponentManager::ComponentResource>
+ComponentManager::get_component_resources(
   const std::string & package_name, const std::string & resource_index) const
 {
   std::string content;
@@ -85,7 +86,7 @@ LifecycleComponentWrapper::get_component_resources(
     !ament_index_cpp::get_resource(
       resource_index, package_name, content, &base_path))
   {
-    throw rclcpp_components::ComponentManagerException("Could not find requested resource in ament index");
+    throw ComponentManagerException("Could not find requested resource in ament index");
   }
 
   std::vector<ComponentResource> resources;
@@ -93,7 +94,7 @@ LifecycleComponentWrapper::get_component_resources(
   for (const auto & line : lines) {
     std::vector<std::string> parts = rcpputils::split(line, ';');
     if (parts.size() != 2) {
-      throw rclcpp_components::ComponentManagerException("Invalid resource entry");
+      throw ComponentManagerException("Invalid resource entry");
     }
 
     std::string library_path = parts[1];
@@ -106,7 +107,7 @@ LifecycleComponentWrapper::get_component_resources(
 }
 
 std::shared_ptr<rclcpp_components::NodeFactory>
-LifecycleComponentWrapper::create_component_factory(const ComponentResource & resource)
+ComponentManager::create_component_factory(const ComponentResource & resource)
 {
   std::string library_path = resource.second;
   std::string class_name = resource.first;
@@ -118,9 +119,9 @@ LifecycleComponentWrapper::create_component_factory(const ComponentResource & re
     try {
       loaders_[library_path] = std::make_unique<class_loader::ClassLoader>(library_path);
     } catch (const std::exception & ex) {
-      throw rclcpp_components::ComponentManagerException("Failed to load library: " + std::string(ex.what()));
+      throw ComponentManagerException("Failed to load library: " + std::string(ex.what()));
     } catch (...) {
-      throw rclcpp_components::ComponentManagerException("Failed to load library");
+      throw ComponentManagerException("Failed to load library");
     }
   }
   loader = loaders_[library_path].get();
@@ -137,7 +138,7 @@ LifecycleComponentWrapper::create_component_factory(const ComponentResource & re
 }
 
 rclcpp::NodeOptions
-LifecycleComponentWrapper::create_node_options(const std::shared_ptr<LoadNode::Request> request)
+ComponentManager::create_node_options(const std::shared_ptr<LoadNode::Request> request)
 {
   std::vector<rclcpp::Parameter> parameters;
   for (const auto & p : request->parameters) {
@@ -175,7 +176,7 @@ LifecycleComponentWrapper::create_node_options(const std::shared_ptr<LoadNode::R
       RCLCPP_INFO(get_logger(), "Found log-level argument: %s", extra_argument.get_value<std::string>().c_str());
 
       if (extra_argument.get_type() != rclcpp::ParameterType::PARAMETER_STRING) {
-        throw rclcpp_components::ComponentManagerException(
+        throw ComponentManagerException(
           "Extra component argument 'log-level' must be a string");
       }
 
@@ -197,46 +198,24 @@ LifecycleComponentWrapper::create_node_options(const std::shared_ptr<LoadNode::R
     const rclcpp::Parameter extra_argument = rclcpp::Parameter::from_parameter_msg(a);
     if (extra_argument.get_name() == "use_intra_process_comms") {
       if (extra_argument.get_type() != rclcpp::ParameterType::PARAMETER_BOOL) {
-        throw rclcpp_components::ComponentManagerException(
+        throw ComponentManagerException(
                 "Extra component argument 'use_intra_process_comms' must be a boolean");
       }
       options.use_intra_process_comms(extra_argument.get_value<bool>());
     }
+
   }
 
   return options;
 }
 
 void
-LifecycleComponentWrapper::on_load_node(
+ComponentManager::on_load_node(
   const std::shared_ptr<rmw_request_id_t> request_header,
   const std::shared_ptr<LoadNode::Request> request,
-  std::shared_ptr<LoadNode::Response> response, boost::optional<uint64_t> internal_id)
+  std::shared_ptr<LoadNode::Response> response)
 {
   (void) request_header;
-
-  ///// CARMA CHANGE /////
-  // If this was an external request and we are NOT in the ACTIVE state
-  // then we should not load the node and simply cache it for load on activate
-  if (!internal_id && get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
-    
-    RCLCPP_INFO_STREAM(get_logger(), "Got request to load node: " << request->node_name <<
-      " but we are not in the active state, caching for later lifecycle based activation.");
-
-    auto node_id = unique_id_++; // Store and update the unique id
-     
-    load_node_requests_.emplace(node_id, std::make_pair(*request_header, *request));
-
-    // NOTE: This is a bit of a hack, but we need to return a valid response
-    response->unique_id = node_id;
-    response->success = true;
-
-    return;
-  }
-
-  // This is an internal request, or we are in the active state, so we can actually load the node
-
-  ///// END CARMA CHANGE /////
 
   try {
     auto resources = get_component_resources(request->package_name);
@@ -252,11 +231,7 @@ LifecycleComponentWrapper::on_load_node(
       }
 
       auto options = create_node_options(request);
-      ///// CARMA CHANGE /////
-      // If a id was provided then we are an internal request and we should use it
-      // else update our unique id counter and set the node id to that
-      auto node_id = internal_id ? internal_id.get() : unique_id_++;
-      ///// END CARMA CHANGE /////
+      auto node_id = unique_id_++;
 
       if (0 == node_id) {
         // This puts a technical limit on the number of times you can add a component.
@@ -307,7 +282,7 @@ LifecycleComponentWrapper::on_load_node(
           }
           // Set the log level
           auto result = rcutils_logging_set_logger_level(node_wrappers_[node_id].get_node_base_interface()->get_name(), sev);
-        
+          
           if (result != RCUTILS_RET_OK) {
             RCLCPP_ERROR(get_logger(), "FAILED to set log level when provided with --log-level argument");
           }
@@ -315,16 +290,16 @@ LifecycleComponentWrapper::on_load_node(
         /////
         // CARMA CHANGE END
         /////
-
+          
       } catch (const std::exception & ex) {
         // In the case that the component constructor throws an exception,
         // rethrow into the following catch block.
-        throw rclcpp_components::ComponentManagerException(
+        throw ComponentManagerException(
                 "Component constructor threw an exception: " + std::string(ex.what()));
       } catch (...) {
         // In the case that the component constructor throws an exception,
         // rethrow into the following catch block.
-        throw rclcpp_components::ComponentManagerException("Component constructor threw an exception");
+        throw ComponentManagerException("Component constructor threw an exception");
       }
 
       auto node = node_wrappers_[node_id].get_node_base_interface();
@@ -342,7 +317,7 @@ LifecycleComponentWrapper::on_load_node(
       request->plugin_name.c_str());
     response->error_message = "Failed to find class with the requested plugin name.";
     response->success = false;
-  } catch (const rclcpp_components::ComponentManagerException & ex) {
+  } catch (const ComponentManagerException & ex) {
     RCLCPP_ERROR(get_logger(), "%s", ex.what());
     response->error_message = ex.what();
     response->success = false;
@@ -350,21 +325,12 @@ LifecycleComponentWrapper::on_load_node(
 }
 
 void
-LifecycleComponentWrapper::on_unload_node(
+ComponentManager::on_unload_node(
   const std::shared_ptr<rmw_request_id_t> request_header,
   const std::shared_ptr<UnloadNode::Request> request,
   std::shared_ptr<UnloadNode::Response> response)
 {
   (void) request_header;
-
-  ///// CARMA CHANGE /////
-  // Before unloading the node we need to check if it still exists in our load cache. If it does then remove it.
-  if (load_node_requests_.find(request->unique_id) != load_node_requests_.end()) {
-
-    load_node_requests_.erase(request->unique_id);
-  }
-
-  ///// END CARMA CHANGE /////
 
   auto wrapper = node_wrappers_.find(request->unique_id);
 
@@ -384,7 +350,7 @@ LifecycleComponentWrapper::on_unload_node(
 }
 
 void
-LifecycleComponentWrapper::on_list_nodes(
+ComponentManager::on_list_nodes(
   const std::shared_ptr<rmw_request_id_t> request_header,
   const std::shared_ptr<ListNodes::Request> request,
   std::shared_ptr<ListNodes::Response> response)
@@ -399,84 +365,4 @@ LifecycleComponentWrapper::on_list_nodes(
   }
 }
 
-///// CARMA CHANGE /////
-
-carma_ros2_utils::CallbackReturn LifecycleComponentWrapper::handle_on_activate(const rclcpp_lifecycle::State &) {
-
-  bool success = true;
-
-  for (auto & request : load_node_requests_) {
-    
-    auto response = std::make_shared<LoadNode::Response>();
-    auto header = std::make_shared<rmw_request_id_t>(request.second.first);
-    auto req = std::make_shared<LoadNode::Request>(request.second.second);
-    on_load_node(header, req, response, request.first);
-
-    if (!response->success) {
-
-      RCLCPP_ERROR_STREAM(get_logger(), "Failed to load node: " << response->error_message);
-
-      success = false;
-    }
-  }
-  load_node_requests_.clear();
-
-  return success ? carma_ros2_utils::CallbackReturn::SUCCESS : carma_ros2_utils::CallbackReturn::FAILURE;
-}
-
-carma_ros2_utils::CallbackReturn LifecycleComponentWrapper::handle_on_deactivate(const rclcpp_lifecycle::State &) {
-
-  return unload_all_nodes() ? carma_ros2_utils::CallbackReturn::SUCCESS : carma_ros2_utils::CallbackReturn::FAILURE;
-
-}
-
-carma_ros2_utils::CallbackReturn LifecycleComponentWrapper::handle_on_cleanup(const rclcpp_lifecycle::State &) {
-
-  return unload_all_nodes() ? carma_ros2_utils::CallbackReturn::SUCCESS : carma_ros2_utils::CallbackReturn::FAILURE;
-
-}
-
-carma_ros2_utils::CallbackReturn LifecycleComponentWrapper::handle_on_error(const rclcpp_lifecycle::State &, const std::string &) {
-
-  return unload_all_nodes() ? carma_ros2_utils::CallbackReturn::SUCCESS : carma_ros2_utils::CallbackReturn::FAILURE;
-}
-
-carma_ros2_utils::CallbackReturn LifecycleComponentWrapper::handle_on_shutdown(const rclcpp_lifecycle::State &) {
-
-  return unload_all_nodes() ? carma_ros2_utils::CallbackReturn::SUCCESS : carma_ros2_utils::CallbackReturn::FAILURE;
-}
-
-bool LifecycleComponentWrapper::unload_all_nodes() {
-  bool success = true;
-
-  // On deactivation we will unload all nodes that are currently tracked
-  // We use an iterator loop here because we are modifying the node_wrappers_ map while iterating via the on_unload_node callback
-  for (auto it = node_wrappers_.cbegin(), next_it = it; it != node_wrappers_.cend(); it = next_it)
-  {
-    ++next_it;
-
-    auto request = std::make_shared<UnloadNode::Request>();
-    request->unique_id = it->first;
-
-    auto response = std::make_shared<UnloadNode::Response>();
-      
-
-    // NOTE: This call will erase "it" so do not access it beyond this line
-    on_unload_node(std::make_shared<rmw_request_id_t>(),
-                  request, response); // Unload our node
-
-    if (!response->success) {
-
-      RCLCPP_ERROR_STREAM(get_logger(), "Failed to unload node: " << response->error_message);
-
-      success = false; // If one of the nodes failed to unload we will track this and return a transition failure
-                       // However, to improve system stability we will continue to unload the rest of the nodes
-    }
-  }
-
-  return success;
-}
-
-///// END CARMA CHANGE /////
-
-}  // namespace carma_ros2_utils
+}  // namespace rclcpp_components

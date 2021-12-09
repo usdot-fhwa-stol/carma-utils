@@ -62,6 +62,12 @@ namespace carma_ros2_utils
   template<class T>
   using SubPtr = typename rclcpp::Subscription<T>::SharedPtr;
 
+  template<class T>
+  using ServicePtr = typename rclcpp::Service<T>::SharedPtr;
+
+  template<class T>
+  using ClientPtr = typename rclcpp::Client<T>::SharedPtr;
+
   /**
  * \brief The CarmaLifecycleNode provides default exception handling and SystemAlert handling for components in carma-platform.
  *        All new nodes in carma-platform are expected to be built off CarmaLifecycleNode and implemented as components. 
