@@ -254,7 +254,13 @@ ComponentManager::on_load_node(
         // If the argument has been set then we set the log level for the default logger of this component
         auto log_level_arg_it = std::find(options.arguments().begin(), options.arguments().end(), "--log-level");
 
-        if (log_level_arg_it != options.arguments().end() && log_level_arg_it + 1 != options.arguments().end()) {
+        if (log_level_arg_it == options.arguments().end()) {
+          RCLCPP_DEBUG(get_logger(), "--log-level arg does not appear to be set");
+        
+        } else if (log_level_arg_it + 1 == options.arguments().end()) {
+          RCLCPP_ERROR(get_logger(), "--log-level arg option provided but the log level itself was not");
+        
+        } else {
           // If the log-level has been set on this component then try to set it for the specific logger
           RCUTILS_LOG_SEVERITY sev = RCUTILS_LOG_SEVERITY_WARN;
 
@@ -275,7 +281,11 @@ ComponentManager::on_load_node(
             sev = RCUTILS_LOG_SEVERITY_WARN;
           }
           // Set the log level
-          rcutils_logging_set_logger_level(node_wrappers_[node_id].get_node_base_interface()->get_name(), sev);
+          auto result = rcutils_logging_set_logger_level(node_wrappers_[node_id].get_node_base_interface()->get_name(), sev);
+          
+          if (result != RCUTILS_RET_OK) {
+            RCLCPP_ERROR(get_logger(), "FAILED to set log level when provided with --log-level argument");
+          }
         }
         /////
         // CARMA CHANGE END
