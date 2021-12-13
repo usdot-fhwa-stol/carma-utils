@@ -1,16 +1,39 @@
-// Copyright 2021 Open Source Robotics Foundation, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * Copyright (C) 2021 LEIDOS.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+/**
+ * This file is loosely based on the reference architecture developed by OSRF for Leidos located here
+ * https://github.com/mjeronimo/carma2/blob/master/carma_utils/carma_utils/include/carma_utils/carma_lifecycle_node.hpp
+ * 
+ * That file has the following license and some code snippets from it may be present in this file as well and are under the same license.
+ * 
+ * Copyright 2021 Open Source Robotics Foundation, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
 
 #ifndef CARMA_ROS2_UTILS__CARMA_LIFECYCLE_NODE_HPP_
 #define CARMA_ROS2_UTILS__CARMA_LIFECYCLE_NODE_HPP_
@@ -19,6 +42,8 @@
 #include <string>
 #include <thread>
 #include <boost/optional.hpp>
+#include <variant>
+
 
 #include "carma_ros2_utils/visibility_control.hpp"
 #include "carma_msgs/msg/system_alert.hpp"
@@ -30,6 +55,18 @@ namespace carma_ros2_utils
 {
 
   using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+
+  template<class T>
+  using PubPtr = typename std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<T>>;
+
+  template<class T>
+  using SubPtr = typename rclcpp::Subscription<T>::SharedPtr;
+
+  template<class T>
+  using ServicePtr = typename rclcpp::Service<T>::SharedPtr;
+
+  template<class T>
+  using ClientPtr = typename rclcpp::Client<T>::SharedPtr;
 
   /**
  * \brief The CarmaLifecycleNode provides default exception handling and SystemAlert handling for components in carma-platform.
@@ -201,6 +238,12 @@ namespace carma_ros2_utils
     /**
      * \brief Override of parent method. See descriptive comments here:
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L463
+     * 
+     * NOTE: The function object passed to this method will be moved using std::move. 
+     *       The user should therefore assume ownership of this function object has been relinquished
+     * 
+     * NOTE: The returned callback handle is also cached inside CarmaLifecycleNode, so the user need not track it 
+     *       unless they intend to use it
      */
     rclcpp_lifecycle::LifecycleNode::OnSetParametersCallbackHandle::SharedPtr
     add_on_set_parameters_callback(
@@ -209,6 +252,9 @@ namespace carma_ros2_utils
     /**
      * \brief Override of parent method. See descriptive comments here:
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L249
+     *
+     * NOTE: The function object passed to this method will be moved using std::move. 
+     *       The user should therefore assume ownership of this function object has been relinquished
      */
     template <typename DurationRepT = int64_t, typename DurationT = std::milli, typename CallbackT>
     std::shared_ptr<rclcpp::TimerBase> // NOTE: TimerBase must be used here to account for the fact that the exception handling lambda will have a different type from the input callback type due to being a possible differnet location in code (member vs non-member method etc.).
@@ -230,6 +276,9 @@ namespace carma_ros2_utils
      * 
      *  \return A pointer to an intialized timer. The timer will be cancled when this node transitions through a deactivate/cleanup sequence
      *
+     * NOTE: The function object passed to this method will be moved using std::move. 
+     *       The user should therefore assume ownership of this function object has been relinquished
+     * 
      */
     template <typename CallbackT>
     typename rclcpp::TimerBase::SharedPtr
@@ -244,6 +293,9 @@ namespace carma_ros2_utils
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L271
      *  
      *  NOTE: In foxy the LifecycleNode api is slightly out of sync with the node api so there is not a create_timer method there. We use rclcpp directly here
+     *
+     * NOTE: The function object passed to this method will be moved using std::move. 
+     *       The user should therefore assume ownership of this function object has been relinquished
      */
     template <typename ServiceT, typename CallbackT>
     typename rclcpp::Service<ServiceT>::SharedPtr
@@ -268,6 +320,42 @@ namespace carma_ros2_utils
     create_client(const std::string service_name, 
         const rmw_qos_profile_t & qos_profile = rmw_qos_profile_services_default,
         rclcpp::CallbackGroup::SharedPtr group = nullptr);
+
+    /**
+     * \brief Helper method for setting parameters based on the input to a parameter callback as used by add_on_set_parameters_callback()
+     *        This method will take a map of parameter name and the parameter variable (passed as reference) and set the parameter.
+     * 
+     * NOTE: This method is templated and should be called once for each parameter type which needs to be set.
+     * 
+     * \tparam T The type of the parameter to set. Must be one of the ROS supported parameter types. If not then this method will return an error.
+     * \param update_targets A map of parameter names and the parameter variable (passed as reference) to set
+     * \param new_params The list of new parameters that provided by the input to a parameter callback. 
+     *                   Parameters not listed in both the update_targets and new_params will be ignored.
+     * 
+     * \return boost::optional<std::string> A string containing the error description if a parameter could not be set. 
+     *         If boost::none then no error occurred
+     */ 
+    template<typename T>
+    boost::optional<std::string> update_params(const std::unordered_map<std::string, std::reference_wrapper<T>>& update_targets,
+                   const std::vector< rclcpp::Parameter > & new_params);
+
+    /**
+     * \brief Helper method for setting parameters based on the input to a parameter callback as used by add_on_set_parameters_callback()
+     *        This method will take a map of parameter name and a setter function which will set the named parameter.
+     * 
+     * NOTE: This method is templated and should be called once for each parameter type which needs to be set.
+     * 
+     * \tparam T The type of the parameter to set. Must be one of the ROS supported parameter types. If not then this method will return an error.
+     * \param update_targets A map of parameter names and a setter function which will set the named parameter. The setter function should return the old value;
+     * \param new_params The list of new parameters that provided by the input to a parameter callback. 
+     *                   Parameters not listed in both the update_targets and new_params will be ignored.
+     * 
+     * \return boost::optional<std::string> A string containing the error description if a parameter could not be set. 
+     *         If boost::none then no error occurred
+     */ 
+    template<typename T>
+    boost::optional<std::string> update_params(const std::unordered_map<std::string, std::function<T(T)>>& update_targets,
+                   const std::vector< rclcpp::Parameter > & new_params);
 
   protected:
     /**
@@ -329,6 +417,10 @@ namespace carma_ros2_utils
     //! Reentrant callback group to use with service calls. Setup this way so that this class' functions
     //  can be called from topic callbacks
     rclcpp::CallbackGroup::SharedPtr service_callback_group_;
+
+    //! Set of callback handles generated by add_on_set_parameters_callback
+    //  This list is maintained to prevent forcing the user to track all their callback handles
+    std::vector<rclcpp_lifecycle::LifecycleNode::OnSetParametersCallbackHandle::SharedPtr> param_callback_handles_;
   };
 
 } // namespace carma_ros2_utils
