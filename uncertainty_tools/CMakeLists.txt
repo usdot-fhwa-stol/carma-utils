@@ -77,16 +77,23 @@ if(${ROS_VERSION} EQUAL 1)
 
 else() #ROS2
 
-  find_package(ament_cmake_auto REQUIRED)
-  ament_auto_find_build_dependencies()
+  find_package(ament_cmake REQUIRED)
 
   include_directories(include)
-  ament_auto_add_library(${PROJECT_NAME} SHARED
-  src/${PROJECT_NAME}/${PROJECT_NAME}.cpp)
 
-  ament_auto_package(
-    INSTALL_TO_SHARE
-  )
+  add_library(${PROJECT_NAME} SHARED
+    src/${PROJECT_NAME}/${PROJECT_NAME}.cpp)
+
+  ament_export_include_directories(include)
+  ament_export_libraries(${PROJECT_NAME})
+
+  ament_package()
+
+  install(
+  TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${PROJECT_NAME}
+  LIBRARY DESTINATION ${PROJECT_NAME}
+)
 
 endif()
 
