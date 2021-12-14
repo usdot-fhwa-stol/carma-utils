@@ -38,7 +38,7 @@ if(${ROS_VERSION} EQUAL 1)
     ## Specify additional locations of header files
     ## Your package locations should be listed before other locations
     include_directories(
-    include
+      include
       ${catkin_INCLUDE_DIRS}
     )
 
@@ -77,17 +77,33 @@ if(${ROS_VERSION} EQUAL 1)
 
 else() #ROS2
 
-  find_package(ament_cmake REQUIRED)
+  find_package(ament_cmake_auto REQUIRED)
 
-  include_directories(include)
+  include_directories(
+    include
+  )
 
   add_library(${PROJECT_NAME}
     src/${PROJECT_NAME}/${PROJECT_NAME}.cpp)
 
+  target_link_libraries(${PROJECT_NAME})
+
   ament_export_include_directories(include)
   ament_export_libraries(${PROJECT_NAME})
 
-  ament_package()
+  ament_auto_package(
+    INSTALL_TO_SHARE
+  )
+
+  install(
+  DIRECTORY include/
+    DESTINATION include
+  )
+  install(
+    TARGETS ${PROJECT_NAME} 
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+  )
 
 endif()
 
