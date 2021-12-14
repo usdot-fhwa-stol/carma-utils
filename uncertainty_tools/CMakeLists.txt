@@ -83,26 +83,27 @@ else() #ROS2
     include
   )
 
-  add_library(${PROJECT_NAME}
+  ament_auto_add_library(${PROJECT_NAME}
     src/${PROJECT_NAME}/${PROJECT_NAME}.cpp)
 
-  target_link_libraries(${PROJECT_NAME})
 
   ament_export_include_directories(include)
   ament_export_libraries(${PROJECT_NAME})
 
+  # Testing
+  if(BUILD_TESTING) 
+    find_package(ament_lint_auto REQUIRED)
+    ament_lint_auto_find_test_dependencies()
+
+    ament_add_gtest(${PROJECT_NAME}-test test/${PROJECT_NAME}/uncertainty_tools_test.cpp)
+    ament_target_dependencies(${PROJECT_NAME}-test ${${PROJECT_NAME}_FOUND_TEST_DEPENDS})
+
+    target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
+    
+  endif()
+
   ament_auto_package(
     INSTALL_TO_SHARE
-  )
-
-  install(
-  DIRECTORY include/
-    DESTINATION include
-  )
-  install(
-    TARGETS ${PROJECT_NAME} 
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
   )
 
 endif()
