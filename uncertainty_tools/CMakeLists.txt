@@ -99,12 +99,10 @@ else() #ROS2
     ament_target_dependencies(${PROJECT_NAME}-test ${${PROJECT_NAME}_FOUND_TEST_DEPENDS})
 
     target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-    
+
   endif()
 
-  ament_auto_package(
-    INSTALL_TO_SHARE
-  )
+  ament_auto_package()
 
 endif()
 
