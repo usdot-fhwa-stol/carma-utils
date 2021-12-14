@@ -16,16 +16,7 @@
 
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include <uncertainty_tools/uncertainty_tools.h>
-
-
-using ::testing::A;
-using ::testing::_;
-using ::testing::DoAll;
-using ::testing::Invoke;
-using ::testing::Return;
-using ::testing::Unused;
 
 
 TEST(uncertainty_tools_test, TestComputeVectorMagnitudeAndUncertainty)
@@ -90,7 +81,7 @@ TEST(uncertainty_tools_test, TestComputeVectorMagnitudeAndUncertainty)
 
 // Run all the tests
 int main(int argc, char **argv) {
-    testing::InitGoogleMock(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
 
