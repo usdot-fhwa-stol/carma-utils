@@ -81,19 +81,13 @@ else() #ROS2
 
   include_directories(include)
 
-  add_library(${PROJECT_NAME} SHARED
+  add_library(${PROJECT_NAME}
     src/${PROJECT_NAME}/${PROJECT_NAME}.cpp)
 
   ament_export_include_directories(include)
   ament_export_libraries(${PROJECT_NAME})
 
   ament_package()
-
-  install(
-  TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${PROJECT_NAME}
-  LIBRARY DESTINATION ${PROJECT_NAME}
-)
 
 endif()
 
