@@ -193,6 +193,8 @@ namespace ros2_lifecycle_manager
       size_t i = 0;
       for (auto future : futures)
       {
+        RCLCPP_INFO_STREAM(node_logging_->get_logger(), "Waiting on future for node: " << future_node_map.at(i));
+        
         if (!wait_on_change_state_future(future, call_timeout))
         {
           failed_nodes.push_back(future_node_map.at(i));
