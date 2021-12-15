@@ -44,7 +44,7 @@ std::vector<T, A> downsample_vector(const std::vector<T, A>& input, unsigned int
 
   output.reserve((input.size() / n) + 1);
 
-  for (int i = 0; i < input.size(); i += n)
+  for (size_t i = 0; i < input.size(); i += n)
   {
     output.push_back(input[i]);
   }

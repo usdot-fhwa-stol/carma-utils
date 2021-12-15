@@ -1,6 +1,7 @@
 #ifndef H_CAN_INTERFACE
 #define H_CAN_INTERFACE
 
+#include <iostream>
 #include <boost/array.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/shared_ptr.hpp>

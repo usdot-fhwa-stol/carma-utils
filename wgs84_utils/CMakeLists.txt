@@ -16,8 +16,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(wgs84_utils)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+## Compile as C++14, supported in ROS Noetic and newer
+add_compile_options(-std=c++14)
 set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 
@@ -84,9 +84,9 @@ add_dependencies(wgs84_utils_library ${catkin_EXPORTED_TARGETS})
 ## Test ##
 ##########
 
-catkin_add_gmock(wgs84_uitls_test test/test_main.cpp test/proj_tools_test.cpp)
+catkin_add_gmock(wgs84_utils_test test/test_main.cpp test/proj_tools_test.cpp)
 
-target_link_libraries( wgs84_uitls_test
+target_link_libraries( wgs84_utils_test
   wgs84_utils_library
   ${Boost_LIBRARIES} 
   ${catkin_LIBRARIES}
