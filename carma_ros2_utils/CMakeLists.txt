@@ -6,6 +6,7 @@ carma_check_ros_version(2)
 carma_package()
 
 find_package(ament_cmake_auto REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 ament_auto_find_build_dependencies()
 
 
@@ -73,5 +74,7 @@ if(BUILD_TESTING)
   rclcpp_components_register_nodes(test_minimal_node "carma_ros2_utils_testing::MinimalNode")
 
 endif()
+
+ament_python_install_package(${PROJECT_NAME})
 
 ament_auto_package()
