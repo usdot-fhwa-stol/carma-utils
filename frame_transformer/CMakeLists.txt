@@ -27,6 +27,7 @@ ament_auto_find_build_dependencies()
 
 # Name build targets
 set(node_exec frame_transformer_node_exec)
+set(node_exec_auto_transition frame_transformer_node_exec_auto_transition)
 set(node_lib frame_transformer_node)
 
 # Includes
@@ -40,7 +41,11 @@ ament_auto_add_library(${node_lib} SHARED
 )
 
 ament_auto_add_executable(${node_exec} 
-        src/main.cpp 
+        src/lifecycle_main.cpp
+)
+
+ament_auto_add_executable(${node_exec_auto_transition} 
+        src/auto_transition_main.cpp
 )
 
 # Register component
@@ -49,6 +54,10 @@ rclcpp_components_register_nodes(${node_lib} "frame_transformer::Node")
 # All locally created targets will need to be manually linked
 # ament auto will handle linking of external dependencies
 target_link_libraries(${node_exec}
+        ${node_lib}
+)
+
+target_link_libraries(${node_exec_auto_transition} 
         ${node_lib}
 )
 

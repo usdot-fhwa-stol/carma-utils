@@ -33,28 +33,28 @@ namespace frame_transformer
     boost::algorithm::trim(type); // Trim white space from the type string
 
     if (type == "geometry_msgs/Vector3Stamped")
-      return std::make_unique<Transformer<geometry_msgs::msg::Vector3Stamped>>(config_.target_frame, buffer_, shared_from_this(), config_.queue_size);
+      return std::make_unique<Transformer<geometry_msgs::msg::Vector3Stamped>>(config_, buffer_, shared_from_this());
     
     else if (type == "geometry_msgs/PointStamped")
-      return std::make_unique<Transformer<geometry_msgs::msg::PointStamped>>(config_.target_frame, buffer_, shared_from_this(), config_.queue_size);
+      return std::make_unique<Transformer<geometry_msgs::msg::PointStamped>>(config_, buffer_, shared_from_this());
     
     else if (type == "geometry_msgs/PoseStamped")
-      return std::make_unique<Transformer<geometry_msgs::msg::PoseStamped>>(config_.target_frame, buffer_, shared_from_this(), config_.queue_size);
+      return std::make_unique<Transformer<geometry_msgs::msg::PoseStamped>>(config_, buffer_, shared_from_this());
     
     else if (type == "geometry_msgs/PoseWithCovarianceStamped")
-      return std::make_unique<Transformer<geometry_msgs::msg::PoseWithCovarianceStamped>>(config_.target_frame, buffer_, shared_from_this(), config_.queue_size);
+      return std::make_unique<Transformer<geometry_msgs::msg::PoseWithCovarianceStamped>>(config_, buffer_, shared_from_this());
     
     else if (type == "geometry_msgs/QuaternionStamped")
-      return std::make_unique<Transformer<geometry_msgs::msg::QuaternionStamped>>(config_.target_frame, buffer_, shared_from_this(), config_.queue_size);
+      return std::make_unique<Transformer<geometry_msgs::msg::QuaternionStamped>>(config_, buffer_, shared_from_this());
     
     else if (type == "geometry_msgs/TransformStamped")
-      return std::make_unique<Transformer<geometry_msgs::msg::TransformStamped>>(config_.target_frame, buffer_, shared_from_this(), config_.queue_size);
+      return std::make_unique<Transformer<geometry_msgs::msg::TransformStamped>>(config_, buffer_, shared_from_this());
 
     else if (type == "sensor_msgs/PointCloud2")
-      return std::make_unique<Transformer<sensor_msgs::msg::PointCloud2>>(config_.target_frame, buffer_, shared_from_this(), config_.queue_size);
+      return std::make_unique<Transformer<sensor_msgs::msg::PointCloud2>>(config_, buffer_, shared_from_this());
 
     else
-      return nullptr
+      return nullptr;
 
   }
 
@@ -67,6 +67,7 @@ namespace frame_transformer
     config_.message_type = declare_parameter<std::string>("message_type", config_.message_type);
     config_.target_frame = declare_parameter<std::string>("target_frame", config_.target_frame);
     config_.queue_size = declare_parameter<int>("queue_size", config_.queue_size);
+    config_.timeout = declare_parameter<int>("timeout", config_.timeout);
 
     RCLCPP_INFO_STREAM(get_logger(), "Loaded params: " << config_);
 
@@ -90,6 +91,7 @@ namespace frame_transformer
 
     transformer_.reset(nullptr); // On cleanup clear the old transformer
 
+    return CallbackReturn::SUCCESS;
   }
 
 

@@ -35,8 +35,6 @@ TEST(Testframe_transformer, example_test){
     std::unique_ptr<std_msgs::msg::String> msg = std::make_unique<std_msgs::msg::String>();
     msg->data = "my string";
 
-    worker_node->example_callback(move(msg)); // Manually drive topic callbacks
-
 }
 
 int main(int argc, char ** argv)

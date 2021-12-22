@@ -1,5 +1,11 @@
 # String: The target coordinate frame id to transform data into
 target_frame : "map"
 
-# Boolean: If true this node will immediately move to the active state on startup so it will behave like a regular node
-auto_transition : true
+# String: Message type which will be transformed. A specialization of tf2_ros::Buffer::doTransform must be available for this type
+message_type : "sensor_msgs/PointCloud2"
+    
+# Integer: Queue size for publishers and subscribers
+queue_size : 1
+
+# Integer: Timeout in ms for transform lookup. A value of 0 means lookup will occur once without blocking if it fails.
+timeout : 0

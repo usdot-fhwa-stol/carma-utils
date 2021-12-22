@@ -30,6 +30,8 @@
   <depend>carma_ros2_utils</depend>
   <depend>rclcpp_components</depend>
   <depend>std_srvs</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_sensor_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_cmake_gtest</test_depend>

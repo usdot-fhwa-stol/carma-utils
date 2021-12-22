@@ -18,9 +18,17 @@
 
 #include "frame_transformer_base.hpp"
 #include <carma_ros2_utils/carma_lifecycle_node.hpp>
+#include <tf2/exceptions.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_sensor_msgs/tf2_sensor_msgs.h>
+#include <chrono>
 
 namespace frame_transformer
 {
+  namespace std_ph = std::placeholders;
+  using std_ms = std::chrono::milliseconds;
 
   /**
    * \brief Class template for data transformers which use the tf2_ros::Buffer.transform() method to perform transforms on ros messages.
@@ -48,14 +56,14 @@ namespace frame_transformer
      * 
      * See comments in TransformerBase for parameter descriptions
      */ 
-    Transformer(const std::string &target_frame, std::shared_ptr<tf2_ros::Buffer> buffer, std::shared_ptr<carma_ros2_utils::CarmaLifecycleNode> node, size_t queue_size)
-    : TransformerBase(target_frame, buffer, node, queue_size) {
+    Transformer(Config config, std::shared_ptr<tf2_ros::Buffer> buffer, std::shared_ptr<carma_ros2_utils::CarmaLifecycleNode> node)
+    : TransformerBase(config, buffer, node) {
 
-      input_sub_ = node_->create_subscription<T>("input", queue_size_,
+      input_sub_ = node_->create_subscription<T>("input", config_.queue_size,
                                                   std::bind(&Transformer::input_callback, this, std_ph::_1));
 
       // Setup publishers
-      output_pub_ = node_->create_publisher<T>("output", queue_size_);
+      output_pub_ = node_->create_publisher<T>("output", config_.queue_size);
     }
 
 
@@ -66,23 +74,25 @@ namespace frame_transformer
      * \param in The input message to transform
      * \param[out] out The preallocated location for the output message
      * \param target_frame The frame the out message data will be in
-     * \param timeout A timeout which if exceeded will result in a false return and invalid out value. This call may block for this period.
+     * \param timeout A timeout in ms which if exceeded will result in a false return and invalid out value. This call may block for this period.
      *                If set to zero, then lookup will be attempted only once. 
      * 
      * \return True if transform succeeded, false if timeout exceeded or transform could not be performed. 
      */ 
-    bool transform(const T &in, T &out, const std::string &target_frame, const rclcpp::Duration timeout)
+    bool transform(const T &in, T &out, const std::string &target_frame, const std_ms timeout)
     {
-
-      T out_msg;
 
       try
       {
-        buffer_.transform(in_msg.get(), out_msg, target_frame, timeout);
+        buffer_->transform(in, out, target_frame, timeout);
       }
       catch (tf2::TransformException &ex)
       {
-        RCLCPP_WARN_THROTTLE_STREAM(this->get_logger(), this->get_clock(), rclcpp::Duration(1.0), "Failed to get transform with exception: " << ex.what());
+        std::string error = ex.what();
+        error = "Failed to get transform with exception: " + error;
+        auto& clk = *node_->get_clock(); // Separate reference required for proper throttle macro call
+        RCLCPP_WARN_THROTTLE(node_->get_logger(), clk, 1000, error);
+        
         return false;
       }
 
@@ -100,29 +110,29 @@ namespace frame_transformer
     {
       T out_msg;
 
-      if (!transform(in_msg, out_msg, target_frame_, timeout_))
+      if (!transform(*in_msg, out_msg, config_.target_frame, std_ms(config_.timeout)))
       {
         return;
       }
 
-      output_pub_.publish(out_msg);
+      output_pub_->publish(out_msg);
     }
   };
 
   // Specialization of input_callback for PointCloud2 messages to allow for preallocation of points vector
   // This is done due to the large size of that data set
   template <>
-  inline void Node<sensor_msgs::msg::PointCloud2>::input_callback(std::unique_ptr<sensor_msgs::msg::PointCloud2> in_msg) {
+  inline void Transformer<sensor_msgs::msg::PointCloud2>::input_callback(std::unique_ptr<sensor_msgs::msg::PointCloud2> in_msg) {
 
     sensor_msgs::msg::PointCloud2 out_msg;
-    out.data.reserve(in->data.size()); // Preallocate points vector
+    out_msg.data.reserve(in_msg->data.size()); // Preallocate points vector
 
-    if (!transform(in_msg, out_msg, target_frame_, timeout_))
+    if (!transform(*in_msg, out_msg, config_.target_frame, std_ms(config_.timeout)))
     {
       return;
     }
 
-    output_pub_.publish(out_msg);
+    output_pub_->publish(out_msg);
   }
 
 }

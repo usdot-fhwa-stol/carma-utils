@@ -35,6 +35,9 @@ namespace frame_transformer
     //! Queue size for publishers and subscribers
     int queue_size = 1;
 
+    //! Timeout in ms for transform lookup. A value of 0 means lookup will occur once without blocking if it fails.
+    int timeout = 0;
+
     // Stream operator for this config
     friend std::ostream &operator<<(std::ostream &output, const Config &c)
     {
@@ -42,6 +45,7 @@ namespace frame_transformer
            << "target_frame: " << c.target_frame << std::endl
            << "message_type: " << c.message_type << std::endl
            << "queue_size: " << c.queue_size << std::endl
+           << "timeout: " << c.timeout << std::endl
            << "}" << std::endl;
       return output;
     }

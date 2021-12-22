@@ -1,4 +1,4 @@
-
+#pragma once
 /*
  * Copyright (C) 2021 LEIDOS.
  *
@@ -32,8 +32,8 @@ namespace frame_transformer
 
   protected:
 
-    //! Target frame for data to be transformed into
-    std::string target_frame_;
+    //! Transformation configuration
+    Config config_;
 
     //! TF2 Buffer for storing transform history and looking up transforms
     std::shared_ptr<tf2_ros::Buffer> buffer_;
@@ -41,12 +41,9 @@ namespace frame_transformer
     //! Containing node which provides access to the ros network
     std::shared_ptr<carma_ros2_utils::CarmaLifecycleNode> node_;
 
-    //! Required queue size for publishers and subscribers
-    size_t queue_size_;
-
-  private: // Private to force super call in child classes
-    TransformerBase(const std::string &target_frame, std::shared_ptr<tf2_ros::Buffer> buffer, std::shared_ptr<carma_ros2_utils::CarmaLifecycleNode> node, size_t queue_size) 
-      : target_frame_(target_frame), buffer_(buffer), node_(node), queue_size_(queue_size) {}
+  protected: // Protected to force super call in child classes
+    TransformerBase(const Config& config, std::shared_ptr<tf2_ros::Buffer> buffer, std::shared_ptr<carma_ros2_utils::CarmaLifecycleNode> node) 
+      : config_(config), buffer_(buffer), node_(node) {}
   };
 
 }

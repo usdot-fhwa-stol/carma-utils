@@ -22,6 +22,8 @@
 
 #include <carma_ros2_utils/carma_lifecycle_node.hpp>
 #include "frame_transformer/frame_transformer_config.hpp"
+#include "frame_transformer/frame_transformer_base.hpp"
+#include "frame_transformer/frame_transformer.hpp"
 
 namespace frame_transformer
 {
@@ -61,7 +63,7 @@ namespace frame_transformer
      * 
      * \return Initialized pointer to a TransformBase object which contains the required pub/sub for transformations to occur  
      */ 
-    std::unique_ptr<TransformerBase> Node::build_transformer();
+    std::unique_ptr<TransformerBase> build_transformer();
 
     ////
     // Overrides
