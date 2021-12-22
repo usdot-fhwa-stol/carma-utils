@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--  
- Copyright (C) 2021 Michael McConnell.
+ Copyright (C) 2021 LEIDOS.
  Licensed under the Apache License, Version 2.0 (the "License"); you may not
  use this file except in compliance with the License. You may obtain a copy of
  the License at
@@ -19,6 +19,8 @@
   <description>The frame_transformer package</description>
 
   <maintainer email="carma@dot.gov">carma</maintainer>
+  
+  <author>Michael McConnell</author>
 
   <license>Apache 2.0</license>
   
