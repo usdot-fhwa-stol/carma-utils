@@ -1,0 +1,5 @@
+# String: The target coordinate frame id to transform data into
+target_frame : "map"
+
+# Boolean: If true this node will immediately move to the active state on startup so it will behave like a regular node
+auto_transition : true
