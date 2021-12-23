@@ -81,6 +81,7 @@ namespace ros {
       } catch(const std::exception& e) {
         handleException(e);
       }
+      return false;
     };
 
     return wrappedFunc;

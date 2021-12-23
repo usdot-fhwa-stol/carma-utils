@@ -62,7 +62,7 @@ namespace CallRecorder {
     return test_calls_map[fullFunctionName];
   }
   // Clear function call history for a specific test
-  bool clearHistory(const std::string& testKey) {
+  void clearHistory(const std::string& testKey) {
     std::lock_guard<std::mutex> lock(map_mutex_);
     callMap_[testKey].clear();
     callMap_.erase(testKey);
