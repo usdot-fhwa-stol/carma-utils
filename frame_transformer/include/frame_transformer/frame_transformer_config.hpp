@@ -27,7 +27,7 @@ namespace frame_transformer
   struct Config
   {
     //! The target coordinate frame id to transform data into
-    std::string target_frame = "map";
+    std::string target_frame = "base_link";
 
     //! Message type which will be transformed
     std::string message_type = "sensor_msgs/PointCloud2";

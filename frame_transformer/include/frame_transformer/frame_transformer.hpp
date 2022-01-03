@@ -24,6 +24,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 #include <chrono>
+#include <gtest/gtest_prod.h>
 
 namespace frame_transformer
 {
@@ -92,7 +93,7 @@ namespace frame_transformer
         error = "Failed to get transform with exception: " + error;
         auto& clk = *node_->get_clock(); // Separate reference required for proper throttle macro call
         RCLCPP_WARN_THROTTLE(node_->get_logger(), clk, 1000, error);
-        
+
         return false;
       }
 
@@ -117,6 +118,9 @@ namespace frame_transformer
 
       output_pub_->publish(out_msg);
     }
+
+    // Unit Test Accessors
+    FRIEND_TEST(frame_transformer_test, transform_test);
   };
 
   // Specialization of input_callback for PointCloud2 messages to allow for preallocation of points vector

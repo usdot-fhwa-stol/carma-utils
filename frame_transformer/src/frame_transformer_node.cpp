@@ -23,6 +23,14 @@ namespace frame_transformer
   Node::Node(const rclcpp::NodeOptions &options)
       : carma_ros2_utils::CarmaLifecycleNode(options)
   {
+    // Create default config
+    config_ = Config();
+
+    // Declare parameters and defaults
+    config_.message_type = declare_parameter<std::string>("message_type", config_.message_type);
+    config_.target_frame = declare_parameter<std::string>("target_frame", config_.target_frame);
+    config_.queue_size = declare_parameter<int>("queue_size", config_.queue_size);
+    config_.timeout = declare_parameter<int>("timeout", config_.timeout);
   }
 
   std::unique_ptr<TransformerBase> Node::build_transformer() {
@@ -64,16 +72,20 @@ namespace frame_transformer
     config_ = Config();
 
     // Load parameters
-    config_.message_type = declare_parameter<std::string>("message_type", config_.message_type);
-    config_.target_frame = declare_parameter<std::string>("target_frame", config_.target_frame);
-    config_.queue_size = declare_parameter<int>("queue_size", config_.queue_size);
-    config_.timeout = declare_parameter<int>("timeout", config_.timeout);
+    get_parameter<std::string>("message_type", config_.message_type);
+    get_parameter<std::string>("target_frame", config_.target_frame);
+    get_parameter<int>("queue_size", config_.queue_size);
+    get_parameter<int>("timeout", config_.timeout);
+
 
     RCLCPP_INFO_STREAM(get_logger(), "Loaded params: " << config_);
 
     // NOTE: Due to the nature of this node generating sub/pubs based of parameters. 
     //       Dynamically changing the parameters is not recommended. Therefore a parameter callback is not implemented. 
 
+
+    buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
+    listener_ = std::make_shared<tf2_ros::TransformListener>(*buffer_);
 
     // Set the transformer based on the specified message type
     transformer_ = build_transformer();
@@ -90,6 +102,8 @@ namespace frame_transformer
   carma_ros2_utils::CallbackReturn Node::handle_on_cleanup(const rclcpp_lifecycle::State &) {
 
     transformer_.reset(nullptr); // On cleanup clear the old transformer
+    buffer_.reset(); // On cleanup clear the old buffer
+    listener_.reset(); // On cleanup clear the old listener
 
     return CallbackReturn::SUCCESS;
   }

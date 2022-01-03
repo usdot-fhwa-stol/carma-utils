@@ -19,6 +19,7 @@
 #include <functional>
 #include <std_msgs/msg/string.hpp>
 #include <std_srvs/srv/empty.hpp>
+#include <gtest/gtest_prod.h>
 
 #include <carma_ros2_utils/carma_lifecycle_node.hpp>
 #include "frame_transformer/frame_transformer_config.hpp"
@@ -71,6 +72,9 @@ namespace frame_transformer
     carma_ros2_utils::CallbackReturn handle_on_configure(const rclcpp_lifecycle::State &);
 
     carma_ros2_utils::CallbackReturn handle_on_cleanup(const rclcpp_lifecycle::State &);
+
+    // Unit Test Accessors
+    FRIEND_TEST(frame_transformer_test, transform_test);
 
   };
 

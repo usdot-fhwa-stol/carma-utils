@@ -1,5 +1,5 @@
 # String: The target coordinate frame id to transform data into
-target_frame : "map"
+target_frame : "base_link"
 
 # String: Message type which will be transformed. A specialization of tf2_ros::Buffer::doTransform must be available for this type
 message_type : "sensor_msgs/PointCloud2"
