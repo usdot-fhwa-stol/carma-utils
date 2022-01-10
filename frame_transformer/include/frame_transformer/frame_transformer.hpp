@@ -130,10 +130,20 @@ namespace frame_transformer
 
     sensor_msgs::msg::PointCloud2 out_msg;
     out_msg.data.reserve(in_msg->data.size()); // Preallocate points vector
+    
 
     if (!transform(*in_msg, out_msg, config_.target_frame, std_ms(config_.timeout)))
     {
       return;
+    }
+
+    // The following if block is added purely for ensuring consistency with Autoware.Auto (prevent "Malformed PointCloud2" error from ray_ground_filter)
+    // It's a bit out of scope for this node to have this functionality here, 
+    // but the alternative is to modify a 3rd party driver, an Autoware.Auto component, or make a new node just for this.
+    // Therefore, the logic will live here until such a time as a better location presents itself.
+    if (out_msg.height == 1) // 1d point cloud
+    {
+      out_msg.row_step = out_msg.data.size();
     }
 
     output_pub_->publish(out_msg);
