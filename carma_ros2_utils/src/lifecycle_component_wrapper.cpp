@@ -343,27 +343,18 @@ LifecycleComponentWrapper::on_load_node(
             throw rclcpp_components::ComponentManagerException(
                     "Extra component argument 'is_lifecycle_node' must be a boolean");
           }
-        
-          RCLCPP_INFO_STEAM(get_logger(), "A lifecycle component has been loaded by the LifecycleComponentWrapper. Attempting to move it to the ACTIVE state.");
-          std::shared_ptr<rclcpp_lifecycle::LifecycleNode> lifecycle_node = std::static_pointer_cast<rclcpp_lifecycle::LifecycleNode>(node_wrappers_[node_id].get_node_instance());
-          lifecycle_node->configure();
-          lifecycle_node->activate();
 
-        }
-
-        if (extra_argument.get_name() == "is_carma_lifecycle_node") {
-          
-          if (extra_argument.get_type() != rclcpp::ParameterType::PARAMETER_BOOL) {
-            throw rclcpp_components::ComponentManagerException(
-                    "Extra component argument 'is_lifecycle_node' must be a boolean");
+          if (extra_argument.as_bool()) {
+            
+            RCLCPP_INFO_STREAM(get_logger(), "A lifecycle component has been loaded by the LifecycleComponentWrapper. Attempting to move it to the ACTIVE state.");
+            
+            std::shared_ptr<rclcpp_lifecycle::LifecycleNode> lifecycle_node = std::static_pointer_cast<rclcpp_lifecycle::LifecycleNode>(node_wrappers_[node_id].get_node_instance());
+            lifecycle_node->configure();
+            lifecycle_node->activate();
           }
-        
-          RCLCPP_INFO_STEAM(get_logger(), "A carma lifecycle component has been loaded by the LifecycleComponentWrapper. Attempting to move it to the ACTIVE state.");
-          std::shared_ptr<carma_ros2_utils::CarmaLifecycleNode> lifecycle_node = std::static_pointer_cast<carma_ros2_utils::CarmaLifecycleNode>(node_wrappers_[node_id].get_node_instance());
-          lifecycle_node->configure();
-          lifecycle_node->activate();
 
         }
+
       }
 
       /////
