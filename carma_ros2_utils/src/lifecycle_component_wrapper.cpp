@@ -327,6 +327,16 @@ LifecycleComponentWrapper::on_load_node(
         throw rclcpp_components::ComponentManagerException("Component constructor threw an exception");
       }
 
+      bool is_lifecycle_node = dynamic_cast<rclcpp_lifecycle::LifecycleNode*>(node_wrappers_[node_id].get_node_instance()->get()) != nullptr;
+
+      if (is_lifecycle_node) {
+        RCLCPP_INFO_STEAM(get_logger(), "A lifecycle component has been loaded by the LifecycleComponentWrapper. Attempting to move it to the ACTIVE state.");
+        std::shared_ptr<rclcpp_lifecycle::LifecycleNode> lifecycle_node = std::dynamic_pointer_cast<rclcpp_lifecycle::LifecycleNode>(node_wrappers_[node_id].get_node_instance());
+        lifecycle_node->configure();
+        lifecycle_node->activate();
+      }
+      
+
       auto node = node_wrappers_[node_id].get_node_base_interface();
       if (auto exec = executor_.lock()) {
         exec->add_node(node, true);
