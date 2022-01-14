@@ -135,3 +135,32 @@ def generate_launch_description():
         lifecycle_container,
     ])
 ```
+
+If the user wishes to include a lifecycle component and a non-lifecycle component in the same container (for performance), then they can use the extra arguments ```is_lifecycle_node```. This will internally cause an unchecked cast to ```rclcpp_lifecycle::LifecycleNode```. The ```configure()``` and ```activate()``` methods will then be called on this classes. Application of these arguments to classes which do not directly inherit from this type will lead to undefined behavior. So caution should be taken in their usage.
+
+```python
+def generate_launch_description():
+  
+    lifecycle_container = ComposableNodeContainer( 
+        package='rclcpp_components',
+        name='lifecycle_component_wrapper', 
+        executable='lifecycle_component_wrapper_mt', 
+        namespace="/",
+        composable_node_descriptions=[
+            ComposableNode( 
+                package='cool_pkg',
+                name='my_lifecycle_node',
+                plugin='cool_pkg_namespace::MyLifecycleNode',
+                extra_arguments=[
+                    {'use_intra_process_comms': True},
+                    # cool_pkg_namespace::MyLifecycleNode extends rclcpp_lifecycle::LifecycleNode and does not overload configure() or activate() so it is safe to make this call here.
+                    {'is_lifecycle_node' : True } 
+                ],
+            ),
+        ]
+    )
+
+    return LaunchDescription([
+        lifecycle_container,
+    ])
+```

@@ -327,6 +327,40 @@ LifecycleComponentWrapper::on_load_node(
         throw rclcpp_components::ComponentManagerException("Component constructor threw an exception");
       }
 
+      /////
+      // CARMA CHANGE START
+      /////
+
+
+      // Check if the loaded node is a lifecycle node and if it is then updates its activation
+      for (const auto & a : request->extra_arguments) {
+        
+        const rclcpp::Parameter extra_argument = rclcpp::Parameter::from_parameter_msg(a);
+        
+        if (extra_argument.get_name() == "is_lifecycle_node") {
+          
+          if (extra_argument.get_type() != rclcpp::ParameterType::PARAMETER_BOOL) {
+            throw rclcpp_components::ComponentManagerException(
+                    "Extra component argument 'is_lifecycle_node' must be a boolean");
+          }
+
+          if (extra_argument.as_bool()) {
+            
+            RCLCPP_INFO_STREAM(get_logger(), "A lifecycle component has been loaded by the LifecycleComponentWrapper. Attempting to move it to the ACTIVE state.");
+            
+            std::shared_ptr<rclcpp_lifecycle::LifecycleNode> lifecycle_node = std::static_pointer_cast<rclcpp_lifecycle::LifecycleNode>(node_wrappers_[node_id].get_node_instance());
+            lifecycle_node->configure();
+            lifecycle_node->activate();
+          }
+
+        }
+
+      }
+
+      /////
+      // CARMA CHANGE END
+      /////
+
       auto node = node_wrappers_[node_id].get_node_base_interface();
       if (auto exec = executor_.lock()) {
         exec->add_node(node, true);
