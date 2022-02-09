@@ -11,6 +11,7 @@
   <author email="ivor@iwanders.net">Ivor Wanders</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>carma_cmake_common</build_depend>
 
   <depend>can_msgs</depend>
   <depend>roscpp</depend>

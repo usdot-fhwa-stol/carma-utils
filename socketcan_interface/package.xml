@@ -11,6 +11,7 @@
   <author email="mathias.luedtke@ipa.fraunhofer.de">Mathias Lüdtke</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>carma_cmake_common</build_depend>
 
   <depend>boost</depend>
   <depend>class_loader</depend> 
