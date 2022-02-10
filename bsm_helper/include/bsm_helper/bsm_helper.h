@@ -11,7 +11,6 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 
 #pragma once
 #include <string.h>
-#include <ros/ros.h>
 #include <vector>
 #include <exception>
 #include <mutex>

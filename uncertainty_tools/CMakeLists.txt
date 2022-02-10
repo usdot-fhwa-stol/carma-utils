@@ -29,7 +29,10 @@ if(${ROS_VERSION} EQUAL 1)
   ## is used, also find other catkin packages
   find_package(catkin REQUIRED COMPONENTS)
 
-  catkin_package()
+  catkin_package(
+    INCLUDE_DIRS include
+    LIBRARIES ${PROJECT_NAME}
+  )
 
   ###########
   ## Build ##
