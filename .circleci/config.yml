@@ -33,6 +33,8 @@ jobs:
         environment:
           TERM: xterm # use xterm to get full display output from build
           INIT_ENV: /home/carma/.base-image/init-env.sh
+          ROS_2_ENV: /opt/ros/foxy/setup.bash
+    resource_class: large
     working_directory: "/opt/carma/"
     # Execution steps
     steps:
@@ -52,16 +54,28 @@ jobs:
             source ${INIT_ENV}
             git clone -b develop --depth 1 git@github.com:usdot-fhwa-stol/carma-msgs.git src/CARMAMsgs
       - run:
-          name: Build Driver
+          name: Build ROS 1
           command: |
             source ${INIT_ENV}
             export ROS_PARALLEL_JOBS='-j1 -l1' # Try to reduce memory consumption on build
             build-wrapper-linux-x86-64 --out-dir /opt/carma/bw-output bash make_with_coverage.bash -m -e /opt/carma/ -o ./coverage_reports/gcov
       - run:
-          name: Run C++ Tests
+          name: Run C++ Tests ROS 1
           command: |
             source ${INIT_ENV}
             export ROS_PARALLEL_JOBS='-j1 -l1' # Try to reduce memory consumption on build
+            bash make_with_coverage.bash -t -e /opt/carma/ -o ./coverage_reports/gcov
+      - run:
+          name: Build ROS 2
+          command: |
+            source ${INIT_ENV}
+            source ${ROS_2_ENV}
+            build-wrapper-linux-x86-64 --out-dir /opt/carma/bw-output bash make_with_coverage.bash -m -e /opt/carma/ -o ./coverage_reports/gcov
+      - run:
+          name: Run C++ Tests ROS 2
+          command: |
+            source ${INIT_ENV}
+            source ${ROS_2_ENV}
             bash make_with_coverage.bash -t -e /opt/carma/ -o ./coverage_reports/gcov
       # Run SonarCloud analysis
       # PR Branchs and number extracted from Circle variables and github api
