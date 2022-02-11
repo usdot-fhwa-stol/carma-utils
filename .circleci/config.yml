@@ -66,6 +66,13 @@ jobs:
             export ROS_PARALLEL_JOBS='-j1 -l1' # Try to reduce memory consumption on build
             bash make_with_coverage.bash -t -e /opt/carma/ -o ./coverage_reports/gcov
       - run:
+          name: Cleanup before ROS 2 build
+          # Clear the build and install folders before building ROS 2 
+          # but leave the build-wrapper output intact
+          command: |
+            rm -rf /opt/carma/install
+            rm -rf /opt/carma/build
+      - run:
           name: Build ROS 2
           command: |
             source ${INIT_ENV}
