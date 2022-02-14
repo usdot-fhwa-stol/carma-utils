@@ -14,7 +14,7 @@
  * the License.
  */
 
-#include "motion_predict/predict_ctrv.h"
+#include "motion_predict/predict_ctrv.hpp"
 #include "../src/predict_ctrv.cpp"
 #include <gtest/gtest.h>
 
@@ -24,7 +24,7 @@ namespace ctrv
 {
 TEST(predict_ctrv, buildCTRVState)
 {
-  geometry_msgs::Pose pose;
+  geometry_msgs::msg::Pose pose;
   pose.position.x = 1.3;
   pose.position.y = 1.4;
   pose.position.z = 2.5;
@@ -35,7 +35,7 @@ TEST(predict_ctrv, buildCTRVState)
   pose.orientation.z = 0.7071068;
   pose.orientation.w = 0.7071057;
 
-  geometry_msgs::Twist twist;
+  geometry_msgs::msg::Twist twist;
   twist.linear.x = 4.5;
   twist.linear.y = 2;
   twist.linear.z = 5;
@@ -62,7 +62,7 @@ TEST(predict_ctrv, buildPredictionFromCTRVState)
   state.v = 4.9244289009;
   state.yaw_rate = 0.0872665;
 
-  geometry_msgs::Pose pose;
+  geometry_msgs::msg::Pose pose;
   pose.position.x = 1.3;
   pose.position.y = 1.4;
   pose.position.z = 2.5;
@@ -73,7 +73,7 @@ TEST(predict_ctrv, buildPredictionFromCTRVState)
   pose.orientation.z = 0.7071068;
   pose.orientation.w = 0.7071057;
 
-  geometry_msgs::Twist twist;
+  geometry_msgs::msg::Twist twist;
   twist.linear.x = 4.5;
   twist.linear.y = 2;
   twist.linear.z = 5;
@@ -83,7 +83,7 @@ TEST(predict_ctrv, buildPredictionFromCTRVState)
   twist.angular.y = 0.00174533;
   twist.angular.z = 0.0872665;
 
-  cav_msgs::PredictedState result = buildPredictionFromCTRVState(state, pose, twist);
+  carma_perception_msgs::msg::PredictedState result = buildPredictionFromCTRVState(state, pose, twist);
   ASSERT_NEAR(result.predicted_position.position.x, pose.position.x, 0.00001);
   ASSERT_NEAR(result.predicted_position.position.y, pose.position.y, 0.00001);
   ASSERT_NEAR(result.predicted_position.position.z, pose.position.z, 0.00001);
@@ -136,8 +136,8 @@ TEST(predict_ctrv, CTRVPredict)
 
 TEST(predict_ctrv, predictStepExternal)
 {
-  cav_msgs::ExternalObject obj;
-  obj.header.stamp = ros::Time(5.0);
+  carma_perception_msgs::msg::ExternalObject obj;
+  obj.header.stamp = builtin_interfaces::msg::Time(rclcpp::Time(5, 0));
   obj.header.frame_id = "my_frame";
   obj.pose.pose.position.x = 5.0;
   obj.pose.pose.orientation.w = 1.0;
@@ -148,42 +148,48 @@ TEST(predict_ctrv, predictStepExternal)
   obj.velocity.covariance[7] = 999;
   obj.velocity.covariance[35] = 999;
 
-  cav_msgs::PredictedState result = motion_predict::ctrv::predictStep(obj, 0.1, 1000, 0.99);
+  carma_perception_msgs::msg::PredictedState result = motion_predict::ctrv::predictStep(obj, 0.1, 1000, 0.99);
 
   ASSERT_NEAR(5.0, result.predicted_position.position.x, 0.00001);  // Verify update functions were called
   ASSERT_NEAR(0.99, result.predicted_position_confidence, 0.01);
   ASSERT_NEAR(0.001, result.predicted_velocity_confidence, 0.001);
-  ros::Time new_time = obj.header.stamp + ros::Duration(0.1);
-  ASSERT_EQ(result.header.stamp.sec, new_time.sec);
-  ASSERT_EQ(result.header.stamp.nsec, new_time.nsec);
+  
+  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(0.1 * 1e9); // Increase by 0.1 sec
+  int32_t new_time_sec = int32_t(new_time.nanoseconds() / 1e9);
+  uint32_t new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);
+  ASSERT_EQ(result.header.stamp.sec, new_time_sec);
+  ASSERT_EQ(result.header.stamp.nanosec, new_time_nanosec);
   ASSERT_EQ(result.header.frame_id, obj.header.frame_id);
 }
 
 TEST(predict_ctrv, predictStep)
 {
-  cav_msgs::PredictedState obj;
-  obj.header.stamp = ros::Time(5.0);
+  carma_perception_msgs::msg::PredictedState obj;
+  obj.header.stamp = builtin_interfaces::msg::Time(rclcpp::Time(5, 0));
   obj.header.frame_id = "my_frame";
   obj.predicted_position.position.x = 5.0;
   obj.predicted_position.orientation.w = 1.0;
   obj.predicted_position_confidence = 1;
   obj.predicted_velocity_confidence = 0.5;
 
-  cav_msgs::PredictedState result = motion_predict::ctrv::predictStep(obj, 0.1, 0.99);
+  carma_perception_msgs::msg::PredictedState result = motion_predict::ctrv::predictStep(obj, 0.1, 0.99);
 
   ASSERT_NEAR(5.0, result.predicted_position.position.x, 0.00001);  // Verify update functions were called
   ASSERT_NEAR(0.99, result.predicted_position_confidence, 0.01);
   ASSERT_NEAR(0.495, result.predicted_velocity_confidence, 0.0001);
-  ros::Time new_time = obj.header.stamp + ros::Duration(0.1);
-  ASSERT_EQ(result.header.stamp.sec, new_time.sec);
-  ASSERT_EQ(result.header.stamp.nsec, new_time.nsec);
+
+  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(0.1 * 1e9); // Increase by 0.1 sec
+  int32_t new_time_sec = int32_t(new_time.nanoseconds() / 1e9);
+  uint32_t new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);
+  ASSERT_EQ(result.header.stamp.sec, new_time_sec);
+  ASSERT_EQ(result.header.stamp.nanosec, new_time_nanosec);
   ASSERT_EQ(result.header.frame_id, obj.header.frame_id);
 }
 
 TEST(predict_ctrv, predictPeriod)
 {
-  cav_msgs::ExternalObject obj;
-  obj.header.stamp = ros::Time(5.0);
+  carma_perception_msgs::msg::ExternalObject obj;
+  obj.header.stamp = builtin_interfaces::msg::Time(rclcpp::Time(5, 0));
   obj.header.frame_id = "my_frame";
   obj.pose.pose.position.x = 5.0;
   obj.pose.pose.orientation.w = 1.0;
@@ -195,22 +201,28 @@ TEST(predict_ctrv, predictPeriod)
   obj.velocity.covariance[7] = 999;
   obj.velocity.covariance[35] = 999;
 
-  std::vector<cav_msgs::PredictedState> results = motion_predict::ctrv::predictPeriod(obj, 0.1, 0.21, 1000, 0.99);
+  std::vector<carma_perception_msgs::msg::PredictedState> results = motion_predict::ctrv::predictPeriod(obj, 0.1, 0.21, 1000, 0.99);
 
   ASSERT_NEAR(5.1, results[0].predicted_position.position.x, 0.00001);  // Verify update functions were called
   ASSERT_NEAR(0.99, results[0].predicted_position_confidence, 0.01);
   ASSERT_NEAR(0.001, results[0].predicted_velocity_confidence, 0.001);
-  ros::Time new_time = obj.header.stamp + ros::Duration(0.1);
-  ASSERT_EQ(results[0].header.stamp.sec, new_time.sec);
-  ASSERT_EQ(results[0].header.stamp.nsec, new_time.nsec);
+  
+  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(0.1 * 1e9); // Increase by 0.1 sec
+  int32_t new_time_sec = int32_t(new_time.nanoseconds() / 1e9);
+  uint32_t new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);  
+  ASSERT_EQ(results[0].header.stamp.sec, new_time_sec);
+  ASSERT_EQ(results[0].header.stamp.nanosec, new_time_nanosec);
   ASSERT_EQ(results[0].header.frame_id, obj.header.frame_id);
 
   ASSERT_NEAR(5.2, results[1].predicted_position.position.x, 0.00001);  // Verify update functions were called
   ASSERT_NEAR(0.9801, results[1].predicted_position_confidence, 0.01);
   ASSERT_NEAR(0.00099, results[1].predicted_velocity_confidence, 0.00001);
-  new_time = obj.header.stamp + ros::Duration(0.2);
-  ASSERT_EQ(results[1].header.stamp.sec, new_time.sec);
-  ASSERT_EQ(results[1].header.stamp.nsec, new_time.nsec);
+
+  new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(0.2 * 1e9); // Increase by 0.2 sec
+  new_time_sec = int32_t(new_time.nanoseconds() / 1e9);
+  new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);  
+  ASSERT_EQ(results[1].header.stamp.sec, new_time_sec);
+  ASSERT_EQ(results[1].header.stamp.nanosec, new_time_nanosec);
   ASSERT_EQ(results[1].header.frame_id, obj.header.frame_id);
 }
 

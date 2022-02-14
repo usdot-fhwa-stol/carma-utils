@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2021 LEIDOS.
+ * Copyright (C) 2019-2022 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,11 +14,13 @@
  * the License.
  */
 
+#pragma once
+
 #ifndef PREDICT_CTRV_H
 #define PREDICT_CTRV_H
 
-#include <cav_msgs/ExternalObject.h>
-#include <cav_msgs/PredictedState.h>
+#include <carma_perception_msgs/msg/external_object.hpp>
+#include <carma_perception_msgs/msg/predicted_state.hpp>
 
 namespace motion_predict
 {
@@ -35,7 +37,7 @@ namespace ctrv
  *
  * \return The predicted state of the external object at time t + delta_t
  */
-std::vector<cav_msgs::PredictedState> predictPeriod(const cav_msgs::ExternalObject& obj, const double delta_t,
+std::vector<carma_perception_msgs::msg::PredictedState> predictPeriod(const carma_perception_msgs::msg::ExternalObject& obj, const double delta_t,
                                                     const double period, const float process_noise_max,
                                                     const double confidence_drop_rate);
 /*!
@@ -49,7 +51,7 @@ std::vector<cav_msgs::PredictedState> predictPeriod(const cav_msgs::ExternalObje
  * \return The predicted state of the external object at time t + delta_t
  */
 
-cav_msgs::PredictedState predictStep(const cav_msgs::ExternalObject& obj, const double delta_t,
+carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_msgs::msg::ExternalObject& obj, const double delta_t,
                                      const float process_noise_max);
 
 /*!
@@ -63,7 +65,7 @@ cav_msgs::PredictedState predictStep(const cav_msgs::ExternalObject& obj, const 
  * \return The predicted state of the external object at time t + delta_t
  */
 
-cav_msgs::PredictedState predictStep(const cav_msgs::PredictedState& obj, const double delta_t,
+carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_msgs::msg::PredictedState& obj, const double delta_t,
                                      const double confidence_drop_rate);
 
 }  // namespace ctrv

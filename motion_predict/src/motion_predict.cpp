@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2021 LEIDOS.
+ * Copyright (C) 2019-2022 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,7 +14,7 @@
  * the License.
  */
 
-#include "motion_predict/motion_predict.h"
+#include "motion_predict/motion_predict.hpp"
 
 namespace motion_predict{
 
@@ -33,7 +33,7 @@ double Mapping(const double input,const double process_noise_max)
   return output;
 }  
 
-cav_msgs::PredictedState predictState(const geometry_msgs::Pose& pose, const geometry_msgs::Twist& twist,const double delta_t)
+carma_perception_msgs::msg::PredictedState predictState(const geometry_msgs::msg::Pose& pose, const geometry_msgs::msg::Twist& twist,const double delta_t)
 {
   Eigen::VectorXd x(4); // State Vector
 
@@ -49,7 +49,7 @@ cav_msgs::PredictedState predictState(const geometry_msgs::Pose& pose, const geo
   
   x = F * x; // Predict 
 
-  cav_msgs::PredictedState pobj;
+  carma_perception_msgs::msg::PredictedState pobj;
 
   pobj.predicted_position.position.x=x(0); // Predicted Position X
   pobj.predicted_position.position.y=x(1); // Predicted Position Y
@@ -73,10 +73,10 @@ cav_msgs::PredictedState predictState(const geometry_msgs::Pose& pose, const geo
 
 
 // Forward predict an external object
-cav_msgs::PredictedState externalPredict(const cav_msgs::ExternalObject &obj,const double delta_t,const double ax,const double ay,const double process_noise_max)
+carma_perception_msgs::msg::PredictedState externalPredict(const carma_perception_msgs::msg::ExternalObject &obj,const double delta_t,const double ax,const double ay,const double process_noise_max)
 {
 
-  cav_msgs::PredictedState pobj = predictState(obj.pose.pose, obj.velocity.twist,delta_t);
+  carma_perception_msgs::msg::PredictedState pobj = predictState(obj.pose.pose, obj.velocity.twist,delta_t);
 
   Eigen::MatrixXd F=Eigen::MatrixXd::Identity(4,4); // Generate identity matrix for state transition matrix
 
@@ -114,17 +114,18 @@ cav_msgs::PredictedState externalPredict(const cav_msgs::ExternalObject &obj,con
 
   // Update header
   pobj.header = obj.header;
-  pobj.header.stamp += ros::Duration(delta_t);
+  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(delta_t * 1e9);
+  pobj.header.stamp = builtin_interfaces::msg::Time(updated_time);
 
   return pobj;
 
 }
 
 // Forward predict a prediction
-cav_msgs::PredictedState predictStep(const cav_msgs::PredictedState& obj, const double delta_t, const double confidence_drop_rate)
+carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_msgs::msg::PredictedState& obj, const double delta_t, const double confidence_drop_rate)
 {
   // Predict Motion
-  cav_msgs::PredictedState pobj = predictState(obj.predicted_position, obj.predicted_velocity,delta_t);
+  carma_perception_msgs::msg::PredictedState pobj = predictState(obj.predicted_position, obj.predicted_velocity,delta_t);
 
   // Map process noise average to confidence
   pobj.predicted_position_confidence = obj.predicted_position_confidence * confidence_drop_rate;
@@ -132,14 +133,15 @@ cav_msgs::PredictedState predictStep(const cav_msgs::PredictedState& obj, const 
 
   // Update header
   pobj.header = obj.header;
-  pobj.header.stamp += ros::Duration(delta_t);
-
+  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(delta_t * 1e9);
+  pobj.header.stamp = builtin_interfaces::msg::Time(updated_time);
+    
   return pobj;
 }
 
-std::vector<cav_msgs::PredictedState> predictPeriod(const cav_msgs::ExternalObject& obj, const double delta_t, const double period,const double ax,const double ay ,const double process_noise_max,const double confidence_drop_rate)
+std::vector<carma_perception_msgs::msg::PredictedState> predictPeriod(const carma_perception_msgs::msg::ExternalObject& obj, const double delta_t, const double period,const double ax,const double ay ,const double process_noise_max,const double confidence_drop_rate)
 {
-  std::vector<cav_msgs::PredictedState> predicted_states = { externalPredict(obj,delta_t,ax,ay,process_noise_max) };
+  std::vector<carma_perception_msgs::msg::PredictedState> predicted_states = { externalPredict(obj,delta_t,ax,ay,process_noise_max) };
 
   double t = delta_t;
   while (t < period)

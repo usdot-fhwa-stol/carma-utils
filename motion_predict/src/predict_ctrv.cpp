@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2021 LEIDOS.
+ * Copyright (C) 2019-2022 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,8 +14,8 @@
  * the License.
  */
 
-#include "motion_predict/predict_ctrv.h"
-#include "motion_predict/motion_predict.h"
+#include "motion_predict/predict_ctrv.hpp"
+#include "motion_predict/motion_predict.hpp"
 #include <math.h>
 #include "Eigen/Dense"
 
@@ -50,9 +50,9 @@ std::tuple<double, double> localVelOrientationAndMagnitude(const double v_x, con
   return std::make_tuple(local_v_orientation, v_mag);
 }
 
-CTRV_State buildCTRVState(const geometry_msgs::Pose& pose, const geometry_msgs::Twist& twist)
+CTRV_State buildCTRVState(const geometry_msgs::msg::Pose& pose, const geometry_msgs::msg::Twist& twist)
 {
-  geometry_msgs::Quaternion quat = pose.orientation;
+  geometry_msgs::msg::Quaternion quat = pose.orientation;
   Eigen::Quaternionf e_quat(quat.w, quat.x, quat.y, quat.z);
   Eigen::Vector3f rpy = e_quat.toRotationMatrix().eulerAngles(0, 1, 2);
 
@@ -70,10 +70,10 @@ CTRV_State buildCTRVState(const geometry_msgs::Pose& pose, const geometry_msgs::
   return state;
 }
 
-cav_msgs::PredictedState buildPredictionFromCTRVState(const CTRV_State& state, const geometry_msgs::Pose& original_pose,
-                                                      const geometry_msgs::Twist& original_twist)
+carma_perception_msgs::msg::PredictedState buildPredictionFromCTRVState(const CTRV_State& state, const geometry_msgs::msg::Pose& original_pose,
+                                                      const geometry_msgs::msg::Twist& original_twist)
 {
-  cav_msgs::PredictedState pobj;
+  carma_perception_msgs::msg::PredictedState pobj;
 
   // Map position
   pobj.predicted_position.position.x = state.x;
@@ -134,7 +134,7 @@ CTRV_State CTRVPredict(const CTRV_State& state, const double delta_t)
 }
 
 // Forward predict an external object
-cav_msgs::PredictedState predictStep(const cav_msgs::ExternalObject& obj, const double delta_t,
+carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_msgs::msg::ExternalObject& obj, const double delta_t,
                                      const float process_noise_max, const double confidence_drop_rate)
 {
   // Get initial state
@@ -144,7 +144,7 @@ cav_msgs::PredictedState predictStep(const cav_msgs::ExternalObject& obj, const 
   CTRV_State next_state = CTRVPredict(state, delta_t);
 
   // Convert CTRV to predicted state object
-  cav_msgs::PredictedState pobj = buildPredictionFromCTRVState(next_state, obj.pose.pose, obj.velocity.twist);
+  carma_perception_msgs::msg::PredictedState pobj = buildPredictionFromCTRVState(next_state, obj.pose.pose, obj.velocity.twist);
 
   // Compute confidence values
 
@@ -165,13 +165,14 @@ cav_msgs::PredictedState predictStep(const cav_msgs::ExternalObject& obj, const 
 
   // Update header
   pobj.header = obj.header;
-  pobj.header.stamp += ros::Duration(delta_t);
+  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(delta_t * 1e9);
+  pobj.header.stamp = builtin_interfaces::msg::Time(updated_time);
 
   return pobj;
 }
 
 // Forward predict a prediction
-cav_msgs::PredictedState predictStep(const cav_msgs::PredictedState& obj, const double delta_t,
+carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_msgs::msg::PredictedState& obj, const double delta_t,
                                      const double confidence_drop_rate)
 {
   // Get initial state
@@ -181,7 +182,7 @@ cav_msgs::PredictedState predictStep(const cav_msgs::PredictedState& obj, const 
   CTRV_State next_state = CTRVPredict(state, delta_t);
 
   // Convert CTRV to predicted state object
-  cav_msgs::PredictedState pobj =
+  carma_perception_msgs::msg::PredictedState pobj =
       buildPredictionFromCTRVState(next_state, obj.predicted_position, obj.predicted_velocity);
 
   // Map process noise average to confidence
@@ -190,16 +191,17 @@ cav_msgs::PredictedState predictStep(const cav_msgs::PredictedState& obj, const 
 
   // Update header
   pobj.header = obj.header;
-  pobj.header.stamp += ros::Duration(delta_t);
-
+  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(delta_t * 1e9);
+  pobj.header.stamp = builtin_interfaces::msg::Time(updated_time);
+  
   return pobj;
 }
 
-std::vector<cav_msgs::PredictedState> predictPeriod(const cav_msgs::ExternalObject& obj, const double delta_t,
+std::vector<carma_perception_msgs::msg::PredictedState> predictPeriod(const carma_perception_msgs::msg::ExternalObject& obj, const double delta_t,
                                                     const double period, const float process_noise_max,
                                                     const double confidence_drop_rate)
 {
-  std::vector<cav_msgs::PredictedState> predicted_states = { predictStep(obj, delta_t, process_noise_max,
+  std::vector<carma_perception_msgs::msg::PredictedState> predicted_states = { predictStep(obj, delta_t, process_noise_max,
                                                                          confidence_drop_rate) };
 
   double t = delta_t;
