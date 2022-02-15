@@ -21,12 +21,7 @@ carma_check_ros_version(2)
 carma_package()
 
 find_package(ament_cmake_auto REQUIRED)
-#find_package(rclcpp REQUIRED)
-#find_package(rclcpp_components REQUIRED)
-#find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
-#find_package(carma_perception_msgs REQUIRED)
-#find_package(geometry_msgs REQUIRED)
 ament_auto_find_build_dependencies()
 
 set(dependencies
