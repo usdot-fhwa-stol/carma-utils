@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2021 LEIDOS.
+ * Copyright (C) 2019-2022 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,9 +17,12 @@
 #ifndef MOTION_PREDICT_H
 #define MOTION_PREDICT_H
 
-#include <cav_msgs/ExternalObject.h>
-#include <cav_msgs/PredictedState.h>
-#include <cav_msgs/ExternalObjectList.h>
+#include <rclcpp/rclcpp.hpp>
+#include <functional>
+#include <carma_perception_msgs/msg/external_object.hpp>
+#include <carma_perception_msgs/msg/predicted_state.hpp>
+#include <geometry_msgs/msg/pose.hpp>
+#include <geometry_msgs/msg/twist.hpp>
 #include <Eigen/Dense>
 #include <vector>
 
@@ -42,7 +45,7 @@ namespace cv{
     \param  delta_t time predicted into the future (sec).
     */
 
-    cav_msgs::PredictedState predictState(const geometry_msgs::Pose& pose, const geometry_msgs::Twist& twist,const double delta_t);
+    carma_perception_msgs::msg::PredictedState predictState(const geometry_msgs::msg::Pose& pose, const geometry_msgs::msg::Twist& twist,const double delta_t);
 
     /*! 
     \brief  externalPredict populates motion prediction with future pose and velocity.
@@ -53,7 +56,7 @@ namespace cv{
     \param  process_noise_max is the maximum process noise of the system
     */
 
-    cav_msgs::PredictedState externalPredict(const cav_msgs::ExternalObject &obj,const double delta_t,const double ax,const double ay,const double process_noise_max);
+    carma_perception_msgs::msg::PredictedState externalPredict(const carma_perception_msgs::msg::ExternalObject &obj,const double delta_t,const double ax,const double ay,const double process_noise_max);
 
     /*! 
     \brief  externalPeriod populates sequence of predicted motion of the object.
@@ -66,7 +69,7 @@ namespace cv{
     \param  confidence_drop_rate rate of drop in confidence with time
     */
 
-    std::vector<cav_msgs::PredictedState> predictPeriod(const cav_msgs::ExternalObject& obj, const double delta_t, const double period,const double ax,const double ay ,const double process_noise_max,const double confidence_drop_rate);
+    std::vector<carma_perception_msgs::msg::PredictedState> predictPeriod(const carma_perception_msgs::msg::ExternalObject& obj, const double delta_t, const double period,const double ax,const double ay ,const double process_noise_max,const double confidence_drop_rate);
 
     /*! 
     \brief  Mapping is used to map input range to an output range of different bandwidth.
@@ -75,7 +78,7 @@ namespace cv{
     \param  confidence_drop_rate rate of drop in confidence with time
     */
 
-    cav_msgs::PredictedState predictStep(const cav_msgs::PredictedState& obj, const double delta_t, const double confidence_drop_rate);
+    carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_msgs::msg::PredictedState& obj, const double delta_t, const double confidence_drop_rate);
    
 
 }//cv
