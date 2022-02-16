@@ -14,8 +14,6 @@
  * the License.
  */
 
-#pragma once
-
 #ifndef PREDICT_CTRV_H
 #define PREDICT_CTRV_H
 

@@ -14,8 +14,6 @@
  * the License.
  */
 
-#pragma once
-
 #ifndef MOTION_PREDICT_H
 #define MOTION_PREDICT_H
 
