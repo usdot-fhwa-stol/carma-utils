@@ -1,4 +1,3 @@
-
 # Copyright (C) 2020-2022 LEIDOS.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -24,25 +23,16 @@ find_package(ament_cmake_auto REQUIRED)
 find_package(Eigen3 REQUIRED)
 ament_auto_find_build_dependencies()
 
-set(dependencies
-    rclcpp
-    rclcpp_components
-    carma_perception_msgs
-    geometry_msgs
-    EIGEN3
-)
-
 # Includes
 include_directories(
   include
+  ${EIGEN3_INCLUDE_DIRS}
 )
 
-set(cpp_files
+ament_auto_add_library(motion_predict
   src/motion_predict.cpp
   src/predict_ctrv.cpp
 )
-
-carma_define_ament_library(${PROJECT_NAME} "${dependencies}" "${cpp_files}")
 
 # Testing
 if(BUILD_TESTING)  
@@ -62,4 +52,4 @@ if(BUILD_TESTING)
 
 endif()
 
-ament_package()
+ament_auto_package()
