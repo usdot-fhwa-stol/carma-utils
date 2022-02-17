@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>rapidjson</name>
+  <version>1.1.0</version>
+  <description>A fast JSON parser/generator for C++ with both SAX/DOM style API</description>
+  <url>https://github.com/Tencent/rapidjson</url>
+  
+  <author>Milo Yip</author>
+  <maintainer email="carma@dot.gov">carma</maintainer> <!-- CARMA Team only maintains this local fork not the mainline version -->
+
+  <license>MIT License</license>
+  
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>carma_cmake_common</build_depend>
+  <build_depend>ament_auto_cmake</build_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
