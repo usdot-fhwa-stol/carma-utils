@@ -178,7 +178,7 @@ namespace carma_ros2_utils
       RCLCPP_WARN_STREAM(get_logger(), "Sending SystemAlert likely failed as publisher is deactivated.");
     }
 
-    system_alert_pub_->publish(msg); 
+    system_alert_pub_->publish(pub_msg); 
   }
 
   void CarmaLifecycleNode::send_error_alert_msg_for_string(const std::string &alert_string)
