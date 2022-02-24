@@ -175,7 +175,7 @@ namespace carma_ros2_utils
     pub_msg.source_node = get_node_base_interface()->get_fully_qualified_name(); // The the source name for the message
 
     if (!system_alert_pub_->is_activated()) {
-      RCLCPP_ERROR_STREAM(get_logger(), "Sending SystemAlert likely failed as publisher is deactivated.");
+      RCLCPP_WARN_STREAM(get_logger(), "Sending SystemAlert likely failed as publisher is deactivated.");
     }
 
     system_alert_pub_->publish(msg); 
