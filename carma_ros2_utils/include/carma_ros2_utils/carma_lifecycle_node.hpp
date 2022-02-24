@@ -163,7 +163,7 @@ namespace carma_ros2_utils
    * \brief Callback triggered when transitioning from any state to ErrorProcessing due to the error signal.
    *        This method should be overriden to add any exception handling logic.
    * 
-   *        NOTE: CarmaLifecycleNode will automatically publish a SystemAlert before this is triggered. 
+   *        NOTE: CarmaLifecycleNode will automatically publish a FATAL SystemAlert before this is triggered. 
    * 
    * \param state The previous state 
    * 
