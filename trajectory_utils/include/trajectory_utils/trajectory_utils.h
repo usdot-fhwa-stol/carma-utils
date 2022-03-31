@@ -121,4 +121,4 @@ std::vector<T> shift_by_lookahead(std::vector<T> values, unsigned int lookahead_
   return output;
 }
 
-};  // namespace trajectory_utils
+}  // namespace trajectory_utils
