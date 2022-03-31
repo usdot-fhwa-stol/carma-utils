@@ -36,7 +36,7 @@ namespace uncertainty_tools {
 
     double sum_of_unc_sqr = 0;
     double sum_of_sqr_val = 0;
-    for (int i=0; i<values.size(); i++) {
+    for (size_t i=0; i<values.size(); i++) {
       const double val = values[i];
       const double unc = uncertainties[i];
       const double val_sqr = val * val;
@@ -54,4 +54,4 @@ namespace uncertainty_tools {
 
     return std::make_tuple(resultant_mag, var_of_resultant);
   }
-};
+}

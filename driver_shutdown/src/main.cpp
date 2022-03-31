@@ -26,4 +26,4 @@ int main(int argc, char** argv)
     driver_shutdown::DriverShutdown node;
     node.run();
     return 0;
-};
+}

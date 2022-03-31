@@ -247,6 +247,11 @@ namespace ros {
         const M_string & 	remappings = M_string() 
       );	
 
+      //TODO: once the ros2 migration is complete, assess the need for copy constructor like this;
+      //      In ros1 the NodeHandle class provides these copy constructors, but no operator= method.
+      //      It is good practice to provide both, and essential in this case, when NodeHandle has two
+      //      member pointers.  I suspect this may change with the conversion to ros2.
+      
       CARMANodeHandle	(	const NodeHandle & 	rhs	);
 
       CARMANodeHandle	(	const CARMANodeHandle & 	rhs	);

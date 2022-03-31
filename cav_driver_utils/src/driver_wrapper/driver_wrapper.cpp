@@ -47,6 +47,8 @@ int DriverWrapper::run()
     ROS_INFO_STREAM("Driver Shutting Down");
     shutdown();
     ros::shutdown();
+
+    return 0; // 0 indicates success
 }
 
 void DriverWrapper::status_publish_timer(const ros::TimerEvent &) const

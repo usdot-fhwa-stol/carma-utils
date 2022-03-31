@@ -65,7 +65,7 @@ public:
      * @param argv - Array of command line arguments
      * @param name - Node name
      */
-    DriverApplication(int argc, char** argv, std::string name = "driver") : status_(), spin_rate(50),shutdown_(false)
+    DriverApplication(int argc, char** argv, std::string name = "driver") : spin_rate(50), shutdown_(false), status_()
     {
         ros::init(argc,argv,name);
     }
@@ -124,6 +124,7 @@ private:
      */
     void status_publish_timer(const ros::TimerEvent &) const;
 
+    //TODO: fill out the param & return descriptions below
     /**
      * @brief Callback for bind service
      *
@@ -197,5 +198,4 @@ private:
     std::mutex bond_mutex_;
 };
 
-};
-
+}

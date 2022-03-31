@@ -29,4 +29,4 @@ namespace uncertainty_tools {
    * \return An std::tuple where the first value is the resultant magnitude and the second value is that magnitudes uncertainty.
    */ 
   std::tuple<double,double> computeVectorMagnitudeAndUncertainty(const std::vector<double>& values, const std::vector<double>& uncertainties);
-};
+}

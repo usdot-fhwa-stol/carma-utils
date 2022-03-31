@@ -72,6 +72,8 @@ int DriverApplication::run()
     ROS_INFO_STREAM("Driver Shutting Down");
     shutdown();
     ros::shutdown();
+
+    return 0; // 0 indicates successful execution
 }
 
 bool DriverStatusEquals(cav_msgs::DriverStatus a, cav_msgs::DriverStatus b)
@@ -109,6 +111,11 @@ void DriverApplication::status_publish_timer(const ros::TimerEvent &) const
 
 bool DriverApplication::bind_service_cb(cav_srvs::Bind::Request &req, cav_srvs::Bind::Response &res)
 {
+    //TODO: fix 2 defects in this code:
+    //      1. it always returns true; one of the cases should be false. If not, then why return any value?
+    //      2. Arg res is not used; if it is not supposed to be, then remove it from arg list
+    ROS_DEBUG_STREAM("Unused param res: " << res);
+
     std::unique_lock<std::mutex> lock(bond_mutex_);
     if(bond_map_.find(req.id) != bond_map_.end())
     {
@@ -120,9 +127,7 @@ bool DriverApplication::bind_service_cb(cav_srvs::Bind::Request &req, cav_srvs::
 
     std::shared_ptr<bond::Bond> bond(new bond::Bond(ros::this_node::getName() + "/bond", req.id));
     bond->start();
-
     bond_map_[req.id] = bond;
-
 
     return true;
 }
@@ -130,6 +135,9 @@ bool DriverApplication::bind_service_cb(cav_srvs::Bind::Request &req, cav_srvs::
 bool DriverApplication::get_driver_api_cb(cav_srvs::GetDriverApiRequest &req,
                                                  cav_srvs::GetDriverApiResponse &res)
 {
+    //TODO: if we really don't need the req arg, then remove it
+    ROS_DEBUG_STREAM("Unused param req: " << req);
+
     res.api_list = get_api();
 
     ROS_DEBUG_STREAM("Sending API");
@@ -138,6 +146,9 @@ bool DriverApplication::get_driver_api_cb(cav_srvs::GetDriverApiRequest &req,
 
 bool DriverApplication::get_status_cb(cav_srvs::GetDriverStatusRequest &req, cav_srvs::GetDriverStatusResponse &res)
 {
+    //TODO: if the args arent going to be used then remove them
+    ROS_DEBUG_STREAM("Unusd param req = " << req);
+
     res.status = status_;
 
     return true;

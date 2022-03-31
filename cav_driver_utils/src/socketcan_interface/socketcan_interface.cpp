@@ -115,10 +115,11 @@ public:
     CANInterface::_onError_signal_type& onError;
 
     SocketCANInterfacePimpl(CANInterface::_onFrameReceived_signal_type& fr,
-                            CANInterface::_onErrorFrameReceived_signal_type&efr,
-                            CANInterface::_onClosed_signal_type&cl,
+                            CANInterface::_onErrorFrameReceived_signal_type& efr,
+                            CANInterface::_onClosed_signal_type& cl,
                             CANInterface::_onOpen_signal_type& op,
-                            CANInterface::_onError_signal_type& oe) : onFrameReceived(fr),onErrorFrameReceived(efr),onClosed(cl),onOpen(op), onError(oe), is_open_(false)
+                            CANInterface::_onError_signal_type& oe) : is_open_(false), onFrameReceived(fr), onErrorFrameReceived(efr), onClosed(cl), 
+                                                                      onOpen(op), onError(oe)
     {
 
     }

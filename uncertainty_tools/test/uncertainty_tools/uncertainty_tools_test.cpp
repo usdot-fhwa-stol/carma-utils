@@ -37,7 +37,7 @@ TEST(uncertainty_tools_test, TestComputeVectorMagnitudeAndUncertainty)
   // First list empty
   try {
     std::vector<double> componentsE;
-    std::tuple<double,double> result = uncertainty_tools::computeVectorMagnitudeAndUncertainty(componentsE, uncertainties);
+    uncertainty_tools::computeVectorMagnitudeAndUncertainty(componentsE, uncertainties);
     FAIL() << "Exception not thrown when provided with empty lists";
   } catch (const std::invalid_argument& e) {
     // PASS
@@ -48,7 +48,7 @@ TEST(uncertainty_tools_test, TestComputeVectorMagnitudeAndUncertainty)
   // Second list empty
   try {
     std::vector<double> uncertaintiesE;
-    std::tuple<double,double> result = uncertainty_tools::computeVectorMagnitudeAndUncertainty(components, uncertaintiesE);
+    uncertainty_tools::computeVectorMagnitudeAndUncertainty(components, uncertaintiesE);
     FAIL() << "Exception not thrown when provided with empty lists";
   } catch (const std::invalid_argument& e) {
     // PASS
@@ -59,7 +59,7 @@ TEST(uncertainty_tools_test, TestComputeVectorMagnitudeAndUncertainty)
   // Both list empty
   try {
     std::vector<double> componentsE, uncertaintiesE;
-    std::tuple<double,double> result = uncertainty_tools::computeVectorMagnitudeAndUncertainty(componentsE, uncertaintiesE);
+    uncertainty_tools::computeVectorMagnitudeAndUncertainty(componentsE, uncertaintiesE);
     FAIL() << "Exception not thrown when provided with empty lists";
   } catch (const std::invalid_argument& e) {
     // PASS
@@ -70,7 +70,7 @@ TEST(uncertainty_tools_test, TestComputeVectorMagnitudeAndUncertainty)
   // Unequal Sizes
   try {
     components.push_back(0.1);
-    std::tuple<double,double> result = uncertainty_tools::computeVectorMagnitudeAndUncertainty(components, uncertainties);
+    uncertainty_tools::computeVectorMagnitudeAndUncertainty(components, uncertainties);
     FAIL() << "Exception not thrown when provided with empty lists";
   } catch (const std::invalid_argument& e) {
     // PASS
