@@ -37,14 +37,14 @@ TEST(Test_driver_shutdown_ros2, alert_test){
 
     worker_node->alert_callback(move(msg)); // Check non-shutdown
 
-    ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, node->get_current_state().id());
+    ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, worker_node->get_current_state().id());
 
     msg = std::make_unique<carma_msgs::msg::SystemAlert>();
     msg->type = carma_msgs::msg::SystemAlert::SHUTDOWN;
 
     worker_node->alert_callback(move(msg)); // Check shutdown
 
-    ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED, node->get_current_state().id());
+    ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED, worker_node->get_current_state().id());
 
 }
 
