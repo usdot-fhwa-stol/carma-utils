@@ -19,6 +19,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <functional>
 #include <carma_msgs/msg/system_alert.hpp>
+#include <gtest/gtest_prod.h>
 
 #include <carma_ros2_utils/carma_lifecycle_node.hpp>
 
@@ -53,6 +54,7 @@ namespace driver_shutdown_ros2
     // Overrides
     ////
     carma_ros2_utils::CallbackReturn handle_on_configure(const rclcpp_lifecycle::State &);
+    carma_ros2_utils::CallbackReturn handle_on_shutdown(const rclcpp_lifecycle::State &);
 
   };
 

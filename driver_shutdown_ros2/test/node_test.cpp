@@ -22,6 +22,7 @@
 
 #include "driver_shutdown_ros2/driver_shutdown_ros2_node.hpp"
 
+namespace driver_shutdown_ros2 {
 
 // Test shutdown behavior
 TEST(Test_driver_shutdown_ros2, alert_test){
@@ -45,6 +46,9 @@ TEST(Test_driver_shutdown_ros2, alert_test){
     worker_node->alert_callback(move(msg)); // Check shutdown
 
     ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED, worker_node->get_current_state().id());
+
+    ASSERT_FALSE(rclcpp::ok()); // Verify that rclcpp::shutdown was called
+}
 
 }
 

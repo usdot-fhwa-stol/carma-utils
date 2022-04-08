@@ -46,6 +46,19 @@ namespace driver_shutdown_ros2
     }
   }
 
+  carma_ros2_utils::CallbackReturn Node::handle_on_shutdown(const rclcpp_lifecycle::State &)
+  {
+
+    RCLCPP_INFO_STREAM(  get_logger(), "Shutdown node forcibly on shutdown transition. This is expected behavior.");
+    
+    // Entering a finalized state does not actually cause a lifecycle nodes process to end. 
+    // Instead we must forcibly tell rclcpp to shutdown which should cause the running executor of this process to exit spin()
+    // Then the main function can exit and finally the launch file should close
+    rclcpp::shutdown(nullptr, "Shutdown node exiting from on_shutdown which is expected.");
+
+    return CallbackReturn::SUCCESS;
+  }
+
 } // driver_shutdown_ros2
 
 #include "rclcpp_components/register_node_macro.hpp"
