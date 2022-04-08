@@ -38,7 +38,9 @@ namespace driver_shutdown_ros2
 
   void Node::alert_callback(carma_msgs::msg::SystemAlert::UniquePtr msg)
   {
-    RCLCPP_INFO_STREAM(  get_logger(), "system alert callback called with value: " << (int) msg->type);
+    RCLCPP_INFO_STREAM(  get_logger(), "system alert callback called with value: " << (int) msg->type 
+      << " description: " << msg->description 
+      << " source node: " << msg->source_node);
 
     if (msg->type == carma_msgs::msg::SystemAlert::SHUTDOWN) {
       // If we received a shutdown then we will shutdown
