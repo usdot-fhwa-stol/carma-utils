@@ -13,69 +13,99 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(uncertainty_tools)
 
-## Compile as C++14, supported in ROS Noetic and newer
-add_compile_options(-std=c++14)
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+find_package(carma_cmake_common REQUIRED)
+carma_package()
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS)
+find_package(ros_environment REQUIRED)
+set(ROS_VERSION $ENV{ROS_VERSION})
 
+if(${ROS_VERSION} EQUAL 1)
+ 
+  ## Find catkin macros and libraries
+  ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+  ## is used, also find other catkin packages
+  find_package(catkin REQUIRED COMPONENTS)
 
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
-  # CATKIN_DEPENDS roscpp
-  # DEPENDS system_lib
-)
+  catkin_package(
+    INCLUDE_DIRS include
+    LIBRARIES ${PROJECT_NAME}
+  )
 
-###########
-## Build ##
-###########
+  ###########
+  ## Build ##
+  ###########
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(
- include
-  ${catkin_INCLUDE_DIRS}
-)
+    ## Specify additional locations of header files
+    ## Your package locations should be listed before other locations
+    include_directories(
+      include
+      ${catkin_INCLUDE_DIRS}
+    )
 
-file(GLOB_RECURSE headers */*.hpp */*.h)
-
-add_library(${PROJECT_NAME} src/${PROJECT_NAME}/${PROJECT_NAME}.cpp)
-target_link_libraries(${PROJECT_NAME})
-add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+  add_library(${PROJECT_NAME} src/${PROJECT_NAME}/${PROJECT_NAME}.cpp)
+  target_link_libraries(${PROJECT_NAME})
+  add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
 
-#############
-## Install ##
-#############
+  #############
+  ## Install ##
+  #############
 
-## Mark executables and/or libraries for installation
- install(TARGETS ${PROJECT_NAME}
-   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
+  ## Mark executables and/or libraries for installation
+  install(TARGETS ${PROJECT_NAME}
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
 
-## Mark cpp header files for installation
- install(DIRECTORY include/${PROJECT_NAME}/
-   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-   FILES_MATCHING PATTERN "*.h"
-   PATTERN ".svn" EXCLUDE
- )
+  ## Mark cpp header files for installation
+  install(DIRECTORY include/${PROJECT_NAME}/
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+    FILES_MATCHING PATTERN "*.h"
+    PATTERN ".svn" EXCLUDE
+  )
 
-##########
-## Test ##
-##########
+  ##########
+  ## Test ##
+  ##########
 
-# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-catkin_add_gmock(${PROJECT_NAME}-test test/${PROJECT_NAME}/uncertainty_tools_test.cpp)
-if(TARGET ${PROJECT_NAME}-test)
-  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
+  # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+  catkin_add_gmock(${PROJECT_NAME}-test test/${PROJECT_NAME}/uncertainty_tools_test.cpp)
+  if(TARGET ${PROJECT_NAME}-test)
+    target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
+  endif()
+
+else() #ROS2
+
+  find_package(ament_cmake_auto REQUIRED)
+
+  include_directories(
+    include
+  )
+
+  ament_auto_add_library(${PROJECT_NAME}
+    src/${PROJECT_NAME}/${PROJECT_NAME}.cpp)
+
+
+  ament_export_include_directories(include)
+  ament_export_libraries(${PROJECT_NAME})
+
+  # Testing
+  if(BUILD_TESTING) 
+    find_package(ament_lint_auto REQUIRED)
+    ament_lint_auto_find_test_dependencies()
+
+    ament_add_gtest(${PROJECT_NAME}-test test/${PROJECT_NAME}/uncertainty_tools_test.cpp)
+    ament_target_dependencies(${PROJECT_NAME}-test ${${PROJECT_NAME}_FOUND_TEST_DEPENDS})
+
+    target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
+
+  endif()
+
+  ament_auto_package()
+
 endif()
+

@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
-add_compile_options(-std=c++14)
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 project(socketcan_bridge)
+
+find_package(carma_cmake_common REQUIRED)
+carma_check_ros_version(1)
+carma_package()
 
 find_package(catkin REQUIRED
   COMPONENTS

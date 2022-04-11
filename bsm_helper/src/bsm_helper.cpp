@@ -8,6 +8,8 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  License for the specific language governing permissions and limitations under
  the License.
 */
+#include <sstream>
+#include <ios>
 #include "bsm_helper/bsm_helper.h"
 
 namespace BSMHelper{

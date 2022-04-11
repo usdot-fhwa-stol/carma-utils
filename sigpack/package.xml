@@ -15,4 +15,5 @@
   <url type="bugtracker">https://sourceforge.net/p/sigpack/discussion/general/</url>
   <author>crolen</author> <!-- Origional SigPack author user name on SourceForge. No email is provided -->
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>carma_cmake_common</build_depend>
 </package>

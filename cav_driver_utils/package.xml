@@ -8,6 +8,7 @@
   <author email="watters@torcrobotics.com">Thomas Watters</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>carma_cmake_common</build_depend>
 
   <depend>bondcpp</depend>
   <depend>cav_msgs</depend>
