@@ -51,5 +51,5 @@ std::vector<T, A> downsample_vector(const std::vector<T, A>& input, unsigned int
 
   return output;
 }
-};  // namespace containers
-};  // namespace carma_utils
+}  // namespace containers
+}  // namespace carma_utils
