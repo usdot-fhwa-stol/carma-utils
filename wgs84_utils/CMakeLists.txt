@@ -13,80 +13,117 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(wgs84_utils)
 
 find_package(carma_cmake_common REQUIRED)
-carma_check_ros_version(1)
 carma_package()
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  tf2
-  tf2_ros
-  tf2_geometry_msgs
-)
+find_package(ros_environment REQUIRED)
+set(ROS_VERSION $ENV{ROS_VERSION})
 
-find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED)
+if(${ROS_VERSION} EQUAL 1)
 
+  ## Find catkin macros and libraries
+  ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+  ## is used, also find other catkin packages
+  find_package(catkin REQUIRED COMPONENTS
+    roscpp
+    tf2
+    tf2_ros
+    tf2_geometry_msgs
+  )
 
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES wgs84_utils_library
-  CATKIN_DEPENDS roscpp tf2 tf2_ros tf2_geometry_msgs
-#  DEPENDS system_lib
-)
-
-###########
-## Build ##
-###########
-
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(
- include
-  ${catkin_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIR}
-  ${Boost_INCLUDE_DIRS}
-)
-
-file(GLOB_RECURSE headers */*.hpp */*.h)
-
-add_library(wgs84_utils_library src/wgs84_utils/wgs84_utils.cpp src/wgs84_utils/proj_tools.cpp)
-target_link_libraries(wgs84_utils_library)
-add_dependencies(wgs84_utils_library ${catkin_EXPORTED_TARGETS})
+  find_package(Eigen3 REQUIRED)
+  find_package(Boost REQUIRED)
 
 
-#############
-## Install ##
-#############
+  catkin_package(
+    INCLUDE_DIRS include
+    LIBRARIES wgs84_utils_library
+    CATKIN_DEPENDS roscpp tf2 tf2_ros tf2_geometry_msgs
+  #  DEPENDS system_lib
+  )
 
-## Mark executables and/or libraries for installation
- install(TARGETS wgs84_utils_library
-   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
+  ###########
+  ## Build ##
+  ###########
 
-## Mark cpp header files for installation
- install(DIRECTORY include/${PROJECT_NAME}/
-   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-   FILES_MATCHING PATTERN "*.h"
-   PATTERN ".svn" EXCLUDE
- )
+  ## Specify additional locations of header files
+  ## Your package locations should be listed before other locations
+  include_directories(
+  include
+    ${catkin_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
+  )
 
-##########
-## Test ##
-##########
+  file(GLOB_RECURSE headers */*.hpp */*.h)
 
-catkin_add_gmock(wgs84_utils_test test/test_main.cpp test/proj_tools_test.cpp)
+  add_library(wgs84_utils_library src/wgs84_utils/wgs84_utils.cpp src/wgs84_utils/proj_tools.cpp)
+  target_link_libraries(wgs84_utils_library)
+  add_dependencies(wgs84_utils_library ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries( wgs84_utils_test
-  wgs84_utils_library
-  ${Boost_LIBRARIES} 
-  ${catkin_LIBRARIES}
-)
+
+  #############
+  ## Install ##
+  #############
+
+  ## Mark executables and/or libraries for installation
+  install(TARGETS wgs84_utils_library
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+
+  ## Mark cpp header files for installation
+  install(DIRECTORY include/${PROJECT_NAME}/
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+    FILES_MATCHING PATTERN "*.h"
+    PATTERN ".svn" EXCLUDE
+  )
+
+  ##########
+  ## Test ##
+  ##########
+
+  catkin_add_gmock(wgs84_utils_test test/test_main.cpp test/proj_tools_test.cpp)
+
+  target_link_libraries( wgs84_utils_test
+    wgs84_utils_library
+    ${Boost_LIBRARIES} 
+    ${catkin_LIBRARIES}
+  )
+
+else() #ROS2
+
+  find_package(ament_cmake_auto REQUIRED)
+  ament_auto_find_build_dependencies()
+
+  include_directories(
+    include
+  )
+
+  ament_auto_add_library(wgs84_utils_library
+    src/wgs84_utils/wgs84_utils.cpp
+    src/wgs84_utils/proj_tools.cpp
+  )
+
+  ament_export_include_directories(include)
+  ament_export_libraries(wgs84_utils_library)
+
+  # Testing
+  if(BUILD_TESTING) 
+    find_package(ament_lint_auto REQUIRED)
+    ament_lint_auto_find_test_dependencies()
+
+    ament_add_gtest(wgs84_utils_test test/proj_tools_test.cpp test/test_main.cpp)
+    ament_target_dependencies(wgs84_utils_test ${${PROJECT_NAME}_FOUND_TEST_DEPENDS})
+
+    target_link_libraries(wgs84_utils_test wgs84_utils_library)
+
+  endif()
+
+  ament_auto_package()
+
+endif()

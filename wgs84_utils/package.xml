@@ -7,7 +7,8 @@
   <license>BSD</license>
   <author email="watters@torcrobotics.com">Thomas Watters</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend condition="$ROS_VERSION==1">catkin</buildtool_depend>
+  <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake_auto</buildtool_depend>
   <build_depend>carma_cmake_common</build_depend>
   <depend>roscpp</depend>
   <depend>tf2</depend>
@@ -15,9 +16,11 @@
   <depend version_gte="0.5.16">tf2_geometry_msgs</depend>
   
 
-  <!-- The export tag contains other, unspecified, tags -->
-  <export>
-    <!-- Other tools can request additional information be placed here -->
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
 
+  <export>
+    <build_type condition="$ROS_VERSION == 1">catkin</build_type>
+    <build_type condition="$ROS_VERSION == 2">ament_cmake</build_type>
   </export>
 </package>
