@@ -15,8 +15,6 @@
  */
 
 #include <gtest/gtest.h>
-<<<<<<< HEAD
-=======
 #include <wgs84_utils/proj_tools.h>
 
 TEST(proj_tools, getAxisFromProjString)
@@ -107,7 +105,6 @@ TEST(proj_tools, getRotationOfNEDFromProjAxis) {
   ASSERT_THROW(wgs84_utils::proj_tools::getRotationOfNEDFromProjAxis("exception"), std::invalid_argument);
   
 }
->>>>>>> develop
 
 // Run all the tests
 int main(int argc, char** argv)
