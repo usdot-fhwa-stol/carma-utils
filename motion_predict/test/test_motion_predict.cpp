@@ -14,7 +14,7 @@
  * the License.
  */
 
-#include "motion_predict/motion_predict.h"
+#include "motion_predict/motion_predict.hpp"
 #include <gtest/gtest.h>
 
 namespace motion_predict{
@@ -49,19 +49,19 @@ namespace cv{
 
     TEST(MotionPredictTest, testpredictState)
     {
-        geometry_msgs::Pose pose;
+        geometry_msgs::msg::Pose pose;
         pose.position.x = 1.3;
         pose.position.y = 1.4;
         pose.position.z = 2.5;
 
-        geometry_msgs::Twist twist;
+        geometry_msgs::msg::Twist twist;
         twist.linear.x = 4.5;
         twist.linear.y = 2;
         twist.linear.z = 5;
   
         double delta_t=0.1;
 
-        cav_msgs::PredictedState pobj = predictState(pose,twist,delta_t);
+        carma_perception_msgs::msg::PredictedState pobj = predictState(pose,twist,delta_t);
                  
         EXPECT_NEAR(1.75, pobj.predicted_position.position.x ,0.00001);
         EXPECT_NEAR(1.6,  pobj.predicted_position.position.y,0.00001);
@@ -80,14 +80,14 @@ namespace cv{
         double ay=9;
         double process_noise_max=1000;
 
-        cav_msgs::ExternalObject obj;
+        carma_perception_msgs::msg::ExternalObject obj;
 
         obj.pose.covariance[0]=1; // X
   		obj.pose.covariance[7]=1; // Y
         obj.velocity.covariance[0]=999; // Vx
         obj.velocity.covariance[7]=999; // Vy
 
-       cav_msgs::PredictedState pobj=externalPredict(obj,delta_t,ax,ay,process_noise_max);        
+       carma_perception_msgs::msg::PredictedState pobj=externalPredict(obj,delta_t,ax,ay,process_noise_max);        
                  
         EXPECT_NEAR(0.99, pobj.predicted_position_confidence ,0.00001);
         EXPECT_NEAR(0.000910911, pobj.predicted_velocity_confidence,0.00001);
@@ -102,14 +102,14 @@ namespace cv{
         double ay=9;
         double process_noise_max=1000;
 
-        cav_msgs::ExternalObject obj;
+        carma_perception_msgs::msg::ExternalObject obj;
 
         obj.pose.covariance[0]=999; // X
   		obj.pose.covariance[7]=999; // Y
         obj.velocity.covariance[0]=1; // Vx
         obj.velocity.covariance[7]=1; // Vy
 
-        cav_msgs::PredictedState pobj=externalPredict(obj,delta_t,ax,ay,process_noise_max);        
+        carma_perception_msgs::msg::PredictedState pobj=externalPredict(obj,delta_t,ax,ay,process_noise_max);        
                  
         EXPECT_NEAR(0.000990766, pobj.predicted_position_confidence ,0.00001);
         EXPECT_NEAR(0.99991, pobj.predicted_velocity_confidence,0.00001);
@@ -123,14 +123,14 @@ namespace cv{
         double ay=9;
         double process_noise_max=1000;
 
-        cav_msgs::ExternalObject obj;
+        carma_perception_msgs::msg::ExternalObject obj;
 
         obj.pose.covariance[0]=1; // X
   		obj.pose.covariance[7]=1; // Y
         obj.velocity.covariance[0]=999; // Vx
         obj.velocity.covariance[7]=999; // Vy
 
-        cav_msgs::PredictedState pobj=externalPredict(obj,delta_t,ax,ay,process_noise_max);        
+        carma_perception_msgs::msg::PredictedState pobj=externalPredict(obj,delta_t,ax,ay,process_noise_max);        
                  
         EXPECT_NEAR(-0.00225225, pobj.predicted_position_confidence ,0.00001);
         EXPECT_NEAR(-0.00800801, pobj.predicted_velocity_confidence,0.00001);
@@ -144,7 +144,7 @@ namespace cv{
         double delta_t=0.1;
         double confidence_drop_rate=0.1;
 
-        cav_msgs::PredictedState pobj;
+        carma_perception_msgs::msg::PredictedState pobj;
 
         pobj.predicted_position.position.x=1.3; // Predicted Position X
   		pobj.predicted_position.position.y=1.4; // Predicted Position Y
@@ -180,7 +180,7 @@ namespace cv{
         double confidence_drop_rate=0.1;
         double period=1.0;
 
-        cav_msgs::ExternalObject obj;
+        carma_perception_msgs::msg::ExternalObject obj;
 
         obj.pose.pose.position.x=1.3;
         obj.pose.pose.position.y=1.4;
@@ -194,7 +194,7 @@ namespace cv{
         obj.velocity.covariance[0]=999; // Vx
         obj.velocity.covariance[7]=999; // Vy
  
-        std::vector<cav_msgs::PredictedState> plist=predictPeriod(obj,delta_t,period,ax,ay ,process_noise_max,confidence_drop_rate);        
+        std::vector<carma_perception_msgs::msg::PredictedState> plist=predictPeriod(obj,delta_t,period,ax,ay ,process_noise_max,confidence_drop_rate);        
                  
         EXPECT_NEAR(1.75, plist[0].predicted_position.position.x ,0.00001);
         EXPECT_NEAR(1.6,  plist[0].predicted_position.position.y,0.0001);

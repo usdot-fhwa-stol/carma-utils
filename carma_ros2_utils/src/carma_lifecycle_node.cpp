@@ -125,18 +125,19 @@ namespace carma_ros2_utils
       error_string = "Exception occurred during lifecycle state transitions. Look for 'Caught exception' in the logs for details.";
       RCLCPP_ERROR_STREAM(get_logger(), error_string);
 
-      try
-      {
+    }
 
-        send_error_alert_msg_for_string(error_string);
-        RCLCPP_ERROR_STREAM(get_logger(), "Sent on_error system alert");
-      }
-      catch (const std::exception &e)
-      {
+    try
+    {
 
-        RCLCPP_ERROR_STREAM(get_logger(), "Failed to send on_error system alert. Forcing shutdown.");
-        return CallbackReturn::FAILURE;
-      }
+      send_error_alert_msg_for_string(error_string);
+      RCLCPP_ERROR_STREAM(get_logger(), "Sent on_error system alert");
+    }
+    catch (const std::exception &e)
+    {
+
+      RCLCPP_ERROR_STREAM(get_logger(), "Failed to send on_error system alert. Forcing shutdown.");
+      return CallbackReturn::FAILURE;
     }
 
     // Call the user error handling before clean up of the publishers to allow them to publish if needed
@@ -173,7 +174,11 @@ namespace carma_ros2_utils
 
     pub_msg.source_node = get_node_base_interface()->get_fully_qualified_name(); // The the source name for the message
 
-    system_alert_pub_->publish(msg); 
+    if (!system_alert_pub_->is_activated()) {
+      RCLCPP_WARN_STREAM(get_logger(), "Sending SystemAlert likely failed as publisher is deactivated.");
+    }
+
+    system_alert_pub_->publish(pub_msg); 
   }
 
   void CarmaLifecycleNode::send_error_alert_msg_for_string(const std::string &alert_string)

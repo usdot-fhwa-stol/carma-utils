@@ -67,5 +67,5 @@ void time_to_speed_constjerk(const std::vector<double>& downtracks, const std::v
  */ 
 void trajectory_to_downtrack_time(const std::vector<cav_msgs::TrajectoryPlanPoint>& traj_points,
                                   std::vector<double>* downtrack, std::vector<double>* times);
-};  // namespace conversions
-};  // namespace trajectory_utils
+}  // namespace conversions
+}  // namespace trajectory_utils
