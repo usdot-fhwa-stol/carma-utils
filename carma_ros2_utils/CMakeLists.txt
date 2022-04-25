@@ -15,6 +15,9 @@ include_directories(
   include
 )
 
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
+
 # Build
 ament_auto_add_library(${PROJECT_NAME} SHARED
   src/carma_lifecycle_node.cpp
