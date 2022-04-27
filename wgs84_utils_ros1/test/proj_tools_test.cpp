@@ -14,7 +14,7 @@
  * the License.
  */
 #include <gtest/gtest.h>
-#include <wgs84_utils/proj_tools.h>
+#include <wgs84_utils_ros1/proj_tools.h>
 
 
 TEST(proj_tools, getAxisFromProjString)

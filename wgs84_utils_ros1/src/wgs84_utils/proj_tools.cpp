@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <wgs84_utils/proj_tools.h>
+#include <wgs84_utils_ros1/proj_tools.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <vector>
 #include <string>
