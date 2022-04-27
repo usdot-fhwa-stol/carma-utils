@@ -31,7 +31,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
-#include "wgs84_utils/wgs84_utils.h"
+#include "wgs84_utils_ros1/wgs84_utils.h"
 
 #include <cmath>
 /**
