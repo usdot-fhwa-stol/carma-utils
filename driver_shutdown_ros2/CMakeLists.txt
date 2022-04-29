@@ -1,5 +1,5 @@
 
-# Copyright (C) 2019-2021 LEIDOS.
+# Copyright (C) 2022 LEIDOS.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -14,61 +14,57 @@
 # the License.
 
 cmake_minimum_required(VERSION 3.5)
-project(wgs84_utils)
+project(driver_shutdown_ros2)
 
 # Declare carma package and check ROS version
 find_package(carma_cmake_common REQUIRED)
 carma_check_ros_version(2)
 carma_package()
 
+## Find dependencies using ament auto
 find_package(ament_cmake_auto REQUIRED)
-find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED)
-
-find_package(ament_lint_auto REQUIRED)
-
 ament_auto_find_build_dependencies()
 
-###########
-## Build ##
-###########
+# Name build targets
+set(node_exec driver_shutdown_ros2_node_exec)
+set(node_lib driver_shutdown_ros2_node)
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
+# Includes
 include_directories(
   include
-  ${EIGEN3_INCLUDE_DIR}
-  ${Boost_INCLUDE_DIRS}
-  ${tf2_INCLUDE_DIRS}
 )
 
-file(GLOB_RECURSE headers */*.hpp */*.h)
-
-ament_auto_add_library(wgs84_utils_library SHARED 
-                        src/wgs84_utils/wgs84_utils.cpp 
-                        src/wgs84_utils/proj_tools.cpp)
-
-target_link_libraries(wgs84_utils_library)
-
-# Install
-ament_auto_package(
-        INSTALL_TO_SHARE
+# Build
+ament_auto_add_library(${node_lib} SHARED
+        src/driver_shutdown_ros2_node.cpp
 )
 
-##########
-## Test ##
-##########
+ament_auto_add_executable(${node_exec} 
+        src/main.cpp 
+)
 
+# Register component
+rclcpp_components_register_nodes(${node_lib} "driver_shutdown_ros2::Node")
 
+# All locally created targets will need to be manually linked
+# ament auto will handle linking of external dependencies
+target_link_libraries(${node_exec}
+        ${node_lib}
+)
+
+# Testing
 if(BUILD_TESTING)  
 
+  find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies() # This populates the ${${PROJECT_NAME}_FOUND_TEST_DEPENDS} variable
 
-  ament_add_gtest(test_wgs84_utils test/test_main.cpp)
+  ament_add_gtest(test_driver_shutdown_ros2 test/node_test.cpp)
 
-  ament_target_dependencies(test_wgs84_utils ${${PROJECT_NAME}_FOUND_TEST_DEPENDS})
+  ament_target_dependencies(test_driver_shutdown_ros2 ${${PROJECT_NAME}_FOUND_TEST_DEPENDS})
 
-  target_link_libraries(test_wgs84_utils wgs84_utils_library)
+  target_link_libraries(test_driver_shutdown_ros2 ${node_lib})
 
 endif()
 
+# Install
+ament_auto_package()
