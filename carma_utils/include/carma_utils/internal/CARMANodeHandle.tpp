@@ -300,6 +300,9 @@ namespace ros {
   template<class Handler , class Obj >
   Timer CARMANodeHandle::createTimer (Rate r, Handler h, Obj o, bool oneshot, bool autostart) {
 
+    //TODO: if param o is not needed, remove it
+    ROS_DEBUG_STREAM("Unused param: o");
+
     auto func = callbackWrapper<const TimerEvent&>(h);
 
     return NodeHandle::createTimer (r.expectedCycleTime(), 

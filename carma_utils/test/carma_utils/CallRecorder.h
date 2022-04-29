@@ -67,4 +67,4 @@ namespace CallRecorder {
     callMap_[testKey].clear();
     callMap_.erase(testKey);
   }
-};
+}

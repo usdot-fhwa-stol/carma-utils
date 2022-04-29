@@ -20,7 +20,7 @@ namespace carma_utils
 {
 namespace timers
 {
-ROSTimerFactory::~ROSTimerFactory(){};
+ROSTimerFactory::~ROSTimerFactory() {}
 std::unique_ptr<Timer> ROSTimerFactory::buildTimer(uint32_t id, ros::Duration duration,
                                                    std::function<void(const ros::TimerEvent&)> callback, bool oneshot,
                                                    bool autostart)
