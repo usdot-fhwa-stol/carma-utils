@@ -209,11 +209,11 @@ TEST(CARMANodeHandleTests, testCARMANodeHandleConstructor)
 {
   CARMANodeHandle cnh;
 
-  cnh.setExceptionCallback([](const std::exception& exp) -> void {});
+  cnh.setExceptionCallback([](const std::exception&) -> void {});
 
   cnh.setShutdownCallback([]() -> void {});
 
-  cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr& msg) -> void {});
+  cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr&) -> void {});
 
   CARMANodeHandle cnh2(cnh);
 
@@ -296,14 +296,14 @@ TEST(CARMANodeHandleTests, testCARMANodeHandleSubscriber)
   Publisher p1 = cnh.advertise<std_msgs::Bool>("p", 1);
 
   Publisher p2 = cnh.advertise<std_msgs::Bool>("p", 1,
-    [](const SingleSubscriberPublisher& ssp) -> void {CallRecorder::markCalled("testCARMANodeHandleSubscriber", "::lambda-p1");},
-    [](const SingleSubscriberPublisher& ssp) -> void {CallRecorder::markCalled("testCARMANodeHandleSubscriber", "::lambda-p2");}
+    [](const SingleSubscriberPublisher&) -> void {CallRecorder::markCalled("testCARMANodeHandleSubscriber", "::lambda-p1");},
+    [](const SingleSubscriberPublisher&) -> void {CallRecorder::markCalled("testCARMANodeHandleSubscriber", "::lambda-p2");}
   );
 
   AdvertiseOptions adv_ops;
   adv_ops.init<std_msgs::Bool>("p", 1, 
-    [](const SingleSubscriberPublisher& ssp) -> void {CallRecorder::markCalled("testCARMANodeHandleSubscriber", "::lambda-p3");},
-    [](const SingleSubscriberPublisher& ssp) -> void {CallRecorder::markCalled("testCARMANodeHandleSubscriber", "::lambda-p4");}
+    [](const SingleSubscriberPublisher&) -> void {CallRecorder::markCalled("testCARMANodeHandleSubscriber", "::lambda-p3");},
+    [](const SingleSubscriberPublisher&) -> void {CallRecorder::markCalled("testCARMANodeHandleSubscriber", "::lambda-p4");}
   );
   Publisher p3 = cnh.advertise(adv_ops);
 
@@ -526,7 +526,7 @@ TEST (CARMANodeHandleTests, testCARMANodeHandleSystemAlert) {
   CallRecorder::clearHistory("testCARMANodeHandleSystemAlert");
   CARMANodeHandle cnh;
 
-  cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr& msg) -> void {
+  cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr&) -> void {
     CallRecorder::markCalled("testCARMANodeHandleSystemAlert","::alertLambda1");
   });
 
@@ -540,12 +540,12 @@ TEST (CARMANodeHandleTests, testCARMANodeHandleExceptionAndShutdown) {
   CallRecorder::clearHistory("testCARMANodeHandleExceptionAndShutdown");
   CARMANodeHandle cnh;
 
-  cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr& msg) -> void {
+  cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr&) -> void {
     CallRecorder::markCalled("testCARMANodeHandleExceptionAndShutdown","::alertLambda1");
     throw std::invalid_argument("This is not a real exception and is coming from a unit test");
   });
 
-  cnh.setExceptionCallback([](const std::exception& e) -> void {
+  cnh.setExceptionCallback([](const std::exception&) -> void {
     CallRecorder::markCalled("testCARMANodeHandleExceptionAndShutdown","::exceptionLambda1");
   });
 
@@ -568,11 +568,11 @@ TEST (CARMANodeHandleTests, testCARMANodeHandleSpin) {
   CallRecorder::clearHistory("testCARMANodeHandleSpin");
   CARMANodeHandle cnh;
 
-  cnh.setExceptionCallback([](const std::exception& exp) -> void {});
+  cnh.setExceptionCallback([](const std::exception&) -> void {});
 
   cnh.setShutdownCallback([]() -> void {});
 
-  cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr& msg) -> void {});
+  cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr&) -> void {});
   cnh.setSpinRate(20.0);
   cnh.setSpinCallback([]() -> bool {
     static int callCount = 0;
@@ -599,11 +599,11 @@ TEST(CARMANodeHandleTests, testSetSpinException)
 
   bool gotException = false;
   bool shutdown_called = false;
-  cnh.setExceptionCallback([&gotException](const std::exception& exp) -> void { gotException = true; });
+  cnh.setExceptionCallback([&gotException](const std::exception&) -> void { gotException = true; });
 
   cnh.setShutdownCallback([&shutdown_called]() -> void { shutdown_called = true; });
 
-  cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr& msg) -> void {});
+  cnh.setSystemAlertCallback([](const cav_msgs::SystemAlertConstPtr&) -> void {});
 
   cnh.setSpinCallback([]() -> bool {return true;});
 

@@ -31,7 +31,7 @@ ros::Time TestTimer::getTime()
   return ros::Time::now();
 }
 
-TestTimer::TestTimer(){};
+TestTimer::TestTimer() {}
 TestTimer::~TestTimer()
 {
   {
@@ -42,7 +42,7 @@ TestTimer::~TestTimer()
   {
     timer_thread_.join();
   }
-};
+}
 
 //// Overrides
 void TestTimer::initializeTimer(ros::Duration duration, std::function<void(const ros::TimerEvent&)> callback,

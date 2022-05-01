@@ -208,10 +208,10 @@ namespace ros {
     SubscriberStatusCallback new_connect_cb = connect_cb;
     SubscriberStatusCallback new_disconnect_cb = disconnect_cb;
     if (!validFunctionPtr(connect_cb)) {
-      new_connect_cb = [](const SingleSubscriberPublisher& ssp) -> void {};
+      new_connect_cb = [](const SingleSubscriberPublisher&) -> void {};
     }
     if (!validFunctionPtr(disconnect_cb)) {
-      new_disconnect_cb = [](const SingleSubscriberPublisher& ssp) -> void {};
+      new_disconnect_cb = [](const SingleSubscriberPublisher&) -> void {};
     }
 
     auto connect_func = callbackWrapper<const SingleSubscriberPublisher&>(new_connect_cb);
@@ -298,10 +298,7 @@ namespace ros {
   }
 
   template<class Handler , class Obj >
-  Timer CARMANodeHandle::createTimer (Rate r, Handler h, Obj o, bool oneshot, bool autostart) {
-
-    //TODO: if param o is not needed, remove it
-    ROS_DEBUG_STREAM("Unused param: o");
+  Timer CARMANodeHandle::createTimer (Rate r, Handler h, Obj, bool oneshot, bool autostart) {
 
     auto func = callbackWrapper<const TimerEvent&>(h);
 

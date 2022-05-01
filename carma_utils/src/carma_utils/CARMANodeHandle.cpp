@@ -282,10 +282,10 @@ namespace ros {
     checkPublisherInput(ops.topic);
     // Check if callbacks are set and if not set them to empty lambdas to prevent need for empty checks throughout code
     if (!validFunctionPtr(ops.connect_cb)) {
-      ops.connect_cb = [](const SingleSubscriberPublisher& ssp) -> void {};
+      ops.connect_cb = [](const SingleSubscriberPublisher&) -> void {};
     }
     if (!validFunctionPtr(ops.disconnect_cb)) {
-      ops.disconnect_cb = [](const SingleSubscriberPublisher& ssp) -> void {};
+      ops.disconnect_cb = [](const SingleSubscriberPublisher&) -> void {};
     }
 
     auto connect_func = callbackWrapper<const SingleSubscriberPublisher&>(ops.connect_cb);
