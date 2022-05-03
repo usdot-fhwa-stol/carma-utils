@@ -20,6 +20,11 @@ ament_auto_add_library(${PROJECT_NAME} SHARED
   src/carma_lifecycle_node.cpp
 )
 
+ament_auto_add_library(carma_ros2_utils_timers SHARED
+  src/timers/testing/TestTimer.cpp
+  src/timers/testing/TestTimerFactory.cpp
+)
+
 ament_auto_add_library(lifecycle_component_wrapper SHARED
   src/lifecycle_component_wrapper.cpp
 )
@@ -45,6 +50,11 @@ ament_auto_add_executable(carma_component_container_mt
 )
 
 # Link local targets
+
+target_link_libraries(carma_ros2_utils_timers
+  ${PROJECT_NAME}
+)
+
 target_link_libraries(lifecycle_component_wrapper
   ${PROJECT_NAME}
 )
