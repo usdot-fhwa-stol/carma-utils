@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright (C) 2020-2021 LEIDOS.
+ * Copyright (C) 2020-2022 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,35 +15,42 @@
  * the License.
  */
 #include <rclcpp/time.hpp>
-#include <rclcpp/timer.hpp>
-#include "TimerFactory.h"
-#include "Timer.h"
-#include "ROSTimer.h"
+#include <rclcpp/node_interfaces/node_clock_interface.hpp>
+#include "../TimerFactory.hpp"
+#include "../Timer.hpp"
+#include "TestTimer.hpp"
 
 namespace carma_ros2_utils
 {
 namespace timers
 {
+namespace testing
+{
 /**
- * @brief Implementation of the TimerFactory interface that returns ROSTimer objects.
- *
+ * @brief Implementation of the TimerFactory interface that is targeted for use in Unit Testing.
+ *        Returns instances of TestTimer.
+ *        This class should NOT be used in production code.
  */
-class ROSTimerFactory : public TimerFactory
+class TestTimerFactory : public TimerFactory
 {
 public:
-  /**
-   * @brief Destructor
-   */
-  ~ROSTimerFactory();
+  ~TestTimerFactory();
 
-  void setCarmaLifecycleNode(std::weak_ptr<carma_ros2_utils::CarmaLifecycleNode> weak_node_pointer);
+  /**
+   * @brief Set the rclcpp clock interface which will be used by this test timer
+   * 
+   * @param clock_interface The interface to set
+   */ 
+  void setClockInterface(rclcpp::node_interfaces::NodeClockInterface::SharedPtr clock_interface);
 
   //// Overrides
   std::unique_ptr<Timer> buildTimer(uint32_t id, rclcpp::Duration duration,
                                     std::function<void()> callback, bool oneshot = false,
                                     bool autostart = true) override;
+
 private:
-  std::weak_ptr<carma_ros2_utils::CarmaLifecycleNode> weak_node_pointer_;
+  rclcpp::node_interfaces::NodeClockInterface::SharedPtr clock_interface_; //! Interface used for accessing current time from rclcpp
 };
+}  // namespace testing
 }  // namespace timers
 }  // namespace carma_ros2_utils

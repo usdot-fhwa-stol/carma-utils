@@ -1,6 +1,6 @@
 
 /*
- * Copyright (C) 2020-2021 LEIDOS.
+ * Copyright (C) 2020-2022 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,7 @@
  * the License.
  */
 #include <iostream>
-#include <carma_ros2_utils/timers/testing/TestTimer.h>
+#include <carma_ros2_utils/timers/testing/TestTimer.hpp>
 
 namespace carma_ros2_utils
 {

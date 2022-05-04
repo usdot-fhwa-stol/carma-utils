@@ -292,7 +292,7 @@ namespace carma_ros2_utils
      * \brief Override of rclcpp method. See descriptive comments here:
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L271
      *  
-     *  NOTE: In foxy the LifecycleNode api is slightly out of sync with the node api so there is not a create_timer method there. We use rclcpp directly here
+     *  NOTE: In foxy the LifecycleNode api is slightly out of sync with the node api so there is not a create_service method there. We use rclcpp directly here
      *
      * NOTE: The function object passed to this method will be moved using std::move. 
      *       The user should therefore assume ownership of this function object has been relinquished

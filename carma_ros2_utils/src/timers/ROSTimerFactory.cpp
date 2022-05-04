@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2021 LEIDOS.
+ * Copyright (C) 2020-2022 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,14 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <carma_ros2_utils/timers/ROSTimerFactory.h>
+#include <carma_ros2_utils/timers/ROSTimerFactory.hpp>
 
 // <SONAR_IGNORE_START> // Disable sonar cloud analysis for ROS dependant logic
 namespace carma_ros2_utils
 {
 namespace timers
 {
-ROSTimerFactory::~ROSTimerFactory(){};
+ROSTimerFactory::~ROSTimerFactory(){}
 std::unique_ptr<Timer> ROSTimerFactory::buildTimer(uint32_t id, rclcpp::Duration duration,
                                                    std::function<void()> callback, bool oneshot,
                                                    bool autostart)
@@ -31,9 +31,9 @@ std::unique_ptr<Timer> ROSTimerFactory::buildTimer(uint32_t id, rclcpp::Duration
   return timer_ptr;
 }
 
-void setCarmaLifecycleNode(std::weak_ptr<carma_ros2_utils::CarmaLifecycleNode> weak_node_pointer)
+void ROSTimerFactory::setCarmaLifecycleNode(std::weak_ptr<carma_ros2_utils::CarmaLifecycleNode> weak_node_pointer)
 {
-  ROSTimerFactory::weak_node_pointer_ = weak_node_pointer;
+  weak_node_pointer_ = weak_node_pointer;
 }
 
 }  // namespace timers

@@ -16,7 +16,7 @@
  */
 #include <rclcpp/time.hpp>
 #include <rclcpp/timer.hpp>
-#include "Timer.h"
+#include "Timer.hpp"
 
 namespace carma_ros2_utils
 {

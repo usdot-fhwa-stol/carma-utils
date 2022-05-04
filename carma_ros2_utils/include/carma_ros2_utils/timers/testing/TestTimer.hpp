@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright (C) 2020-2021 LEIDOS.
+ * Copyright (C) 2020-2022 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,7 +21,7 @@
 #include <atomic>
 #include <rclcpp/time.hpp>
 #include <rclcpp/clock.hpp>
-#include "../Timer.h"
+#include "../Timer.hpp"
 
 namespace carma_ros2_utils
 {

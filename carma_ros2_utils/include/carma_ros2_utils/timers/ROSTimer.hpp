@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright (C) 2020-2021 LEIDOS.
+ * Copyright (C) 2020-2022 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,10 +14,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <ros/node_handle.h>
+#include <memory>
+#include "../carma_lifecycle_node.hpp"
 #include <rclcpp/timer.hpp>
 #include <rclcpp/time.hpp>
-#include "Timer.h"
+#include "Timer.hpp"
 
 namespace carma_ros2_utils
 {
@@ -31,6 +32,10 @@ class ROSTimer : public Timer
 {
   rclcpp::TimerBase::SharedPtr timer_;
   std::weak_ptr<carma_ros2_utils::CarmaLifecycleNode> weak_node_pointer_;
+  rclcpp::Duration duration_ = rclcpp::Duration(0);
+  bool autostart_=true;
+  std::function<void()> callback_;
+
 
 public:
   ROSTimer(std::weak_ptr<carma_ros2_utils::CarmaLifecycleNode> weak_node_pointer);
