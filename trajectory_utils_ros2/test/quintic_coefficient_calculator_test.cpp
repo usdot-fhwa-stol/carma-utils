@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2022 LEIDOS.
+ * Copyright (C) 2019-2021 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,16 +15,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
-#include <trajectory_utils/quintic_coefficient_calculator.h>
-
-using ::testing::A;
-using ::testing::_;
-using ::testing::DoAll;
-using ::testing::Invoke;
-using ::testing::Return;
-using ::testing::Unused;
-
+#include <trajectory_utils/quintic_coefficient_calculator.hpp>
 
 TEST(trajectory_utils_test, TestGetCoefficient)
 {
@@ -46,3 +37,18 @@ TEST(trajectory_utils_test, TestGetCoefficient)
     }
 
 }
+
+int main(int argc, char ** argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+
+    //Initialize ROS
+    rclcpp::init(argc, argv);
+
+    bool success = RUN_ALL_TESTS();
+
+    //shutdown ROS
+    rclcpp::shutdown();
+
+    return success;
+} 

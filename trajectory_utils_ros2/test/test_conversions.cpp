@@ -15,8 +15,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
-#include <trajectory_utils/conversions/conversions.h>
+#include <trajectory_utils/conversions/conversions.hpp>
 
 namespace trajectory_utils
 {
@@ -25,25 +24,25 @@ namespace conversions
 TEST(trajectory_utils_conversions_test, trajectory_to_downtrack_time)
 {
   // Nominal case
-  std::vector<cav_msgs::TrajectoryPlanPoint> traj_points;
+  std::vector<carma_planning_msgs::msg::TrajectoryPlanPoint> traj_points;
   double start_time = 0;
 
   std::vector<double> downtracks, times;
 
-  cav_msgs::TrajectoryPlanPoint p1, p2, p3;
+  carma_planning_msgs::msg::TrajectoryPlanPoint p1, p2, p3;
 
   double step_size = 1;
   p1.x = 0;
   p1.y = 0;
-  p1.target_time = ros::Time(start_time);
+  p1.target_time = rclcpp::Time(start_time * 1e9); // Convert seconds to nanoseconds
 
   p2.x = step_size;
   p2.y = 0;
-  p2.target_time = ros::Time(1.0);
+  p2.target_time = rclcpp::Time(1.0 * 1e9); // Convert 1 second to nanoseconds
 
   p3.x = step_size;
   p3.y = step_size;
-  p3.target_time = ros::Time(1.5);
+  p3.target_time = rclcpp::Time(1.5 * 1e9); // Convert 1.5 seconds to nanoseconds
 
   traj_points = { p1, p2, p3 };
 
@@ -55,7 +54,7 @@ TEST(trajectory_utils_conversions_test, trajectory_to_downtrack_time)
   for (size_t i = 0; i < downtracks.size(); i++)
   {
     ASSERT_EQ(downtracks[i], i * step_size);
-    ASSERT_NEAR(times[i], traj_points[i].target_time.toSec(), 0.0000000001);
+    ASSERT_NEAR(times[i], rclcpp::Time(traj_points[i].target_time).seconds(), 0.0000000001);
   }
 
   // Non-Zero start time
@@ -64,7 +63,7 @@ TEST(trajectory_utils_conversions_test, trajectory_to_downtrack_time)
   downtracks = {};
   times = {};
 
-  traj_points[0].target_time = ros::Time(start_time);
+  traj_points[0].target_time = rclcpp::Time(start_time * 1e9); // Convert seconds to nanoseconds
 
   trajectory_to_downtrack_time(traj_points, &downtracks, &times);
 
@@ -74,7 +73,7 @@ TEST(trajectory_utils_conversions_test, trajectory_to_downtrack_time)
   for (size_t i = 0; i < downtracks.size(); i++)
   {
     ASSERT_EQ(downtracks[i], i * step_size);
-    ASSERT_NEAR(times[i], traj_points[i].target_time.toSec(), 0.0000000001);
+    ASSERT_NEAR(times[i], rclcpp::Time(traj_points[i].target_time).seconds(), 0.0000000001);
   }
 
   // Empty input
@@ -168,6 +167,21 @@ TEST(trajectory_utils_conversions_test, time_to_speed)
   ASSERT_NEAR(speeds[2], 1.0, 0.0000001);
 
 }
+
+int main(int argc, char ** argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+
+    //Initialize ROS
+    rclcpp::init(argc, argv);
+
+    bool success = RUN_ALL_TESTS();
+
+    //shutdown ROS
+    rclcpp::shutdown();
+
+    return success;
+} 
 
 }  // namespace conversions
 }  // namespace trajectory_utils
