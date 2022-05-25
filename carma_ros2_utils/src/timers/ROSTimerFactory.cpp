@@ -20,6 +20,7 @@ namespace carma_ros2_utils
 {
 namespace timers
 {
+ROSTimerFactory::ROSTimerFactory(std::weak_ptr<carma_ros2_utils::CarmaLifecycleNode> weak_node_pointer): weak_node_pointer_(weak_node_pointer){}
 ROSTimerFactory::~ROSTimerFactory(){}
 std::unique_ptr<Timer> ROSTimerFactory::buildTimer(uint32_t id, rclcpp::Duration duration,
                                                    std::function<void()> callback, bool oneshot,

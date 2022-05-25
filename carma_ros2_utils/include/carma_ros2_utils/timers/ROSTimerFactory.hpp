@@ -33,11 +33,12 @@ namespace timers
 class ROSTimerFactory : public TimerFactory
 {
 public:
+  ROSTimerFactory(std::weak_ptr<carma_ros2_utils::CarmaLifecycleNode> weak_node_pointer);
   /**
    * @brief Destructor
    */
   ~ROSTimerFactory();
-
+  
   void setCarmaLifecycleNode(std::weak_ptr<carma_ros2_utils::CarmaLifecycleNode> weak_node_pointer);
 
   //// Overrides
