@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright (C) 2020-2022 LEIDOS.
+ * Copyright (C) 2022 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,7 +21,6 @@
 #include <atomic>
 #include <rclcpp/time.hpp>
 #include <rclcpp/clock.hpp>
-#include "TestClock.hpp"
 #include "../Timer.hpp"
 
 namespace carma_ros2_utils
@@ -31,46 +30,25 @@ namespace timers
 namespace testing
 {
 /**
- * @brief Implementation of the Timer interface that is targeted for use in Unit Testing.
+ * @brief Implementation of the Clock interface that is targeted for use in Unit Testing.
  *        Internally rclcpp::Time objects are used for getting the clock time meaning this class does support simulated
  * time and rclcpp::Time::setNow() semantics. This class should NOT be used in production code as it does not provide the
  * same threading behavior as rclcpp::Timer.
- *
- * TestTimers utilize a separate std::thread to generate and process the callback.
  */
-class TestTimer : public Timer
+class TestClock : public rclcpp::Clock
 {
 
-private:
-  std::mutex clock_mutex_;
-
-  std::function<void()> callback_;
-
-  rclcpp::Time start_time_ = rclcpp::Time(0);
-  rclcpp::Duration duration_ = rclcpp::Duration(0);
-  carma_ros2_utils::timers::testing::TestClock::SharedPtr clock_; //! Interface used for accessing current time from rclcpp
-  bool oneshot_ = false;
-
-  std::thread timer_thread_;
-  std::mutex timer_mutex_;
-
-  std::atomic_bool running_ = ATOMIC_VAR_INIT(false);
-
-  void startImpl();  // Implementation of start to prevent deadlock
-
 public:
-  TestTimer(carma_ros2_utils::timers::testing::TestClock::SharedPtr clock);
-  ~TestTimer();
-
-  rclcpp::Time getTime();
-
   //// Overrides
-  void initializeTimer(rclcpp::Duration duration, std::function<void()> callback,
-                       bool oneshot = false, bool autostart = true);
+  explicit TestClock(rcl_clock_type_t clock_type = RCL_ROS_TIME);
 
-  void start() override;
+  rclcpp::Time now();
 
-  void stop() override;
+  void setNow(const rclcpp::Time& time);
+
+private:
+  rclcpp::Time current_time_{0, 0};
+
 };
 }  // namespace testing
 }  // namespace timers

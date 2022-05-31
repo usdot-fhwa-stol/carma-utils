@@ -50,6 +50,8 @@ public:
   virtual std::unique_ptr<Timer> buildTimer(uint32_t id, rclcpp::Duration duration,
                                             std::function<void()> callback, bool oneshot = false,
                                             bool autostart = true) = 0;
+
+  virtual rclcpp::Time  now() = 0;
 };
 }  // namespace timers
 }  // namespace carma_ros2_utils

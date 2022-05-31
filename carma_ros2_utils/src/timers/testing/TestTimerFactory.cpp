@@ -14,7 +14,6 @@
  * the License.
  */
 #include <carma_ros2_utils/timers/testing/TestTimerFactory.hpp>
-
 namespace carma_ros2_utils
 {
 namespace timers
@@ -23,16 +22,32 @@ namespace testing
 {
 TestTimerFactory::~TestTimerFactory(){}
 
-void TestTimerFactory::setClockInterface(rclcpp::node_interfaces::NodeClockInterface::SharedPtr clock_interface)
+void TestTimerFactory::setNow(const rclcpp::Time& current_time)
 {
-  clock_interface_ = clock_interface;
+  for (std::shared_ptr<TestClock> time: clock_log_)
+  {
+    time->setNow(current_time);
+  }
+}
+
+rclcpp::Time TestTimerFactory::now()
+{
+  if (!clock_log_.empty())
+    return clock_log_.back()->now();
+  else
+    return rclcpp::Time(0,0);
 }
 
 std::unique_ptr<Timer> TestTimerFactory::buildTimer(uint32_t id, rclcpp::Duration duration,
                                                     std::function<void()> callback, bool oneshot,
                                                     bool autostart)
 {
-  std::unique_ptr<Timer> timer(new TestTimer(clock_interface_->get_clock()));
+  std::shared_ptr<TestClock> clock = std::make_shared<TestClock>();
+  if (!clock_log_.empty())
+    clock->setNow(clock_log_.back()->now());
+  
+  clock_log_.push_back(clock);
+  std::unique_ptr<Timer> timer(new TestTimer(clock));
   timer->setId(id);
   timer->initializeTimer(duration, callback, oneshot, autostart);
   return timer;

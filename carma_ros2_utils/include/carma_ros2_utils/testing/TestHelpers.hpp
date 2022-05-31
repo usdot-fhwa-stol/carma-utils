@@ -17,7 +17,7 @@
 #include <chrono>
 #include <thread>
 #include <atomic>
-namespace carma_utils
+namespace carma_ros2_utils
 {
 namespace testing
 {
@@ -38,6 +38,7 @@ inline bool waitForEqOrTimeout(double timeout_s, T1 expected, std::atomic<T2>& a
 
   while (elapsed_seconds < sec)
   {
+    
     if (actual.load() == expected)
     {
       return true;
@@ -46,7 +47,6 @@ inline bool waitForEqOrTimeout(double timeout_s, T1 expected, std::atomic<T2>& a
     auto period = std::chrono::milliseconds(10);
     std::this_thread::sleep_for(period);
   }
-
   return false;
 }
 }  // namespace testing

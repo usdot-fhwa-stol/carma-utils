@@ -23,6 +23,7 @@ ament_auto_add_library(${PROJECT_NAME} SHARED
 ament_auto_add_library(carma_ros2_utils_timers SHARED
   src/timers/testing/TestTimer.cpp
   src/timers/testing/TestTimerFactory.cpp
+  src/timers/testing/TestClock.cpp
   src/timers/ROSTimer.cpp
   src/timers/ROSTimerFactory.cpp
 )

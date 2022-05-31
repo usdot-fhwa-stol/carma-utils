@@ -37,5 +37,13 @@ void ROSTimerFactory::setCarmaLifecycleNode(std::weak_ptr<carma_ros2_utils::Carm
   weak_node_pointer_ = weak_node_pointer;
 }
 
+rclcpp::Time  ROSTimerFactory::now()
+{
+  if (!weak_node_pointer_.expired())
+    return weak_node_pointer_.lock()->get_clock()->now();
+  else
+    return rclcpp::Time(0, 0);
+}
+
 }  // namespace timers
 }  // namespace carma_ros2_utils
