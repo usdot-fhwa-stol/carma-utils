@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright (C) 2020-2021 LEIDOS.
+ * Copyright (C) 2020-2022 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,7 +16,9 @@
  */
 
 #include <vector>
-#include <cav_msgs/TrajectoryPlanPoint.h>
+#include <cmath>
+#include <rclcpp/rclcpp.hpp>
+#include <carma_planning_msgs/msg/trajectory_plan_point.hpp>
 
 namespace trajectory_utils
 {
@@ -65,7 +67,7 @@ void time_to_speed_constjerk(const std::vector<double>& downtracks, const std::v
  * \param times Output parameter which points to the vector which will store the resulting downtracks
  * 
  */ 
-void trajectory_to_downtrack_time(const std::vector<cav_msgs::TrajectoryPlanPoint>& traj_points,
+void trajectory_to_downtrack_time(const std::vector<carma_planning_msgs::msg::TrajectoryPlanPoint>& traj_points,
                                   std::vector<double>* downtrack, std::vector<double>* times);
 }  // namespace conversions
 }  // namespace trajectory_utils

@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright (C) 2018-2021 LEIDOS.
+ * Copyright (C) 2018-2022 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,7 +20,9 @@
  */
 
 #include <vector>
-namespace carma_utils
+#include <rclcpp/rclcpp.hpp>
+
+namespace carma_ros2_utils
 {
 namespace containers
 {
@@ -52,4 +54,4 @@ std::vector<T, A> downsample_vector(const std::vector<T, A>& input, unsigned int
   return output;
 }
 }  // namespace containers
-}  // namespace carma_utils
+}  // namespace carma_ros2_utils
