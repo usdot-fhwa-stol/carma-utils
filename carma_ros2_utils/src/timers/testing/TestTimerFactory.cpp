@@ -14,6 +14,7 @@
  * the License.
  */
 #include <carma_ros2_utils/timers/testing/TestTimerFactory.hpp>
+#include <iostream>
 namespace carma_ros2_utils
 {
 namespace timers
@@ -33,7 +34,9 @@ void TestTimerFactory::setNow(const rclcpp::Time& current_time)
 rclcpp::Time TestTimerFactory::now()
 {
   if (!clock_log_.empty())
+  {
     return clock_log_.back()->now();
+  }
   else
     return rclcpp::Time(0,0);
 }
