@@ -21,6 +21,7 @@
 #include <atomic>
 #include <rclcpp/time.hpp>
 #include <rclcpp/clock.hpp>
+#include "TestClock.hpp"
 #include "../Timer.hpp"
 
 namespace carma_ros2_utils
@@ -47,7 +48,7 @@ private:
 
   rclcpp::Time start_time_ = rclcpp::Time(0);
   rclcpp::Duration duration_ = rclcpp::Duration(0);
-  rclcpp::Clock::SharedPtr clock_; //! Interface used for accessing current time from rclcpp
+  carma_ros2_utils::timers::testing::TestClock::SharedPtr clock_; //! Interface used for accessing current time from rclcpp
   bool oneshot_ = false;
 
   std::thread timer_thread_;
@@ -58,7 +59,7 @@ private:
   void startImpl();  // Implementation of start to prevent deadlock
 
 public:
-  TestTimer(rclcpp::Clock::SharedPtr clock);
+  TestTimer(carma_ros2_utils::timers::testing::TestClock::SharedPtr clock);
   ~TestTimer();
 
   rclcpp::Time getTime();

@@ -20,6 +20,7 @@ namespace carma_ros2_utils
 {
 namespace timers
 {
+ROSTimerFactory::ROSTimerFactory(std::weak_ptr<carma_ros2_utils::CarmaLifecycleNode> weak_node_pointer): weak_node_pointer_(weak_node_pointer){}
 ROSTimerFactory::~ROSTimerFactory(){}
 std::unique_ptr<Timer> ROSTimerFactory::buildTimer(uint32_t id, rclcpp::Duration duration,
                                                    std::function<void()> callback, bool oneshot,
@@ -34,6 +35,18 @@ std::unique_ptr<Timer> ROSTimerFactory::buildTimer(uint32_t id, rclcpp::Duration
 void ROSTimerFactory::setCarmaLifecycleNode(std::weak_ptr<carma_ros2_utils::CarmaLifecycleNode> weak_node_pointer)
 {
   weak_node_pointer_ = weak_node_pointer;
+}
+
+rclcpp::Time  ROSTimerFactory::now()
+{
+  if (!weak_node_pointer_.expired())
+    return weak_node_pointer_.lock()->get_clock()->now();
+  else
+  {
+    std::cerr << "ROSTimerFactory's weak pointer to the owner node is expired and clock is not available! Returning rclcpp::Time(0)" << std::endl;
+    return rclcpp::Time(0, 0);
+  }
+    
 }
 
 }  // namespace timers

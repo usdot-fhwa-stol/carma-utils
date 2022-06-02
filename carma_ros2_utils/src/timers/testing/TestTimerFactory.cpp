@@ -14,7 +14,7 @@
  * the License.
  */
 #include <carma_ros2_utils/timers/testing/TestTimerFactory.hpp>
-
+#include <iostream>
 namespace carma_ros2_utils
 {
 namespace timers
@@ -23,18 +23,29 @@ namespace testing
 {
 TestTimerFactory::~TestTimerFactory(){}
 
-void TestTimerFactory::setClockInterface(rclcpp::node_interfaces::NodeClockInterface::SharedPtr clock_interface)
+void TestTimerFactory::setNow(const rclcpp::Time& current_time)
 {
-  clock_interface_ = clock_interface;
+  clock_->setNow(current_time);
+}
+
+rclcpp::Time TestTimerFactory::now()
+{
+  return clock_->now();
 }
 
 std::unique_ptr<Timer> TestTimerFactory::buildTimer(uint32_t id, rclcpp::Duration duration,
                                                     std::function<void()> callback, bool oneshot,
                                                     bool autostart)
 {
-  std::unique_ptr<Timer> timer(new TestTimer(clock_interface_->get_clock()));
+  if (!clock_)
+  {
+    clock_ = std::make_shared<TestClock>();
+  }
+  std::unique_ptr<Timer> timer(new TestTimer(clock_));
+
   timer->setId(id);
   timer->initializeTimer(duration, callback, oneshot, autostart);
+
   return timer;
 }
 }  // namespace testing

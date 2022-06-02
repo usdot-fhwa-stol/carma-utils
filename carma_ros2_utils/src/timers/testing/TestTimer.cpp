@@ -30,7 +30,7 @@ rclcpp::Time TestTimer::getTime()
   return clock_->now();
 }
 
-TestTimer::TestTimer(rclcpp::Clock::SharedPtr clock) : clock_(clock) {}
+TestTimer::TestTimer(carma_ros2_utils::timers::testing::TestClock::SharedPtr clock) : clock_(clock) {}
 
 TestTimer::~TestTimer()
 {

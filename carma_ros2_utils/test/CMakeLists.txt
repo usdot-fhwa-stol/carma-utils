@@ -77,8 +77,24 @@ ament_target_dependencies(test_carma_lifecycle_gtest
   ${dependencies}
 )
 
+ament_add_gtest(test_timers
+  timers/TestingTimers.cpp
+)
+
+target_include_directories(test_timers
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(test_timers carma_ros2_utils_timers ${PROJECT_NAME})
+
+ament_target_dependencies(test_timers
+  ${dependencies}
+)
+
 install(
-  TARGETS test_lifecycle_gtest test_carma_lifecycle_node test_carma_lifecycle_gtest test_minimal_node
+  TARGETS test_lifecycle_gtest test_carma_lifecycle_node test_carma_lifecycle_gtest test_minimal_node test_timers
   # EXPORT should not be needed for unit tests
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib/${PROJECT_NAME}

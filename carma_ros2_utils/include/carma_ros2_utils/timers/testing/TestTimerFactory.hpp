@@ -16,6 +16,7 @@
  */
 #include <rclcpp/time.hpp>
 #include <rclcpp/node_interfaces/node_clock_interface.hpp>
+#include "TestClock.hpp"
 #include "../TimerFactory.hpp"
 #include "../Timer.hpp"
 #include "TestTimer.hpp"
@@ -37,19 +38,22 @@ public:
   ~TestTimerFactory();
 
   /**
-   * @brief Set the rclcpp clock interface which will be used by this test timer
+   * @brief Set all previously created timer's time to the given time
    * 
-   * @param clock_interface The interface to set
+   * @param current_time 
    */ 
-  void setClockInterface(rclcpp::node_interfaces::NodeClockInterface::SharedPtr clock_interface);
+  void setNow(const rclcpp::Time& current_time);
 
   //// Overrides
   std::unique_ptr<Timer> buildTimer(uint32_t id, rclcpp::Duration duration,
                                     std::function<void()> callback, bool oneshot = false,
                                     bool autostart = true) override;
-
+  rclcpp::Time now();
+  
 private:
-  rclcpp::node_interfaces::NodeClockInterface::SharedPtr clock_interface_; //! Interface used for accessing current time from rclcpp
+  
+  std::shared_ptr<TestClock> clock_; 
+
 };
 }  // namespace testing
 }  // namespace timers
