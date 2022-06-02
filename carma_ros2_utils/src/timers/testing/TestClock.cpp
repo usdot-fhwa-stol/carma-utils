@@ -39,6 +39,7 @@ void TestClock::setNow(const rclcpp::Time& time)
 void TestClock::setClockType(rcl_clock_type_t clock_type)
 {
   clock_type_ = clock_type;
+  current_time_ = rclcpp::Time(current_time_, clock_type_);
 }
 
 }  // namespace testing

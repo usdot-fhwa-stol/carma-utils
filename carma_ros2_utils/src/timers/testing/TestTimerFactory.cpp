@@ -37,9 +37,15 @@ std::unique_ptr<Timer> TestTimerFactory::buildTimer(uint32_t id, rclcpp::Duratio
                                                     std::function<void()> callback, bool oneshot,
                                                     bool autostart)
 {
+  if (!clock_)
+  {
+    clock_ = std::make_shared<TestClock>();
+  }
   std::unique_ptr<Timer> timer(new TestTimer(clock_));
+
   timer->setId(id);
   timer->initializeTimer(duration, callback, oneshot, autostart);
+
   return timer;
 }
 }  // namespace testing
