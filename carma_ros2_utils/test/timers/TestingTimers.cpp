@@ -27,7 +27,7 @@ namespace timers
 {
 namespace testing
 {
-  /*
+  
 TEST(TestingTimers, buildTimer)
 {
   std::shared_ptr<carma_ros2_utils::timers::testing::TestTimerFactory> factory(new TestTimerFactory());  // Verify casting behavior
@@ -95,7 +95,7 @@ TEST(TestingTimers, buildTimer)
   ASSERT_THROW(timer->initializeTimer(rclcpp::Duration(1.0), [&](){}), std::invalid_argument);
 
 }
-*/
+
 }  // namespace testing
 }  // namespace timers
 }  // namespace carma_ros2_utils
