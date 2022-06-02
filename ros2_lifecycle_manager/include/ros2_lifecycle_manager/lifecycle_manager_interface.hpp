@@ -71,11 +71,22 @@ namespace ros2_lifecycle_manager
      */
     virtual uint8_t get_managed_node_state(const std::string &node) = 0;
 
+
+    /**
+     * \brief Attempts to move the specified managed node to the specified state
+     * 
+     * \param state The lifecycle state to move to. As defined in the lifecycle_msgs::State message primary states enum
+     * \param node The managed node to transition.  
+     * 
+     * \return The resulting state after the attempt
+     */ 
+    virtual uint8_t transition_node_to_state(const uint8_t state, const std::string& node) = 0;
+
     /**
      * \brief Send the Configure transition to all managed nodes. Returns true if all nodes transitioned successfully.
      * 
      * \param connection_timeout The length of time in nanoseconds to wait for connection to be established with EACH node. 
-     * \param call_timeout The length of time in nanoseconds to wait for successfull transition execution for EACH node. 
+     * \param call_timeout The length of time in nanoseconds to wait for successful transition execution for EACH node. 
      * \param ordered If true then the nodes will be transitioned in order of the list provided by set_managed_nodes. 
      *                If false the nodes will all be triggered at once.
      * 

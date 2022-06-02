@@ -109,6 +109,99 @@ namespace ros2_lifecycle_manager
     return future_result.get()->current_state.id;
   }
 
+
+
+  uint8_t Ros2LifecycleManager::transition_node_to_state(const uint8_t state, const std::string& node)
+  {
+    auto it = node_map_.find(node_name);
+    if (it == node_map_.end()) // Check if the requested node is being managed
+    {
+
+      RCLCPP_ERROR_STREAM(
+          node_logging_->get_logger(), "State for node: " << node_name << " could not be provided as that node was not being managed. ");
+
+      return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
+    }
+
+    using UNKNOWN = lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
+    using UNCONFIGURED = lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED;
+    using INACTIVE = lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE;
+    using ACTIVE = lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE;
+    using FINALIZED = lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED;
+
+    if (state != UNCONFIGURED
+      && state != INACTIVE
+      && state != ACTIVE
+      && state != FINALIZED) // Check if target state is no primary state
+    {
+      RCLCPP_ERROR_STREAM(
+          node_logging_->get_logger(), "transition_node_to_state does not support transitioning to temporary states.");
+      
+      return get_managed_node_state(node); // Return whatever the current state is
+    }
+
+    ///// Setup transition paths /////
+    using TransitionFunc = std::function<std::vector<std::string>(const std_nanosec &, const std_nanosec &, bool, std::vector<std::string>)>;
+
+    static const auto configure_func = std::bind(&Ros2LifecycleManager::configure, this, _1, _2, _3, _4);
+    static const auto activate_func = std::bind(&Ros2LifecycleManager::activate, this, _1, _2, _3, _4);
+    static const auto deactivate_func = std::bind(&Ros2LifecycleManager::deactivate, this, _1, _2, _3, _4);
+    static const auto cleanup_func = std::bind(&Ros2LifecycleManager::cleanup, this, _1, _2, _3, _4);
+    static const auto shutdown_func = std::bind(&Ros2LifecycleManager::shutdown, this, _1, _2, _3, _4);
+
+    // This object represents a mapping of all source->target combinations for primary states to the function call path required to reach that state
+    // It is implemented as a map of maps where the keys for each map are source state and target state respectively
+    // The inner map contains a list of transition functions to call in order to move a node to the target state from the source state 
+    static const std::unordered_map<uint8_t, std::unordered_map<uint8_t, std::vector<TransitionFunc>>> transitions_paths = {
+      { UNCONFIGURED, { { INACTIVE, { configure_func } }, { ACTIVE, {configure_func, activate_func } }, { FINALIZED, { shutdown_func } } } },
+      { INACTIVE, { { UNCONFIGURED, { cleanup_func } }, { ACTIVE, { activate_func } }, { FINALIZED, { shutdown_func } } } },
+      { ACTIVE, { { UNCONFIGURED, { deactivate_func, cleanup_func } }, { INACTIVE, { deactivate_func } }, { FINALIZED, { shutdown_func } } } }
+    }
+
+    ///// Execute Transitions /////
+
+    auto current_state = get_managed_node_state(node);
+
+    // If the states are the same or current state is finalized, or unknown then no need for further transition
+    if (current_state == state 
+      || current_state == UNKNOWN 
+      || current_state == FINALIZED)
+    {
+      return current_state;
+    }
+
+    // Check if the node is not in a primary state which is required to transition
+    if (current_state != UNCONFIGURED // UNKNOWN and FINALIZED states already evaluated above
+      && current_state != INACTIVE
+      && current_state != ACTIVE)
+    {
+      // If the node is in a temporary state then we have no choice but to return the temporary state since the resulting state is unknown
+      // as its dependant on transition success
+      return current_state
+    }
+
+    // At this point there is a guarantee the node state is either UNCONFIGURED, INACTIVE, or ACTIVE
+    // and that target state is  UNCONFIGURED, INACTIVE, ACTIVE, or FINALIZED and target != source
+    // So we can use the path map to move the node to the target state
+    for (auto transition_func : transitions_paths[current_state][state])
+    {
+      // TODO make these timeouts parameters
+      bool success = transition_func(std_nanosec(10000000L), std_nanosec(10000000L), true, {node}).empty();
+      
+      // If a transition failed then return whatever the resulting state is
+      if (!success)
+      {
+        return get_managed_node_state(node);
+      }
+    }
+
+
+    // Since all our transitions succeeded 
+    // we can be confident that the node is in the desired state and just return that without an extra service call
+    return state;
+    
+  }
+
   std::vector<std::string> Ros2LifecycleManager::configure(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered, std::vector<std::string> nodes)
   {
     return transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE, ordered, connection_timeout, call_timeout, nodes);
