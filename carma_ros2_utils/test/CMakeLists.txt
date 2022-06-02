@@ -93,6 +93,12 @@ ament_target_dependencies(test_timers
   ${dependencies}
 )
 
+ament_add_gtest(test_containers
+  containers/containers_test.cpp
+)
+
+target_link_libraries(test_containers ${PROJECT_NAME})
+
 install(
   TARGETS test_lifecycle_gtest test_carma_lifecycle_node test_carma_lifecycle_gtest test_minimal_node test_timers
   # EXPORT should not be needed for unit tests
