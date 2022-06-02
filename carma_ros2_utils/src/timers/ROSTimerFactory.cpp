@@ -42,7 +42,11 @@ rclcpp::Time  ROSTimerFactory::now()
   if (!weak_node_pointer_.expired())
     return weak_node_pointer_.lock()->get_clock()->now();
   else
+  {
+    std::cerr << "ROSTimerFactory's weak pointer to the owner node is expired and clock is not available! Returning rclcpp::Time(0)" << std::endl;
     return rclcpp::Time(0, 0);
+  }
+    
 }
 
 }  // namespace timers

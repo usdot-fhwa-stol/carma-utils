@@ -52,7 +52,8 @@ public:
   
 private:
   
-  std::vector<std::shared_ptr<TestClock>> clock_log_; 
+  std::shared_ptr<TestClock> clock_; 
+
 };
 }  // namespace testing
 }  // namespace timers

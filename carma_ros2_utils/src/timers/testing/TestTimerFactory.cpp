@@ -25,32 +25,19 @@ TestTimerFactory::~TestTimerFactory(){}
 
 void TestTimerFactory::setNow(const rclcpp::Time& current_time)
 {
-  for (std::shared_ptr<TestClock> time: clock_log_)
-  {
-    time->setNow(current_time);
-  }
+  clock_->setNow(current_time);
 }
 
 rclcpp::Time TestTimerFactory::now()
 {
-  if (!clock_log_.empty())
-  {
-    return clock_log_.back()->now();
-  }
-  else
-    return rclcpp::Time(0,0);
+  return clock_->now();
 }
 
 std::unique_ptr<Timer> TestTimerFactory::buildTimer(uint32_t id, rclcpp::Duration duration,
                                                     std::function<void()> callback, bool oneshot,
                                                     bool autostart)
 {
-  std::shared_ptr<TestClock> clock = std::make_shared<TestClock>();
-  if (!clock_log_.empty())
-    clock->setNow(clock_log_.back()->now());
-  
-  clock_log_.push_back(clock);
-  std::unique_ptr<Timer> timer(new TestTimer(clock));
+  std::unique_ptr<Timer> timer(new TestTimer(clock_));
   timer->setId(id);
   timer->initializeTimer(duration, callback, oneshot, autostart);
   return timer;

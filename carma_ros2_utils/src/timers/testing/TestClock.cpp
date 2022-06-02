@@ -24,7 +24,7 @@ namespace timers
 namespace testing
 {
 
-TestClock::TestClock (rcl_clock_type_t clock_type) : rclcpp::Clock(clock_type) {}
+TestClock::TestClock (rcl_clock_type_t clock_type) : clock_type_(clock_type) {}
 
 rclcpp::Time TestClock::now()
 {
@@ -33,7 +33,12 @@ rclcpp::Time TestClock::now()
 
 void TestClock::setNow(const rclcpp::Time& time)
 {
-  current_time_ = time;
+  current_time_ = rclcpp::Time(time, clock_type_);
+}
+
+void TestClock::setClockType(rcl_clock_type_t clock_type)
+{
+  clock_type_ = clock_type;
 }
 
 }  // namespace testing

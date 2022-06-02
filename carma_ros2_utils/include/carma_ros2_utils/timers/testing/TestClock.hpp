@@ -29,25 +29,37 @@ namespace timers
 {
 namespace testing
 {
+
 /**
  * @brief Implementation of the Clock interface that is targeted for use in Unit Testing.
  *        Internally rclcpp::Time objects are used for getting the clock time meaning this class does support simulated
- * time and rclcpp::Time::setNow() semantics. This class should NOT be used in production code as it does not provide the
+ * time and equivalent of ROS1 ros::Time::setNow() semantics. This class should NOT be used in production code as it does not provide the
  * same threading behavior as rclcpp::Timer.
  */
-class TestClock : public rclcpp::Clock
+class TestClock
 {
 
 public:
   //// Overrides
-  explicit TestClock(rcl_clock_type_t clock_type = RCL_ROS_TIME);
+  TestClock(rcl_clock_type_t clock_type = RCL_ROS_TIME);
 
   rclcpp::Time now();
 
+  /**
+   * @brief Sets the simulated time to given time. Clock type will be created from internal saved rcl_clock_type_t.
+   */
   void setNow(const rclcpp::Time& time);
+
+  /**
+   * @brief Sets the rcl_clock_type_t to use for when returning current time.
+   */
+  void setClockType(rcl_clock_type_t clock_type);
+
+  typedef std::shared_ptr<TestClock> SharedPtr;
 
 private:
   rclcpp::Time current_time_{0, 0};
+  rcl_clock_type_t clock_type_;
 
 };
 }  // namespace testing

@@ -45,12 +45,17 @@ public:
    * @param autostart If true the timer will immediately start after this function is called. Otherwise the start()
    * function must be called
    *
-   * @return A unique pointer to a Timer object which was intialized using the provided parameters
+   * @return A unique pointer to a Timer object which was initialized using the provided parameters
    */
   virtual std::unique_ptr<Timer> buildTimer(uint32_t id, rclcpp::Duration duration,
                                             std::function<void()> callback, bool oneshot = false,
                                             bool autostart = true) = 0;
 
+  /**
+   * @brief Equivalent to executing rclcpp::Clock::now() by the internal clock the factory uses to create timers
+   *
+   * @return current time returned by the internal Clock used
+   */
   virtual rclcpp::Time  now() = 0;
 };
 }  // namespace timers
