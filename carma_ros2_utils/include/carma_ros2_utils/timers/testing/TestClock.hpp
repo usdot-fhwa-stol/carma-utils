@@ -33,7 +33,7 @@ namespace testing
 /**
  * @brief Implementation of the Clock interface that is targeted for use in Unit Testing.
  *        Internally rclcpp::Time objects are used for getting the clock time meaning this class does support simulated
- * time and equivalent of ROS1 ros::Time::setNow() semantics. By default internal time is RCL_ROS_TIME unless changed by setClockType()
+ * time and equivalent of ROS1 ros::Time::setNow() semantics. By default internal time is RCL_SYSTEM_TIME unless changed by setClockType()
  * This class should NOT be used in production code as it does not provide the
  * same threading behavior as rclcpp::Timer.
  */
@@ -44,7 +44,7 @@ public:
   /**
    * @brief Constructor
    */
-  TestClock(rcl_clock_type_t clock_type = RCL_ROS_TIME);
+  TestClock(rcl_clock_type_t clock_type = RCL_SYSTEM_TIME);
 
   rclcpp::Time now();
 
@@ -61,8 +61,8 @@ public:
   typedef std::shared_ptr<TestClock> SharedPtr;
 
 private:
-  rclcpp::Time current_time_{0, 0, RCL_ROS_TIME};
-  rcl_clock_type_t clock_type_ = RCL_ROS_TIME;
+  rclcpp::Time current_time_{0, 0};
+  rcl_clock_type_t clock_type_ ;
 
 };
 }  // namespace testing

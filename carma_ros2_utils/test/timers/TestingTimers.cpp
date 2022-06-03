@@ -93,7 +93,6 @@ TEST(TestingTimers, buildTimer)
 
   // // Verify duplicate initialization throw
   ASSERT_THROW(timer->initializeTimer(rclcpp::Duration(1.0), [&](){}), std::invalid_argument);
-
 }
 
 }  // namespace testing
