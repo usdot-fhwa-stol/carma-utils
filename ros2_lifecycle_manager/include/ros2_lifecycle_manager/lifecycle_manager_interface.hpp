@@ -52,6 +52,14 @@ namespace ros2_lifecycle_manager
     virtual void set_managed_nodes(const std::vector<std::string> &nodes) = 0;
 
     /**
+     * \brief Add a single node to the set of managed nodes
+     * 
+     * \param node The node to add to the set of managed nodes. 
+     *             If node is already present, then nothing happens 
+     */ 
+    virtual void add_managed_node(const std::string& node) = 0;
+
+    /**
      * \brief Returns the list of managed node's Fully Qualified Names
      */
     virtual std::vector<std::string> get_managed_nodes() = 0;
@@ -63,30 +71,45 @@ namespace ros2_lifecycle_manager
      */
     virtual uint8_t get_managed_node_state(const std::string &node) = 0;
 
+
+    /**
+     * \brief Attempts to move the specified managed node to the specified state
+     * 
+     * \param state The lifecycle state to move to. As defined in the lifecycle_msgs::State message primary states enum
+     * \param node The managed node to transition.  
+     * \param connection_timeout The length of time in nanoseconds to wait for connection to be established with EACH node. 
+     * \param call_timeout The length of time in nanoseconds to wait for successful transition execution for EACH node. 
+     * 
+     * \return The resulting state after the attempt
+     */ 
+    virtual uint8_t transition_node_to_state(const uint8_t state, const std::string& node, const std_nanosec &connection_timeout, const std_nanosec &call_timeout) = 0;
+
     /**
      * \brief Send the Configure transition to all managed nodes. Returns true if all nodes transitioned successfully.
      * 
      * \param connection_timeout The length of time in nanoseconds to wait for connection to be established with EACH node. 
-     * \param call_timeout The length of time in nanoseconds to wait for successfull transition execution for EACH node. 
+     * \param call_timeout The length of time in nanoseconds to wait for successful transition execution for EACH node. 
      * \param ordered If true then the nodes will be transitioned in order of the list provided by set_managed_nodes. 
      *                If false the nodes will all be triggered at once.
      * 
+     * \param nodes The specific nodes to transition. If empty then all managed nodes will be transitioned
+     * 
      * \return A list of any nodes that failed to execute the requested transition
      */
-    virtual std::vector<std::string> configure(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
+    virtual std::vector<std::string> configure(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true, std::vector<std::string> nodes = {}) = 0;
 
     //! \brief Same as configure() except for Cleanup transition
-    virtual std::vector<std::string> cleanup(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
+    virtual std::vector<std::string> cleanup(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true, std::vector<std::string> nodes = {}) = 0;
 
     //! \brief Same as configure() except for Activate transition
-    virtual std::vector<std::string> activate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
+    virtual std::vector<std::string> activate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true, std::vector<std::string> nodes = {}) = 0;
 
     //! \brief Same as configure() except for Deactivate transition
-    virtual std::vector<std::string> deactivate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
+    virtual std::vector<std::string> deactivate(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true, std::vector<std::string> nodes = {}) = 0;
 
     //! \brief Same as configure() except for Shutdown transition
     // NOTE: The set of returned nodes may not be as meaningful as the other methods due to the nature of the shutdown transition.
-    virtual std::vector<std::string> shutdown(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true) = 0;
+    virtual std::vector<std::string> shutdown(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true, std::vector<std::string> nodes = {}) = 0;
   };
 
 } // namespace ros2_lifecycle_manager

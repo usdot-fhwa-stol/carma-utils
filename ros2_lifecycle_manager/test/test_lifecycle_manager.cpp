@@ -91,7 +91,25 @@ TEST(LifecycleManagerTest, BasicTest)
     ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED , lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1"));
     ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED , lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_2"));
 
-    // Bring back to active then shutdown
+    RCLCPP_INFO(node->get_logger(), "Using requested state methods");
+
+    // Bring to active via requested state
+    ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.transition_node_to_state(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, "test_lifecycle_node_1", std_msec(2000), std_msec(2000)));
+    ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1"));
+
+    ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.transition_node_to_state(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, "test_lifecycle_node_2", std_msec(2000), std_msec(2000)));
+    ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_2"));
+
+    // Bring to unconfigured via requested state
+    ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, lifecycle_mgr_.transition_node_to_state(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, "test_lifecycle_node_1", std_msec(2000), std_msec(2000)));
+    ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1"));
+
+    ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, lifecycle_mgr_.transition_node_to_state(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, "test_lifecycle_node_2", std_msec(2000), std_msec(2000)));
+    ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_2"));
+
+    RCLCPP_INFO(node->get_logger(), "Done with requested state methods");
+
+    // Bring back to active then shutdown via transitions
     ASSERT_TRUE(lifecycle_mgr_.configure(std_msec(2000), std_msec(2000)).empty());
     ASSERT_TRUE(lifecycle_mgr_.activate(std_msec(2000), std_msec(2000)).empty());
     ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE , lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1"));
