@@ -157,9 +157,18 @@ namespace ros2_lifecycle_manager
     // It is implemented as a map of maps where the keys for each map are source state and target state respectively
     // The inner map contains a list of transition functions to call in order to move a node to the target state from the source state 
     static std::unordered_map<uint8_t, std::unordered_map<uint8_t, std::vector<TransitionFunc>>> transitions_paths = {
-      { UNCONFIGURED, { { INACTIVE, { configure_func } }, { ACTIVE, {configure_func, activate_func } }, { FINALIZED, { shutdown_func } } } },
-      { INACTIVE, { { UNCONFIGURED, { cleanup_func } }, { ACTIVE, { activate_func } }, { FINALIZED, { shutdown_func } } } },
-      { ACTIVE, { { UNCONFIGURED, { deactivate_func, cleanup_func } }, { INACTIVE, { deactivate_func } }, { FINALIZED, { shutdown_func } } } }
+      { UNCONFIGURED, { 
+        { INACTIVE, { configure_func } }, 
+        { ACTIVE, {configure_func, activate_func } }, 
+        { FINALIZED, { shutdown_func } } } },
+      { INACTIVE, { 
+        { UNCONFIGURED, { cleanup_func } }, 
+        { ACTIVE, { activate_func } }, 
+        { FINALIZED, { shutdown_func } } } },
+      { ACTIVE, { 
+        { UNCONFIGURED, { deactivate_func, cleanup_func } }, 
+        { INACTIVE, { deactivate_func } }, 
+        { FINALIZED, { shutdown_func } } } }
     };
 
     ///// Execute Transitions /////
