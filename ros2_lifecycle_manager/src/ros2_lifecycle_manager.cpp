@@ -88,18 +88,18 @@ namespace ros2_lifecycle_manager
     auto node = managed_nodes_.at((*it).second);
 
     // Check for service. If not read return unknown
-    // if (!waitForService<lifecycle_msgs::srv::GetState>(node.get_state_client, std_nanosec(900000000L)))
-    // {
-    //   RCLCPP_ERROR_STREAM(
-    //       node_logging_->get_logger(), "State for node: " << node_name << " could not be provided as that node's service is not ready ");
-    //   return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
-    // }
-    if (!node.get_state_client->service_is_ready())
+    if (!waitForService<lifecycle_msgs::srv::GetState>(node.get_state_client, std_nanosec(50000000L))) // 50 millisecond delay
     {
       RCLCPP_ERROR_STREAM(
           node_logging_->get_logger(), "State for node: " << node_name << " could not be provided as that node's service is not ready ");
       return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
     }
+    // if (!node.get_state_client->service_is_ready())
+    // {
+    //   RCLCPP_ERROR_STREAM(
+    //       node_logging_->get_logger(), "State for node: " << node_name << " could not be provided as that node's service is not ready ");
+    //   return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
+    // }
 
     auto request = std::make_shared<lifecycle_msgs::srv::GetState::Request>();
     // Send request
