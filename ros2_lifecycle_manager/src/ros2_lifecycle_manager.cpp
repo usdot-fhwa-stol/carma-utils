@@ -73,7 +73,7 @@ namespace ros2_lifecycle_manager
     return managed_node_names_;
   }
 
-  uint8_t Ros2LifecycleManager::get_managed_node_state(const std::string &node_name)
+  uint8_t Ros2LifecycleManager::get_managed_node_state(const std::string &node_name, const std_nanosec &call_timeout)
   {
     auto it = node_map_.find(node_name);
     if (it == node_map_.end()) // Check if the requested node is being managed
@@ -99,7 +99,7 @@ namespace ros2_lifecycle_manager
     // Send request
     auto future_result = node.get_state_client->async_send_request(request);
 
-    auto future_status = future_result.wait_for(std_nanosec(75000000L)); // 75 millisecond delay
+    auto future_status = future_result.wait_for(call_timeout); // 75 millisecond delay
 
     if (future_status != std::future_status::ready)
     {
@@ -139,7 +139,7 @@ namespace ros2_lifecycle_manager
       RCLCPP_ERROR_STREAM(
           node_logging_->get_logger(), "transition_node_to_state does not support transitioning to temporary states.");
       
-      return get_managed_node_state(node); // Return whatever the current state is
+      return get_managed_node_state(node,call_timeout); // Return whatever the current state is
     }
 
     ///// Setup transition paths /////
@@ -173,7 +173,7 @@ namespace ros2_lifecycle_manager
 
     ///// Execute Transitions /////
 
-    auto current_state = get_managed_node_state(node);
+    auto current_state = get_managed_node_state(node, call_timeout);
 
     // If the states are the same or current state is finalized, or unknown then no need for further transition
     if (current_state == state 
@@ -203,7 +203,7 @@ namespace ros2_lifecycle_manager
       // If a transition failed then return whatever the resulting state is
       if (!success)
       {
-        return get_managed_node_state(node);
+        return get_managed_node_state(node,call_timeout);
       }
     }
 

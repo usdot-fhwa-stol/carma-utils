@@ -67,9 +67,11 @@ namespace ros2_lifecycle_manager
     /**
      * \brief Returns the Lifecycle state of the provided node
      *      
-     * NOTE: This call has a 10ms timeout
+     * \param call_timeout The length of time in nanoseconds to wait for successful transition execution for EACH node. Default 50ms
+     * 
+     * NOTE: This call expects the service to already be available
      */
-    virtual uint8_t get_managed_node_state(const std::string &node) = 0;
+    virtual uint8_t get_managed_node_state(const std::string &node, const std_nanosec &call_timeout=std_nanosec(50000000L)) = 0;
 
 
     /**

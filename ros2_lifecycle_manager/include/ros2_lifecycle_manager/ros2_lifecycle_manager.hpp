@@ -84,7 +84,7 @@ namespace ros2_lifecycle_manager
     void set_managed_nodes(const std::vector<std::string> &nodes) override;
     void add_managed_node(const std::string& node) override;
     std::vector<std::string> get_managed_nodes() override;
-    uint8_t get_managed_node_state(const std::string &node) override;
+    uint8_t get_managed_node_state(const std::string &node, const std_nanosec &call_timeout=std_nanosec(50000000L)) override;
     uint8_t transition_node_to_state(const uint8_t state, const std::string& node, const std_nanosec &connection_timeout, const std_nanosec &call_timeout) override;
     std::vector<std::string> configure(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true, std::vector<std::string> nodes = {}) override;
     std::vector<std::string> cleanup(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered = true, std::vector<std::string> nodes = {}) override;
