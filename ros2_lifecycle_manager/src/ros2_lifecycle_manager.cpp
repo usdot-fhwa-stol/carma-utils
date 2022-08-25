@@ -99,7 +99,7 @@ namespace ros2_lifecycle_manager
     // Send request
     auto future_result = node.get_state_client->async_send_request(request);
 
-    auto future_status = future_result.wait_for(std_nanosec(10000000L)); // 10 millisecond delay
+    auto future_status = future_result.wait_for(std_nanosec(50000000L)); // 50 millisecond delay
 
     if (future_status != std::future_status::ready)
     {
