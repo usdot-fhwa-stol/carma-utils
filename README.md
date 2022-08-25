@@ -1,3 +1,7 @@
+| CicleCI Build Status | Sonar Code Quality |
+|------|-----|
+[![CircleCI](https://img.shields.io/circleci/build/gh/usdot-fhwa-stol/carma-utils/develop?label=CircleCI)](https://app.circleci.com/pipelines/github/usdot-fhwa-stol/carma-utils?branch=develop) | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=usdot-fhwa-stol_CARMAUtils&metric=alert_status)](https://sonarcloud.io/dashboard?id=usdot-fhwa-stol_CARMAUtils) 
+
 # CARMAUtils
 CARMAUtils contains packages relevent to or useful for developing components for usage with the CARMAPlatform  
 
