@@ -25,11 +25,19 @@ TestTimerFactory::~TestTimerFactory(){}
 
 void TestTimerFactory::setNow(const rclcpp::Time& current_time)
 {
+  if (!clock_) // lazy initialization of clock
+  {
+    clock_ = std::make_shared<TestClock>();
+  }
   clock_->setNow(current_time);
 }
 
 rclcpp::Time TestTimerFactory::now()
 {
+  if (!clock_) // lazy initialization of clock
+  {
+    clock_ = std::make_shared<TestClock>();
+  }
   return clock_->now();
 }
 
@@ -37,7 +45,7 @@ std::unique_ptr<Timer> TestTimerFactory::buildTimer(uint32_t id, rclcpp::Duratio
                                                     std::function<void()> callback, bool oneshot,
                                                     bool autostart)
 {
-  if (!clock_)
+  if (!clock_) // lazy initialization of clock
   {
     clock_ = std::make_shared<TestClock>();
   }
