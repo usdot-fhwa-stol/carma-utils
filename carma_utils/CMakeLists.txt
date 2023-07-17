@@ -70,7 +70,12 @@ add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/timers/ROSTimerFactory.cpp
   src/${PROJECT_NAME}/timers/testing/TestTimer.cpp
   src/${PROJECT_NAME}/timers/testing/TestTimerFactory.cpp
-        include/carma_utils/SimulatedSensor/SimulatedSensor.cpp include/carma_utils/SimulatedSensor/SimulatedSensor.h include/carma_utils/SimulatedSensor/SensedObject.cpp include/carma_utils/SimulatedSensor/SensedObject.h include/carma_utils/SimulatedSensor/NoiseModel.cpp include/carma_utils/SimulatedSensor/NoiseModel.h)
+        include/carma_utils/SimulatedSensor/SimulatedSensor.cpp
+        include/carma_utils/SimulatedSensor/SimulatedSensor.h
+        include/carma_utils/SimulatedSensor/SensedObject.cpp
+        include/carma_utils/SimulatedSensor/SensedObject.h
+        include/carma_utils/SimulatedSensor/NoiseModel.cpp
+        include/carma_utils/SimulatedSensor/NoiseModel.h)
 add_dependencies( ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
