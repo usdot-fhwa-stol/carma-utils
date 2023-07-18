@@ -1,6 +1,8 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 
+# TODO Do we want getters and setters?
+
 class SensedObject:
     def __init__(self, simulated_sensor_config, carla_actor):
         self.id = carla_actor.id

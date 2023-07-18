@@ -2,6 +2,8 @@
 #-*- coding: utf-8 -*-
 import numpy as np
 
+# TODO Python funciton memoization could help.?
+
 class SimulatedSensor:
 
     def __init__(self, config, carla_world, carla_sensor, noise_model):
@@ -82,7 +84,7 @@ class SimulatedSensorHelper:
         actors = filter(lambda actor: is_tag_allowed(actor.semantic_tags), actors)
 
 
-
+get_carla_lidar_hitpoints
         # Filter by radius
         simulated_sensor_config.prefilter.max_distance_meters
 
@@ -91,7 +93,7 @@ class SimulatedSensorHelper:
 
     def get_carla_lidar_hitpoints(self):
         pass
-
+    
 
     def associate(self, hitpoints, actors):
         pass
