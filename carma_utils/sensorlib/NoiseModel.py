@@ -2,8 +2,8 @@
 #-*- coding: utf-8 -*-
 
 class NoiseModel:
-    def __init__(self):
-        self.config = None
+    def __init__(self, config):
+        self.config = config
 
     def load_config(self, ):
         pass

@@ -1,0 +1,6 @@
+{
+    "noise_model_config": {
+        "grey_values": [ 0.1, 0.1, 0.1 ],
+        "std_deviations": [ 0.8, 0.8, 0.8 ]
+    }
+}
