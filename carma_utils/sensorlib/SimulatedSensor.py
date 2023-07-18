@@ -17,28 +17,28 @@ class SimulatedSensor:
 
         # Note: actors is the "driving" list indicating which items are considered inside the sensor FOV throughout
 
-        # Get sensors including locations and parameters
-        sensor = self.helper.get_carla_sensor_info()
+        # Get sensor including current location and configured sensor parameters
+        sensor = self.helper.get_sensor()
 
-        # Get Actors including locations
-        actors = self.helper.get_carla_actors()
+        # Get object truth states from simulation
+        objects = self.helper.get_scene_objects()
 
         # Prefilter
-        actors = self.helper.prefilter(sensor, actors)
+        objects = self.helper.prefilter(sensor, objects)
 
         # Get LIDAR hitpoints with Actor ID associations
         hitpoints = self.helper.get_carla_lidar_hitpoints()
-        hitpoints = self.helper.sample_hitpoints(hitpoints)
-        hitpoints = self.helper.associate(hitpoints, actors)
+        hitpoints = self.helper.get_hitpoints_sampled(hitpoints)
+        hitpoints = self.helper.associate_hitpoints(hitpoints, objects)
 
         # Compute data needed for occlusion operation
-        actor_angular_extents = self.helper.compute_actor_angular_extents(sensor_info, actors)
-        detection_thresholds = self.helper.compute_adjusted_detection_thresholds(sensor_info, actors)
+        actor_angular_extents = self.helper.compute_actor_angular_extents(sensor, objects)
+        detection_thresholds = self.helper.compute_adjusted_detection_thresholds(sensor, objects)
 
         # Apply occlusion
-        actors = self.helper.apply_occlusion(actors, actor_angular_extents, hitpoints, detection_thresholds)
+        objects = self.helper.apply_occlusion(objects, actor_angular_extents, hitpoints, detection_thresholds)
 
-        return actors
+        return objects
 
 
 
@@ -80,9 +80,8 @@ class SimulatedSensorHelper:
         # Filter by object type
         # Actor.type_id and Actor.semantic_tags are available for determining type; semantic_tags effectively specifies the type of object
         # Possible types are listed in the CARLA documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
-        is_tag_allowed = lambda tag: tag in self.config.prefilter.allowed_semantic_tags
-        actors = filter(lambda actor: is_tag_allowed(actor.semantic_tags), actors)
-
+        actors = filter(lambda actor: actor.semantic_tags), actors)
+        self.config.prefilter.allowed_semantic_tags
 
 get_carla_lidar_hitpoints
         # Filter by radius
