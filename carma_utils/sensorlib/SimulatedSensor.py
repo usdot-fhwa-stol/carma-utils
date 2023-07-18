@@ -2,6 +2,9 @@
 #-*- coding: utf-8 -*-
 import numpy as np
 
+from SensedObject import SensedObject
+
+
 # TODO Python funciton memoization could help.?
 
 class SimulatedSensor:
@@ -9,36 +12,36 @@ class SimulatedSensor:
     def __init__(self, config, carla_world, carla_sensor, noise_model):
         self.config = config
         self.carla_world = carla_world
-        self.carla_sensor = None
-        self.noise_model = None
+        self.carla_sensor = carla_sensor
+        self.noise_model = noise_model
         self.helper = SimulatedSensorHelper()
 
-    def get_objects_in_frame(self):
+    def get_sensed_objects_in_frame(self):
 
         # Note: actors is the "driving" list indicating which items are considered inside the sensor FOV throughout
 
         # Get sensor including current location and configured sensor parameters
         sensor = self.helper.get_sensor()
 
-        # Get object truth states from simulation
-        objects = self.helper.get_scene_objects()
+        # Get sensed_object truth states from simulation
+        sensed_objects = self.helper.get_scene_sensed_objects()
 
         # Prefilter
-        objects = self.helper.prefilter(sensor, objects)
+        sensed_objects = self.helper.prefilter(sensor, sensed_objects)
 
         # Get LIDAR hitpoints with Actor ID associations
         hitpoints = self.helper.get_carla_lidar_hitpoints()
         hitpoints = self.helper.get_hitpoints_sampled(hitpoints)
-        hitpoints = self.helper.associate_hitpoints(hitpoints, objects)
+        hitpoints = self.helper.associate_hitpoints(hitpoints, sensed_objects)
 
         # Compute data needed for occlusion operation
-        actor_angular_extents = self.helper.compute_actor_angular_extents(sensor, objects)
-        detection_thresholds = self.helper.compute_adjusted_detection_thresholds(sensor, objects)
+        actor_angular_extents = self.helper.compute_actor_angular_extents(sensor, sensed_objects)
+        detection_thresholds = self.helper.compute_adjusted_detection_thresholds(sensor, sensed_objects)
 
         # Apply occlusion
-        objects = self.helper.apply_occlusion(objects, actor_angular_extents, hitpoints, detection_thresholds)
+        sensed_objects = self.helper.apply_occlusion(sensed_objects, actor_angular_extents, hitpoints, detection_thresholds)
 
-        return objects
+        return sensed_objects
 
 
 
@@ -46,7 +49,11 @@ class SimulatedSensor:
 
 class SimulatedSensorHelper:
 
-    def get_carla_sensor_info(self, carla_sensor):
+    # ------------------------------------------------------------------------------
+    # CARLA Scene SensedObject Retrieval
+    # ------------------------------------------------------------------------------
+
+    def get_sensor(self, carla_sensor):
 
         sensor_info = {}
 
@@ -65,52 +72,52 @@ class SimulatedSensorHelper:
 
         return sensor_info
 
+    def get_scene_sensed_objects(self, carla_world, simulated_sensor_config):
+        actors = carla_world.get_actors()
+        return map(lambda actor: SensedObject(simulated_sensor_config, actor), actors)
 
-    def get_carla_actors(self):
-        # actors = get_actors()
-        # foreach (actor in actors):
-        # id = actor.id
-        # position = actor.bounding_box.location
-        # bounding_box = actor.bounding_box.extent
-        pass
+    # ------------------------------------------------------------------------------
+    # Prefilter
+    # ------------------------------------------------------------------------------
 
+    def prefilter(sensor, sensed_objects):
 
-    def prefilter(self, sensor_info, actors):
-
-        # Filter by object type
-        # Actor.type_id and Actor.semantic_tags are available for determining type; semantic_tags effectively specifies the type of object
+        # Filter by sensed_object type
+        # Actor.type_id and Actor.semantic_tags are available for determining type; semantic_tags effectively specifies the type of sensed_object
         # Possible types are listed in the CARLA documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
         actors = filter(lambda actor: actor.semantic_tags), actors)
         self.config.prefilter.allowed_semantic_tags
 
-get_carla_lidar_hitpoints
+        get_carla_lidar_hitpoints
         # Filter by radius
         simulated_sensor_config.prefilter.max_distance_meters
 
 
         pass
 
-    def get_carla_lidar_hitpoints(self):
-        pass
-    
+    # ------------------------------------------------------------------------------
+    # CARLA Raw Sensor Data Retrieval
+    # ------------------------------------------------------------------------------
 
-    def associate(self, hitpoints, actors):
-        pass
+    def get_carla_lidar_hitpoints(self, ):
 
+    def get_hitpoints_sampled(self, hitpoints):
 
-    def compute_actor_angular_extents(self, sensor_info, actors):
-        pass
+    def associate_hitpoints(hitpoints, sensed_objects):
 
+    # ------------------------------------------------------------------------------
+    # Computations
+    # ------------------------------------------------------------------------------
 
-    def compute_adjusted_detection_thresholds(self, sensor_info, actors):
-        pass
+    def compute_actor_angular_extents(self, sensor, sensed_objects):
 
+    def compute_adjusted_detection_thresholds(self, sensor, sensed_objects):
 
-    def apply_occlusion(self, actors, actor_angular_extents, hitpoints, detection_thresholds):
-        pass
+    # ------------------------------------------------------------------------------
+    # Occlusion Filter
+    # ------------------------------------------------------------------------------
 
-
-
+    def apply_occlusion(self, sensed_objects, actor_angular_extents, hitpoints, detection_thresholds):
 
 
 
