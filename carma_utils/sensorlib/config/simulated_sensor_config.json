@@ -8,6 +8,9 @@
             "max_distance_meters": 100
         },
         "detection_threshold_scaling_formula": {
-            # TODO config must contain nominal hitpoint detection ratio threshold, and scaling parameters for the adjustable threshold
+            "nominal_hitpoint_detection_ratio_threshold": 0.6,
+            "hitpoint_detection_ratio_threshold_per_meter_change_rate": -0.0033
+
+        and scaling parameters for the adjustable threshold
     }
 }

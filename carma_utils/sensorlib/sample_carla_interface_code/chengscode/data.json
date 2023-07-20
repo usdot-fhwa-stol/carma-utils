@@ -1,0 +1,7 @@
+{
+    "CARLAIp": "localhost",
+    "CARLAPort": 2000,
+    "vehicles": [
+        {"vehicleId": 1, "vehicleModel": "vehicle.nissan.micra", "yaw": 89.775162, "startPt": [-9.635131, -146.145798, 0.281942], "endPt":[0,-10, 0], "targetSpeedMPH": 30}
+    ]
+}
