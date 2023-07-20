@@ -9,6 +9,11 @@ from SensedObject import SensedObject
 # TODO Python funciton memoization could help.?
 
 # TODO Need to rework based on updated frame capture approach
+# 1. Register listener
+# 2. Listen for data updates and collect it only
+# 3. Perform processing upon correct scan rotation angle
+# 4. Provide query function for processed results
+
 class SimulatedSensorVerticalScan:
     def update_data(self, , , sensor_updated, hitpoints, detection_thresholds):
 
@@ -94,7 +99,7 @@ class SimulatedSensorUtilities:
         # Filter by sensed_object type
         # Actor.type_id and Actor.semantic_tags are available for determining type; semantic_tags effectively specifies the type of sensed_object
         # Possible types are listed in the CARLA documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
-        actors = filter(lambda actor: actor.semantic_tags), actors)
+        actors = filter(lambda actor: actor.semantic_tags, actors)
         self.config.prefilter.allowed_semantic_tags
 
         get_carla_lidar_hitpoints
@@ -119,9 +124,30 @@ class SimulatedSensorUtilities:
     # ------------------------------------------------------------------------------
 
     def compute_actor_angular_extents(self, sensor, sensed_objects):
+        return dict([ (sensed_object.id,
+                       self.__compute_actor_angular_extent(sensor, sensed_object)) for sensed_object in sensed_objects ])
+
+    def __compute_actor_angular_extent(self, sensor, sensed_object):
+        bbox = sensed_object.bbox
+        corner_vec = bbox.extent as np.ndarray
+
+
+        map(lambda X: np.diagflat(X) * corner_vec, itertools.product([-1,1], repeat=3))
+
+
+        corner_vec = [2.2,2.4,2.8]
+        list( map(lambda X: np.matmul(np.diagflat(X), corner_vec), itertools.product([-1,1], repeat=3)) )
+
+
+
+        v1 = np.diagflat([ 1,  1,  -1]) * v0
+        v1 = np.diagflat([ 1,  1,  1]) * v0
+        v1 = np.diagflat([-1,  1,  1]) * v0
+        return (,)
 
     def compute_adjusted_detection_thresholds(self, sensor, sensed_objects):
-        __compute_adjusted_detection_threshold()
+        return dict([ (sensed_object.id,
+                self.__compute_adjusted_detection_threshold(sensor, sensed_object)) for sensed_object in sensed_objects ])
 
     def __compute_adjusted_detection_threshold(self, sensor, sensed_object):
         r = self.__compute_range(sensor, sensed_object)
