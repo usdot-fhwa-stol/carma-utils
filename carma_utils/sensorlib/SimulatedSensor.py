@@ -136,21 +136,22 @@ class SimulatedSensorUtilities:
         thetas = map(lambda v: self.__compute_view_angle(sensor, v), all_corner_vectors)
         return (min(thetas), max(thetas))
 
-    def __compute_view_angle(self, sensor, v):
+    def __compute_view_angle(self, relative_object_position_vectors):
         return np.arccos(np.vdot(sensor.position, v) / (norm))
 
-    def compute_adjusted_detection_thresholds(self, sensor, sensed_objects):
+    def compute_adjusted_detection_thresholds(self, sensed_objects, relative_object_position_vectors):
         return dict([ (sensed_object.id,
-                self.__compute_adjusted_detection_threshold(sensor, sensed_object)) for sensed_object in sensed_objects ])
+                self.__compute_adjusted_detection_threshold(relative_object_position_vector)) for relative_object_position_vector in relative_object_position_vectors ])
 
-    def __compute_adjusted_detection_threshold(self, sensor, sensed_object):
-        r = self.__compute_range(sensor, sensed_object)
+    def __compute_adjusted_detection_threshold(self, relative_object_position_vector):
+        r = self.__compute_range(relative_object_position_vector)
         dt_dr = self.simulated_sensor_config["detection_threshold_scaling_formula"]["hitpoint_detection_ratio_threshold_per_meter_change_rate"]
         t_nominal = self.simulated_sensor_config["detection_threshold_scaling_formula"]["nominal_hitpoint_detection_ratio_threshold"]
         return dt_dr * r * t_nominal
 
-    def __compute_range(self, sensor, sensed_object):
-        return numpy.linalg.norm(sensed_object["position"] - sensor["position"])
+    def __compute_range(self, relative_object_position_vector):
+        return numpy.linalg.norm(relative_object_position_vector)
+    # return numpy.linalg.norm(sensed_object["position"] - sensor["position"])
 
     # ------------------------------------------------------------------------------
     # Occlusion Filter
