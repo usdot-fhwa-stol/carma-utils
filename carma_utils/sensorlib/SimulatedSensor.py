@@ -1,5 +1,7 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
+import itertools
+
 import numpy
 import numpy as np
 
@@ -130,20 +132,12 @@ class SimulatedSensorUtilities:
     def __compute_actor_angular_extent(self, sensor, sensed_object):
         bbox = sensed_object.bbox
         corner_vec = bbox.extent as np.ndarray
+        all_corner_vectors = map(lambda X: np.matmul(np.diagflat(X), corner_vec), itertools.product([-1,1], repeat=3))
+        thetas = map(lambda v: self.__compute_view_angle(sensor, v), all_corner_vectors)
+        return (min(thetas), max(thetas))
 
-
-        map(lambda X: np.diagflat(X) * corner_vec, itertools.product([-1,1], repeat=3))
-
-
-        corner_vec = [2.2,2.4,2.8]
-        list( map(lambda X: np.matmul(np.diagflat(X), corner_vec), itertools.product([-1,1], repeat=3)) )
-
-
-
-        v1 = np.diagflat([ 1,  1,  -1]) * v0
-        v1 = np.diagflat([ 1,  1,  1]) * v0
-        v1 = np.diagflat([-1,  1,  1]) * v0
-        return (,)
+    def __compute_view_angle(self, sensor, v):
+        return np.arccos(np.vdot(sensor.position, v) / (norm))
 
     def compute_adjusted_detection_thresholds(self, sensor, sensed_objects):
         return dict([ (sensed_object.id,
