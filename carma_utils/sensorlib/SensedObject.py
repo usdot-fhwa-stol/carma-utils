@@ -20,6 +20,8 @@ class SensedObject:
         Args:
 
         """
+
+        # Set intersection, except order matters
         for tag in simulated_sensor_config.prefilter.allowed_semantic_tags:
             if tag in carla_actor.semantic_types:
                 return tag

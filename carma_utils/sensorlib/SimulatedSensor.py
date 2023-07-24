@@ -4,6 +4,7 @@ import itertools
 
 import numpy
 import numpy as np
+from collections import deque
 
 from SensedObject import SensedObject
 
@@ -31,6 +32,14 @@ class SimulatedSensor:
         self.carla_sensor = carla_sensor
         self.noise_model = noise_model
         self.sensor_utilities = SimulatedSensorUtilities()
+
+        # Data collection objects
+        # class SensorDataCollector
+        self.raw_sensor_data
+
+    def __collect_sensor_data(self, data):
+
+        self.raw_sensor_data += data
 
     def get_sensed_objects_in_frame(self):
 
@@ -101,25 +110,13 @@ class SimulatedSensorUtilities:
         # Filter by sensed_object type
         # Actor.type_id and Actor.semantic_tags are available for determining type; semantic_tags effectively specifies the type of sensed_object
         # Possible types are listed in the CARLA documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
-        actors = filter(lambda actor: actor.semantic_tags, actors)
-        self.config.prefilter.allowed_semantic_tags
+        sensed_objects = filter(lambda obj: obj.object_type in self.config.prefilter.allowed_semantic_tags, sensed_objects)
 
-        get_carla_lidar_hitpoints
         # Filter by radius
-        simulated_sensor_config.prefilter.max_distance_meters
+        sensed_objects = filter(lambda obj: np.norm(obj.position - sensor.position) <= simulated_sensor_config.prefilter.max_distance_meters,
+                                sensed_objects)
 
-
-        pass
-
-    # ------------------------------------------------------------------------------
-    # CARLA Raw Sensor Data Retrieval
-    # ------------------------------------------------------------------------------
-
-    def get_carla_lidar_hitpoints(self, ):
-
-    def get_hitpoints_sampled(self, hitpoints):
-
-    def associate_hitpoints(hitpoints, sensed_objects):
+        return sensed_objects
 
     # ------------------------------------------------------------------------------
     # Computations
