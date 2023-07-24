@@ -4,67 +4,47 @@ import itertools
 
 import numpy
 import numpy as np
-from collections import deque
 
 from SensedObject import SensedObject
-
-
-# TODO Python funciton memoization could help.?
-
-# TODO Need to rework based on updated frame capture approach
-# 1. Register listener
-# 2. Listen for data updates and collect it only
-# 3. Perform processing upon correct scan rotation angle
-# 4. Provide query function for processed results
-
-class SimulatedSensorVerticalScan:
-    def update_data(self, , , sensor_updated, hitpoints, detection_thresholds):
-
-    def get_sensed_objects(self):
-        return sensed_objects
+from SensorDataCollector import SensorDataCollector
 
 
 class SimulatedSensor:
 
     def __init__(self, config, carla_world, carla_sensor, noise_model):
-        self.config = config
-        self.carla_world = carla_world
-        self.carla_sensor = carla_sensor
-        self.noise_model = noise_model
-        self.sensor_utilities = SimulatedSensorUtilities()
+        self.__config = config
+        self.__carla_world = carla_world
+        self.__carla_sensor = carla_sensor
+        self.__noise_model = noise_model
+        self.__sensor_utilities = SimulatedSensorUtilities()
 
         # Data collection objects
-        # class SensorDataCollector
-        self.raw_sensor_data
-
-    def __collect_sensor_data(self, data):
-
-        self.raw_sensor_data += data
+        self.__raw_sensor_data_collector = SensorDataCollector(carla_world, carla_sensor)
 
     def get_sensed_objects_in_frame(self):
 
         # Note: actors is the "driving" list indicating which items are considered inside the sensor FOV throughout
 
         # Get sensor including current location and configured sensor parameters
-        sensor = self.sensor_utilities.get_sensor()
+        sensor = self.__sensor_utilities.get_sensor()
 
         # Get sensed_object truth states from simulation
-        sensed_objects = self.sensor_utilities.get_scene_sensed_objects()
+        sensed_objects = self.__sensor_utilities.get_scene_sensed_objects()
 
         # Prefilter
-        sensed_objects = self.sensor_utilities.prefilter(sensor, sensed_objects)
+        sensed_objects = self.__sensor_utilities.prefilter(sensor, sensed_objects)
 
         # Get LIDAR hitpoints with Actor ID associations
-        hitpoints = self.sensor_utilities.get_carla_lidar_hitpoints()
-        hitpoints = self.sensor_utilities.get_hitpoints_sampled(hitpoints)
-        hitpoints = self.sensor_utilities.associate_hitpoints(hitpoints, sensed_objects)
+        hitpoints = self.__raw_sensor_data_collector.get_carla_lidar_hitpoints()
+        hitpoints = self.__sensor_utilities.get_hitpoints_sampled(hitpoints)
+        hitpoints = self.__sensor_utilities.associate_hitpoints(hitpoints, sensed_objects)
 
         # Compute data needed for occlusion operation
-        actor_angular_extents = self.sensor_utilities.compute_actor_angular_extents(sensor, sensed_objects)
-        detection_thresholds = self.sensor_utilities.compute_adjusted_detection_thresholds(sensor, sensed_objects)
+        actor_angular_extents = self.__sensor_utilities.compute_actor_angular_extents(sensor, sensed_objects)
+        detection_thresholds = self.__sensor_utilities.compute_adjusted_detection_thresholds(sensor, sensed_objects)
 
         # Apply occlusion
-        sensed_objects = self.sensor_utilities.apply_occlusion(sensed_objects, actor_angular_extents, hitpoints, detection_thresholds)
+        sensed_objects = self.__sensor_utilities.apply_occlusion(sensed_objects, actor_angular_extents, hitpoints, detection_thresholds)
 
         return sensed_objects
 
@@ -92,8 +72,8 @@ class SimulatedSensorUtilities:
         sensor["fov_angular_width"] = 0
 
         # Dynamic position and parameters
-        sensor["position"] = carla_sensor.get_location() as np.ndarray
-        sensor["rotation"] = carla_sensor.get_transform().get_matrix() as np.ndarray
+        sensor["position"] = self.__carla_sensor.get_location() as np.ndarray
+        sensor["rotation"] = self.__carla_sensor.get_transform().get_matrix() as np.ndarray
 
         return sensor
 
@@ -105,15 +85,15 @@ class SimulatedSensorUtilities:
     # Prefilter
     # ------------------------------------------------------------------------------
 
-    def prefilter(sensor, sensed_objects):
+    def prefilter(self, sensor, sensed_objects):
 
         # Filter by sensed_object type
         # Actor.type_id and Actor.semantic_tags are available for determining type; semantic_tags effectively specifies the type of sensed_object
         # Possible types are listed in the CARLA documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
-        sensed_objects = filter(lambda obj: obj.object_type in self.config.prefilter.allowed_semantic_tags, sensed_objects)
+        sensed_objects = filter(lambda obj: obj.object_type in self.__config.prefilter.allowed_semantic_tags, sensed_objects)
 
         # Filter by radius
-        sensed_objects = filter(lambda obj: np.norm(obj.position - sensor.position) <= simulated_sensor_config.prefilter.max_distance_meters,
+        sensed_objects = filter(lambda obj: numpy.linalg.norm(obj.position - sensor.position) <= self.__config.prefilter.max_distance_meters,
                                 sensed_objects)
 
         return sensed_objects
@@ -142,8 +122,8 @@ class SimulatedSensorUtilities:
 
     def __compute_adjusted_detection_threshold(self, relative_object_position_vector):
         r = self.__compute_range(relative_object_position_vector)
-        dt_dr = self.simulated_sensor_config["detection_threshold_scaling_formula"]["hitpoint_detection_ratio_threshold_per_meter_change_rate"]
-        t_nominal = self.simulated_sensor_config["detection_threshold_scaling_formula"]["nominal_hitpoint_detection_ratio_threshold"]
+        dt_dr = self.__config["detection_threshold_scaling_formula"]["hitpoint_detection_ratio_threshold_per_meter_change_rate"]
+        t_nominal = self.__config["detection_threshold_scaling_formula"]["nominal_hitpoint_detection_ratio_threshold"]
         return dt_dr * r * t_nominal
 
     def __compute_range(self, relative_object_position_vector):

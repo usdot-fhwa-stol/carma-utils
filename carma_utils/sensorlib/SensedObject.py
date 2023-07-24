@@ -6,7 +6,7 @@
 class SensedObject:
     def __init__(self, simulated_sensor_config, carla_actor):
         self.id = carla_actor.id
-        self.object_type = self.__get_object_type(carla_actor)
+        self.object_type = self.__determine_object_type(carla_actor)
         self.position = None
         self.rotation = None
         self.covariance = None
@@ -14,7 +14,7 @@ class SensedObject:
         self.size = None
         self.confidence = 1.0  # Default
 
-    def __get_object_type(self, simulated_sensor_config, carla_actor):
+    def __determine_object_type(self, simulated_sensor_config, carla_actor):
         """
         Check for identification as one of the accepted types, and mark unidentified otherwise.
         Args:
