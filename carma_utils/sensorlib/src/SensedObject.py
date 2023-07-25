@@ -14,7 +14,8 @@ class SensedObject:
         self.size = None
         self.confidence = 1.0  # Default
 
-    def __determine_object_type(self, simulated_sensor_config, carla_actor):
+    @staticmethod
+    def determine_object_type(simulated_sensor_config, carla_actor):
         """
         Check for identification as one of the accepted types, and mark unidentified otherwise.
         Args:
@@ -22,7 +23,7 @@ class SensedObject:
         """
 
         # Set intersection, except order matters
-        for tag in simulated_sensor_config.prefilter.allowed_semantic_tags:
+        for tag in simulated_sensor_config["prefilter"]["allowed_semantic_tags"]:
             if tag in carla_actor.semantic_types:
                 return tag
         return "Unknown"
