@@ -1,16 +1,25 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
+import numpy as np
+
+from src.util.CarlaActorUtils import CarlaActorUtils
+
 
 # TODO Do we want getters and setters?
 
 class SensedObject:
     def __init__(self, simulated_sensor_config, carla_actor):
         self.id = carla_actor.id
-        self.object_type = self.__determine_object_type(carla_actor)
+        self.object_type = SensedObject.determine_object_type(simulated_sensor_config, carla_actor)
+
         self.position = None
         self.rotation = None
-        self.covariance = None
         self.velocity = None
+        self.angular_velocity = CarlaActorUtils.get_actor_angular_velocity()
+
+        self.position_covariance = None
+        self.velocity_covariance = None
+
         self.size = None
         self.confidence = 1.0  # Default
 
@@ -27,3 +36,4 @@ class SensedObject:
             if tag in carla_actor.semantic_types:
                 return tag
         return "Unknown"
+
