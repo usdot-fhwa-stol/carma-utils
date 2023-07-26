@@ -3,6 +3,7 @@
 import numpy as np
 
 from src.util.CarlaActorUtils import CarlaActorUtils
+from src.util.CarlaUtils import CarlaUtils
 
 
 # TODO Do we want getters and setters?
@@ -12,7 +13,7 @@ class SensedObject:
         self.id = carla_actor.id
         self.object_type = SensedObject.determine_object_type(simulated_sensor_config, carla_actor)
 
-        self.position = None
+        self.position = CarlaUtils.vector3d_to_numpy(carla_actor.get_location())
         self.rotation = None
         self.velocity = None
         self.angular_velocity = CarlaActorUtils.get_actor_angular_velocity()
@@ -36,4 +37,3 @@ class SensedObject:
             if tag in carla_actor.semantic_types:
                 return tag
         return "Unknown"
-

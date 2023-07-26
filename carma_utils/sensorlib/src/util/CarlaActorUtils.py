@@ -3,7 +3,7 @@ import numpy as np
 
 class CarlaActorUtils:
 
-    DEG_TO_RAD = np.pi / 360.0
+    DEG_TO_RAD = np.pi / 180.0
 
     @staticmethod
     def get_actor_angular_velocity(carla_actor):
