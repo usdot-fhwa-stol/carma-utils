@@ -36,8 +36,17 @@ class SimulatedSensorTestUtils:
         }
 
     @staticmethod
-    def generate_test_data_detected_object_list():
-        detected_objects = generate_test_data_detected_object
+    def generate_test_data_detected_object_list(num_objects):
+        nominal_detected_object = SimulatedSensorTestUtils.generate_test_data_detected_object()
+        detected_objects = []
+        for n in num_objects:
+            detected_object = DetectedObject(nominal_detected_object)
+            detected_object.id = n
+            detected_object.position = nominal_detected_object.position + n * carla.Vector3D(1, 1, 1)
+            detected_objects.append(detected_object)
+
+        return detected_objects
+
 
     @staticmethod
     def generate_test_data_detected_object():
