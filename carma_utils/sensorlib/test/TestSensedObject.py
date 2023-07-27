@@ -6,6 +6,7 @@ from src.util.CarlaActorUtils import CarlaActorUtils
 from src.util.CarlaUtils import CarlaUtils
 from src.SensedObject import SensedObject
 
+
 class SensedObjectTestCase(unittest.TestCase):
     # TODO not verified
 
@@ -78,6 +79,7 @@ class SensedObjectTestCase(unittest.TestCase):
         expected_size = np.array([0.0, 0.0, 0.0])
         self.carla_actor.get_bounding_box.return_value = MagicMock(extent=MagicMock(x=0.0, y=0.0, z=0.0))
         self.assertTrue(np.array_equal(self.sensed_object.get_size(), expected_size))
+
 
 if __name__ == '__main__':
     unittest.main()

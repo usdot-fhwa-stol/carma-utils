@@ -1,5 +1,6 @@
 from collections import deque
 
+
 class SensorDataCollector:
 
     def __init__(self, carla_world, carla_sensor):

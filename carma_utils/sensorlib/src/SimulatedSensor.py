@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import itertools
 
 import numpy
@@ -21,7 +21,6 @@ class SimulatedSensor:
         self.__raw_sensor_data_collector = SensorDataCollector(carla_world, carla_sensor)
 
     def get_sensed_objects_in_frame(self):
-
         # Note: actors is the "driving" list indicating which items are considered inside the sensor FOV throughout
 
         # Get sensor including current location and configured sensor parameters
@@ -41,12 +40,14 @@ class SimulatedSensor:
         detection_thresholds = SimulatedSensorUtilities.compute_adjusted_detection_thresholds(sensor, sensed_objects)
 
         # Apply occlusion
-        sensed_objects = SimulatedSensorUtilities.apply_occlusion(sensed_objects, actor_angular_extents, hitpoints, detection_thresholds)
+        sensed_objects = SimulatedSensorUtilities.apply_occlusion(sensed_objects, actor_angular_extents, hitpoints,
+                                                                  detection_thresholds)
 
         # Apply noise
         sensed_objects = SimulatedSensorUtilities.apply_noise(sensed_objects, self.__noise_model)
 
         return sensed_objects
+
 
 class SimulatedSensorUtilities:
 
@@ -56,7 +57,6 @@ class SimulatedSensorUtilities:
 
     @staticmethod
     def get_sensor(carla_sensor):
-
         sensor = {}
 
         # Static sensor settings
@@ -85,14 +85,15 @@ class SimulatedSensorUtilities:
 
     @staticmethod
     def prefilter(sensor, sensed_objects):
-
         # Filter by sensed_object type
         # Actor.type_id and Actor.semantic_tags are available for determining type; semantic_tags effectively specifies the type of sensed_object
         # Possible types are listed in the CARLA documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
-        sensed_objects = filter(lambda obj: obj.object_type in self.__config.prefilter.allowed_semantic_tags, sensed_objects)
+        sensed_objects = filter(lambda obj: obj.object_type in self.__config.prefilter.allowed_semantic_tags,
+                                sensed_objects)
 
         # Filter by radius
-        sensed_objects = filter(lambda obj: numpy.linalg.norm(obj.position - sensor.position) <= self.__config.prefilter.max_distance_meters,
+        sensed_objects = filter(lambda obj: numpy.linalg.norm(
+            obj.position - sensor.position) <= self.__config.prefilter.max_distance_meters,
                                 sensed_objects)
 
         return sensed_objects
@@ -103,14 +104,14 @@ class SimulatedSensorUtilities:
 
     @staticmethod
     def compute_actor_angular_extents(sensor, sensed_objects):
-        return dict([ (sensed_object.id,
-                       self.__compute_actor_angular_extent(sensor, sensed_object)) for sensed_object in sensed_objects ])
+        return dict([(sensed_object.id,
+                      self.__compute_actor_angular_extent(sensor, sensed_object)) for sensed_object in sensed_objects])
 
     @staticmethod
     def compute_actor_angular_extent(sensor, sensed_object):
         bbox = sensed_object.bbox
         corner_vec = bbox.extent as np.ndarray
-        all_corner_vectors = map(lambda X: np.matmul(np.diagflat(X), corner_vec), itertools.product([-1,1], repeat=3))
+        all_corner_vectors = map(lambda X: np.matmul(np.diagflat(X), corner_vec), itertools.product([-1, 1], repeat=3))
         thetas = map(lambda v: self.__compute_view_angle(sensor, v), all_corner_vectors)
         return (min(thetas), max(thetas))
 
@@ -120,19 +121,22 @@ class SimulatedSensorUtilities:
 
     @staticmethod
     def compute_adjusted_detection_thresholds(sensed_objects, relative_object_position_vectors):
-        return dict([ (sensed_object.id,
-                       self.__compute_adjusted_detection_threshold(relative_object_position_vector)) for relative_object_position_vector in relative_object_position_vectors ])
+        return dict([(sensed_object.id,
+                      self.__compute_adjusted_detection_threshold(relative_object_position_vector)) for
+                     relative_object_position_vector in relative_object_position_vectors])
 
     @staticmethod
     def compute_adjusted_detection_threshold(relative_object_position_vector):
         r = self.__compute_range(relative_object_position_vector)
-        dt_dr = self.__config["detection_threshold_scaling_formula"]["hitpoint_detection_ratio_threshold_per_meter_change_rate"]
+        dt_dr = self.__config["detection_threshold_scaling_formula"][
+            "hitpoint_detection_ratio_threshold_per_meter_change_rate"]
         t_nominal = self.__config["detection_threshold_scaling_formula"]["nominal_hitpoint_detection_ratio_threshold"]
         return dt_dr * r * t_nominal
 
     @staticmethod
     def compute_range(relative_object_position_vector):
         return numpy.linalg.norm(relative_object_position_vector)
+
     # return numpy.linalg.norm(sensed_object["position"] - sensor["position"])
 
     # ------------------------------------------------------------------------------
@@ -141,11 +145,12 @@ class SimulatedSensorUtilities:
 
     @staticmethod
     def apply_occlusion(sensed_objects, actor_angular_extents, sensor, hitpoints, detection_thresholds):
-        return filter(lambda obj: self.__is_visible(obj, actor_angular_extents[obj.id], hitpoints, detection_thresholds), sensed_objects)
+        return filter(
+            lambda obj: self.__is_visible(obj, actor_angular_extents[obj.id], hitpoints, detection_thresholds),
+            sensed_objects)
 
     @staticmethod
     def is_visible(sensed_object, actor_angular_extent, sensor, hitpoints, detection_thresholds):
-
         # Compute threshold hitpoint count for this object
         num_expected_hitpoints = self.__compute_expected_num_hitpoints(actor_angular_extent, sensor)
         detection_threshold_ratio = detection_thresholds[sensed_object.id]
