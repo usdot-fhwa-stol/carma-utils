@@ -6,11 +6,11 @@ import numpy as np
 
 from src.util.CarlaActorUtils import CarlaActorUtils
 from src.util.CarlaUtils import CarlaUtils
-from src.SensedObject import SensedObject
+from src.DetectedObject import DetectedObject
 from test.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
-class TestSensedObject(unittest.TestCase):
+class TestDetectedObject(unittest.TestCase):
     # TODO not verified
 
     def setUp(self):
@@ -33,50 +33,50 @@ class TestSensedObject(unittest.TestCase):
         self.carla_actor.get_velocity = MagicMock(return_value=carla.Vector3D(100.0, 1.0, 0.0))
         self.carla_actor.get_world = MagicMock(return_value=carla.World)
 
-        # Construct the SensedObject
-        self.sensed_object = SensedObject(self.simulated_sensor_config, self.carla_actor)
+        # Construct the DetectedObject
+        self.detected_object = DetectedObject(self.simulated_sensor_config, self.carla_actor)
 
     def test_get_id(self):
-        self.assertEqual(self.sensed_object.get_id(), 1)
+        self.assertEqual(self.detected_object.get_id(), 1)
 
     def test_get_object_type(self):
-        self.assertEqual(self.sensed_object.get_object_type(), "Vehicles")
+        self.assertEqual(self.detected_object.get_object_type(), "Vehicles")
 
     def test_get_position(self):
         expected_position = np.array([0.0, 0.0, 0.0])
         self.carla_actor.get_location.return_value = MagicMock(x=0.0, y=0.0, z=0.0)
-        self.assertTrue(np.array_equal(self.sensed_object.get_position(), expected_position))
+        self.assertTrue(np.array_equal(self.detected_object.get_position(), expected_position))
 
     def test_get_rotation(self):
         expected_rotation = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
         self.carla_actor.get_transform.return_value = MagicMock(get_matrix=MagicMock(return_value=expected_rotation))
-        self.assertTrue(np.array_equal(self.sensed_object.get_rotation(), expected_rotation))
+        self.assertTrue(np.array_equal(self.detected_object.get_rotation(), expected_rotation))
 
     def test_get_velocity(self):
         expected_velocity = np.array([0.0, 0.0, 0.0])
         self.carla_actor.get_velocity.return_value = MagicMock(x=0.0, y=0.0, z=0.0)
-        self.assertTrue(np.array_equal(self.sensed_object.get_velocity(), expected_velocity))
+        self.assertTrue(np.array_equal(self.detected_object.get_velocity(), expected_velocity))
 
     def test_get_angular_velocity(self):
         expected_angular_velocity = np.array([0.0, 0.0, 0.0])
         self.carla_actor.get_angular_velocity.return_value = MagicMock(x=0.0, y=0.0, z=0.0)
-        self.assertTrue(np.array_equal(self.sensed_object.get_angular_velocity(), expected_angular_velocity))
+        self.assertTrue(np.array_equal(self.detected_object.get_angular_velocity(), expected_angular_velocity))
 
     def test_get_position_covariance(self):
         expected_covariance = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
-        self.assertTrue(np.array_equal(self.sensed_object.get_position_covariance(), expected_covariance))
+        self.assertTrue(np.array_equal(self.detected_object.get_position_covariance(), expected_covariance))
 
     def test_get_velocity_covariance(self):
         expected_covariance = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
-        self.assertTrue(np.array_equal(self.sensed_object.get_velocity_covariance(), expected_covariance))
+        self.assertTrue(np.array_equal(self.detected_object.get_velocity_covariance(), expected_covariance))
 
     def test_get_confidence(self):
-        self.assertEqual(self.sensed_object.get_confidence(), 1.0)
+        self.assertEqual(self.detected_object.get_confidence(), 1.0)
 
     def test_get_size(self):
         expected_size = np.array([0.0, 0.0, 0.0])
         self.carla_actor.get_bounding_box.return_value = MagicMock(extent=MagicMock(x=0.0, y=0.0, z=0.0))
-        self.assertTrue(np.array_equal(self.sensed_object.get_size(), expected_size))
+        self.assertTrue(np.array_equal(self.detected_object.get_size(), expected_size))
 
 
 if __name__ == '__main__':

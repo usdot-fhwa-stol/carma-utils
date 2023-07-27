@@ -5,7 +5,7 @@ import numpy as np
 import yaml
 
 from src.SimulatedSensor import SimulatedSensor, SimulatedSensorUtilities
-from src.SensedObject import SensedObject
+from src.DetectedObject import DetectedObject
 from src.SensorDataCollector import SensorDataCollector
 from test.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
@@ -40,20 +40,20 @@ class TestSimulatedSensor(unittest.TestCase):
         os.remove(config_file_path)
 
 
-def test_get_sensed_objects_in_frame__nominal(self):
+def test_get_detected_objects_in_frame__nominal(self):
     # Mocking necessary objects and methods
     carla_lidar_hitpoints = MagicMock()
     self.simulated_sensor._SimulatedSensor__raw_sensor_data_collector.get_carla_lidar_hitpoints.return_value = carla_lidar_hitpoints
 
-    sensed_objects = SimulatedSensorTestUtils.generate_sensed_objects()
-    SimulatedSensorUtilities.get_scene_sensed_objects = MagicMock(return_value=sensed_objects)
+    detected_objects = SimulatedSensorTestUtils.generate_detected_objects()
+    SimulatedSensorUtilities.get_scene_detected_objects = MagicMock(return_value=detected_objects)
 
     # Test the method
-    result = self.simulated_sensor.get_sensed_objects_in_frame()
+    result = self.simulated_sensor.get_detected_objects_in_frame()
 
     # Assertions
-    self.assertEqual(result, sensed_objects)
-    SimulatedSensorUtilities.get_scene_sensed_objects.assert_called_once()
+    self.assertEqual(result, detected_objects)
+    SimulatedSensorUtilities.get_scene_detected_objects.assert_called_once()
     self.simulated_sensor._SimulatedSensor__raw_sensor_data_collector.get_carla_lidar_hitpoints.assert_called_once()
 
 class SimulatedSensorUtilitiesTest(unittest.TestCase):
@@ -90,12 +90,12 @@ class SimulatedSensorUtilitiesTest(unittest.TestCase):
         sensor = {
             "position": np.array([0.0, 0.0, 0.0])
         }
-        sensed_objects = [SensedObject({}, MagicMock(object_type="Pedestrian", position=np.array([1.0, 0.0, 0.0]))),
-                          SensedObject({}, MagicMock(object_type="Vehicle", position=np.array([2.0, 0.0, 0.0]))),
-                          SensedObject({}, MagicMock(object_type="Cyclist", position=np.array([3.0, 0.0, 0.0])))]
+        detected_objects = [DetectedObject({}, MagicMock(object_type="Pedestrian", position=np.array([1.0, 0.0, 0.0]))),
+                          DetectedObject({}, MagicMock(object_type="Vehicle", position=np.array([2.0, 0.0, 0.0]))),
+                          DetectedObject({}, MagicMock(object_type="Cyclist", position=np.array([3.0, 0.0, 0.0])))]
         config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
 
-        result = SimulatedSensorUtilities.prefilter(sensor, sensed_objects, config)
+        result = SimulatedSensorUtilities.prefilter(sensor, detected_objects, config)
 
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0].object_type, "Pedestrian")
@@ -105,10 +105,10 @@ class SimulatedSensorUtilitiesTest(unittest.TestCase):
         sensor = {
             "position": np.array([0.0, 0.0, 0.0])
         }
-        sensed_objects = [SensedObject({}, MagicMock(id=1, bbox=MagicMock(extent=np.array([1.0, 1.0, 1.0])))),
-                          SensedObject({}, MagicMock(id=2, bbox=MagicMock(extent=np.array([2.0, 2.0, 2.0]))))]
+        detected_objects = [DetectedObject({}, MagicMock(id=1, bbox=MagicMock(extent=np.array([1.0, 1.0, 1.0])))),
+                          DetectedObject({}, MagicMock(id=2, bbox=MagicMock(extent=np.array([2.0, 2.0, 2.0]))))]
 
-        result = SimulatedSensorUtilities.compute_actor_angular_extents(sensor, sensed_objects)
+        result = SimulatedSensorUtilities.compute_actor_angular_extents(sensor, detected_objects)
 
         self.assertEqual(len(result), 2)
         self.assertEqual(result[1], (0.0, 0.0))
@@ -122,7 +122,7 @@ class SimulatedSensorUtilitiesTest(unittest.TestCase):
         self.assertTrue(np.array_equal(result, np.array([0.0, 0.0])))
 
     def test_compute_adjusted_detection_thresholds(self):
-        sensed_objects = [MagicMock(id=1), MagicMock(id=2)]
+        detected_objects = [MagicMock(id=1), MagicMock(id=2)]
         relative_object_position_vectors = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
 
         config = {
@@ -132,7 +132,7 @@ class SimulatedSensorUtilitiesTest(unittest.TestCase):
             }
         }
 
-        result = SimulatedSensorUtilities.compute_adjusted_detection_thresholds(sensed_objects,
+        result = SimulatedSensorUtilities.compute_adjusted_detection_thresholds(detected_objects,
                                                                                 relative_object_position_vectors,
                                                                                 config)
 
@@ -148,21 +148,21 @@ class SimulatedSensorUtilitiesTest(unittest.TestCase):
         self.assertAlmostEqual(result, 5.0)
 
     def test_apply_occlusion(self):
-        sensed_objects = [MagicMock(id=1), MagicMock(id=2)]
+        detected_objects = [MagicMock(id=1), MagicMock(id=2)]
         actor_angular_extents = {1: (0.0, 0.0), 2: (0.0, 0.0)}
         sensor = MagicMock()
         hitpoints = {1: [MagicMock(), MagicMock()], 2: [MagicMock(), MagicMock()]}
         detection_thresholds = {1: 0.5, 2: 0.5}
 
-        result = SimulatedSensorUtilities.apply_occlusion(sensed_objects, actor_angular_extents, sensor, hitpoints,
+        result = SimulatedSensorUtilities.apply_occlusion(detected_objects, actor_angular_extents, sensor, hitpoints,
                                                           detection_thresholds)
 
         self.assertEqual(len(result), 2)
-        self.assertEqual(result[0], sensed_objects[0])
-        self.assertEqual(result[1], sensed_objects[1])
+        self.assertEqual(result[0], detected_objects[0])
+        self.assertEqual(result[1], detected_objects[1])
 
     def test_is_visible(self):
-        sensed_object = MagicMock()
+        detected_object = MagicMock()
         actor_angular_extent = (0.0, 0.0)
         sensor = MagicMock()
         hitpoints = {1: [MagicMock(), MagicMock(), MagicMock()]}
@@ -173,7 +173,7 @@ class SimulatedSensorUtilitiesTest(unittest.TestCase):
         detection_threshold = detection_thresholds[1]
         expected_result = hitpoints_count >= detection_threshold * len(hitpoints[1])
 
-        result = SimulatedSensorUtilities.is_visible(sensed_object, actor_angular_extent, sensor, hitpoints,
+        result = SimulatedSensorUtilities.is_visible(detected_object, actor_angular_extent, sensor, hitpoints,
                                                      detection_thresholds)
 
         self.assertEqual(result, expected_result)
@@ -182,7 +182,7 @@ class SimulatedSensorUtilitiesTest(unittest.TestCase):
         hitpoints_count = len(hitpoints[1]) - 1
         expected_result = hitpoints_count >= detection_threshold * len(hitpoints[1])
 
-        result = SimulatedSensorUtilities.is_visible(sensed_object, actor_angular_extent, sensor, hitpoints,
+        result = SimulatedSensorUtilities.is_visible(detected_object, actor_angular_extent, sensor, hitpoints,
                                                      detection_thresholds)
 
         self.assertEqual(result, expected_result)
@@ -209,7 +209,7 @@ class SimulatedSensorUtilitiesTest(unittest.TestCase):
         self.assertEqual(result, expected_result)
 
     def test_apply_noise(self):
-        sensed_objects = [MagicMock(), MagicMock()]
+        detected_objects = [MagicMock(), MagicMock()]
         noise_model = MagicMock()
 
         # Mock the noise_model.apply_position_noise method
@@ -229,13 +229,13 @@ class SimulatedSensorUtilitiesTest(unittest.TestCase):
         noise_model.apply_list_inclusion_noise.return_value = None
 
         # Test the method
-        SimulatedSensorUtilities.apply_noise(sensed_objects, noise_model)
+        SimulatedSensorUtilities.apply_noise(detected_objects, noise_model)
 
         # Assertions
-        noise_model.apply_position_noise.assert_called_once_with(sensed_objects)
-        noise_model.apply_orientation_noise.assert_called_once_with(sensed_objects)
-        noise_model.apply_type_noise.assert_called_once_with(sensed_objects)
-        noise_model.apply_list_inclusion_noise.assert_called_once_with(sensed_objects)
+        noise_model.apply_position_noise.assert_called_once_with(detected_objects)
+        noise_model.apply_orientation_noise.assert_called_once_with(detected_objects)
+        noise_model.apply_type_noise.assert_called_once_with(detected_objects)
+        noise_model.apply_list_inclusion_noise.assert_called_once_with(detected_objects)
 
 
 

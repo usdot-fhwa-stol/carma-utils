@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 import carla
 
-from src.SensedObject import SensedObject
+from src.DetectedObject import DetectedObject
 
 
 class SimulatedSensorTestUtils:
@@ -36,7 +36,11 @@ class SimulatedSensorTestUtils:
         }
 
     @staticmethod
-    def generate_test_data_sensed_object():
+    def generate_test_data_detected_object_list():
+        detected_objects = generate_test_data_detected_object
+
+    @staticmethod
+    def generate_test_data_detected_object():
 
         # Mock the carla.Actor class
         carla_actor = MagicMock()
@@ -60,11 +64,11 @@ class SimulatedSensorTestUtils:
         carla_actor.get_velocity = MagicMock(return_value=carla.Vector3D(100.0, 1.0, 0.0))
         carla_actor.get_world = MagicMock(return_value=carla.World)
 
-        # Construct the SensedObject
+        # Construct the DetectedObject
         simulated_sensor_config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
-        sensed_object = SensedObject(simulated_sensor_config, carla_actor)
+        detected_object = DetectedObject(simulated_sensor_config, carla_actor)
 
-        return sensed_object
+        return detected_object
 
     @staticmethod
     def generate_test_data_hitpoints(self):

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.SensedObject import SensedObject
+from src.DetectedObject import DetectedObject
 
 
 class TestCarlaActorUtils(unittest.TestCase):
@@ -13,19 +13,19 @@ class TestCarlaActorUtils(unittest.TestCase):
     def test_determine_object_type(config, carla_actor):
         # Nominal case
         carla_actor.semantic_types = ["Vehicles"]
-        assert "Vehicles" == SensedObject.determine_object_type(config, carla_actor)
+        assert "Vehicles" == DetectedObject.determine_object_type(config, carla_actor)
 
         # Nominal case
         carla_actor.semantic_types = ["Pedestrian"]
-        assert "Pedestrian" == SensedObject.determine_object_type(config, carla_actor)
+        assert "Pedestrian" == DetectedObject.determine_object_type(config, carla_actor)
 
         # Multiple types
         carla_actor.semantic_types = ["Invalid Type", "Vehicles"]
-        assert "Vehicles" == SensedObject.determine_object_type(config, carla_actor)
+        assert "Vehicles" == DetectedObject.determine_object_type(config, carla_actor)
 
         # No allowed type
         carla_actor.semantic_types = ["Invalid Type"]
-        assert "Unknown" == SensedObject.determine_object_type(config, carla_actor)
+        assert "Unknown" == DetectedObject.determine_object_type(config, carla_actor)
 
     def test_get_actor_angular_velocity(self):
         expected_angular_velocity = np.array([0.0, 0.0, 0.0])

@@ -6,7 +6,7 @@ from src.util.CarlaActorUtils import CarlaActorUtils
 from src.util.CarlaUtils import CarlaUtils
 
 
-class SensedObject:
+class DetectedObject:
     def __init__(self, simulated_sensor_config, carla_actor):
         self.__carla_actor = carla_actor
         self.__id = carla_actor.id
