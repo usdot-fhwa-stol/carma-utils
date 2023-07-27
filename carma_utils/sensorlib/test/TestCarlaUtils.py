@@ -5,7 +5,7 @@ import numpy as np
 from src.util.CarlaUtils import CarlaUtils
 
 
-class CarlaUtilsTestCase(unittest.TestCase):
+class TestCarlaUtils(unittest.TestCase):
     # TODO Not verified
     def test_vector3d_to_numpy(self):
         vec = MagicMock(x=1.0, y=2.0, z=3.0)

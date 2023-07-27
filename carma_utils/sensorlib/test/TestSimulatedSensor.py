@@ -1,45 +1,85 @@
+import os
 import unittest
 from unittest.mock import MagicMock
 import numpy as np
+import yaml
 
 from src.SimulatedSensor import SimulatedSensor, SimulatedSensorUtilities
 from src.SensedObject import SensedObject
 from src.SensorDataCollector import SensorDataCollector
 
 
-class SimulatedSensorTestCase(unittest.TestCase):
+class TestSimulatedSensor(unittest.TestCase):
     # TODO Not reviewed
 
     def setUp(self):
-        self.config = {
-            "prefilter": {
-                "allowed_semantic_tags": ["Pedestrian", "Vehicle"],
-                "max_distance_meters": 100
-            }
-        }
+        self.config =
         self.carla_world = MagicMock()
         self.carla_sensor = MagicMock()
         self.noise_model = MagicMock()
         self.simulated_sensor = SimulatedSensor(self.config, self.carla_world, self.carla_sensor, self.noise_model)
 
-    def test_get_sensed_objects_in_frame(self):
-        # Mocking necessary objects and methods
-        carla_lidar_hitpoints = MagicMock()
-        self.simulated_sensor._SimulatedSensor__raw_sensor_data_collector.get_carla_lidar_hitpoints.return_value = carla_lidar_hitpoints
+    def test_load_config_from_dict(self):
+        config = {
+            "prefilter": {
+                "allowed_semantic_tags": ["Pedestrian", "Vehicle"],
+                "max_distance_meters": 100
+            },
+            "detection_threshold_scaling_formula": {
+                "nominal_hitpoint_detection_ratio_threshold": 0.6,
+                "hitpoint_detection_ratio_threshold_per_meter_change_rate": -0.0033,
+                "and_scaling_parameters_for_the_adjustable_threshold": {
+                    "dropoff_rate": 0.01
+                }
+            }
+        }
 
-        sensed_objects = [SensedObject(self.config, MagicMock(id=1)), SensedObject(self.config, MagicMock(id=2))]
-        SimulatedSensorUtilities.get_scene_sensed_objects = MagicMock(return_value=sensed_objects)
+        self.simulated_sensor.load_config_from_dict(config)
 
-        # Test the method
-        result = self.simulated_sensor.get_sensed_objects_in_frame()
+        self.assertEqual(self.simulated_sensor._SimulatedSensor__config, config)
 
-        # Assertions
-        self.assertEqual(result, sensed_objects)
-        SimulatedSensorUtilities.get_scene_sensed_objects.assert_called_once()
-        self.simulated_sensor._SimulatedSensor__raw_sensor_data_collector.get_carla_lidar_hitpoints.assert_called_once()
+    def test_load_config_from_file(self):
+        config_file_path = "test__simulated_sensor_config.yaml"
+        config = {
+            "prefilter": {
+                "allowed_semantic_tags": ["Pedestrian", "Vehicle"],
+                "max_distance_meters": 100
+            },
+            "detection_threshold_scaling_formula": {
+                "nominal_hitpoint_detection_ratio_threshold": 0.6,
+                "hitpoint_detection_ratio_threshold_per_meter_change_rate": -0.0033,
+                "and_scaling_parameters_for_the_adjustable_threshold": {
+                    "dropoff_rate": 0.01
+                }
+            }
+        }
+
+        with open(config_file_path, 'w') as file:
+            yaml.dump(config, file)
+
+        self.simulated_sensor.load_config_from_file(config_file_path)
+
+        self.assertEqual(self.simulated_sensor._SimulatedSensor__config, config)
+        os.remove(config_file_path)
 
 
-class SimulatedSensorUtilitiesTestCase(unittest.TestCase):
+def test_get_sensed_objects_in_frame__nominal(self):
+    # Mocking necessary objects and methods
+    carla_lidar_hitpoints = MagicMock()
+    self.simulated_sensor._SimulatedSensor__raw_sensor_data_collector.get_carla_lidar_hitpoints.return_value = carla_lidar_hitpoints
+
+    sensed_objects = SimulatedSensorTestUtils.generate_sensed_objects()
+    SimulatedSensorUtilities.get_scene_sensed_objects = MagicMock(return_value=sensed_objects)
+
+    # Test the method
+    result = self.simulated_sensor.get_sensed_objects_in_frame()
+
+    # Assertions
+    self.assertEqual(result, sensed_objects)
+    SimulatedSensorUtilities.get_scene_sensed_objects.assert_called_once()
+    self.simulated_sensor._SimulatedSensor__raw_sensor_data_collector.get_carla_lidar_hitpoints.assert_called_once()
+
+class SimulatedSensorUtilitiesTest(unittest.TestCase):
 
     def setUp(self):
         self.carla_sensor = MagicMock()
@@ -224,6 +264,9 @@ class SimulatedSensorUtilitiesTestCase(unittest.TestCase):
         noise_model.apply_orientation_noise.assert_called_once_with(sensed_objects)
         noise_model.apply_type_noise.assert_called_once_with(sensed_objects)
         noise_model.apply_list_inclusion_noise.assert_called_once_with(sensed_objects)
+
+
+
 
 
 if __name__ == '__main__':

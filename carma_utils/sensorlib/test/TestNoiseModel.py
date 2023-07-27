@@ -5,7 +5,7 @@ import numpy as np
 from src.NoiseModel import NoiseModel
 
 
-class NoiseModelTestCase(unittest.TestCase):
+class TestNoiseModelTest(unittest.TestCase):
     # TODO Not verified
     def setUp(self):
         self.config = {

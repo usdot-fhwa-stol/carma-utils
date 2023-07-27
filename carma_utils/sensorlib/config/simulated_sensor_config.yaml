@@ -1,0 +1,11 @@
+simulated_sensor_config:
+  prefilter:
+    allowed_semantic_tags:
+      - Pedestrian
+      - Vehicles
+    max_distance_meters: 100
+  detection_threshold_scaling_formula:
+    nominal_hitpoint_detection_ratio_threshold: 0.6
+    hitpoint_detection_ratio_threshold_per_meter_change_rate: -0.0033
+    and_scaling_parameters_for_the_adjustable_threshold:
+      dropoff_rate: 0.01

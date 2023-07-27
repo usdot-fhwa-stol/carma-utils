@@ -1,5 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
+
+import carla
 import numpy as np
 
 from src.util.CarlaActorUtils import CarlaActorUtils
@@ -7,16 +9,11 @@ from src.util.CarlaUtils import CarlaUtils
 from src.SensedObject import SensedObject
 
 
-class SensedObjectTestCase(unittest.TestCase):
+class TestSensedObject(unittest.TestCase):
     # TODO not verified
 
     def setUp(self):
-        self.simulated_sensor_config = {
-            "prefilter": {
-                "allowed_semantic_tags": ["Pedestrian", "Vehicles", "Other Allowed Type"],
-                "max_distance_meters": 100
-            }
-        }
+        self.simulated_sensor_config =
 
         # Mock the carla.Actor class
         self.carla_actor = MagicMock()

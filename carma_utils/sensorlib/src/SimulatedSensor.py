@@ -4,6 +4,7 @@ import itertools
 
 import numpy
 import numpy as np
+import yaml
 
 from SensedObject import SensedObject
 from SensorDataCollector import SensorDataCollector
@@ -11,14 +12,21 @@ from SensorDataCollector import SensorDataCollector
 
 class SimulatedSensor:
 
-    def __init__(self, config, carla_world, carla_sensor, noise_model):
-        self.__config = config
+    def __init__(self, carla_world, carla_sensor, noise_model):
         self.__carla_world = carla_world
         self.__carla_sensor = carla_sensor
         self.__noise_model = noise_model
 
         # Data collection objects
         self.__raw_sensor_data_collector = SensorDataCollector(carla_world, carla_sensor)
+
+    def load_config_from_dict(self, config):
+        self.__config = config
+
+    def load_config_from_file(self, config_file_path):
+        with open(config_file_path, 'r') as file:
+            config = yaml.safe_load(file)
+        self.__config = config
 
     def get_sensed_objects_in_frame(self):
         # Note: actors is the "driving" list indicating which items are considered inside the sensor FOV throughout
