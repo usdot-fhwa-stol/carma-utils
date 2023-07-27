@@ -1,4 +1,7 @@
 import unittest
+from unittest.mock import MagicMock
+
+from src.SensedObject import SensedObject
 
 
 class TestCarlaActorUtils(unittest.TestCase):

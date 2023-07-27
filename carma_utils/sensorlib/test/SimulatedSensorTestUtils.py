@@ -1,3 +1,11 @@
+import csv
+from unittest.mock import MagicMock
+
+import carla
+
+from src.SensedObject import SensedObject
+
+
 class SimulatedSensorTestUtils:
 
     @staticmethod
@@ -17,35 +25,72 @@ class SimulatedSensorTestUtils:
         }
 
     @staticmethod
-    def generate_test_data_sensed_objects():
+    def generate_noise_model_config():
+        return {
+            "noise_model_config": {
+                "std_deviations": {
+                    "position": [0.8, 0.8, 0.8],
+                    "orientation": [0.1, 0.1, 0.1]
+                }
+            }
+        }
+
+    @staticmethod
+    def generate_test_data_sensed_object():
 
         # Mock the carla.Actor class
-        self.carla_actor = MagicMock()
-        self.carla_actor.id = 1
-        self.carla_actor.attributes = dict()
-        self.carla_actor.is_alive = True
-        self.carla_actor.parent = None
-        self.carla_actor.semantic_types = ["Vehicles"]
-        self.carla_actor.type_id = "vehicle.ford.mustang"
+        carla_actor = MagicMock()
+        carla_actor.id = 123
+        carla_actor.attributes = dict()
+        carla_actor.is_alive = True
+        carla_actor.parent = None
+        carla_actor.semantic_types = ["Vehicles"]
+        carla_actor.type_id = "vehicle.ford.mustang"
 
-        self.carla_actor.get_acceleration = MagicMock(return_value=carla.Vector3D(0.0, 0.0, 0.0))
-        self.carla_actor.get_angular_velocity = MagicMock(return_value=carla.Vector3D(0.0, 0.0, 0.005))
-        self.carla_actor.get_location = MagicMock(return_value=carla.Location(10.0, 15.0, 7.0))
-        self.carla_actor.get_transform = MagicMock(
-            return_value=carla.Transform(carla.Location(10.0, 15.0, 7.0), carla.Rotation(3.0, 1.4, 4.0)))
-        self.carla_actor.get_velocity = MagicMock(return_value=carla.Vector3D(100.0, 1.0, 0.0))
-        self.carla_actor.get_world = MagicMock(return_value=carla.World)
+        extent = carla.Vector3D(2.94838892768239, 1.69796758051459, 1.0)
+        location = carla.Location(20, 34.6410161513775, 0.0)
+        rotation = carla.Rotation(3.0, 1.4, 4.0)
+        carla_actor.get_bounding_box = MagicMock(return_value=carla.BoundingBox(extent, location, rotation))
+
+        carla_actor.get_acceleration = MagicMock(return_value=carla.Vector3D(0.0, 0.0, 0.0))
+        carla_actor.get_angular_velocity = MagicMock(return_value=carla.Vector3D(0.0, 0.0, 0.005))
+        carla_actor.get_location = MagicMock(return_value=location)
+        carla_actor.get_transform = MagicMock(
+            return_value=carla.Transform(carla.Location(10.0, 15.0, 7.0), rotation))
+        carla_actor.get_velocity = MagicMock(return_value=carla.Vector3D(100.0, 1.0, 0.0))
+        carla_actor.get_world = MagicMock(return_value=carla.World)
 
         # Construct the SensedObject
-        self.sensed_object = SensedObject(self.simulated_sensor_config, self.carla_actor)
+        simulated_sensor_config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
+        sensed_object = SensedObject(simulated_sensor_config, carla_actor)
 
-
-
-        return [
-            SensedObject(
-
-            )
-        ]
+        return sensed_object
 
     @staticmethod
     def generate_test_data_hitpoints(self):
+        # Read raw data
+        test_points = []
+        with open("data/test_data_hitpoints.csv", 'r') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                theta, x, y, z = map(float, row)
+                test_points.append((theta, x, y, z))
+
+        # Chunk into data collection chunks
+        num_chunks = 3
+        semantic_lidar_measurements = []
+        for n in num_chunks:
+            chunk = test_points[n * len(test_points) // num_chunks: (n + 1) * len(test_points) // num_chunks]
+            semantic_lidar_measurements.append(SimulatedSensorTestUtils.generate_semantic_lidar_measurement(chunk))
+        return semantic_lidar_measurements
+
+    @staticmethod
+    def generate_semantic_lidar_measurement(test_points_chunk):
+        raw_data = []
+        for point in test_points_chunk:
+            location = carla.Location(x=point[1], y=point[2], z=point[3])
+            semantic_lidar_measurement = carla.SemanticLidarMeasurement(point=location, object_idx=123)
+            raw_data.append(semantic_lidar_measurement)
+
+        # Assign one representative angle for this measurement. This is a very rough approximation of the real collection data.
+        return carla.SemanticLidarMeasurement(channels=1, horizontal_angle=test_points_chunk[0][0], raw_data=raw_data)

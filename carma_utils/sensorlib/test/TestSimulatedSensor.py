@@ -7,32 +7,21 @@ import yaml
 from src.SimulatedSensor import SimulatedSensor, SimulatedSensorUtilities
 from src.SensedObject import SensedObject
 from src.SensorDataCollector import SensorDataCollector
+from test.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestSimulatedSensor(unittest.TestCase):
     # TODO Not reviewed
 
     def setUp(self):
-        self.config =
+        self.config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
         self.carla_world = MagicMock()
         self.carla_sensor = MagicMock()
         self.noise_model = MagicMock()
         self.simulated_sensor = SimulatedSensor(self.config, self.carla_world, self.carla_sensor, self.noise_model)
 
     def test_load_config_from_dict(self):
-        config = {
-            "prefilter": {
-                "allowed_semantic_tags": ["Pedestrian", "Vehicle"],
-                "max_distance_meters": 100
-            },
-            "detection_threshold_scaling_formula": {
-                "nominal_hitpoint_detection_ratio_threshold": 0.6,
-                "hitpoint_detection_ratio_threshold_per_meter_change_rate": -0.0033,
-                "and_scaling_parameters_for_the_adjustable_threshold": {
-                    "dropoff_rate": 0.01
-                }
-            }
-        }
+        config =
 
         self.simulated_sensor.load_config_from_dict(config)
 
@@ -40,19 +29,7 @@ class TestSimulatedSensor(unittest.TestCase):
 
     def test_load_config_from_file(self):
         config_file_path = "test__simulated_sensor_config.yaml"
-        config = {
-            "prefilter": {
-                "allowed_semantic_tags": ["Pedestrian", "Vehicle"],
-                "max_distance_meters": 100
-            },
-            "detection_threshold_scaling_formula": {
-                "nominal_hitpoint_detection_ratio_threshold": 0.6,
-                "hitpoint_detection_ratio_threshold_per_meter_change_rate": -0.0033,
-                "and_scaling_parameters_for_the_adjustable_threshold": {
-                    "dropoff_rate": 0.01
-                }
-            }
-        }
+        config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
 
         with open(config_file_path, 'w') as file:
             yaml.dump(config, file)
@@ -116,12 +93,7 @@ class SimulatedSensorUtilitiesTest(unittest.TestCase):
         sensed_objects = [SensedObject({}, MagicMock(object_type="Pedestrian", position=np.array([1.0, 0.0, 0.0]))),
                           SensedObject({}, MagicMock(object_type="Vehicle", position=np.array([2.0, 0.0, 0.0]))),
                           SensedObject({}, MagicMock(object_type="Cyclist", position=np.array([3.0, 0.0, 0.0])))]
-        config = {
-            "prefilter": {
-                "allowed_semantic_tags": ["Pedestrian", "Vehicle"],
-                "max_distance_meters": 2.5
-            }
-        }
+        config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
 
         result = SimulatedSensorUtilities.prefilter(sensor, sensed_objects, config)
 

@@ -7,13 +7,14 @@ import numpy as np
 from src.util.CarlaActorUtils import CarlaActorUtils
 from src.util.CarlaUtils import CarlaUtils
 from src.SensedObject import SensedObject
+from test.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestSensedObject(unittest.TestCase):
     # TODO not verified
 
     def setUp(self):
-        self.simulated_sensor_config =
+        self.simulated_sensor_config = SimulatedSensorTestUtils.get_default_simulated_sensor_config()
 
         # Mock the carla.Actor class
         self.carla_actor = MagicMock()
