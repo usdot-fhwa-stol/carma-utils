@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import random
+
 import numpy as np
 
 
@@ -11,7 +13,6 @@ class NoiseModel:
 
     def apply_position_noise(self, object_list):
         # Apply position noise to the object_list
-        # Example implementation:
         noise_mean = self.config["position_noise"]["mean"]
         noise_std = self.config["position_noise"]["std"]
         for obj in object_list:
@@ -21,7 +22,6 @@ class NoiseModel:
 
     def apply_orientation_noise(self, object_list):
         # Apply orientation noise to the object_list
-        # Example implementation:
         noise_mean = self.config["orientation_noise"]["mean"]
         noise_std = self.config["orientation_noise"]["std"]
         for obj in object_list:
@@ -31,16 +31,9 @@ class NoiseModel:
 
     def apply_type_noise(self, object_list):
         # Apply type noise to the object_list
-        # Example implementation:
         for obj in object_list:
-            obj.object_type = "Unknown"
+            obj.object_type = random.sample(self.config["type_noise"]["possible_object_types"])
         return object_list
 
-    def apply_list_inclusion_noise(self, object_list, excluded_object_list):
-        # Apply list inclusion noise to the object_list
-        # Example implementation:
-        inclusion_prob = self.config["list_inclusion_noise"]["inclusion_prob"]
-        for obj in excluded_object_list:
-            if np.random.uniform() < inclusion_prob:
-                object_list.append(obj)
-        return object_list
+    def apply_list_inclusion_noise(self, object_list):
+        return object_list[0:np.random.randint(0, len(object_list))]

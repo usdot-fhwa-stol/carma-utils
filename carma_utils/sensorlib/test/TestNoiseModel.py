@@ -3,38 +3,14 @@ from unittest.mock import MagicMock
 import numpy as np
 
 from src.NoiseModel import NoiseModel
+from test.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestNoiseModelTest(unittest.TestCase):
-    # TODO Not verified
     def setUp(self):
-        self.config = {
-            "numeric_noise": {
-                "mean": 0.0,
-                "std": 0.1
-            },
-            "position_noise": {
-                "mean": 0.0,
-                "std": 0.1
-            },
-            "orientation_noise": {
-                "mean": 0.0,
-                "std": 0.1
-            },
-            "list_inclusion_noise": {
-                "inclusion_prob": 0.5
-            }
-        }
+        self.config = SimulatedSensorTestUtils.generate_noise_model_config()
         self.noise_model = NoiseModel(self.config)
-
-    def test_apply_numeric_noise(self):
-        x = 1.0
-        np.random.normal = MagicMock(return_value=0.05)
-
-        result = self.noise_model.apply_numeric_noise(x)
-
-        self.assertEqual(result, 1.05)
-        np.random.normal.assert_called_once_with(0.0, 0.1)
+        self.detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_object()
 
     def test_apply_position_noise(self):
         object_list = [MagicMock(position=np.array([1.0, 2.0, 3.0])), MagicMock(position=np.array([4.0, 5.0, 6.0]))]
@@ -64,24 +40,23 @@ class TestNoiseModelTest(unittest.TestCase):
     def test_apply_type_noise(self):
         object_list = [MagicMock(object_type="Pedestrian"), MagicMock(object_type="Vehicle")]
 
+        np.random.sample = MagicMock(return_value=["TestValue"])
+
         self.noise_model.apply_type_noise(object_list)
 
-        self.assertEqual(object_list[0].object_type, "Unknown")
-        self.assertEqual(object_list[1].object_type, "Unknown")
+        self.assertEqual(object_list[0].object_type, "TestValue")
+        self.assertEqual(object_list[1].object_type, "TestValue")
+
+        np.random.sample.assert_called_once_with(self.config["type_noise"]["possible_object_types"])
 
     def test_apply_list_inclusion_noise(self):
-        object_list = [MagicMock(), MagicMock()]
-        excluded_object_list = [MagicMock(), MagicMock()]
+        object_list = [MagicMock(), MagicMock(), MagicMock()]
 
-        np.random.uniform = MagicMock(return_value=0.4)
-
-        result = self.noise_model.apply_list_inclusion_noise(object_list, excluded_object_list)
+        result = self.noise_model.apply_list_inclusion_noise(object_list)
 
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0], object_list[0])
         self.assertEqual(result[1], object_list[1])
-
-        np.random.uniform.assert_called_once_with()
 
 
 if __name__ == '__main__':

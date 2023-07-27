@@ -36,6 +36,28 @@ class SimulatedSensorTestUtils:
         }
 
     @staticmethod
+    def gerate_carla_sensor():
+        """
+        Generate a mock sensor.lidar.ray_cast_semantic.
+        :return:
+        """
+        carla_sensor = MagicMock()
+        # carla_sensor.get_transform = MagicMock(return_value=carla.Transform(carla.Location(0, 0, 0), carla.Rotation(0, 0, 0)))
+        sensor_config = carla.SemanticLidarSensorConfiguration('sensor.lidar.semantic')
+        sensor_config.channels = 1
+        sensor_config.range = 1000.0
+        sensor_config.rotation_frequency = 10.0
+        sensor_config.points_per_second = 10000
+        sensor_config.upper_fov = 20
+        sensor_config.lower_fov = -40
+        sensor_config.position = carla.Location(10.0, 15.0, 7.0)
+        rotation = carla.Rotation(0, 0, 0)
+        sensor_config.transform = MagicMock(
+            return_value=carla.Transform(carla.Location(10.0, 15.0, 7.0), rotation))
+
+        return carla_sensor
+
+    @staticmethod
     def generate_test_data_detected_object_list(num_objects):
         nominal_detected_object = SimulatedSensorTestUtils.generate_test_data_detected_object()
         detected_objects = []
@@ -46,7 +68,6 @@ class SimulatedSensorTestUtils:
             detected_objects.append(detected_object)
 
         return detected_objects
-
 
     @staticmethod
     def generate_test_data_detected_object():

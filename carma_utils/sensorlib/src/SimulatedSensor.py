@@ -8,6 +8,7 @@ import yaml
 
 from DetectedObject import DetectedObject
 from SensorDataCollector import SensorDataCollector
+from src.objects.ProxySensor import ProxySensor
 
 
 class SimulatedSensor:
@@ -32,7 +33,7 @@ class SimulatedSensor:
         # Note: actors is the "driving" list indicating which items are considered inside the sensor FOV throughout
 
         # Get sensor including current location and configured sensor parameters
-        sensor = SimulatedSensorUtilities.get_sensor(self.__carla_sensor)
+        sensor = ProxySensor(self.__carla_sensor)
 
         # Get detected_object truth states from simulation
         detected_objects = SimulatedSensorUtilities.get_scene_detected_objects()
@@ -50,7 +51,6 @@ class SimulatedSensor:
         # Apply occlusion
         detected_objects = SimulatedSensorUtilities.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
                                                                   detection_thresholds)
-
         # Apply noise
         detected_objects = SimulatedSensorUtilities.apply_noise(detected_objects, self.__noise_model)
 
@@ -62,25 +62,6 @@ class SimulatedSensorUtilities:
     # ------------------------------------------------------------------------------
     # CARLA Scene DetectedObject Retrieval
     # ------------------------------------------------------------------------------
-
-    @staticmethod
-    def get_sensor(carla_sensor):
-        sensor = {}
-
-        # Static sensor settings
-        sensor["channels"] = carla_sensor["channels"]
-        sensor["points_per_second"] = carla_sensor["points_per_second"]
-        sensor["rotation_frequency"] = carla_sensor["rotation_frequency"]
-        sensor["upper_fov"] = carla_sensor["upper_fov"]
-        sensor["lower_fov"] = carla_sensor["lower_fov"]
-        sensor["sensor_tick"] = carla_sensor["sensor_tick"]
-        sensor["fov_angular_width"] = 0
-
-        # Dynamic position and parameters
-        sensor["position"] = carla_sensor.get_location() as np.ndarray
-        sensor["rotation"] = carla_sensor.get_transform().get_matrix() as np.ndarray
-
-        return sensor
 
     @staticmethod
     def get_scene_detected_objects(carla_world, simulated_sensor_config):
