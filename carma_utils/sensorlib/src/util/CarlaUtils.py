@@ -10,7 +10,7 @@ class CarlaUtils:
         :param vec: carla.Vector3D to convert.
         :return: Vector in numpy array form.
         """
-        np.array([vec.x, vec.y, vec.z])
+        return np.array([vec.x, vec.y, vec.z])
 
     @staticmethod
     def vector2d_to_numpy(vec):
@@ -19,7 +19,7 @@ class CarlaUtils:
         :param vec: carla.Vector2D to convert.
         :return: Vector in numpy array form.
         """
-        np.array([vec.x, vec.y])
+        return np.array([vec.x, vec.y])
 
     @staticmethod
     def determine_object_type(allowed_semantic_tags, carla_actor):
