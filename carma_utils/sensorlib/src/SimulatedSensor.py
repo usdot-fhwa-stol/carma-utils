@@ -1,13 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import itertools
-
-import numpy
-import numpy as np
-import yaml
-
-from DetectedObject import DetectedObject
-from SensorDataCollector import SensorDataCollector
+from src.SensorDataCollector import SensorDataCollector
 from src.noise_models.NoiseModelFactory import NoiseModelFactory
 from src.objects.ProxySensor import ProxySensor
 from src.util.SimulatedSensorUtils import SimulatedSensorUtils
