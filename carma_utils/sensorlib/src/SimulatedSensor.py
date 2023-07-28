@@ -8,163 +8,106 @@ import yaml
 
 from DetectedObject import DetectedObject
 from SensorDataCollector import SensorDataCollector
+from src.noise_models.NoiseModelFactory import NoiseModelFactory
 from src.objects.ProxySensor import ProxySensor
+from src.util.SimulatedSensorUtils import SimulatedSensorUtils
 
 
 class SimulatedSensor:
+    """
+    Configuration steps:
+    1. SimulatedSensor settings
+    2. CARLA sensor settings from either:
+        a) Existing spawned sensor
+        b) Existing blueprint
+        c) Configuration only
+    3. Noise model
+    """
 
-    def __init__(self, carla_world, carla_sensor, noise_model):
+    def __init__(self, carla_world):
         self.__carla_world = carla_world
+        self.__config = None
+        self.__carla_sensor = None
+        self.__raw_sensor_data_collector = None
+        self.__noise_model = None
+
+        # Configuration stages required before beginning operation
+        self.__is_configuration_loaded = False
+        self.__is_sensor_configured = False
+        self.__is_noise_model_configured = False
+
+    # ------------------------------------------------------------------------------
+    # Configuration loading
+    # ------------------------------------------------------------------------------
+
+    def configure_simulated_sensor(self, config):
+        self.__config = config
+        self.__is_configuration_loaded = True
+
+    # ------------------------------------------------------------------------------
+    # Sensor configuration
+    # ------------------------------------------------------------------------------
+
+    def configure_carla_sensor_from_config(self, carla_sensor_config, transform=None, parent_object=None):
+        carla_sensor_blueprint = self.__carla_world.get_blueprint_library().find('sensor.lidar.ray_cast_semantic')
+        for sensor_attribute_pair in carla_sensor_config:
+            carla_sensor_blueprint.set_attribute(sensor_attribute_pair[0], sensor_attribute_pair[1])
+        self.configure_carla_sensor_from_blueprint(carla_sensor_blueprint, transform, parent_object)
+
+    def configure_carla_sensor_from_blueprint(self, carla_sensor_blueprint, transform, parent_object=None):
+        carla_sensor = self.__carla_world.spawn_actor(carla_sensor_blueprint, transform, attach_to=parent_object)
+        self.configure_carla_sensor_from_sensor_actor(carla_sensor)
+
+    def configure_carla_sensor_from_sensor_actor(self, carla_sensor):
         self.__carla_sensor = carla_sensor
-        self.__noise_model = noise_model
+        self.__raw_sensor_data_collector = SensorDataCollector(self.__carla_world, carla_sensor)
+        self.__is_sensor_configured = True
 
-        # Data collection objects
-        self.__raw_sensor_data_collector = SensorDataCollector(carla_world, carla_sensor)
+    # ------------------------------------------------------------------------------
+    # Noise model configuration
+    # ------------------------------------------------------------------------------
 
-    def load_config_from_dict(self, config):
-        self.__config = config
+    def configure_noise_model(self, noise_model_config, noise_model_name="GaussianNoiseModel"):
+        self.__noise_model = NoiseModelFactory.get_noise_model(noise_model_name, noise_model_config)
+        self.__is_noise_model_configured = True
 
-    def load_config_from_file(self, config_file_path):
-        with open(config_file_path, 'r') as file:
-            config = yaml.safe_load(file)
-        self.__config = config
+    # ------------------------------------------------------------------------------
+    # Operation
+    # ------------------------------------------------------------------------------
 
     def get_detected_objects_in_frame(self):
-        # Note: actors is the "driving" list indicating which items are considered inside the sensor FOV throughout
+        # Ensure configuration before starting
+        if not (self.__is_configuration_loaded and self.__is_sensor_configured and self.__is_noise_model_configured):
+            raise Exception("SimulatedSensor must be configured before use.")
 
         # Get sensor including current location and configured sensor parameters
         sensor = ProxySensor(self.__carla_sensor)
 
         # Get detected_object truth states from simulation
-        detected_objects = SimulatedSensorUtilities.get_scene_detected_objects()
+        detected_objects = SimulatedSensorUtils.get_scene_detected_objects()
 
         # Prefilter
-        detected_objects = SimulatedSensorUtilities.prefilter(sensor, detected_objects)
+        detected_objects = SimulatedSensorUtils.prefilter(sensor, detected_objects)
 
         # Get LIDAR hitpoints with Actor ID associations
         hitpoints = self.__raw_sensor_data_collector.get_carla_lidar_hitpoints()
 
         # Compute data needed for occlusion operation
-        actor_angular_extents = SimulatedSensorUtilities.compute_actor_angular_extents(sensor, detected_objects)
-        detection_thresholds = SimulatedSensorUtilities.compute_adjusted_detection_thresholds(sensor, detected_objects)
+        actor_angular_extents = SimulatedSensorUtils.compute_actor_angular_extents(sensor, detected_objects)
+        detection_thresholds = SimulatedSensorUtils.compute_adjusted_detection_thresholds(sensor, detected_objects)
 
         # Apply occlusion
-        detected_objects = SimulatedSensorUtilities.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
-                                                                  detection_thresholds)
+        detected_objects = SimulatedSensorUtils.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
+                                                                detection_thresholds)
         # Apply noise
-        detected_objects = SimulatedSensorUtilities.apply_noise(detected_objects, self.__noise_model)
+        detected_objects = SimulatedSensorUtils.apply_noise(detected_objects, self.__noise_model)
 
         return detected_objects
 
-
-class SimulatedSensorUtilities:
-
-    # ------------------------------------------------------------------------------
-    # CARLA Scene DetectedObject Retrieval
-    # ------------------------------------------------------------------------------
-
-    @staticmethod
-    def get_scene_detected_objects(carla_world, simulated_sensor_config):
-        actors = carla_world.get_actors()
-        return map(lambda actor: DetectedObject(simulated_sensor_config, actor), actors)
-
-    # ------------------------------------------------------------------------------
-    # Prefilter
-    # ------------------------------------------------------------------------------
-
-    @staticmethod
-    def prefilter(sensor, detected_objects):
-        # Filter by detected_object type
-        # Actor.type_id and Actor.semantic_tags are available for determining type; semantic_tags effectively specifies the type of detected_object
-        # Possible types are listed in the CARLA documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
-        detected_objects = filter(lambda obj: obj.object_type in self.__config.prefilter.allowed_semantic_tags,
-                                detected_objects)
-
-        # Filter by radius
-        detected_objects = filter(lambda obj: numpy.linalg.norm(
-            obj.position - sensor.position) <= self.__config.prefilter.max_distance_meters,
-                                detected_objects)
-
-        return detected_objects
-
-    # ------------------------------------------------------------------------------
-    # Computations
-    # ------------------------------------------------------------------------------
-
-    @staticmethod
-    def compute_actor_angular_extents(sensor, detected_objects):
-        return dict([(detected_object.id,
-                      self.__compute_actor_angular_extent(sensor, detected_object)) for detected_object in detected_objects])
-
-    @staticmethod
-    def compute_actor_angular_extent(sensor, detected_object):
-        bbox = detected_object.bbox
-        corner_vec = bbox.extent as np.ndarray
-        all_corner_vectors = map(lambda X: np.matmul(np.diagflat(X), corner_vec), itertools.product([-1, 1], repeat=3))
-        thetas = map(lambda v: self.__compute_view_angle(sensor, v), all_corner_vectors)
-        return (min(thetas), max(thetas))
-
-    @staticmethod
-    def compute_view_angle(sensor, vec):
-        return np.arccos(np.vdot(sensor.position, vec) / (norm(sensor.position) * norm(vec)))
-
-    @staticmethod
-    def compute_adjusted_detection_thresholds(config, sensor, detected_objects):
-        return dict([(detected_object.id,
-                      self.__compute_adjusted_detection_threshold(config, detected_object.position - sensor.position)) for
-                     detected_object in detected_objects])
-
-    @staticmethod
-    def compute_adjusted_detection_threshold(config, relative_object_position_vector):
-        r = self.__compute_range(relative_object_position_vector)
-        dt_dr = self.__config["detection_threshold_scaling_formula"][
-            "hitpoint_detection_ratio_threshold_per_meter_change_rate"]
-        t_nominal = self.__config["detection_threshold_scaling_formula"]["nominal_hitpoint_detection_ratio_threshold"]
-        # TODO Review this formula
-        return dt_dr * r * t_nominal
-
-    @staticmethod
-    def compute_range(relative_object_position_vector):
-        return numpy.linalg.norm(relative_object_position_vector)
-
-    # return numpy.linalg.norm(detected_object["position"] - sensor["position"])
-
-    # ------------------------------------------------------------------------------
-    # Occlusion Filter
-    # ------------------------------------------------------------------------------
-
-    @staticmethod
-    def apply_occlusion(detected_objects, actor_angular_extents, sensor, hitpoints, detection_thresholds):
-        return filter(
-            lambda obj: self.__is_visible(obj, actor_angular_extents[obj.id], hitpoints, detection_thresholds),
-            detected_objects)
-
-    @staticmethod
-    def is_visible(detected_object, actor_angular_extent, sensor, hitpoints, detection_thresholds):
-        # Compute threshold hitpoint count for this object
-        num_expected_hitpoints = self.__compute_expected_num_hitpoints(actor_angular_extent, sensor)
-        detection_threshold_ratio = detection_thresholds[detected_object.id]
-        min_hitpoint_count = detection_threshold_ratio * num_expected_hitpoints
-
-        # Compare hitpoint count
-        num_hitpoints = len(hitpoints[detected_object.id])
-
-        return num_hitpoints >= min_hitpoint_count
-
-    @staticmethod
-    def compute_expected_num_hitpoints(actor_angular_extent, sensor):
-        num_points_per_scan = sensor.points_per_second / sensor.rotation_frequency
-        theta_resolution = sensor.fov_angular_width / num_points_per_scan
-        return (actor_angular_extent[1] - actor_angular_extent[0]) / theta_resolution
-
-    # ------------------------------------------------------------------------------
-    # Noise Filter
-    # ------------------------------------------------------------------------------
-
-    @staticmethod
-    def apply_noise(detected_objects, noise_model):
-        detected_objects = noise_model.apply_position_noise(detected_objects)
-        detected_objects = noise_model.apply_orientation_noise(detected_objects)
-        detected_objects = noise_model.apply_type_noise(detected_objects)
-        detected_objects = noise_model.apply_list_inclusion_noise(detected_objects)
+    def get_detected_objects_in_frame__simple(self):
+        if not (self.__is_configuration_loaded and self.__is_sensor_configured and self.__is_noise_model_configured):
+            raise Exception("SimulatedSensor must be configured before use.")
+        detected_objects = SimulatedSensorUtils.get_scene_detected_objects()
+        hitpoints = self.__raw_sensor_data_collector.get_carla_lidar_hitpoints()
+        detected_objects = filter(lambda obj: hitpoints[obj.id] is not None, detected_objects)
         return detected_objects

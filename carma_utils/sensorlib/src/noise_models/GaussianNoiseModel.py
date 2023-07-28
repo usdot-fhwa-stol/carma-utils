@@ -4,8 +4,10 @@ import random
 
 import numpy as np
 
+from src.noise_models.AbstractNoiseModel import AbstractNoiseModel
 
-class NoiseModel:
+
+class GaussianNoiseModel(AbstractNoiseModel):
     def __init__(self, config):
         self.__config = config
         self.__position_std = self.config["noise_model_config"]["std_deviations"]["position"]

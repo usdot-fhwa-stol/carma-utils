@@ -1,7 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.DetectedObject import DetectedObject
+from src.objects.DetectedObject import DetectedObject
+from src.util.CarlaUtils import CarlaUtils
 
 
 class TestCarlaUtils(unittest.TestCase):
