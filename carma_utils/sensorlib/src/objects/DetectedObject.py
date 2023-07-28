@@ -10,7 +10,7 @@ class DetectedObject:
         self.__carla_actor = carla_actor
         self.__id = carla_actor.id
         self.__object_type = CarlaUtils.determine_object_type(
-            simulated_sensor_config["prefilter"]["allowed_semantic_tags"], carla_actor)
+            simulated_sensor_config["simulated_sensor_config"]["prefilter"]["allowed_semantic_tags"], carla_actor)
         self.__size = CarlaUtils.get_actor_bounding_size(carla_actor)  # Length, width, height of object in meters
 
     def get_id(self):

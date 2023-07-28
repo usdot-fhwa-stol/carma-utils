@@ -198,10 +198,10 @@ def main(arg):
         simulated_sensor.configure_noise_model(SimulatedSensorUtils.load_config_from_file('../../config/noise_model_config.yaml'))
 
         point_list = o3d.geometry.PointCloud()
-        if arg.semantic:
-            lidar.listen(lambda data: semantic_lidar_callback(data, point_list))
-        else:
-            lidar.listen(lambda data: lidar_callback(data, point_list))
+        # if arg.semantic:
+        #     lidar.listen(lambda data: semantic_lidar_callback(data, point_list))
+        # else:
+        #     lidar.listen(lambda data: lidar_callback(data, point_list))
 
         vis = o3d.visualization.Visualizer()
         vis.create_window(
@@ -228,7 +228,8 @@ def main(arg):
             vis.update_renderer()
 
 
-            # detected_objects = simulated_sensor.get_detected_objects_in_frame__simple()
+            if frame % 120 == 0:
+                detected_objects = simulated_sensor.get_detected_objects_in_frame__simple()
 
 
 
@@ -239,8 +240,8 @@ def main(arg):
             world.tick()
 
             process_time = datetime.now() - dt0
-            sys.stdout.write('\r' + 'FPS: ' + str(1.0 / process_time.total_seconds()))
-            sys.stdout.flush()
+            # sys.stdout.write('\r' + 'FPS: ' + str(1.0 / process_time.total_seconds()))
+            # sys.stdout.flush()
             dt0 = datetime.now()
             frame += 1
 

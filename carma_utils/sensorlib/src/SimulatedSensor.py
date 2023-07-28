@@ -100,7 +100,7 @@ class SimulatedSensor:
     def get_detected_objects_in_frame__simple(self):
         if not (self.__is_configuration_loaded and self.__is_sensor_configured and self.__is_noise_model_configured):
             raise Exception("SimulatedSensor must be configured before use.")
-        detected_objects = SimulatedSensorUtils.get_scene_detected_objects()
+        detected_objects = SimulatedSensorUtils.get_scene_detected_objects(self.__carla_world, self.__config)
         hitpoints = self.__raw_sensor_data_collector.get_carla_lidar_hitpoints()
-        detected_objects = filter(lambda obj: hitpoints[obj.id] is not None, detected_objects)
+        detected_objects = list(filter(lambda obj: hitpoints[obj.id] is not None, detected_objects))
         return detected_objects

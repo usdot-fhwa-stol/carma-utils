@@ -25,7 +25,7 @@ class SimulatedSensorUtils:
     @staticmethod
     def get_scene_detected_objects(carla_world, simulated_sensor_config):
         actors = carla_world.get_actors()
-        return map(lambda actor: DetectedObject(simulated_sensor_config, actor), actors)
+        return [DetectedObject(simulated_sensor_config, actor) for actor in actors]
 
     # ------------------------------------------------------------------------------
     # Prefilter
@@ -36,13 +36,13 @@ class SimulatedSensorUtils:
         # Filter by detected_object type
         # Actor.type_id and Actor.semantic_tags are available for determining type; semantic_tags effectively specifies the type of detected_object
         # Possible types are listed in the CARLA documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
-        detected_objects = filter(lambda obj: obj.object_type in config.prefilter.allowed_semantic_tags,
-                                  detected_objects)
+        detected_objects = list(filter(lambda obj: obj.object_type in config.prefilter.allowed_semantic_tags,
+                                       detected_objects))
 
         # Filter by radius
-        detected_objects = filter(lambda obj: np.linalg.norm(
+        detected_objects = list(filter(lambda obj: np.linalg.norm(
             obj.position - sensor.position) <= config.prefilter.max_distance_meters,
-                                  detected_objects)
+                                       detected_objects))
 
         return detected_objects
 
@@ -53,15 +53,16 @@ class SimulatedSensorUtils:
     @staticmethod
     def compute_actor_angular_extents(sensor, detected_objects):
         return dict([(detected_object.id,
-                      SimulatedSensorUtils.compute_actor_angular_extent(sensor, detected_object)) for detected_object in detected_objects])
+                      SimulatedSensorUtils.compute_actor_angular_extent(sensor, detected_object)) for detected_object in
+                     detected_objects])
 
     @staticmethod
     def compute_actor_angular_extent(sensor, detected_object):
         bbox = detected_object.bbox
         corner_vec = np.array(bbox.extent)
-        all_corner_vectors = map(lambda X: np.matmul(np.diagflat(X), corner_vec), itertools.product([-1, 1], repeat=3))
-        thetas = map(lambda v: SimulatedSensorUtils.compute_view_angle(sensor, v), all_corner_vectors)
-        return (min(thetas), max(thetas))
+        all_corner_vectors = [np.matmul(np.diagflat(X), corner_vec) for X in itertools.product([-1, 1], repeat=3)]
+        thetas = [SimulatedSensorUtils.compute_view_angle(sensor, v) for v in all_corner_vectors]
+        return min(thetas), max(thetas)
 
     @staticmethod
     def compute_view_angle(sensor, vec):
@@ -70,7 +71,9 @@ class SimulatedSensorUtils:
     @staticmethod
     def compute_adjusted_detection_thresholds(config, sensor, detected_objects):
         return dict([(detected_object.id,
-                      SimulatedSensorUtils.compute_adjusted_detection_threshold(config, detected_object.position - sensor.position)) for
+                      SimulatedSensorUtils.compute_adjusted_detection_threshold(config,
+                                                                                detected_object.position - sensor.position))
+                     for
                      detected_object in detected_objects])
 
     @staticmethod
@@ -94,9 +97,10 @@ class SimulatedSensorUtils:
 
     @staticmethod
     def apply_occlusion(detected_objects, actor_angular_extents, sensor, hitpoints, detection_thresholds):
-        return filter(
-            lambda obj: SimulatedSensorUtils.is_visible(obj, actor_angular_extents[obj.id], hitpoints, detection_thresholds),
-            detected_objects)
+        return list(filter(
+            lambda obj: SimulatedSensorUtils.is_visible(obj, actor_angular_extents[obj.id], sensor, hitpoints,
+                                                        detection_thresholds),
+            detected_objects))
 
     @staticmethod
     def is_visible(detected_object, actor_angular_extent, sensor, hitpoints, detection_thresholds):
