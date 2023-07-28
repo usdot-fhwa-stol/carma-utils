@@ -105,21 +105,22 @@ class SimulatedSensorUtilities:
         return (min(thetas), max(thetas))
 
     @staticmethod
-    def compute_view_angle(relative_object_position_vectors):
-        return np.arccos(np.vdot(sensor.position, v) / (norm))
+    def compute_view_angle(sensor, vec):
+        return np.arccos(np.vdot(sensor.position, vec) / (norm(sensor.position) * norm(vec)))
 
     @staticmethod
-    def compute_adjusted_detection_thresholds(detected_objects, relative_object_position_vectors):
+    def compute_adjusted_detection_thresholds(config, sensor, detected_objects):
         return dict([(detected_object.id,
-                      self.__compute_adjusted_detection_threshold(relative_object_position_vector)) for
-                     relative_object_position_vector in relative_object_position_vectors])
+                      self.__compute_adjusted_detection_threshold(config, detected_object.position - sensor.position)) for
+                     detected_object in detected_objects])
 
     @staticmethod
-    def compute_adjusted_detection_threshold(relative_object_position_vector):
+    def compute_adjusted_detection_threshold(config, relative_object_position_vector):
         r = self.__compute_range(relative_object_position_vector)
         dt_dr = self.__config["detection_threshold_scaling_formula"][
             "hitpoint_detection_ratio_threshold_per_meter_change_rate"]
         t_nominal = self.__config["detection_threshold_scaling_formula"]["nominal_hitpoint_detection_ratio_threshold"]
+        # TODO Review this formula
         return dt_dr * r * t_nominal
 
     @staticmethod

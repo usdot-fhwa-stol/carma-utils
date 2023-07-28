@@ -13,7 +13,7 @@ class SimulatedSensorTestUtils:
         return {
             "prefilter": {
                 "allowed_semantic_tags": ["Pedestrian", "Vehicle"],
-                "max_distance_meters": 100
+                "max_distance_meters": 42
             },
             "detection_threshold_scaling_formula": {
                 "nominal_hitpoint_detection_ratio_threshold": 0.6,
@@ -36,13 +36,12 @@ class SimulatedSensorTestUtils:
         }
 
     @staticmethod
-    def gerate_carla_sensor():
+    def generate_carla_sensor():
         """
         Generate a mock sensor.lidar.ray_cast_semantic.
         :return:
         """
         carla_sensor = MagicMock()
-        # carla_sensor.get_transform = MagicMock(return_value=carla.Transform(carla.Location(0, 0, 0), carla.Rotation(0, 0, 0)))
         sensor_config = carla.SemanticLidarSensorConfiguration('sensor.lidar.semantic')
         sensor_config.channels = 1
         sensor_config.range = 1000.0
