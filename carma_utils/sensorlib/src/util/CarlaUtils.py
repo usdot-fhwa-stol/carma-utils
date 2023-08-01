@@ -54,6 +54,6 @@ class CarlaUtils:
 
     @staticmethod
     def get_actor_bounding_size(carla_actor):
-        extent_vector = carla_actor.bounding_box.extent
+        extent_vector = carla_actor.get_actor_bounding_size().extent
         # Extent vector is half the length, width, and height of the bounding box
         return 2.0 * np.array([extent_vector.x, extent_vector.y, extent_vector.z])

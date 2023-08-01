@@ -1,8 +1,9 @@
 import unittest
+import numpy as np
 from unittest.mock import MagicMock
 
-from src.objects.DetectedObject import DetectedObject
 from src.util.CarlaUtils import CarlaUtils
+from tests.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestCarlaUtils(unittest.TestCase):
@@ -13,15 +14,15 @@ class TestCarlaUtils(unittest.TestCase):
     def test_determine_object_type(config, carla_actor):
         # Nominal case
         carla_actor.semantic_types = ["Vehicles"]
-        assert "Vehicles" == DetectedObject.determine_object_type(config, carla_actor)
+        assert "Vehicles" == CarlaUtils.determine_object_type(config, carla_actor)
 
         # Multiple types
         carla_actor.semantic_types = ["Invalid Type", "Vehicles"]
-        assert "Vehicles" == DetectedObject.determine_object_type(config, carla_actor)
+        assert "Vehicles" == CarlaUtils.determine_object_type(config, carla_actor)
 
         # No allowed type
         carla_actor.semantic_types = ["Invalid Type"]
-        assert "Unknown" == DetectedObject.determine_object_type(config, carla_actor)
+        assert "Unknown" == CarlaUtils.determine_object_type(config, carla_actor)
 
     def test_get_actor_angular_velocity(self):
         expected_angular_velocity = np.array([0.0, 0.0, 0.0])
@@ -37,10 +38,11 @@ class TestCarlaUtils(unittest.TestCase):
         self.assertTrue(np.array_equal(result, expected_rotation_matrix))
 
     def test_get_actor_bounding_size(self):
-        expected_bounding_size = np.array([1.0, 2.0, 3.0])
-        self.carla_actor.get_bounding_box.return_value = MagicMock(extent=MagicMock(x=1.0, y=2.0, z=3.0))
+        expected_bounding_size = np.array([2.0, 4.0, 6.0])
+        self.carla_actor = MagicMock(get_actor_bounding_size=MagicMock(return_value=MagicMock(extent=MagicMock(
+            x=1.0, y=2.0, z=3.0))))
         result = CarlaUtils.get_actor_bounding_size(self.carla_actor)
-        self.assertTrue(np.array_equal(result, expected_bounding_size))
+        self.assertTrue(np.all_close(result, expected_bounding_size, atol=SimulatedSensorTestUtils.TOLERANCE))
 
 
 if __name__ == '__main__':

@@ -4,16 +4,14 @@ from unittest.mock import MagicMock
 import carla
 import numpy as np
 
-from src.util.CarlaUtils import CarlaUtils
-from src.util.CarlaUtils import CarlaUtils
-from src.DetectedObject import DetectedObject
-from test.SimulatedSensorTestUtils import SimulatedSensorTestUtils
+from src.objects.DetectedObject import DetectedObject
+from tests.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestDetectedObject(unittest.TestCase):
 
     def setUp(self):
-        self.simulated_sensor_config = SimulatedSensorTestUtils.get_simulated_sensor_config()
+        self.simulated_sensor_config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
 
         # Mock the carla.Actor class
         self.carla_actor = MagicMock()
@@ -37,48 +35,38 @@ class TestDetectedObject(unittest.TestCase):
         # Construct the DetectedObject
         self.detected_object = DetectedObject(self.simulated_sensor_config, self.carla_actor)
 
-
     def test_get_id(self):
         self.assertEqual(self.detected_object.get_id(), 123)
 
-
     def test_get_object_type(self):
         self.assertEqual(self.detected_object.get_object_type(), "Vehicles")
-
 
     def test_get_position(self):
         expected_position = np.array([10.0, 15.0, 7.0])
         self.assertTrue(np.array_equal(self.detected_object.get_position(), expected_position))
 
-
     def test_get_rotation(self):
         expected_rotation = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
         self.assertTrue(np.array_equal(self.detected_object.get_rotation(), expected_rotation))
-
 
     def test_get_velocity(self):
         expected_velocity = np.array([0.0, 0.0, 0.0])
         self.assertTrue(np.array_equal(self.detected_object.get_velocity(), expected_velocity))
 
-
     def test_get_angular_velocity(self):
         expected_angular_velocity = np.array([0.0, 0.0, 0.0])
         self.assertTrue(np.array_equal(self.detected_object.get_angular_velocity(), expected_angular_velocity))
-
 
     def test_get_position_covariance(self):
         expected_covariance = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
         self.assertTrue(np.array_equal(self.detected_object.get_position_covariance(), expected_covariance))
 
-
     def test_get_velocity_covariance(self):
         expected_covariance = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
         self.assertTrue(np.array_equal(self.detected_object.get_velocity_covariance(), expected_covariance))
 
-
     def test_get_confidence(self):
         self.assertEqual(self.detected_object.get_confidence(), 1.0)
-
 
     def test_get_size(self):
         self.assertTrue(np.array_equal(self.detected_object.get_size(), np.array([3.0, 4.0, 5.0])))

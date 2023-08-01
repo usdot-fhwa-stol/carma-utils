@@ -3,10 +3,12 @@ from unittest.mock import MagicMock
 
 import carla
 
-from src.DetectedObject import DetectedObject
+from src.objects.DetectedObject import DetectedObject
 
 
 class SimulatedSensorTestUtils:
+
+    TOLERANCE = 1e-4
 
     @staticmethod
     def generate_simulated_sensor_config():
@@ -83,7 +85,7 @@ class SimulatedSensorTestUtils:
         extent = carla.Vector3D(2.94838892768239, 1.69796758051459, 1.0)
         location = carla.Location(20, 34.6410161513775, 0.0)
         rotation = carla.Rotation(3.0, 1.4, 4.0)
-        carla_actor.get_bounding_box = MagicMock(return_value=carla.BoundingBox(extent, location, rotation))
+        carla_actor.get_bounding_box = MagicMock(return_value=MagicMock(extent=extent, location=location, rotation=rotation))
 
         carla_actor.get_acceleration = MagicMock(return_value=carla.Vector3D(0.0, 0.0, 0.0))
         carla_actor.get_angular_velocity = MagicMock(return_value=carla.Vector3D(0.0, 0.0, 0.005))

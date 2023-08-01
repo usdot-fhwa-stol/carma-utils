@@ -10,7 +10,7 @@ from src.SimulatedSensor import SimulatedSensor, SimulatedSensorUtils
 from src.DetectedObject import DetectedObject
 from src.SensorDataCollector import SensorDataCollector
 from src.objects.ProxySensor import ProxySensor
-from test.SimulatedSensorTestUtils import SimulatedSensorTestUtils
+from tests.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestSimulatedSensor(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestSimulatedSensor(unittest.TestCase):
         self.sensor = ProxySensor(self.carla_sensor)
         self.noise_model = MagicMock()
         self.simulated_sensor = SimulatedSensor(self.config, self.carla_world, self.carla_sensor, self.noise_model)
-        # Generate test data
+        # Generate tests data
         self.detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_object_list(10)
         self.carla_lidar_hitpoints = SimulatedSensorTestUtils.generate_test_data_carla_lidar_hitpoints()
 
@@ -80,7 +80,7 @@ class TestSimulatedSensorUtilities(unittest.TestCase):
         self.sensor = ProxySensor(self.carla_sensor)
         self.noise_model = MagicMock()
         self.simulated_sensor = SimulatedSensor(self.config, self.carla_world, self.carla_sensor, self.noise_model)
-        # Generate test data
+        # Generate tests data
         self.detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_object_list(10)
         self.carla_lidar_hitpoints = SimulatedSensorTestUtils.generate_test_data_carla_lidar_hitpoints()
 
