@@ -14,7 +14,7 @@ class SensorDataCollector:
         self.__prev_angle = 0.0
 
         # Store current and prior data collections. The current is actively being added to, previous is finalized.
-        self.__data = deque([[], []], maxlen=2)
+        self.__data = deque([{}, {}], maxlen=2)
 
         # Register callback to collect data
         self.__carla_sensor.listen(self.__collect_sensor_data)

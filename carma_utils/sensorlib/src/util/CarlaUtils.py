@@ -22,20 +22,6 @@ class CarlaUtils:
         return np.array([vec.x, vec.y])
 
     @staticmethod
-    def determine_object_type(allowed_semantic_tags, carla_actor):
-        """
-        Check for identification as one of the accepted types, and mark unidentified otherwise.
-        Args:
-
-        """
-
-        # Set intersection, except order matters
-        for tag in allowed_semantic_tags:
-            if tag in carla_actor.semantic_tags:
-                return tag
-        return "Unknown"
-
-    @staticmethod
     def get_actor_angular_velocity(carla_actor):
         """
         Get carla.Actor angular velocity in radians per second.

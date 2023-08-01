@@ -20,7 +20,7 @@ class TestNoiseModelTest(unittest.TestCase):
 
         self.assertEqual(object_list[0].position.tolist(), [1.1, 2.2, 3.3])
         self.assertEqual(object_list[1].position.tolist(), [4.1, 5.2, 6.3])
-        np.random.normal.assert_called_once_with(0.0, 0.1, size=3)
+        np.random.normal.assert_called_with(0.0, [0.8, 0.8, 0.8], size=3)
 
     def test_apply_orientation_noise(self):
         object_list = [MagicMock(rotation=np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])),

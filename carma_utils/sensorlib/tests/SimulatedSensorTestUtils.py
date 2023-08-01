@@ -79,7 +79,6 @@ class SimulatedSensorTestUtils:
         carla_actor.attributes = dict()
         carla_actor.is_alive = True
         carla_actor.parent = None
-        carla_actor.semantic_types = ["Vehicles"]
         carla_actor.type_id = "vehicle.ford.mustang"
 
         extent = carla.Vector3D(2.94838892768239, 1.69796758051459, 1.0)
@@ -97,7 +96,7 @@ class SimulatedSensorTestUtils:
 
         # Construct the DetectedObject
         simulated_sensor_config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
-        detected_object = DetectedObject(simulated_sensor_config, carla_actor)
+        detected_object = DetectedObject(carla_actor, "Vehicle")
 
         return detected_object
 
