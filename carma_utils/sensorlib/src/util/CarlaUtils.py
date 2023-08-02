@@ -33,7 +33,7 @@ class CarlaUtils:
 
     @staticmethod
     def get_actor_rotation_matrix(carla_actor):
-        rotation_matrix = carla_actor.get_transform().get_matrix()
+        rotation_matrix = carla_actor.rotation.get_matrix()
         rotation_matrix = np.array(rotation_matrix)
         rotation_matrix = np.deg2rad(rotation_matrix)
         return rotation_matrix
