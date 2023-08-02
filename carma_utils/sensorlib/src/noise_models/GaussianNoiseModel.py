@@ -27,15 +27,15 @@ class GaussianNoiseModel(AbstractNoiseModel):
         noise_mean = 0.0
         noise_std = self.__orientation_std
         for obj in object_list:
-            noise = np.random.normal(noise_mean, noise_std, size=(3, 3))
-            obj.rotation = np.dot(noise, obj.rotation)
+            noise = np.random.normal(noise_mean, noise_std, size=(4, 4))
+            obj.rotation += noise
         return object_list
 
     def apply_type_noise(self, object_list):
         # Apply type noise to the object_list
         for obj in object_list:
-            obj.object_type = random.sample(self.__config["type_noise"]["possible_object_types"])
+            obj.object_type = np.random.sample(self.__config["noise_model_config"]["type_noise"]["allowed_semantic_tags"], 1)
         return object_list
 
     def apply_list_inclusion_noise(self, object_list):
-        return object_list[0:np.random.randint(0, len(object_list))]
+        return object_list[0:np.random.randint(0, len(object_list) + 1)]

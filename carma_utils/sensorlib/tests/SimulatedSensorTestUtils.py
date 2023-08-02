@@ -32,7 +32,18 @@ class SimulatedSensorTestUtils:
             "noise_model_config": {
                 "std_deviations": {
                     "position": [0.8, 0.8, 0.8],
-                    "orientation": [0.1, 0.1, 0.1]
+                    "orientation": 0.1
+                },
+                "type_noise": {
+                    "allowed_semantic_tags": [
+                        "Vehicle",
+                        "Pedestrian",
+                        "Cyclist",
+                        "TrafficSign",
+                        "TrafficLight",
+                        "RoadMarking",
+                        "Wall"
+                    ]
                 }
             }
         }
