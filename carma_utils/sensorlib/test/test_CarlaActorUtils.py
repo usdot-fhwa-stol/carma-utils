@@ -3,7 +3,7 @@ import numpy as np
 from unittest.mock import MagicMock
 
 from src.util.CarlaUtils import CarlaUtils
-from tests.SimulatedSensorTestUtils import SimulatedSensorTestUtils
+from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestCarlaUtils(unittest.TestCase):

@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import MagicMock
 
 import carla
+import numpy as np
 
 from src.objects.ProxySensor import ProxySensor
 
@@ -48,7 +49,7 @@ class ProxySensorTestCase(unittest.TestCase):
 
         fov_angular_width = self.proxy_sensor.get_fov_angular_width()
 
-        expected_angular_width = expected_upper_fov - expected_lower_fov
+        expected_angular_width = np.deg2rad(expected_upper_fov - expected_lower_fov)
         self.assertEqual(fov_angular_width, expected_angular_width)
 
 if __name__ == '__main__':

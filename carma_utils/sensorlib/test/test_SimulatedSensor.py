@@ -7,10 +7,8 @@ import numpy as np
 import yaml
 
 from src.SimulatedSensor import SimulatedSensor, SimulatedSensorUtils
-from src.DetectedObject import DetectedObject
-from src.SensorDataCollector import SensorDataCollector
 from src.objects.ProxySensor import ProxySensor
-from tests.SimulatedSensorTestUtils import SimulatedSensorTestUtils
+from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestSimulatedSensor(unittest.TestCase):

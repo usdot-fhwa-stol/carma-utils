@@ -5,7 +5,7 @@ import carla
 import numpy as np
 
 from src.objects.DetectedObject import DetectedObject
-from tests.SimulatedSensorTestUtils import SimulatedSensorTestUtils
+from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestDetectedObject(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestDetectedObject(unittest.TestCase):
         self.carla_actor.type_id = "vehicle.ford.mustang"
 
         self.carla_actor.get_acceleration = MagicMock(return_value=carla.Vector3D(0.0, 0.0, 0.0))
-        self.carla_actor.get_angular_velocity = MagicMock(return_value=carla.Vector3D(0.0, 0.0, 0.005))
+        self.carla_actor.get_angular_velocity = MagicMock(return_value=carla.Vector3D(0.0, 0.0, 0.0))
         self.carla_actor.get_location = MagicMock(return_value=carla.Location(10.0, 15.0, 7.0))
         self.carla_actor.get_transform = MagicMock(
             return_value=carla.Transform(carla.Location(10.0, 15.0, 7.0), carla.Rotation(3.0, 1.4, 4.0)))
@@ -33,7 +33,7 @@ class TestDetectedObject(unittest.TestCase):
         self.carla_actor.get_bounding_box.return_value = MagicMock(extent=MagicMock(x=3.0, y=4.0, z=5.0))
 
         # Construct the DetectedObject
-        self.detected_object = DetectedObject(self.simulated_sensor_config, self.carla_actor)
+        self.detected_object = DetectedObject(self.carla_actor, "Vehicles")
 
     def test_get_id(self):
         self.assertEqual(self.detected_object.get_id(), 123)
