@@ -40,11 +40,10 @@ class SimulatedSensorUtils:
                                        detected_objects))
 
         # Filter by radius
-        detected_objects = list(filter(lambda obj: np.linalg.norm(
-            obj.position - sensor.position) <= config.prefilter.max_distance_meters,
-                                       detected_objects))
+        object_ranges = dict([(obj.get_id(), np.linalg.norm(obj.position - sensor.position)) for obj in detected_objects])
+        detected_objects = list(filter(lambda obj: object_ranges[obj.get_id()] <= config.prefilter.max_distance_meters, detected_objects))
 
-        return detected_objects
+        return detected_objects, object_ranges
 
     # ------------------------------------------------------------------------------
     # Computations
@@ -60,6 +59,7 @@ class SimulatedSensorUtils:
     def compute_actor_angular_extent(sensor, detected_object):
         bbox = detected_object.bbox
         corner_vec = np.array(bbox.extent)
+        # Using combinatorics for conciseness
         all_corner_vectors = [np.matmul(np.diagflat(X), corner_vec) for X in itertools.product([-1, 1], repeat=3)]
         thetas = [SimulatedSensorUtils.compute_view_angle(sensor, v) for v in all_corner_vectors]
         return min(thetas), max(thetas)
@@ -69,10 +69,10 @@ class SimulatedSensorUtils:
         return np.arccos(np.vdot(sensor.position, vec) / (np.linalg.norm(sensor.position) * np.linalg.norm(vec)))
 
     @staticmethod
-    def compute_adjusted_detection_thresholds(config, sensor, detected_objects):
+    def compute_adjusted_detection_thresholds(config, detected_objects, object_ranges):
         return dict([(detected_object.id,
                       SimulatedSensorUtils.compute_adjusted_detection_threshold(config,
-                                                                                detected_object.position - sensor.position))
+                                                                                object_ranges[detected_object.get_id()],))
                      for
                      detected_object in detected_objects])
 

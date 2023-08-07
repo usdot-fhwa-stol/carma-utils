@@ -80,14 +80,14 @@ class SimulatedSensor:
         detected_objects = SimulatedSensorUtils.get_scene_detected_objects()
 
         # Prefilter
-        detected_objects = SimulatedSensorUtils.prefilter(sensor, detected_objects)
+        detected_objects, object_ranges = SimulatedSensorUtils.prefilter(sensor, detected_objects)
 
         # Get LIDAR hitpoints with Actor ID associations
         hitpoints = self.__raw_sensor_data_collector.get_carla_lidar_hitpoints()
 
         # Compute data needed for occlusion operation
         actor_angular_extents = SimulatedSensorUtils.compute_actor_angular_extents(sensor, detected_objects)
-        detection_thresholds = SimulatedSensorUtils.compute_adjusted_detection_thresholds(sensor, detected_objects)
+        detection_thresholds = SimulatedSensorUtils.compute_adjusted_detection_thresholds(config, detected_objects, object_ranges)
 
         # Apply occlusion
         detected_objects = SimulatedSensorUtils.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,

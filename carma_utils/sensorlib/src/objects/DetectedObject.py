@@ -11,6 +11,11 @@ class DetectedObject:
         self.__id = carla_actor.id
         self.__object_type = object_type
         self.__size = CarlaUtils.get_actor_bounding_size(carla_actor)  # Length, width, height of object in meters
+        self.__position = CarlaUtils.vector3d_to_numpy(self.__carla_actor.get_location())
+        self.__rotation = CarlaUtils.get_actor_rotation_matrix(carla_actor)
+
+    def __init__(self, obj):
+        self.__carla_actor = obj.carla_actor
 
     def get_id(self):
         return self.__id
@@ -19,10 +24,10 @@ class DetectedObject:
         return self.__object_type
 
     def get_position(self):
-        return CarlaUtils.vector3d_to_numpy(self.__carla_actor.get_location())
+        return self.__position
 
     def get_rotation(self):
-        return CarlaUtils.get_actor_rotation_matrix(self.__carla_actor)
+        return self.__rotation
 
     def get_velocity(self):
         return CarlaUtils.vector3d_to_numpy(self.__carla_actor.get_velocity())
