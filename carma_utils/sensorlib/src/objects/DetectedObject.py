@@ -1,51 +1,42 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from dataclasses import dataclass
+from typing import Tuple
+
+import carla
 import numpy as np
 
 from src.util.CarlaUtils import CarlaUtils
 
 
+@dataclass(frozen=True)
 class DetectedObject:
-    def __init__(self, carla_actor, object_type):
-        self.__carla_actor = carla_actor
-        self.__id = carla_actor.id
-        self.__object_type = object_type
-        self.__size = CarlaUtils.get_actor_bounding_size(carla_actor)  # Length, width, height of object in meters
-        self.__position = CarlaUtils.vector3d_to_numpy(self.__carla_actor.get_location())
-        self.__rotation = CarlaUtils.get_actor_rotation_matrix(carla_actor)
+    carla_actor: carla.Actor
+    id: int
+    object_type: str
+    size: Tuple[float, float, float]
+    position: np.ndarray  # Length, width, height of object in meters
+    velocity: np.ndarray
+    rotation: np.ndarray
+    angular_velocity: np.ndarray
+    position_covariance: np.ndarray
+    velocity_covariance: np.ndarray
+    confidence: float
 
-    def __init__(self, obj):
-        self.__carla_actor = obj.carla_actor
+    @staticmethod
+    def build_detected_object(carla_actor, object_type):
+        return DetectedObject(
+            carla_actor,
+            carla_actor.id,
+            object_type,
+            CarlaUtils.get_actor_bounding_size(carla_actor),
+            CarlaUtils.vector3d_to_numpy(carla_actor.get_location()),
+            CarlaUtils.vector3d_to_numpy(carla_actor.get_velocity()),
+            CarlaUtils.get_actor_rotation_matrix(carla_actor),
+            CarlaUtils.get_actor_angular_velocity(carla_actor),
 
-    def get_id(self):
-        return self.__id
-
-    def get_object_type(self):
-        return self.__object_type
-
-    def get_position(self):
-        return self.__position
-
-    def get_rotation(self):
-        return self.__rotation
-
-    def get_velocity(self):
-        return CarlaUtils.vector3d_to_numpy(self.__carla_actor.get_velocity())
-
-    def get_angular_velocity(self):
-        return CarlaUtils.get_actor_angular_velocity(self.__carla_actor)
-
-    def get_position_covariance(self):
-        # Use stand-in values which assume complete certainty
-        return np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
-
-    def get_velocity_covariance(self):
-        # Use stand-in values which assume complete certainty
-        return np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
-
-    def get_confidence(self):
-        # Use stand-in values which assume complete certainty
-        return 1.0
-
-    def get_size(self):
-        return self.__size
+            # Use stand-in values which assume complete certainty
+            np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]),
+            np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]),
+            1.0
+        )
