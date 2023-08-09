@@ -7,7 +7,7 @@ import numpy as np
 import yaml
 
 from src.SimulatedSensor import SimulatedSensor, SimulatedSensorUtils
-from src.objects.ProxySensor import ProxySensor
+from src.objects.CarlaSensor import CarlaSensor
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
@@ -17,7 +17,7 @@ class TestSimulatedSensor(unittest.TestCase):
         self.config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
         self.carla_world = MagicMock()
         self.carla_sensor = SimulatedSensorTestUtils.generate_carla_sensor()
-        self.sensor = ProxySensor(self.carla_sensor)
+        self.sensor = CarlaSensor(self.carla_sensor)
         self.noise_model = MagicMock()
         self.simulated_sensor = SimulatedSensor(self.config, self.carla_world, self.carla_sensor, self.noise_model)
         # Generate tests data
@@ -75,7 +75,7 @@ class TestSimulatedSensorUtilities(unittest.TestCase):
         self.config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
         self.carla_world = MagicMock()
         self.carla_sensor = SimulatedSensorTestUtils.generate_carla_sensor()
-        self.sensor = ProxySensor(self.carla_sensor)
+        self.sensor = CarlaSensor(self.carla_sensor)
         self.noise_model = MagicMock()
         self.simulated_sensor = SimulatedSensor(self.config, self.carla_world, self.carla_sensor, self.noise_model)
         # Generate tests data
