@@ -6,6 +6,15 @@ from src.util.CarlaUtils import CarlaUtils
 
 
 class SensorDataCollector:
+    """
+    Collects data from the sensor via CARLA's sensor callback feature.
+
+    Hitpiont data specifically from the CARLA Semantic LIDAR Sensor is associated and grouped by actor ID, which is beneficial to preserve.
+
+    Hitpoints are stored inside a two-element circular queue, with __data[0] acting as the active object collection and _data[1] the collection from the prior scan. As the LIDAR sensor scans, it may periodically activate the callback. When this happens, data is appended to that inside the active collection __data[0]. When a new scan is detected, the collections are rotated making __data[0] the prior and an empty __data[0] the current.
+
+    New data scans are detected by a reset in the sensor read angle as reported by the simulator.
+    """
 
     def __init__(self, carla_world, carla_sensor):
         self.debug = True
@@ -38,13 +47,6 @@ class SensorDataCollector:
         # Extract geometric hitpoints and group them by actor ID
         # The resulting dictionary maps actor ID to a list of hitpoints
         for r in raw_sensor_data:
-            if (self.debug):
-                print("r type: " + type(r).__name__)
-                print("r.point " + str(r.point))
-                p = CarlaUtils.vector3d_to_numpy(r.point)
-                print("converted: " + type(p).__name__)
-                print("converted: " + str(p))
-                self.debug = False
             point = CarlaUtils.vector3d_to_numpy(r.point)
             if r.object_idx not in grouped_data:
                 grouped_data[r.object_idx] = [point]

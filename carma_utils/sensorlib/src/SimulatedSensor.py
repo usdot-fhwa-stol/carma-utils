@@ -98,6 +98,9 @@ class SimulatedSensor:
         return detected_objects
 
     def get_detected_objects_in_frame__simple(self):
+
+        # TODO Function for integration testing only
+
         if not (self.__is_configuration_loaded and self.__is_sensor_configured and self.__is_noise_model_configured):
             raise Exception("SimulatedSensor must be configured before use.")
         detected_objects = SimulatedSensorUtils.get_scene_detected_objects(self.__carla_world, self.__config)

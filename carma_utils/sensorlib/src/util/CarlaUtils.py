@@ -2,6 +2,9 @@ import numpy as np
 
 
 class CarlaUtils:
+    """
+    Generic CARLA utility functions.
+    """
 
     @staticmethod
     def vector3d_to_numpy(vec):

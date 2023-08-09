@@ -2,7 +2,6 @@ import numpy as np
 
 from src.util.CarlaUtils import CarlaUtils
 
-
 class ProxySensor:
     def __init__(self, carla_sensor):
         self.__carla_sensor = carla_sensor
@@ -18,3 +17,8 @@ class ProxySensor:
 
     def get_fov_angular_width(self):
         return np.deg2rad(self.__carla_sensor.upper_fov - self.__carla_sensor.lower_fov)
+
+class ProxySensorBuilder:
+    @staticmethod
+    def build_proxy_sensor(carla_sensor):
+        return ProxySensor(carla_sensor)

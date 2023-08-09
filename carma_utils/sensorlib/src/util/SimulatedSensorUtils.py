@@ -7,6 +7,9 @@ from src.objects.DetectedObject import DetectedObject
 
 
 class SimulatedSensorUtils:
+    """
+    Internal SimulatedSensor functions.
+    """
 
     # ------------------------------------------------------------------------------
     # Configuration file reading
