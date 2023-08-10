@@ -45,5 +45,5 @@ class TestCarlaUtils(unittest.TestCase):
         self.assertTrue(np.all_close(result, expected_bounding_size, atol=SimulatedSensorTestUtils.TOLERANCE))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

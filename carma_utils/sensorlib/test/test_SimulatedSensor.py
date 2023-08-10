@@ -35,7 +35,7 @@ class TestSimulatedSensor(unittest.TestCase):
         config_file_path = "test__simulated_sensor_config.yaml"
         config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
 
-        with open(config_file_path, 'w') as file:
+        with open(config_file_path, "w") as file:
             yaml.dump(config, file)
 
         self.simulated_sensor.load_config_from_file(config_file_path)
@@ -214,5 +214,5 @@ class TestSimulatedSensorUtilities(unittest.TestCase):
         noise_model.apply_list_inclusion_noise.assert_called_once_with(detected_objects)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

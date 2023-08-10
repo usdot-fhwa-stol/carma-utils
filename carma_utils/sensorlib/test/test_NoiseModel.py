@@ -61,5 +61,5 @@ class TestNoiseModelTest(unittest.TestCase):
         self.assertEqual(result[1], object_list[1])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

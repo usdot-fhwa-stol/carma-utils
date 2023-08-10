@@ -55,7 +55,7 @@ class SimulatedSensorTestUtils:
         :return:
         """
         carla_sensor = MagicMock()
-        sensor_config = carla.SemanticLidarSensorConfiguration('sensor.lidar.semantic')
+        sensor_config = carla.SemanticLidarSensorConfiguration("sensor.lidar.semantic")
         sensor_config.channels = 1
         sensor_config.range = 1000.0
         sensor_config.rotation_frequency = 10.0
@@ -115,7 +115,7 @@ class SimulatedSensorTestUtils:
     def generate_test_data_hitpoints(self):
         # Read raw data
         test_points = []
-        with open("data/test_data_hitpoints.csv", 'r') as file:
+        with open("data/test_data_hitpoints.csv", "r") as file:
             reader = csv.reader(file)
             for row in reader:
                 theta, x, y, z = map(float, row)

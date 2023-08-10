@@ -1,9 +1,11 @@
+from dataclasses import dataclass
+
 import carla
 import numpy as np
 
 from src.util.CarlaUtils import CarlaUtils
 
-
+@dataclass(frozen=True)
 class CarlaSensor:
     carla_sensor: carla.Sensor
     position: np.ndarray
@@ -14,7 +16,7 @@ class CarlaSensor:
 
 class CarlaSensorBuilder:
     @staticmethod
-    def build_proxy_sensor(carla_sensor):
+    def build_sensor(carla_sensor):
         return CarlaSensor(carla_sensor,
                            CarlaUtils.vector3d_to_numpy(carla_sensor.get_location()),
                            carla_sensor.points_per_second,

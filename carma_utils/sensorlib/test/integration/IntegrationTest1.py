@@ -8,7 +8,7 @@ def main(arg):
         client.set_timeout(2.0)
 
         # Load map
-        world = client.load_world('Town04') if arg.map_name else client.get_world()
+        world = client.load_world("Town04") if arg.map_name else client.get_world()
 
         # Apply settings
         original_settings = world.get_settings()
@@ -45,7 +45,7 @@ def main(arg):
 
         vis = o3d.visualization.Visualizer()
         vis.create_window(
-            window_name='Carla Lidar',
+            window_name="Carla Lidar",
             width=960,
             height=540,
             left=480,
@@ -71,7 +71,7 @@ def main(arg):
             world.tick()
 
             process_time = datetime.now() - dt0
-            sys.stdout.write('\r' + 'FPS: ' + str(1.0 / process_time.total_seconds()))
+            sys.stdout.write("\r" + "FPS: " + str(1.0 / process_time.total_seconds()))
             sys.stdout.flush()
             dt0 = datetime.now()
             frame += 1
@@ -89,25 +89,25 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser(
         description=__doc__)
     argparser.add_argument(
-        '--host',
-        metavar='H',
-        default='localhost',
-        help='IP of the host CARLA Simulator (default: localhost)')
+        "--host",
+        metavar="H",
+        default="localhost",
+        help="IP of the host CARLA Simulator (default: localhost)")
     argparser.add_argument(
-        '-p', '--port',
-        metavar='P',
+        "-p", "--port",
+        metavar="P",
         default=2000,
         type=int,
-        help='TCP port of CARLA Simulator (default: 2000)')
+        help="TCP port of CARLA Simulator (default: 2000)")
     argparser.add_argument(
-        '-m', '--map-name',
-        metavar='M',
+        "-m", "--map-name",
+        metavar="M",
         default="",
         type=str,
-        help='Name of the map (default: ""')
+        help="Name of the map (default: """)
     args = argparser.parse_args()
 
     try:
         main(args)
     except KeyboardInterrupt:
-        print(' - Exited by user.')
+        print(" - Exited by user.")

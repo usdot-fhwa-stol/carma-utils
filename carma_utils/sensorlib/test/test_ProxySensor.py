@@ -52,5 +52,5 @@ class CarlaSensorTestCase(unittest.TestCase):
         expected_angular_width = np.deg2rad(expected_upper_fov - expected_lower_fov)
         self.assertEqual(fov_angular_width, expected_angular_width)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

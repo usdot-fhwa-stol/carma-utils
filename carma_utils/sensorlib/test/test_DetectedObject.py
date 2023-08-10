@@ -72,5 +72,5 @@ class TestDetectedObject(unittest.TestCase):
         self.assertTrue(np.array_equal(self.detected_object.get_size(), np.array([3.0, 4.0, 5.0])))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

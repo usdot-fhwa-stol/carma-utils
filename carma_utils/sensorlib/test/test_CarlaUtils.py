@@ -48,5 +48,5 @@ class TestCarlaUtils(unittest.TestCase):
         self.assertTrue(np.array_equal(result, np.array([2.0, 4.0, 6.0])))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
