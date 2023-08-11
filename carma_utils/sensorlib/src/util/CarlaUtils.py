@@ -46,3 +46,17 @@ class CarlaUtils:
         extent_vector = carla_actor.get_actor_bounding_size().extent
         # Extent vector is half the length, width, and height of the bounding box
         return 2.0 * np.array([extent_vector.x, extent_vector.y, extent_vector.z])
+
+    @staticmethod
+    def determine_object_type(carla_actor, allowed_semantic_tags):
+        """
+        Check for identification as one of the accepted types, and mark unidentified otherwise.
+        Args:
+
+        """
+
+        # Set intersection, except order matters
+        for tag in allowed_semantic_tags:
+            if tag in carla_actor.semantic_tags:
+                return tag
+        return "Unknown"

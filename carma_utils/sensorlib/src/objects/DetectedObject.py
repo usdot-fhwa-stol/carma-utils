@@ -25,11 +25,11 @@ class DetectedObject:
 
 class DetectedObjectBuilder:
     @staticmethod
-    def build_detected_object(carla_actor, object_type):
+    def build_detected_object(carla_actor):
         return DetectedObject(
             carla_actor,
             carla_actor.id,
-            object_type,
+            CarlaUtils.determine_object_type(carla_actor),
             CarlaUtils.get_actor_bounding_size(carla_actor),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_location()),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_velocity()),

@@ -6,7 +6,7 @@ import numpy as np
 import yaml
 
 from src.SimulatedSensor import SimulatedSensor
-from src.objects.DetectedObject import DetectedObject
+from src.objects.DetectedObject import DetectedObject, DetectedObjectBuilder
 from collections import Counter
 
 
@@ -74,7 +74,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
     def get_scene_detected_objects(self):
         actors = self.__carla_world.get_actors()
-        return [DetectedObject(self.__simulated_sensor_config, actor) for actor in actors]
+        return [DetectedObjectBuilder.build_detected_object(actor) for actor in actors]
 
     # ------------------------------------------------------------------------------
     # Prefilter
