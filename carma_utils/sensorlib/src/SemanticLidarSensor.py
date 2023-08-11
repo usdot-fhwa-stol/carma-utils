@@ -162,13 +162,22 @@ class SemanticLidarSensor(SimulatedSensor):
 
 
     # ------------------------------------------------------------------------------
-    # Geometry Re-Association
+    # Geometry Re-Association: Sampling
     # ------------------------------------------------------------------------------
 
     def sample_hitpoints(self, hitpoints, sample_size):
         """Randomly sample points inside each object's set of LIDAR hitpoints."""
         return dict([(obj_id, self.__rng.choice(object_hitpoints, sample_size)) for obj_id, object_hitpoints in
                      hitpoints.items()])
+
+
+
+
+    # ------------------------------------------------------------------------------
+    # Geometry Re-Association: Instantaneous Association
+    # ------------------------------------------------------------------------------
+
+
 
     def compute_instantaneous_actor_id_association(self, downsampled_hitpoints, scene_objects):
         """
@@ -208,6 +217,10 @@ class SemanticLidarSensor(SimulatedSensor):
 
 
 
+    # ------------------------------------------------------------------------------
+    # Geometry Re-Association: Update Step
+    # ------------------------------------------------------------------------------
+
 
     def update_actor_id_association(self, instantaneous_actor_id_association, trailing_id_associations):
         """
@@ -216,18 +229,24 @@ class SemanticLidarSensor(SimulatedSensor):
         # TODO Should UKF be used?
         # For now the highest-voted id wins.
 
-        # Extract all (from_id, to_id) pairs from all dictionaries
+        # Extract all keys ("from" ID's) from all dictionaries
         combined = trailing_id_associations + instantaneous_actor_id_association
-        all_items = [association.items() for association in combined]
+        all_keys = [association.keys() for association in combined]
 
-        # Build a multimap
+        # Count number of each mapped ID reach from the from ID, and take the highest-voted
+        return dict([(key, self.get_highest_counted_target_id(key, combined)) for key in all_keys])
 
+    def get_highest_counted_target_id(self, key, combined):
 
-        # return dict([(from_id, vote(to_id_list)) for from_id, to_id_list in combined.items()])
+        # Get all targets mapped from the key
+        targets = [association.get(key) for association in combined]
+        targets = filter(lambda x: x is not None, targets)
 
+        # Count the number of times each target is mapped from the key
+        counts = Counter(targets)
 
-
-
+        # Return the target with the highest count
+        return counts.most_common(1)[0][0]
 
 
 
