@@ -136,7 +136,7 @@ class SemanticLidarSensor(SimulatedSensor):
     def compute_view_angle(self, vec):
         return np.arccos(np.vdot(self.__sensor.position, vec) / (np.linalg.norm(sensor.position) * np.linalg.norm(vec)))
 
-    def compute_adjusted_detection_thresholds(self, config, detected_objects, object_ranges):
+    def compute_adjusted_detection_thresholds(self, detected_objects, object_ranges):
         return dict([(detected_object.id,
                       self.compute_adjusted_detection_threshold(config,
                                                                 object_ranges[
@@ -273,7 +273,7 @@ class SemanticLidarSensor(SimulatedSensor):
     # Noise Filter
     # ------------------------------------------------------------------------------
 
-    def apply_noise(self, detected_objects, noise_model):
+    def apply_noise(self, detected_objects):
         detected_objects = noise_model.apply_position_noise(detected_objects)
         detected_objects = noise_model.apply_orientation_noise(detected_objects)
         detected_objects = noise_model.apply_type_noise(detected_objects)
