@@ -20,6 +20,7 @@ from matplotlib import cm
 import open3d as o3d
 
 from src.SimulatedSensor import SimulatedSensor
+from src.SimulatedSensorConfigurator import SimulatedSensorConfigurator
 from src.util.SimulatedSensorUtils import SimulatedSensorUtils
 
 try:
@@ -35,30 +36,30 @@ import carla
 VIRIDIS = np.array(cm.get_cmap("plasma").colors)
 VID_RANGE = np.linspace(0.0, 1.0, VIRIDIS.shape[0])
 LABEL_COLORS = np.array([
-    (255, 255, 255), # None
-    (70, 70, 70),    # Building
-    (100, 40, 40),   # Fences
-    (55, 90, 80),    # Other
-    (220, 20, 60),   # Pedestrian
-    (153, 153, 153), # Pole
+    (255, 255, 255),  # None
+    (70, 70, 70),  # Building
+    (100, 40, 40),  # Fences
+    (55, 90, 80),  # Other
+    (220, 20, 60),  # Pedestrian
+    (153, 153, 153),  # Pole
     (157, 234, 50),  # RoadLines
     (128, 64, 128),  # Road
     (244, 35, 232),  # Sidewalk
     (107, 142, 35),  # Vegetation
-    (0, 0, 142),     # Vehicle
-    (102, 102, 156), # Wall
-    (220, 220, 0),   # TrafficSign
+    (0, 0, 142),  # Vehicle
+    (102, 102, 156),  # Wall
+    (220, 220, 0),  # TrafficSign
     (70, 130, 180),  # Sky
-    (81, 0, 81),     # Ground
-    (150, 100, 100), # Bridge
-    (230, 150, 140), # RailTrack
-    (180, 165, 180), # GuardRail
+    (81, 0, 81),  # Ground
+    (150, 100, 100),  # Bridge
+    (230, 150, 140),  # RailTrack
+    (180, 165, 180),  # GuardRail
     (250, 170, 30),  # TrafficLight
-    (110, 190, 160), # Static
+    (110, 190, 160),  # Static
     (170, 120, 50),  # Dynamic
-    (45, 60, 150),   # Water
-    (145, 170, 100), # Terrain
-]) / 255.0 # normalize each channel [0-1] since is what Open3D uses
+    (45, 60, 150),  # Water
+    (145, 170, 100),  # Terrain
+]) / 255.0  # normalize each channel [0-1] since is what Open3D uses
 
 
 def lidar_callback(point_cloud, point_list):
@@ -180,13 +181,10 @@ def main(arg):
         user_offset = carla.Location(arg.x, arg.y, arg.z)
         lidar_transform = carla.Transform(carla.Location(x=-0.5, z=1.8) + user_offset)
 
-        lidar = world.spawn_actor(lidar_bp, lidar_transform, attach_to=vehicle)
-
         # Wrap the actor
-        simulated_sensor = SimulatedSensor(world)
-        simulated_sensor.configure_simulated_sensor(SimulatedSensorUtils.load_config_from_file("../../config/simulated_sensor_config.yaml"))
-        simulated_sensor.configure_carla_sensor_from_sensor_actor(lidar)
-        simulated_sensor.configure_noise_model(SimulatedSensorUtils.load_config_from_file("../../config/noise_model_config.yaml"))
+        sensor = SimulatedSensorConfigurator.build_simulated_sensor(world, lidar_transform, vehicle,
+                                                                    arg.simulated_sensor_config_filename,
+                                                                    arg.noise_model_config_filename)
 
         point_list = o3d.geometry.PointCloud()
         # if arg.semantic:
@@ -218,13 +216,8 @@ def main(arg):
             vis.poll_events()
             vis.update_renderer()
 
-
             if frame % 120 == 0:
-                detected_objects = simulated_sensor.get_detected_objects_in_frame__simple()
-
-
-
-
+                detected_objects = sensor.get_detected_objects_in_frame__simple()
 
             # # This can fix Open3D jittering issues:
             time.sleep(0.005)
@@ -263,13 +256,13 @@ if __name__ == "__main__":
         "--no-rendering",
         action="store_true",
         help="use the no-rendering mode which will provide some extra"
-        " performance but you will lose the articulated objects in the"
-        " lidar, such as pedestrians")
+             " performance but you will lose the articulated objects in the"
+             " lidar, such as pedestrians")
     argparser.add_argument(
         "--semantic",
         action="store_true",
         help="use the semantic lidar instead, which provides ground truth"
-        " information")
+             " information")
     argparser.add_argument(
         "--no-noise",
         action="store_true",
@@ -286,7 +279,7 @@ if __name__ == "__main__":
         "--filter",
         metavar="PATTERN",
         default="model3",
-        help="actor filter (default: "vehicle.*")")
+        help="actor filter (default: \"vehicle.*\")")
     argparser.add_argument(
         "--upper-fov",
         default=15.0,
@@ -327,6 +320,16 @@ if __name__ == "__main__":
         default=0.0,
         type=float,
         help="offset in the sensor position in the Z-axis in meters (default: 0.0)")
+    argparser.add_argument(
+        "--simulated-sensor-config-filename",
+        default="../../config/simulated_sensor_config.yaml",
+        type=str,
+        help="Configuration filename for the simulated sensor.")
+    argparser.add_argument(
+        "--noise-model-config-filename",
+        default="../../config/noise_model_config.yaml",
+        type=str,
+        help="Configuration filename for the simulated sensor noise model.")
     args = argparser.parse_args()
 
     try:

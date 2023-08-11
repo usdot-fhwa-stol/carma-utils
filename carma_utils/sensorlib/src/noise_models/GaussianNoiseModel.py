@@ -12,6 +12,7 @@ class GaussianNoiseModel(AbstractNoiseModel):
         self.__config = config
         self.__position_std = self.__config["noise_model_config"]["std_deviations"]["position"]
         self.__orientation_std = self.__config["noise_model_config"]["std_deviations"]["orientation"]
+        self.__rng = np.random.default_rng()
 
     def apply_position_noise(self, object_list):
         # Apply position noise to the object_list
@@ -34,7 +35,7 @@ class GaussianNoiseModel(AbstractNoiseModel):
     def apply_type_noise(self, object_list):
         # Apply type noise to the object_list
         for obj in object_list:
-            obj.object_type = np.random.sample(self.__config["noise_model_config"]["type_noise"]["allowed_semantic_tags"], 1)
+            obj.object_type = self.__rng.choice(self.__config["noise_model_config"]["type_noise"]["allowed_semantic_tags"], 1, replace=False)
         return object_list
 
     def apply_list_inclusion_noise(self, object_list):
