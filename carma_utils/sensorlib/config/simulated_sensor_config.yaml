@@ -9,6 +9,9 @@ simulated_sensor:
     hitpoint_detection_ratio_threshold_per_meter_change_rate: -0.0033
     and_scaling_parameters_for_the_adjustable_threshold:
       dropoff_rate: 0.01
+  geometry_reassociation:
+    trailing_id_associations_count: 2
+    sample_count: 3
 lidar_sensor:
   lower_fov: -80.0
   upper_fov: 30.0

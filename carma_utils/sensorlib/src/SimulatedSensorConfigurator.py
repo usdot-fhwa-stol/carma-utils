@@ -33,7 +33,8 @@ class SimulatedSensorConfigurator:
         carla_sensor = SimulatedSensorConfigurator.build_carla_semantic_lidar_sensor(carla_world, sensor_transform,
                                                                                      parent_actor, carla_sensor_config)
         return SimulatedSensorConfigurator.build_simulated_lidar_sensor(carla_world, carla_sensor,
-                                                                        simulated_sensor_config, noise_model_config)
+                                                                        simulated_sensor_config, carla_sensor_config,
+                                                                        noise_model_config)
 
     # ------------------------------------------------------------------------------
     # CARLA Sensor Building
@@ -71,7 +72,8 @@ class SimulatedSensorConfigurator:
     # ------------------------------------------------------------------------------
 
     @staticmethod
-    def build_simulated_lidar_sensor(carla_world, carla_sensor, simulated_sensor_config, noise_model_config):
+    def build_simulated_lidar_sensor(carla_world, carla_sensor, simulated_sensor_config, carla_sensor_config,
+                                     noise_model_config):
         """
         Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
         :param carla_sensor:
@@ -84,4 +86,5 @@ class SimulatedSensorConfigurator:
         noise_model = NoiseModelFactory.get_noise_model(noise_model_config["noise_model_name"], noise_model_config)
 
         # Construct the SimulatedSensor
-        return SemanticLidarSensor(simulated_sensor_config, sensor, data_collector, noise_model)
+        return SemanticLidarSensor(simulated_sensor_config, carla_sensor_config, carla_world, sensor, data_collector,
+                                   noise_model)
