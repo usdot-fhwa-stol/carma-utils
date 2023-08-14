@@ -1,9 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import random
+from dataclasses import replace
 
 import numpy as np
-from pyquaternion import quaternion
 
 from src.noise_models.AbstractNoiseModel import AbstractNoiseModel
 
@@ -11,8 +10,8 @@ from src.noise_models.AbstractNoiseModel import AbstractNoiseModel
 class GaussianNoiseModel(AbstractNoiseModel):
     def __init__(self, config):
         self.__config = config
-        self.__position_std = self.__config["noise_model_config"]["std_deviations"]["position"]
-        self.__orientation_std = self.__config["noise_model_config"]["std_deviations"]["orientation"]
+        self.__position_std = self.__config["std_deviations"]["position"]
+        self.__orientation_std = self.__config["std_deviations"]["orientation"]
         self.__rng = np.random.default_rng()
 
     def apply_position_noise(self, object_list):
@@ -37,9 +36,8 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
     def apply_type_noise(self, object_list):
         # Apply type noise to the object_list
-        for obj in object_list:
-            obj.object_type = self.__rng.choice(self.__config["noise_model_config"]["type_noise"]["allowed_semantic_tags"], 1, replace=False)
-        return object_list
+        return [replace(obj, object_type=self.__rng.choice(self.__config["type_noise"]["allowed_semantic_tags"], 1, replace=False))
+                    for obj in object_list]
 
     def apply_list_inclusion_noise(self, object_list):
         return object_list[0:np.random.randint(0, len(object_list) + 1)]

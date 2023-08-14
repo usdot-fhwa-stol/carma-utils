@@ -1,13 +1,13 @@
 import csv
+from dataclasses import replace
 from unittest.mock import MagicMock
 
 import carla
 
-from src.objects.DetectedObject import DetectedObject
+from src.objects.DetectedObject import DetectedObject, DetectedObjectBuilder
 
 
 class SimulatedSensorTestUtils:
-
     TOLERANCE = 1e-4
 
     @staticmethod
@@ -20,31 +20,44 @@ class SimulatedSensorTestUtils:
             "detection_threshold_scaling_formula": {
                 "nominal_hitpoint_detection_ratio_threshold": 0.6,
                 "hitpoint_detection_ratio_threshold_per_meter_change_rate": -0.0033,
-                "and_scaling_parameters_for_the_adjustable_threshold": {
+                "adjustable_threshold_scaling_parameters": {
                     "dropoff_rate": 0.01
                 }
+            },
+            "geometry_reassociation": {
+                "trailing_id_associations_count": 2,
+                "sample_count": 3
             }
+        }
+
+    def generate_lidar_sensor_config(self):
+        return {
+            "lower_fov": -80.0,
+            "upper_fov": 30.0,
+            "channels": 60,
+            "range": 100.0,
+            "rotation_period": 0.05,
+            "points_per_second": 10000
         }
 
     @staticmethod
     def generate_noise_model_config():
         return {
-            "noise_model_config": {
-                "std_deviations": {
-                    "position": [0.8, 0.8, 0.8],
-                    "orientation": 0.1
-                },
-                "type_noise": {
-                    "allowed_semantic_tags": [
-                        "Vehicle",
-                        "Pedestrian",
-                        "Cyclist",
-                        "TrafficSign",
-                        "TrafficLight",
-                        "RoadMarking",
-                        "Wall"
-                    ]
-                }
+            "noise_model_name": "GaussianNoiseModel",
+            "std_deviations": {
+                "position": [0.8, 0.8, 0.8],
+                "orientation": [0.1, 0.1, 0.1],
+            },
+            "type_noise": {
+                "allowed_semantic_tags": [
+                    "Vehicle",
+                    "Pedestrian",
+                    "Cyclist",
+                    "TrafficSign",
+                    "TrafficLight",
+                    "RoadMarking",
+                    "Wall"
+                ]
             }
         }
 
@@ -82,11 +95,11 @@ class SimulatedSensorTestUtils:
         return detected_objects
 
     @staticmethod
-    def generate_test_data_detected_object():
+    def generate_test_data_detected_objects():
 
         # Mock the carla.Actor class
         carla_actor = MagicMock()
-        carla_actor.id = 123
+        carla_actor.id = 0
         carla_actor.attributes = dict()
         carla_actor.is_alive = True
         carla_actor.parent = None
@@ -95,7 +108,8 @@ class SimulatedSensorTestUtils:
         extent = carla.Vector3D(2.94838892768239, 1.69796758051459, 1.0)
         location = carla.Location(20, 34.6410161513775, 0.0)
         rotation = carla.Rotation(3.0, 1.4, 4.0)
-        carla_actor.get_bounding_box = MagicMock(return_value=MagicMock(extent=extent, location=location, rotation=rotation))
+        carla_actor.get_bounding_box = MagicMock(
+            return_value=MagicMock(extent=extent, location=location, rotation=rotation))
 
         carla_actor.get_acceleration = MagicMock(return_value=carla.Vector3D(0.0, 0.0, 0.0))
         carla_actor.get_angular_velocity = MagicMock(return_value=carla.Vector3D(0.0, 0.0, 0.005))
@@ -107,9 +121,17 @@ class SimulatedSensorTestUtils:
 
         # Construct the DetectedObject
         simulated_sensor_config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
-        detected_object = DetectedObject(carla_actor, "Vehicle")
+        detected_object = DetectedObjectBuilder.build_detected_object(carla_actor, simulated_sensor_config["prefilter"]["allowed_semantic_tags"])
 
-        return detected_object
+        # Construct additional DetectedObject by adjustment
+        return [
+            replace(detected_object, id=1, object_type="Vehicle"),
+            replace(detected_object, id=1, object_type="Pedestrian"),
+            replace(detected_object, id=2, object_type="Pedestrian"),
+            replace(detected_object, id=3, object_type="Pedestrian"),
+            replace(detected_object, id=4, object_type="Vehicle"),
+            replace(detected_object, id=5, object_type="Vehicle")
+        ]
 
     @staticmethod
     def generate_test_data_hitpoints(self):

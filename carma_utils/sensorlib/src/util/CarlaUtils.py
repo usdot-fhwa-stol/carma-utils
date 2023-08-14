@@ -52,12 +52,10 @@ class CarlaUtils:
     def determine_object_type(carla_actor, allowed_semantic_tags):
         """
         Check for identification as one of the accepted types, and mark unidentified otherwise.
-        Args:
-
         """
 
         # Set intersection, except order matters
-        for tag in allowed_semantic_tags:
-            if tag in carla_actor.semantic_tags:
+        for tag in carla_actor.semantic_tags:
+            if tag in allowed_semantic_tags:
                 return tag
         return "Unknown"

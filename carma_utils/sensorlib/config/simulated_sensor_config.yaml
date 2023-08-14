@@ -7,7 +7,7 @@ simulated_sensor:
   detection_threshold_scaling_formula:
     nominal_hitpoint_detection_ratio_threshold: 0.6
     hitpoint_detection_ratio_threshold_per_meter_change_rate: -0.0033
-    and_scaling_parameters_for_the_adjustable_threshold:
+    adjustable_threshold_scaling_parameters:
       dropoff_rate: 0.01
   geometry_reassociation:
     trailing_id_associations_count: 2

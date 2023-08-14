@@ -44,8 +44,6 @@ class DetectedObjectTestCase(unittest.TestCase):
         rotation_angles_deg = np.array([45.0, 30.0, 90.0])
         rotation_angles = np.deg2rad(rotation_angles_deg)
         rotation_matrix = Rotation.from_euler('xyz', rotation_angles)
-        a = detected_object.rotation
-        e = rotation_matrix.as_matrix()
         assert np.allclose(detected_object.rotation, rotation_matrix.as_matrix())
 
         # Angular velocity

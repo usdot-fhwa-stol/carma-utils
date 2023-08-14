@@ -31,18 +31,6 @@ class TestSimulatedSensor(unittest.TestCase):
 
         self.assertEqual(self.simulated_sensor._SimulatedSensor__config, config)
 
-    def test_load_config_from_file(self):
-        config_file_path = "test__simulated_sensor_config.yaml"
-        config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
-
-        with open(config_file_path, "w") as file:
-            yaml.dump(config, file)
-
-        self.simulated_sensor.load_config_from_file(config_file_path)
-
-        self.assertEqual(self.simulated_sensor._SimulatedSensor__config, config)
-        os.remove(config_file_path)
-
     def test_get_detected_objects_in_frame__nominal(self):
         # Mock necessary objects and methods
         SimulatedSensorUtils.get_scene_detected_objects = MagicMock(return_value=self.detected_objects)
