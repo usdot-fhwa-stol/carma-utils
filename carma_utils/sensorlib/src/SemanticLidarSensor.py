@@ -64,11 +64,9 @@ class SemanticLidarSensor(SimulatedSensor):
         #                                               self.__simulated_sensor_config.geometry_reassociation.sample_count])
         # instantaneous_actor_id_association = self.compute_instantaneous_actor_id_association(downsampled_hitpoints,
         #                                                                                      detected_objects)
-        # self.__actor_id_association = self.update_actor_id_association(instantaneous_actor_id_association,
+        # detected_objects = self.update_actor_id_association(detected_objects,
+        #                                                                   instantaneous_actor_id_association,
         #                                                                self.__trailing_id_associations)
-        # TODO detected_objects = self.reassociate(detected_objects, self.__actor_id_association)
-
-        # Update actor IDs to match the association
 
         # Update actor types to match that reported from the CARLA semantic LIDAR sensor
         detected_objects = self.update_object_types(hitpoints, detected_objects)
@@ -226,7 +224,7 @@ class SemanticLidarSensor(SimulatedSensor):
     # Geometry Re-Association: Update Step
     # ------------------------------------------------------------------------------
 
-    def update_actor_id_association(self, instantaneous_actor_id_association, trailing_id_associations):
+    def update_actor_id_association(self, detected_objects, instantaneous_actor_id_association, trailing_id_associations):
         """
         Update the most recent association based on the current time step's instantaneously-derived association.
         """
@@ -238,14 +236,15 @@ class SemanticLidarSensor(SimulatedSensor):
         all_keys = [association.keys() for association in combined]
 
         # Count number of each mapped ID reach from the from ID, and take the highest-voted
-        updated_id_association = dict([(key, self.get_highest_counted_target_id(key, combined)) for key in all_keys])
+        self.__actor_id_association = dict([(key, self.get_highest_counted_target_id(key, combined)) for key in all_keys])
 
         # Update trailing association queue
         self.__trailing_id_associations.appendleft(instantaneous_actor_id_association)
 
-        # TODO Also update ids in the detected_objects list
+        # Update actor IDs to match the association
+        detected_objects = self.update_object_ids(detected_objects)
 
-        return updated_id_association
+        return detected_objects
 
     def get_highest_counted_target_id(self, key, combined):
         # Get all targets mapped from the key
@@ -257,6 +256,18 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Return the target with the highest count
         return counts.most_common(1)[0][0]
+
+    def update_object_ids(self, detected_objects):
+        return [replace(obj, id=self.__actor_id_association[obj.id]) for obj in detected_objects]
+
+    # ------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
+
+    def update_object_types(self, hitpoints, detected_objects):
+        """Update object type and ID from association."""
+        # self.__actor_id_association is referenced
+        # TODO
+        return detected_objects
 
     # ------------------------------------------------------------------------------
     # Occlusion Filter
@@ -298,12 +309,6 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
     # Post Processing
     # ------------------------------------------------------------------------------
-
-    def update_object_types(self, hitpoints, detected_objects):
-        """Update object type and ID from association."""
-        # self.__actor_id_association is referenced
-        # TODO
-        return detected_objects
 
     def transform_to_sensor_frame(self, detected_objects):
         """Convert coordinates to sensor-centric frame"""
