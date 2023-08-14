@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 
 class CarlaUtils:
@@ -36,10 +37,11 @@ class CarlaUtils:
 
     @staticmethod
     def get_actor_rotation_matrix(carla_actor):
-        rotation_matrix = carla_actor.rotation.get_matrix()
-        rotation_matrix = np.array(rotation_matrix)
-        rotation_matrix = np.deg2rad(rotation_matrix)
-        return rotation_matrix
+        carla_rotation = carla_actor.get_transform().rotation
+        rotation_angles_deg = np.array([carla_rotation.roll, carla_rotation.pitch, carla_rotation.yaw])
+        rotation_angles = np.deg2rad(rotation_angles_deg)
+        rotation_matrix = Rotation.from_euler('xyz', rotation_angles)
+        return rotation_matrix.as_matrix()
 
     @staticmethod
     def get_actor_bounding_box_points(carla_actor):
