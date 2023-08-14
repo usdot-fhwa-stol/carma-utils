@@ -13,6 +13,14 @@ from collections import Counter
 class SemanticLidarSensor(SimulatedSensor):
 
     def __init__(self, simulated_sensor_config, carla_sensor_config, carla_world, sensor, data_collector, noise_model):
+        """
+        :param simulated_sensor_config:
+        :param carla_sensor_config:
+        :param carla_world:
+        :param sensor: CarlaSensor object wrapping the CARLA sensor actor.
+        :param data_collector:
+        :param noise_model:
+        """
         self.__simulated_sensor_config = simulated_sensor_config
         self.__carla_sensor_config = carla_sensor_config
 
@@ -60,11 +68,19 @@ class SemanticLidarSensor(SimulatedSensor):
         #                                                                self.__trailing_id_associations)
         # TODO detected_objects = self.reassociate(detected_objects, self.__actor_id_association)
 
+        # Update actor IDs to match the association
+
+        # Update actor types to match that reported from the CARLA semantic LIDAR sensor
+        detected_objects = self.update_object_types(hitpoints, detected_objects)
+
         # Apply occlusion
         detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
                                                 detection_thresholds)
         # Apply noise
         detected_objects = self.apply_noise(detected_objects)
+
+        # Transform object locations to sensor frame
+        detected_objects = self.transform_to_sensor_frame(detected_objects)
 
         return detected_objects
 
@@ -83,15 +99,13 @@ class SemanticLidarSensor(SimulatedSensor):
     def prefilter(self, detected_objects):
         """
         Perform the following operations:
-            1. Convert coordinates to sensor-centric frame.
-            2. Compute range from sensor to object.
-            3. Filter objects by allowed type.
-            4. Filter objects beyond the configured range threshold.
+            1. Compute range from sensor to object.
+            2. Filter objects by allowed type.
+            3. Filter objects beyond the configured range threshold.
 
         :param detected_objects:
         :return:
         """
-
         #
 
         # Filter by detected_object type
@@ -101,12 +115,9 @@ class SemanticLidarSensor(SimulatedSensor):
             filter(lambda obj: obj.object_type in self.__simulated_sensor_config.prefilter.allowed_semantic_tags,
                    detected_objects))
 
-        # Convert coordinates to sensor-centric frame
-        detected_objects = [replace(obj, position=np.subtract(obj.position, self.__sensor.position)) for obj in
-                            detected_objects]
-
         # Compute ranges
-        object_ranges = dict([(obj.get_id(), np.linalg.norm(obj.position)) for obj in detected_objects])
+        object_ranges = dict(
+            [(obj.get_id(), np.linalg.norm(obj.position - self.__sensor.position)) for obj in detected_objects])
 
         # Filter by radius
         detected_objects = list(
@@ -121,41 +132,43 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def compute_actor_angular_extents(self, detected_objects):
+        """
+        Compute horizontal and vertical angular FOV extent from sensor perspective for each detected object.
+        param: detected_objects: List of DetectedObject objects.
+        return: Dictionary of actor ID to tuple of (horizontal, vertical) angular extents.
+        """
         return dict([(detected_object.id,
                       self.compute_actor_angular_extent(detected_object)) for detected_object in
                      detected_objects])
 
     def compute_actor_angular_extent(self, detected_object):
-        bbox = detected_object.bbox
-        corner_vec = np.array(bbox.extent)
-        # Using combinatorics for conciseness
-        all_corner_vectors = [np.matmul(np.diagflat(X), corner_vec) for X in itertools.product([-1, 1], repeat=3)]
-        thetas = [self.compute_view_angle(v) for v in all_corner_vectors]
-        return min(thetas), max(thetas)
+        """
+        """
+        corner_vectors_in_world_frame = detected_object.bounding_box_in_world_coordinate_frame
+        theta = [self.compute_horizontal_angular_extent(vec) for vec in corner_vectors_in_world_frame]
+        phi = [self.compute_vertical_angular_extent(vec) for vec in corner_vectors_in_world_frame]
+        return min(theta), max(phi)
 
-    def compute_view_angle(self, vec):
-        return np.arccos(np.vdot(self.__sensor.position, vec) / (np.linalg.norm(sensor.position) * np.linalg.norm(vec)))
+    def compute_horizontal_angular_extent(self, vec):
+        p = vec - self.__sensor.position  # Position vector relative to sensor
+        return np.arctan2(p[1], p[0])
+
+    def compute_vertical_angular_extent(self, vec):
+        p = vec - self.__sensor.position
+        return np.arcsin(p[2], np.linalg.norm(p))
 
     def compute_adjusted_detection_thresholds(self, detected_objects, object_ranges):
         return dict([(detected_object.id,
-                      self.compute_adjusted_detection_threshold(config,
-                                                                object_ranges[
-                                                                    detected_object.get_id()], ))
+                      self.compute_adjusted_detection_threshold(object_ranges[detected_object.get_id()]))
                      for
                      detected_object in detected_objects])
 
-    def compute_adjusted_detection_threshold(self, config, relative_object_position_vector):
-        r = self.compute_range(relative_object_position_vector)
-        dt_dr = config["detection_threshold_scaling_formula"][
+    def compute_adjusted_detection_threshold(self, range):
+        dt_dr = self.__simulated_sensor_config["detection_threshold_scaling_formula"][
             "hitpoint_detection_ratio_threshold_per_meter_change_rate"]
-        t_nominal = config["detection_threshold_scaling_formula"]["nominal_hitpoint_detection_ratio_threshold"]
+        t_nominal = self.__simulated_sensor_config["detection_threshold_scaling_formula"]["nominal_hitpoint_detection_ratio_threshold"]
         # TODO Review this formula
-        return dt_dr * r * t_nominal
-
-    def compute_range(self, relative_object_position_vector):
-        return np.linalg.norm(relative_object_position_vector)
-
-    # return np.linalg.norm(detected_object["position"] - sensor["position"])
+        return dt_dr * range * t_nominal
 
     # ------------------------------------------------------------------------------
     # Geometry Re-Association: Sampling
@@ -230,6 +243,8 @@ class SemanticLidarSensor(SimulatedSensor):
         # Update trailing association queue
         self.__trailing_id_associations.appendleft(instantaneous_actor_id_association)
 
+        # TODO Also update ids in the detected_objects list
+
         return updated_id_association
 
     def get_highest_counted_target_id(self, key, combined):
@@ -279,3 +294,19 @@ class SemanticLidarSensor(SimulatedSensor):
         detected_objects = noise_model.apply_type_noise(detected_objects)
         detected_objects = noise_model.apply_list_inclusion_noise(detected_objects)
         return detected_objects
+
+    # ------------------------------------------------------------------------------
+    # Post Processing
+    # ------------------------------------------------------------------------------
+
+    def update_object_types(self, hitpoints, detected_objects):
+        """Update object type and ID from association."""
+        # self.__actor_id_association is referenced
+        # TODO
+        return detected_objects
+
+    def transform_to_sensor_frame(self, detected_objects):
+        """Convert coordinates to sensor-centric frame"""
+        # TODO
+        detected_objects = [replace(obj, position=np.subtract(obj.position, self.__sensor.position)) for obj in
+                            detected_objects]

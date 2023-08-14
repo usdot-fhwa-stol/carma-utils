@@ -42,10 +42,9 @@ class CarlaUtils:
         return rotation_matrix
 
     @staticmethod
-    def get_actor_bounding_size(carla_actor):
-        extent_vector = carla_actor.get_actor_bounding_size().extent
-        # Extent vector is half the length, width, and height of the bounding box
-        return 2.0 * np.array([extent_vector.x, extent_vector.y, extent_vector.z])
+    def get_actor_bounding_box_points(carla_actor):
+        bounding_box_locations = carla_actor.get_world_vertices(carla_actor.get_transform())
+        return [CarlaUtils.vector3d_to_numpy(location) for location in bounding_box_locations]
 
     @staticmethod
     def determine_object_type(carla_actor, allowed_semantic_tags):

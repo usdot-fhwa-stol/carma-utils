@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, List
 
 import carla
 import numpy as np
@@ -14,8 +14,8 @@ class DetectedObject:
     carla_actor: carla.Actor
     id: int
     object_type: str
-    size: Tuple[float, float, float]
-    position: np.ndarray  # Length, width, height of object in meters
+    bounding_box_in_world_coordinate_frame: List[np.ndarray]
+    position: np.ndarray
     velocity: np.ndarray
     rotation: np.ndarray
     angular_velocity: np.ndarray
@@ -30,7 +30,7 @@ class DetectedObjectBuilder:
             carla_actor,
             carla_actor.id,
             CarlaUtils.determine_object_type(carla_actor),
-            CarlaUtils.get_actor_bounding_size(carla_actor),
+            CarlaUtils.get_actor_bounding_box_points(carla_actor),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_location()),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_velocity()),
             CarlaUtils.get_actor_rotation_matrix(carla_actor),
