@@ -90,7 +90,9 @@ class SemanticLidarSensor(SimulatedSensor):
 
     def get_scene_detected_objects(self):
         actors = self.__carla_world.get_actors()
-        return [DetectedObjectBuilder.build_detected_object(actor) for actor in actors]
+        return [DetectedObjectBuilder.build_detected_object(actor,
+                                                            self.__simulated_sensor_config.prefilter.allowed_semantic_tags)
+                for actor in actors]
 
     # ------------------------------------------------------------------------------
     # Prefilter

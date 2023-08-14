@@ -25,11 +25,11 @@ class DetectedObject:
 
 class DetectedObjectBuilder:
     @staticmethod
-    def build_detected_object(carla_actor):
+    def build_detected_object(carla_actor, allowed_semantic_tags):
         return DetectedObject(
             carla_actor,
             carla_actor.id,
-            CarlaUtils.determine_object_type(carla_actor),
+            CarlaUtils.determine_object_type(carla_actor, allowed_semantic_tags),
             CarlaUtils.get_actor_bounding_box_points(carla_actor),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_location()),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_velocity()),
@@ -37,7 +37,7 @@ class DetectedObjectBuilder:
             CarlaUtils.get_actor_angular_velocity(carla_actor),
 
             # Use stand-in values which assume complete certainty
-            np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]),
-            np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]),
+            np.zeros((3, 3)),
+            np.zeros((3, 3)),
             1.0
         )
