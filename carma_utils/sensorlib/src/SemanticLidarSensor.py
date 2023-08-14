@@ -64,12 +64,18 @@ class SemanticLidarSensor(SimulatedSensor):
         #                                               self.__simulated_sensor_config.geometry_reassociation.sample_count])
         # instantaneous_actor_id_association = self.compute_instantaneous_actor_id_association(downsampled_hitpoints,
         #                                                                                      detected_objects)
-        # detected_objects = self.update_actor_id_association(detected_objects,
-        #                                                                   instantaneous_actor_id_association,
+        # self.update_actor_id_association(instantaneous_actor_id_association,
         #                                                                self.__trailing_id_associations)
 
+
+
+        # Update object IDs to match the association
+        hitpoints = self.update_object_ids(hitpoints)
+
         # Update actor types to match that reported from the CARLA semantic LIDAR sensor
-        detected_objects = self.update_object_types(hitpoints, detected_objects)
+        detected_objects = self.update_object_types(detected_objects, hitpoints)
+
+
 
         # Apply occlusion
         detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
@@ -224,7 +230,7 @@ class SemanticLidarSensor(SimulatedSensor):
     # Geometry Re-Association: Update Step
     # ------------------------------------------------------------------------------
 
-    def update_actor_id_association(self, detected_objects, instantaneous_actor_id_association, trailing_id_associations):
+    def update_actor_id_association(self, instantaneous_actor_id_association, trailing_id_associations):
         """
         Update the most recent association based on the current time step's instantaneously-derived association.
         """
@@ -241,11 +247,6 @@ class SemanticLidarSensor(SimulatedSensor):
         # Update trailing association queue
         self.__trailing_id_associations.appendleft(instantaneous_actor_id_association)
 
-        # Update actor IDs to match the association
-        detected_objects = self.update_object_ids(detected_objects)
-
-        return detected_objects
-
     def get_highest_counted_target_id(self, key, combined):
         # Get all targets mapped from the key
         targets = [association.get(key) for association in combined]
@@ -257,17 +258,25 @@ class SemanticLidarSensor(SimulatedSensor):
         # Return the target with the highest count
         return counts.most_common(1)[0][0]
 
-    def update_object_ids(self, detected_objects):
-        return [replace(obj, id=self.__actor_id_association[obj.id]) for obj in detected_objects]
-
     # ------------------------------------------------------------------------------
+    # Update Object IDs and Types
     # ------------------------------------------------------------------------------
 
-    def update_object_types(self, hitpoints, detected_objects):
-        """Update object type and ID from association."""
-        # self.__actor_id_association is referenced
-        # TODO
-        return detected_objects
+    def update_object_ids(self, hitpoints):
+        return dict([(self.self.__actor_id_association[id], hitpoint_list) for id, hitpoint_list in hitpoints])
+
+    def update_object_types(self, detected_objects, hitpoints):
+        return [replace(obj, object_type=self.get_object_type_from_hitpoint(obj, hitpoints)) for obj in detected_objects]
+
+    def get_object_type_from_hitpoint(self, detected_object, hitpoints):
+        """Get the object type from the first hitpoint associated with the object, per the CARLA API."""
+        hitpoint_list = hitpoints.get(detected_object.id)
+        if hitpoint_list is not None:
+            first_hitpoint = hitpoint_list.get(0)
+            if first_hitpoint is not None:
+                return first_hitpoint.object_tag
+
+        return detected_object.object_type
 
     # ------------------------------------------------------------------------------
     # Occlusion Filter
