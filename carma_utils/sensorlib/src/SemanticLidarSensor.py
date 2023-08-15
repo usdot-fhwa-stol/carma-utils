@@ -32,7 +32,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Structures to store reassociation information
         self.__actor_id_association = {}
-        trailing_id_associations_count = simulated_sensor_config.geometry_reassociation.trailing_id_associations_count
+        trailing_id_associations_count = simulated_sensor_config["geometry_reassociation"]["trailing_id_associations_count"]
         self.__trailing_id_associations = deque([{}], maxlen=trailing_id_associations_count)
         self.__rng = np.random.default_rng()
 

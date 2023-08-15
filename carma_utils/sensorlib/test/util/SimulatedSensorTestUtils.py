@@ -30,7 +30,8 @@ class SimulatedSensorTestUtils:
             }
         }
 
-    def generate_lidar_sensor_config(self):
+    @staticmethod
+    def generate_lidar_sensor_config():
         return {
             "lower_fov": -80.0,
             "upper_fov": 30.0,

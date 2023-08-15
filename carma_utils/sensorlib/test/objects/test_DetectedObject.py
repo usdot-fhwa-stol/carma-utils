@@ -8,7 +8,7 @@ from scipy.spatial.transform import Rotation
 from src.objects.DetectedObject import DetectedObjectBuilder
 
 
-class DetectedObjectTestCase(unittest.TestCase):
+class TestDetectedObject(unittest.TestCase):
 
     def setUp(self):
         self.carla_actor = MagicMock()

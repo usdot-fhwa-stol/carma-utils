@@ -7,7 +7,7 @@ from src.util.SimulatedSensorUtils import SimulatedSensorUtils
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
-class TestCarlaUtils(unittest.TestCase):
+class TestSimulatedSensorUtils(unittest.TestCase):
 
     def test_load_config_from_file(self):
         config_file_path = "test__simulated_sensor_config.yaml"

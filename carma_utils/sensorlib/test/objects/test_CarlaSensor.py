@@ -7,7 +7,7 @@ import numpy as np
 from src.objects.CarlaSensor import CarlaSensor, CarlaSensorBuilder
 
 
-class CarlaSensorTestCase(unittest.TestCase):
+class TestCarlaSensor(unittest.TestCase):
 
     def setUp(self):
         self.carla_sensor = MagicMock()
