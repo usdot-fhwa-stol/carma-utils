@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 import carla
 
+from src.objects.CarlaSensor import CarlaSensorBuilder
 from src.objects.DetectedObject import DetectedObject, DetectedObjectBuilder
 
 
@@ -69,7 +70,7 @@ class SimulatedSensorTestUtils:
         :return:
         """
         carla_sensor = MagicMock()
-        sensor_config = carla.SemanticLidarSensorConfiguration("sensor.lidar.semantic")
+        sensor_config = MagicMock()
         sensor_config.channels = 1
         sensor_config.range = 1000.0
         sensor_config.rotation_frequency = 10.0
@@ -83,17 +84,17 @@ class SimulatedSensorTestUtils:
 
         return carla_sensor
 
-    @staticmethod
-    def generate_test_data_detected_object_list(num_objects):
-        nominal_detected_object = SimulatedSensorTestUtils.generate_test_data_detected_object()
-        detected_objects = []
-        for n in num_objects:
-            detected_object = DetectedObject(nominal_detected_object)
-            detected_object.id = n
-            detected_object.position = nominal_detected_object.position + n * carla.Vector3D(1, 1, 1)
-            detected_objects.append(detected_object)
-
-        return detected_objects
+    # @staticmethod
+    # def generate_test_data_detected_object_list(num_objects):
+    #     nominal_detected_object = SimulatedSensorTestUtils.generate_test_data_detected_object()
+    #     detected_objects = []
+    #     for n in num_objects:
+    #         detected_object = DetectedObject(nominal_detected_object)
+    #         detected_object.id = n
+    #         detected_object.position = nominal_detected_object.position + n * carla.Vector3D(1, 1, 1)
+    #         detected_objects.append(detected_object)
+    #
+    #     return detected_objects
 
     @staticmethod
     def generate_test_data_detected_objects():
@@ -126,7 +127,7 @@ class SimulatedSensorTestUtils:
 
         # Construct additional DetectedObject by adjustment
         return [
-            replace(detected_object, id=1, object_type="Vehicle"),
+            replace(detected_object, id=0, object_type="Vehicle"),
             replace(detected_object, id=1, object_type="Pedestrian"),
             replace(detected_object, id=2, object_type="Pedestrian"),
             replace(detected_object, id=3, object_type="Pedestrian"),
