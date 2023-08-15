@@ -31,6 +31,125 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor = SemanticLidarSensor(self.simulated_sensor_config, self.carla_sensor_config, self.carla_world,
                                           self.carla_sensor, self.data_collector, self.noise_model)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def test_apply_occlusion(self):
+        detected_object = MagicMock(id=1)
+        actor_angular_extents = {1: (0.0, 1.096)}
+        hitpoints = {1: []}
+        detection_thresholds = {1: 0.5}
+
+        # Mock internal function
+        self.sensor.is_visible = MagicMock(return_value=detected_object)
+
+        # Call and apply assertions
+        self.sensor.apply_occlusion([detected_object], actor_angular_extents, hitpoints, detection_thresholds)
+
+        self.sensor.is_visible.assert_called_with(actor_angular_extents[detected_object.id],
+                                                  hitpoints[detected_object.id],
+                                                  detection_thresholds[detected_object.id]
+                                                  )
+
+
+    def test_is_visible(self):
+        carla_sensor = MagicMock(points_per_second=10000, rotation_frequency=10, fov_angular_width=1.096)
+        self.sensor._SemanticLidarSensor__sensor = carla_sensor
+        fov = 1.096
+        detection_threshold_ratio = 0.5
+
+        # Test case 1: Number of hitpoints is greater than or equal to the minimum required
+        object_hitpoints = []
+        for i in range(4000):
+            object_hitpoints += [MagicMock()]
+        result = self.sensor.is_visible((fov, fov), object_hitpoints, detection_threshold_ratio)
+        self.assertTrue(result)
+
+        # Test case 2: Number of hitpoints is less than the minimum required
+        object_hitpoints = []
+        for i in range(4):
+            object_hitpoints += [MagicMock()]
+        result = self.sensor.is_visible((fov, fov), object_hitpoints, detection_threshold_ratio)
+        self.assertFalse(result)
+
+
+
+
+
+
+    def test_compute_expected_num_hitpoints(self):
+        carla_sensor = MagicMock(points_per_second=10000, rotation_frequency=10, fov_angular_width=1.096)
+        self.sensor._SemanticLidarSensor__sensor = carla_sensor
+
+        fov = 1.096
+        num_points_per_scan = carla_sensor.points_per_second / carla_sensor.rotation_frequency
+        theta_resolution = carla_sensor.fov_angular_width / num_points_per_scan
+        expected_result = fov / theta_resolution
+
+        result = self.sensor.compute_expected_num_hitpoints(fov)
+
+        self.assertEqual(result, expected_result)
+
+
+
+
+
+
+
+
     def test_apply_noise(self):
         detected_objects = [MagicMock(), MagicMock()]
         noise_model = MagicMock()

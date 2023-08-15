@@ -287,11 +287,11 @@ class SemanticLidarSensor(SimulatedSensor):
 
     def apply_occlusion(self, detected_objects, actor_angular_extents, hitpoints, detection_thresholds):
         return list(filter(
-            lambda obj: self.is_visible(obj, actor_angular_extents.get(obj.id), hitpoints.get(obj.id),
-                                        detection_thresholds.get(obj.id))),
-            detected_objects)
+            lambda obj: self.is_visible(actor_angular_extents.get(obj.id), hitpoints.get(obj.id),
+                                        detection_thresholds.get(obj.id)),
+            detected_objects))
 
-    def is_visible(self, detected_object, actor_angular_extents, object_hitpoints, detection_threshold_ratio):
+    def is_visible(self, actor_angular_extents, object_hitpoints, detection_threshold_ratio):
 
         if actor_angular_extents is None or object_hitpoints is None or detection_threshold_ratio is None:
             return False

@@ -138,39 +138,6 @@ class TestSimulatedSensorUtilities(unittest.TestCase):
         self.assertEqual(result[0], detected_objects[0])
         self.assertEqual(result[1], detected_objects[1])
 
-    def test_is_visible(self):
-        detected_object = MagicMock()
-        actor_angular_extent = (0.0, 1.096)
-        sensor = MagicMock()
-
-        # Test case 1: Number of hitpoints is greater than or equal to the minimum required
-        hitpoints = []
-        for i in range(10000):
-            hitpoints[1] += [MagicMock()]
-        detection_thresholds = {1: 0.5}
-        result = SimulatedSensorUtils.is_visible(detected_object, actor_angular_extent, sensor, hitpoints,
-                                                 detection_thresholds)
-        self.assertTrue(result)
-
-        # Test case 2: Number of hitpoints is less than the minimum required
-        hitpoints = []
-        for i in range(4):
-            hitpoints[1] += [MagicMock()]
-        result = SimulatedSensorUtils.is_visible(detected_object, actor_angular_extent, sensor, hitpoints,
-                                                 detection_thresholds)
-        self.assertFalse(result)
-
-    def test_compute_expected_num_hitpoints(self):
-        sensor = MagicMock(points_per_second=10000, rotation_frequency=10, fov_angular_width=1.096)
-
-        actor_angular_extent = (0.0, 1.096)
-        num_points_per_scan = sensor.points_per_second / sensor.rotation_frequency
-        theta_resolution = sensor.fov_angular_width / num_points_per_scan
-        expected_result = (actor_angular_extent[1] - actor_angular_extent[0]) / theta_resolution
-
-        result = SimulatedSensorUtils.compute_expected_num_hitpoints(actor_angular_extent, sensor)
-
-        self.assertEqual(result, expected_result)
 
 
 if __name__ == "__main__":
