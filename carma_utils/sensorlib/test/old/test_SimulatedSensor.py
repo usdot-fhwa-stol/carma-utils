@@ -172,35 +172,6 @@ class TestSimulatedSensorUtilities(unittest.TestCase):
 
         self.assertEqual(result, expected_result)
 
-    def test_apply_noise(self):
-        detected_objects = [MagicMock(), MagicMock()]
-        noise_model = MagicMock()
-
-        # Mock the noise_model.apply_position_noise method
-        noise_model.apply_position_noise = MagicMock()
-        noise_model.apply_position_noise.return_value = None
-
-        # Mock the noise_model.apply_orientation_noise method
-        noise_model.apply_orientation_noise = MagicMock()
-        noise_model.apply_orientation_noise.return_value = None
-
-        # Mock the noise_model.apply_type_noise method
-        noise_model.apply_type_noise = MagicMock()
-        noise_model.apply_type_noise.return_value = None
-
-        # Mock the noise_model.apply_list_inclusion_noise method
-        noise_model.apply_list_inclusion_noise = MagicMock()
-        noise_model.apply_list_inclusion_noise.return_value = None
-
-        # Test the method
-        SimulatedSensorUtils.apply_noise(detected_objects, noise_model)
-
-        # Assertions
-        noise_model.apply_position_noise.assert_called_once_with(detected_objects)
-        noise_model.apply_orientation_noise.assert_called_once_with(detected_objects)
-        noise_model.apply_type_noise.assert_called_once_with(detected_objects)
-        noise_model.apply_list_inclusion_noise.assert_called_once_with(detected_objects)
-
 
 if __name__ == "__main__":
     unittest.main()

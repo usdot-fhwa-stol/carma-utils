@@ -31,6 +31,26 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor = SemanticLidarSensor(self.simulated_sensor_config, self.carla_sensor_config, self.carla_world,
                                           self.carla_sensor, self.data_collector, self.noise_model)
 
+    def test_apply_noise(self):
+        detected_objects = [MagicMock(), MagicMock()]
+        noise_model = MagicMock()
+
+        # Mock the noise_model functions
+        noise_model.apply_position_noise = MagicMock(return_value=detected_objects)
+        noise_model.apply_orientation_noise = MagicMock(return_value=detected_objects)
+        noise_model.apply_type_noise = MagicMock(return_value=detected_objects)
+        noise_model.apply_list_inclusion_noise = MagicMock(return_value=detected_objects)
+
+        # Test the method
+        self.sensor._SemanticLidarSensor__noise_model = noise_model
+        self.sensor.apply_noise(detected_objects)
+
+        # Verify the noise model functions were called
+        noise_model.apply_position_noise.assert_called_once_with(detected_objects)
+        noise_model.apply_orientation_noise.assert_called_once_with(detected_objects)
+        noise_model.apply_type_noise.assert_called_once_with(detected_objects)
+        noise_model.apply_list_inclusion_noise.assert_called_once_with(detected_objects)
+
     def test_transform_to_sensor_frame(self):
         # Generate objects in original world frame
         detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
