@@ -68,7 +68,7 @@ class SemanticLidarSensor(SimulatedSensor):
         #                                                                self.__trailing_id_associations)
 
         # Update object IDs to match the association
-        hitpoints = self.update_object_ids(hitpoints)
+        # hitpoints = self.update_object_ids(hitpoints)
 
         # Update actor types to match that reported from the CARLA semantic LIDAR sensor
         detected_objects = self.update_object_types(detected_objects, hitpoints)
@@ -264,8 +264,8 @@ class SemanticLidarSensor(SimulatedSensor):
     # Update Object IDs and Types
     # ------------------------------------------------------------------------------
 
-    def update_object_ids(self, hitpoints):
-        return dict([(self.self.__actor_id_association[id], hitpoint_list) for id, hitpoint_list in hitpoints])
+    # def update_object_ids(self, hitpoints):
+    #     return dict([(self.self.__actor_id_association[id], hitpoint_list) for id, hitpoint_list in hitpoints])
 
     def update_object_types(self, detected_objects, hitpoints):
         return [replace(obj, object_type=self.get_object_type_from_hitpoint(obj, hitpoints)) for obj in
@@ -275,7 +275,7 @@ class SemanticLidarSensor(SimulatedSensor):
         """Get the object type from the first hitpoint associated with the object, per the CARLA API."""
         hitpoint_list = hitpoints.get(detected_object.id)
         if hitpoint_list is not None:
-            first_hitpoint = hitpoint_list.get(0)
+            first_hitpoint = hitpoint_list[0]
             if first_hitpoint is not None:
                 return first_hitpoint.object_tag
 

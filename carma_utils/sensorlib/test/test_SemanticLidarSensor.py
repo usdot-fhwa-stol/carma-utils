@@ -2,12 +2,14 @@ import unittest
 from dataclasses import replace
 from unittest.mock import MagicMock
 
+import carla
 import numpy as np
 
 from src.SemanticLidarSensor import SemanticLidarSensor
 from src.collector.SensorDataCollector import SensorDataCollector
 from src.noise_models.GaussianNoiseModel import GaussianNoiseModel
 from src.objects.CarlaSensor import CarlaSensorBuilder
+from src.objects.DetectedObject import DetectedObjectBuilder
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
@@ -73,14 +75,42 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
 
 
+    def test_update_object_types(self):
+
+        # Build mock objects
+        expected_type = "CorrectedVehicle"
+        carla_actor = MagicMock()
+        carla_actor.id = 0
+        carla_actor.semantic_tags = ["Vehicle"]
+        carla_actor.get_world_vertices = MagicMock(return_value=[carla.Location(1.0, 2.0, 3.0),
+                                                                      carla.Location(4.0, 5.0, 6.0),
+                                                                      carla.Location(7.0, 8.0, 9.0),
+                                                                      carla.Location(10.0, 11.0, 12.0)])
+        carla_actor.get_transform = MagicMock(return_value=MagicMock(rotation=carla.Rotation(30.0, 90.0, 45.0)))
+        carla_actor.get_location = MagicMock(return_value=carla.Location(1.0, 2.0, 3.0))
+        carla_actor.get_velocity = MagicMock(return_value=carla.Vector3D(4.0, 5.0, 6.0))
+        carla_actor.get_angular_velocity = MagicMock(return_value=carla.Vector3D(7.0, 8.0, 9.0))
+
+        detected_object = DetectedObjectBuilder.build_detected_object(carla_actor, ["Vehicle"])
+
+        hitpoints = {0: [MagicMock(object_tag=expected_type)]}
+
+        # Call and provide assertions
+        corrected_objects = self.sensor.update_object_types([detected_object], hitpoints)
+        assert expected_type == corrected_objects[0].object_type
 
 
 
 
+    def test_get_object_type_from_hitpoint(self):
+        original_type = "Vehicle"
+        expected_type = "CorrectedVehicle"
 
+        detected_object = MagicMock(id=0, object_type=original_type)
+        hitpoints = {0: [MagicMock(object_tag=expected_type)]}
 
-
-
+        actual_type = self.sensor.get_object_type_from_hitpoint(detected_object, hitpoints)
+        self.assertEqual(expected_type, actual_type)
 
 
 
