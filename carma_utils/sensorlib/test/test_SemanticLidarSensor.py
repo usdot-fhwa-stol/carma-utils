@@ -206,7 +206,40 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert np.allclose(sampled_hitpoints[1][0], np.array([1.0, 1.0, 1.0]))
 
     def test_compute_instantaneous_actor_id_association(self):
-        self.assertTrue(False)
+
+        # Generate test scenario
+        pos1 = np.array([4.0, 2.0, 0.0])
+        pos2 = np.array([2.0, 4.0, 0.0])
+        scene_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
+        scene_objects = [
+            replace(scene_objects[0], position=pos1),
+            replace(scene_objects[1], position=pos2)
+        ]
+        points_list_1 = [
+            pos1 + np.array([0.0, 0.0, 0.0]),
+            pos1 + np.array([0.1, 0.0, 0.0]),
+            pos1 + np.array([0.0, 0.1, 0.0]),
+            pos1 + np.array([0.1, 0.1, 0.0]),
+            pos1 + np.array([0.2, 0.0, 0.0]),
+            pos1 + np.array([0.0, 0.2, 0.0])
+        ]
+        points_list_2 = [
+            pos2 + np.array([0.0, 0.0, 0.0]),
+            pos2 + np.array([0.1, 0.0, 0.0]),
+            pos2 + np.array([0.0, 0.1, 0.0]),
+            pos2 + np.array([0.1, 0.1, 0.0]),
+            pos2 + np.array([0.2, 0.0, 0.0]),
+            pos2 + np.array([0.0, 0.2, 0.0])
+        ]
+        downsampled_hitpoints = {
+            0: points_list_1,
+            1: points_list_2
+        }
+
+        # No change to a correct association
+        id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert id_association[0] == 0
+        assert id_association[1] == 1
 
     def test_compute_closest_object_list(self):
         self.assertTrue(False)

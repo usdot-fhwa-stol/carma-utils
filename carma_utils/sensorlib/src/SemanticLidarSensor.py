@@ -205,7 +205,7 @@ class SemanticLidarSensor(SimulatedSensor):
              downsampled_hitpoints.items()])
 
         # Vote within each dictionary key
-        return dict([(obj_id, self.vote_closest_object(object_id_list)) for obj_id, object_id_list in
+        return dict([(obj_id, self.vote_closest_object(object_list)) for obj_id, object_list in
                      direct_nearest_neighbors.items()])
 
     def compute_closest_object_list(self, hitpoints, scene_objects):
@@ -218,13 +218,12 @@ class SemanticLidarSensor(SimulatedSensor):
         object_positions = [obj.position for obj in scene_objects]
         distances = distance.cdist([hitpoint], object_positions)[0]
         closest_index = np.argmin(distances)
-        closest_distance = distances[closest_index]
         closest_object = scene_objects[closest_index]
-        return closest_distance, closest_object
+        return closest_object
 
-    def vote_closest_object(self, object_ids):
+    def vote_closest_object(self, object_list):
         # Determine the object with the highest number of votes
-        return Counter(object_ids).most_common(1)[0][0]
+        return Counter([obj.id for obj in object_list]).most_common(1)[0][0]
 
     # ------------------------------------------------------------------------------
     # Geometry Re-Association: Update Step
