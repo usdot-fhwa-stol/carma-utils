@@ -33,8 +33,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor = SemanticLidarSensor(self.simulated_sensor_config, self.carla_sensor_config, self.carla_world,
                                           self.carla_sensor, self.data_collector, self.noise_model)
 
-
-
     def test_get_detected_objects_in_frame(self):
 
         # Generate test data
@@ -92,23 +90,23 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor.compute_actor_angular_extents.assert_called_once_with(detected_objects)
         self.sensor.compute_adjusted_detection_thresholds.assert_called_once_with(detected_objects, object_ranges)
         self.sensor.update_object_types.assert_called_once_with(detected_objects, hitpoints)
-        self.sensor.apply_occlusion.assert_called_once_with(detected_objects, actor_angular_extents, hitpoints, detection_thresholds)
+        self.sensor.apply_occlusion.assert_called_once_with(detected_objects, actor_angular_extents, hitpoints,
+                                                            detection_thresholds)
         self.sensor.apply_noise.assert_called_once_with(detected_objects)
         self.sensor.transform_to_sensor_frame.assert_called_once_with(detected_objects)
 
         self.assertEqual(result, detected_objects)
 
-
-
-
-
     def test_get_scene_detected_objects(self):
         actors = [MagicMock()]
         self.sensor._SemanticLidarSensor__carla_world.get_actors = MagicMock(return_value=actors)
         detected_object = MagicMock(id=0)
+        old_fcn = DetectedObjectBuilder.build_detected_object
         DetectedObjectBuilder.build_detected_object = MagicMock(return_value=detected_object)
-
         DetectedObjectBuilder.build_detected_object.isCalledWith(actors[0], ["Pedestrian", "Vehicle"])
+
+        # Undo the mock to avoid side effects which cause other tests to fail
+        DetectedObjectBuilder.build_detected_object = old_fcn
 
     def test_prefilter(self):
 
