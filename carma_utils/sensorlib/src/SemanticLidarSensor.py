@@ -91,7 +91,7 @@ class SemanticLidarSensor(SimulatedSensor):
     def get_scene_detected_objects(self):
         actors = self.__carla_world.get_actors()
         return [DetectedObjectBuilder.build_detected_object(actor,
-                                                            self.__simulated_sensor_config.prefilter.allowed_semantic_tags)
+                                                            self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"])
                 for actor in actors]
 
     # ------------------------------------------------------------------------------
@@ -114,17 +114,17 @@ class SemanticLidarSensor(SimulatedSensor):
         # Actor.type_id and Actor.semantic_tags are available for determining type; semantic_tags effectively specifies the type of detected_object
         # Possible types are listed in the CARLA documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
         detected_objects = list(
-            filter(lambda obj: obj.object_type in self.__simulated_sensor_config.prefilter.allowed_semantic_tags,
+            filter(lambda obj: obj.object_type in self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"],
                    detected_objects))
 
         # Compute ranges
         object_ranges = dict(
-            [(obj.get_id(), np.linalg.norm(obj.position - self.__sensor.position)) for obj in detected_objects])
+            [(obj.id, np.linalg.norm(obj.position - self.__sensor.position)) for obj in detected_objects])
 
         # Filter by radius
         detected_objects = list(
             filter(
-                lambda obj: object_ranges[obj.get_id()] <= self.__simulated_sensor_config.prefilter.max_distance_meters,
+                lambda obj: object_ranges[obj.id] <= self.__simulated_sensor_config["prefilter"]["max_distance_meters"],
                 detected_objects))
 
         return detected_objects, object_ranges

@@ -70,28 +70,6 @@ class TestSimulatedSensorUtilities(unittest.TestCase):
         self.detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_object_list(10)
         self.carla_lidar_hitpoints = SimulatedSensorTestUtils.generate_test_data_carla_lidar_hitpoints()
 
-    def test_get_scene_detected_objects(self):
-
-        self.carla_world.get_actors = MagicMock(return_value=self.detected_objects)
-        result = SimulatedSensorUtils.get_scene_detected_objects(self.carla_world, self.config)
-        self.assertEqual(len(result), len(self.detected_objects))
-        for i in range(len(result)):
-            self.assertEqual(result[i].id, self.detected_objects[i].id)
-
-    def test_prefilter(self):
-
-        # Test filtering by type
-        detected_objects = self.detected_objects[0:3]
-        detected_objects[2].object_type = "Pole"
-        result = SimulatedSensorUtils.prefilter(self.sensor, detected_objects, self.config)
-        self.assertEqual(len(result), 2)
-        self.assertEqual(result[0].object_type, "Pedestrian")
-        self.assertEqual(result[1].object_type, "Vehicle")
-
-        # Test filtering by distance (set in the configuration)
-        result = SimulatedSensorUtils.prefilter(self.sensor, self.detected_objects, self.config)
-
-        self.assertEqual(len(result), 4)
 
     def test_compute_actor_angular_extents(self):
         detected_objects = self.detected_objects[0:1]

@@ -37,17 +37,44 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+    def test_get_scene_detected_objects(self):
+        actors = [MagicMock()]
+        self.sensor._SemanticLidarSensor__carla_world.get_actors = MagicMock(return_value=actors)
+        detected_object = MagicMock(id=0)
+        DetectedObjectBuilder.build_detected_object = MagicMock(return_value=detected_object)
+
+        DetectedObjectBuilder.build_detected_object.isCalledWith(actors[0], ["Pedestrian", "Vehicle"])
+
+    def test_prefilter(self):
+
+        # Test filtering by type
+        detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()[0:3]
+        detected_objects[2] = replace(detected_objects[2], object_type="Pole")
+        filtered_objects, object_ranges = self.sensor.prefilter(detected_objects)
+        self.assertEqual(len(filtered_objects), 2)
+        self.assertEqual(filtered_objects[0].object_type, "Vehicle")
+        self.assertEqual(filtered_objects[1].object_type, "Pedestrian")
+
+        # Forceably adjust configured filter distance and test filtering by distance
+        self.sensor._SemanticLidarSensor__simulated_sensor_config["prefilter"]["max_distance_meters"] = 0.0001
+        filtered_objects, object_ranges = self.sensor.prefilter(detected_objects)
+        self.assertEqual(len(filtered_objects), 0)
+
     def test_compute_actor_angular_extents(self):
         self.sensor.compute_actor_angular_extent = MagicMock(return_value=(0.5, 1.0))
         extents = self.sensor.compute_actor_angular_extents([MagicMock(id=0)])
         assert extents[0] == (0.5, 1.0)
-
-
-
-
-
-
-
 
     def test_compute_actor_angular_extent(self):
         # Data and call
@@ -79,8 +106,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.assertAlmostEqual(angle1, np.arctan(1.0 / 3.0))
         self.assertAlmostEqual(angle2, np.arctan(3.0 / 1.0))
 
-
-
     def test_compute_vertical_angular_offset(self):
         vec1 = np.array([2.0, 0.0, 4.0])
         vec2 = np.array([4.0, 0.0, 2.0])
@@ -90,15 +115,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         vec2 = vec2 - np.array([1.0, 1.0, 0.0])
         self.assertAlmostEqual(angle1, np.arcsin(vec1[2] / np.linalg.norm(vec1)))
         self.assertAlmostEqual(angle2, np.arcsin(vec2[2] / np.linalg.norm(vec2)))
-
-
-
-
-
-
-
-
-
 
     def test_compute_adjusted_detection_thresholds(self):
 
@@ -111,18 +127,9 @@ class TestSemanticLidarSensor(unittest.TestCase):
         result = self.sensor.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
         self.assertCalledOnceWith(detected_objects[0], object_ranges[0])
 
-
-
-
-
-
     def test_compute_adjusted_detection_thresholds(self):
         result = self.sensor.compute_adjusted_detection_threshold(100.0)
         self.assertAlmostEqual(-0.0033 * 0.6 * 100.0, result)
-
-
-
-
 
     # def test_get_highest_counted_target_id(self):
     #     # Build mock objects
@@ -134,7 +141,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
     #     actual_id = self.sensor.get_highest_counted_target_id(detected_object, hitpoints)
     #     self.assertEqual(expected_id, actual_id)
 
-
     def test_update_object_types(self):
 
         # Build mock objects
@@ -143,9 +149,9 @@ class TestSemanticLidarSensor(unittest.TestCase):
         carla_actor.id = 0
         carla_actor.semantic_tags = ["Vehicle"]
         carla_actor.get_world_vertices = MagicMock(return_value=[carla.Location(1.0, 2.0, 3.0),
-                                                                      carla.Location(4.0, 5.0, 6.0),
-                                                                      carla.Location(7.0, 8.0, 9.0),
-                                                                      carla.Location(10.0, 11.0, 12.0)])
+                                                                 carla.Location(4.0, 5.0, 6.0),
+                                                                 carla.Location(7.0, 8.0, 9.0),
+                                                                 carla.Location(10.0, 11.0, 12.0)])
         carla_actor.get_transform = MagicMock(return_value=MagicMock(rotation=carla.Rotation(30.0, 90.0, 45.0)))
         carla_actor.get_location = MagicMock(return_value=carla.Location(1.0, 2.0, 3.0))
         carla_actor.get_velocity = MagicMock(return_value=carla.Vector3D(4.0, 5.0, 6.0))
@@ -159,9 +165,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         corrected_objects = self.sensor.update_object_types([detected_object], hitpoints)
         assert expected_type == corrected_objects[0].object_type
 
-
-
-
     def test_get_object_type_from_hitpoint(self):
         original_type = "Vehicle"
         expected_type = "CorrectedVehicle"
@@ -171,11 +174,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
         actual_type = self.sensor.get_object_type_from_hitpoint(detected_object, hitpoints)
         self.assertEqual(expected_type, actual_type)
-
-
-
-
-
 
     def test_apply_occlusion(self):
         detected_object = MagicMock(id=1)
@@ -193,7 +191,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
                                                   hitpoints[detected_object.id],
                                                   detection_thresholds[detected_object.id]
                                                   )
-
 
     def test_is_visible(self):
         carla_sensor = MagicMock(points_per_second=10000, rotation_frequency=10, fov_angular_width=1.096)
@@ -215,11 +212,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         result = self.sensor.is_visible((fov, fov), object_hitpoints, detection_threshold_ratio)
         self.assertFalse(result)
 
-
-
-
-
-
     def test_compute_expected_num_hitpoints(self):
         carla_sensor = MagicMock(points_per_second=10000, rotation_frequency=10, fov_angular_width=1.096)
         self.sensor._SemanticLidarSensor__sensor = carla_sensor
@@ -232,13 +224,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         result = self.sensor.compute_expected_num_hitpoints(fov)
 
         self.assertEqual(result, expected_result)
-
-
-
-
-
-
-
 
     def test_apply_noise(self):
         detected_objects = [MagicMock(), MagicMock()]
