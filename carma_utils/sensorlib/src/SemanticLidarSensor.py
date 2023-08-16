@@ -32,7 +32,8 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Structures to store reassociation information
         self.__actor_id_association = {}
-        trailing_id_associations_count = simulated_sensor_config["geometry_reassociation"]["trailing_id_associations_count"]
+        trailing_id_associations_count = simulated_sensor_config["geometry_reassociation"][
+            "trailing_id_associations_count"]
         self.__trailing_id_associations = deque([{}], maxlen=trailing_id_associations_count)
         self.__rng = np.random.default_rng()
 
@@ -41,6 +42,7 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def get_detected_objects_in_frame(self):
+
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
 
@@ -53,25 +55,21 @@ class SemanticLidarSensor(SimulatedSensor):
         detected_objects, object_ranges = self.prefilter(detected_objects)
 
         # Get LIDAR hitpoints with Actor ID associations
-        hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
+        timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
 
         # Compute data needed for occlusion operation
         actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
         detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
 
+        # Instantaneous geometry association
+        downsampled_hitpoints = self.sample_hitpoints(hitpoints,
+                                                      self.__simulated_sensor_config.geometry_reassociation.sample_count)
+        instantaneous_actor_id_association = self.compute_instantaneous_actor_id_association(downsampled_hitpoints,
+                                                                                             detected_objects)
+
         # Geometry re-association
-        # downsampled_hitpoints = self.sample_hitpoints(hitpoints,
-        #                                               self.__simulated_sensor_config.geometry_reassociation.sample_count])
-        # instantaneous_actor_id_association = self.compute_instantaneous_actor_id_association(downsampled_hitpoints,
-        #                                                                                      detected_objects)
-        # self.update_actor_id_association(instantaneous_actor_id_association,
-        #                                                                self.__trailing_id_associations)
-
-        # Update object IDs to match the association
-        # hitpoints = self.update_object_ids(hitpoints)
-
-        # Update actor types to match that reported from the CARLA semantic LIDAR sensor
-        detected_objects = self.update_object_types(detected_objects, hitpoints)
+        self.update_actor_id_association(instantaneous_actor_id_association, self.__trailing_id_associations)
+        hitpoints = self.update_object_ids(hitpoints)
 
         # Apply occlusion
         detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
@@ -79,8 +77,8 @@ class SemanticLidarSensor(SimulatedSensor):
         # Apply noise
         detected_objects = self.apply_noise(detected_objects)
 
-        # Transform object locations to sensor frame
-        detected_objects = self.transform_to_sensor_frame(detected_objects)
+        # Update object type, reference frame, and detection time
+        detected_objects = self.update_object_metadata(detected_objects, hitpoints, timestamp)
 
         return detected_objects
 
@@ -91,7 +89,8 @@ class SemanticLidarSensor(SimulatedSensor):
     def get_scene_detected_objects(self):
         actors = self.__carla_world.get_actors()
         return [DetectedObjectBuilder.build_detected_object(actor,
-                                                            self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"])
+                                                            self.__simulated_sensor_config["prefilter"][
+                                                                "allowed_semantic_tags"])
                 for actor in actors]
 
     # ------------------------------------------------------------------------------
@@ -179,107 +178,90 @@ class SemanticLidarSensor(SimulatedSensor):
     # Geometry Re-Association: Sampling
     # ------------------------------------------------------------------------------
 
-    # def sample_hitpoints(self, hitpoints, sample_size):
-    #     """Randomly sample points inside each object's set of LIDAR hitpoints."""
-    #     return dict([(obj_id, self.__rng.choice(object_hitpoints, sample_size)) for obj_id, object_hitpoints in
-    #                  hitpoints.items()])
+    def sample_hitpoints(self, hitpoints, sample_size):
+        """Randomly sample points inside each object's set of LIDAR hitpoints."""
+        return dict([(obj_id, self.__rng.choice(object_hitpoints, sample_size)) for obj_id, object_hitpoints in
+                     hitpoints.items()])
 
     # ------------------------------------------------------------------------------
     # Geometry Re-Association: Instantaneous Association
     # ------------------------------------------------------------------------------
 
-    # def compute_instantaneous_actor_id_association(self, downsampled_hitpoints, scene_objects):
-    #     """
-    #     Need:
-    #     - Hitpoint geometry
-    #     - Hitpoint wrong association
-    #     - Available actor ID's
-    #     - Actor locations
-    #     - Current association
-    #
-    #     return: Actor ID association applicable to this time step based on geometry-based association algorithm.
-    #     """
-    #
-    #     # Compute nearest neighbor for each hitpoint
-    #     direct_nearest_neighbors = dict(
-    #         [(obj_id, self.compute_closest_object_list(hitpoint_list, scene_objects)) for obj_id, hitpoint_list in
-    #          downsampled_hitpoints.items()])
-    #
-    #     # Vote within each dictionary key
-    #     return dict([(obj_id, self.vote_closest_object(object_id_list)) for obj_id, object_id_list in
-    #                  direct_nearest_neighbors.items()])
-    #
-    # def compute_closest_object_list(self, hitpoints, scene_objects):
-    #     return [self.compute_closest_object(hitpoint, scene_objects) for hitpoint in hitpoints]
-    #
-    # def compute_closest_object(self, hitpoint, scene_objects):
-    #     # TODO This function is written inefficiently.
-    #     import numpy as np
-    #     from scipy.spatial import distance
-    #     object_positions = [obj.position for obj in scene_objects]
-    #     distances = distance.cdist([hitpoint], object_positions)[0]
-    #     closest_index = np.argmin(distances)
-    #     closest_distance = distances[closest_index]
-    #     closest_object = scene_objects[closest_index]
-    #     return closest_distance, closest_object
-    #
-    # def vote_closest_object(self, object_ids):
-    #     # Determine the object with the highest number of votes
-    #     return Counter(object_ids).most_common(1)[0][0]
+    def compute_instantaneous_actor_id_association(self, downsampled_hitpoints, scene_objects):
+        """
+        Need:
+        - Hitpoint geometry
+        - Hitpoint wrong association
+        - Available actor ID's
+        - Actor locations
+        - Current association
+
+        return: Actor ID association applicable to this time step based on geometry-based association algorithm.
+        """
+
+        # Compute nearest neighbor for each hitpoint
+        direct_nearest_neighbors = dict(
+            [(obj_id, self.compute_closest_object_list(hitpoint_list, scene_objects)) for obj_id, hitpoint_list in
+             downsampled_hitpoints.items()])
+
+        # Vote within each dictionary key
+        return dict([(obj_id, self.vote_closest_object(object_id_list)) for obj_id, object_id_list in
+                     direct_nearest_neighbors.items()])
+
+    def compute_closest_object_list(self, hitpoints, scene_objects):
+        return [self.compute_closest_object(hitpoint, scene_objects) for hitpoint in hitpoints]
+
+    def compute_closest_object(self, hitpoint, scene_objects):
+        # TODO This function is written inefficiently.
+        import numpy as np
+        from scipy.spatial import distance
+        object_positions = [obj.position for obj in scene_objects]
+        distances = distance.cdist([hitpoint], object_positions)[0]
+        closest_index = np.argmin(distances)
+        closest_distance = distances[closest_index]
+        closest_object = scene_objects[closest_index]
+        return closest_distance, closest_object
+
+    def vote_closest_object(self, object_ids):
+        # Determine the object with the highest number of votes
+        return Counter(object_ids).most_common(1)[0][0]
 
     # ------------------------------------------------------------------------------
     # Geometry Re-Association: Update Step
     # ------------------------------------------------------------------------------
 
-    # def update_actor_id_association(self, instantaneous_actor_id_association, trailing_id_associations):
-    #     """
-    #     Update the most recent association based on the current time step's instantaneously-derived association.
-    #     """
-    #     # TODO Should UKF be used?
-    #     # For now the highest-voted id wins.
-    #
-    #     # Extract all keys ("from" ID's) from all dictionaries
-    #     combined = trailing_id_associations + instantaneous_actor_id_association
-    #     all_keys = [association.keys() for association in combined]
-    #
-    #     # Count number of each mapped ID reach from the from ID, and take the highest-voted
-    #     self.__actor_id_association = dict(
-    #         [(key, self.get_highest_counted_target_id(key, combined)) for key in all_keys])
-    #
-    #     # Update trailing association queue
-    #     self.__trailing_id_associations.appendleft(instantaneous_actor_id_association)
-    #
-    # def get_highest_counted_target_id(self, key, combined):
-    #     # Get all targets mapped from the key
-    #     targets = [association.get(key) for association in combined]
-    #     targets = filter(lambda x: x is not None, targets)
-    #
-    #     # Count the number of times each target is mapped from the key
-    #     counts = Counter(targets)
-    #
-    #     # Return the target with the highest count
-    #     return counts.most_common(1)[0][0]
+    def update_actor_id_association(self, instantaneous_actor_id_association, trailing_id_associations):
+        """
+        Update the most recent association based on the current time step's instantaneously-derived association.
+        """
+        # TODO Should UKF be used?
+        # For now the highest-voted id wins.
 
-    # ------------------------------------------------------------------------------
-    # Update Object IDs and Types
-    # ------------------------------------------------------------------------------
+        # Extract all keys ("from" ID's) from all dictionaries
+        combined = trailing_id_associations + instantaneous_actor_id_association
+        all_keys = [association.keys() for association in combined]
 
-    # def update_object_ids(self, hitpoints):
-    #     return dict([(self.self.__actor_id_association[id], hitpoint_list) for id, hitpoint_list in hitpoints])
+        # Count number of each mapped ID reach from the from ID, and take the highest-voted
+        self.__actor_id_association = dict(
+            [(key, self.get_highest_counted_target_id(key, combined)) for key in all_keys])
 
-    def update_object_types(self, detected_objects, hitpoints):
-        return [replace(obj, object_type=self.get_object_type_from_hitpoint(obj, hitpoints)) for obj in
-                detected_objects]
+        # Update trailing association queue
+        self.__trailing_id_associations.appendleft(instantaneous_actor_id_association)
 
-    def get_object_type_from_hitpoint(self, detected_object, hitpoints):
-        """Get the object type from the first hitpoint associated with the object, per the CARLA API."""
-        hitpoint_list = hitpoints.get(detected_object.id)
-        if hitpoint_list is not None:
-            first_hitpoint = hitpoint_list[0]
-            if first_hitpoint is not None:
-                return first_hitpoint.object_tag
+    def get_highest_counted_target_id(self, key, combined):
+        # Get all targets mapped from the key
+        targets = [association.get(key) for association in combined]
+        targets = filter(lambda x: x is not None, targets)
 
-        return detected_object.object_type
+        # Count the number of times each target is mapped from the key
+        counts = Counter(targets)
+
+        # Return the target with the highest count
+        return counts.most_common(1)[0][0]
+
+    def update_object_ids(self, hitpoints):
+        """Update object ID using the latest ID association"""
+        return dict([(self.self.__actor_id_association[id], hitpoint_list) for id, hitpoint_list in hitpoints])
 
     # ------------------------------------------------------------------------------
     # Occlusion Filter
@@ -329,7 +311,26 @@ class SemanticLidarSensor(SimulatedSensor):
     # Post Processing
     # ------------------------------------------------------------------------------
 
-    def transform_to_sensor_frame(self, detected_objects):
-        """Convert coordinates to sensor-centric frame"""
-        return [replace(obj, position=np.subtract(obj.position, self.__sensor.position)) for obj in
-                detected_objects]
+    def update_object_metadata(self, detected_objects, hitpoints, timestamp):
+        return [self.update_object_metadata_from_hitpoint(obj, hitpoints) for obj in detected_objects]
+
+    def update_object_metadata_from_hitpoint(self, obj, hitpoints, timestamp):
+        """Get the metadata from the first hitpoint associated with the object, per the CARLA API."""
+        hitpoint_list = hitpoints.get(obj.id)
+        first_hitpoint = hitpoint_list[0] if hitpoint_list is not None else None
+
+        # Update object type to match that reported from the CARLA semantic LIDAR sensor
+        new_object_type = obj.object_type
+        if first_hitpoint is not None:
+            new_object_type = first_hitpoint.object_tag
+
+        # If enabled, convert coordinates to sensor-centric frame
+        new_position = obj.position
+        if self.__simulated_sensor_config["use_sensor_centric_frame"]:
+            new_position = np.subtract(obj.position, self.__sensor.position)
+
+        return replace(obj,
+                       object_type=new_object_type,
+                       timestamp=timestamp,
+                       position=new_position
+                       )

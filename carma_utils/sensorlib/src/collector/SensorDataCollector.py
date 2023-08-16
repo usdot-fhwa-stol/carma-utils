@@ -22,6 +22,9 @@ class SensorDataCollector:
         self.__carla_sensor = carla_sensor
         self.__prev_angle = 0.0
 
+        # Time of latest data capture
+        self.__timestamp = 0
+
         # Store current and prior data collections. The current is actively being added to, previous is finalized.
         self.__data = deque([{}, {}], maxlen=2)
 
@@ -30,9 +33,13 @@ class SensorDataCollector:
 
     def get_carla_lidar_hitpoints(self):
         # Prior collection is always complete
-        return self.__data[1]
+        return self.__timestamp, self.__data[1]
 
     def __collect_sensor_data(self, raw_sensor_data):
+
+        # Update the timestamp
+        self.__timestamp = int(raw_sensor_data.timestamp)
+
         # Check if this data collection belongs to the same data collection run as the previous time step
         sensor_rotation_angle = raw_sensor_data.horizontal_angle
         if not self.__is_same_data_collection(sensor_rotation_angle):

@@ -28,7 +28,8 @@ class SimulatedSensorTestUtils:
             "geometry_reassociation": {
                 "trailing_id_associations_count": 2,
                 "sample_count": 3
-            }
+            },
+            "use_sensor_centric_frame": True
         }
 
     @staticmethod

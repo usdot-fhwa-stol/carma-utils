@@ -14,6 +14,7 @@ class DetectedObject:
     carla_actor: carla.Actor
     id: int
     object_type: str
+    timestamp: int
     bounding_box_in_world_coordinate_frame: List[np.ndarray]
     position: np.ndarray
     velocity: np.ndarray
@@ -30,6 +31,7 @@ class DetectedObjectBuilder:
             carla_actor,
             carla_actor.id,
             CarlaUtils.determine_object_type(carla_actor, allowed_semantic_tags),
+            0,
             CarlaUtils.get_actor_bounding_box_points(carla_actor),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_location()),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_velocity()),

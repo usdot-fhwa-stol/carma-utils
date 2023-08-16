@@ -185,49 +185,53 @@ class TestSemanticLidarSensor(unittest.TestCase):
         result = self.sensor.compute_adjusted_detection_threshold(100.0)
         self.assertAlmostEqual(-0.0033 * 0.6 * 100.0, result)
 
-    # def test_get_highest_counted_target_id(self):
-    #     # Build mock objects
-    #     expected_id = 1
-    #     detected_object = MagicMock(id=expected_id)
-    #     hitpoints = {expected_id: [MagicMock(), MagicMock(), MagicMock()]}
-    #
-    #     # Call and provide assertions
-    #     actual_id = self.sensor.get_highest_counted_target_id(detected_object, hitpoints)
-    #     self.assertEqual(expected_id, actual_id)
+    def test_sample_hitpoints(self):
+        points_list = [
+            np.array([1.0, 1.0, 1.0]),
+            np.array([2.0, 2.0, 2.0]),
+            np.array([3.0, 3.0, 3.0]),
+            np.array([4.0, 4.0, 4.0]),
+            np.array([5.0, 5.0, 5.0]),
+            np.array([6.0, 6.0, 6.0])
+            ]
+        hitpoints = {
+            0: points_list,
+            1: points_list
+        }
+        self.sensor._SemanticLidarSensor__rng = MagicMock(choice=MagicMock(return_value=points_list[0:3]))
+        sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 3)
+        assert len(sampled_hitpoints[0]) == 3
+        assert len(sampled_hitpoints[1]) == 3
+        assert np.allclose(sampled_hitpoints[0][0], np.array([1.0, 1.0, 1.0]))
+        assert np.allclose(sampled_hitpoints[1][0], np.array([1.0, 1.0, 1.0]))
 
-    def test_update_object_types(self):
+    def test_compute_instantaneous_actor_id_association(self):
+        self.assertTrue(False)
 
+    def test_compute_closest_object_list(self):
+        self.assertTrue(False)
+
+    def test_compute_closest_object(self):
+        self.assertTrue(False)
+
+    def test_vote_closest_object(self):
+        self.assertTrue(False)
+
+    def test_update_actor_id_association(self):
+        self.assertTrue(False)
+
+    def test_get_highest_counted_target_id(self):
         # Build mock objects
-        expected_type = "CorrectedVehicle"
-        carla_actor = MagicMock()
-        carla_actor.id = 0
-        carla_actor.semantic_tags = ["Vehicle"]
-        carla_actor.get_world_vertices = MagicMock(return_value=[carla.Location(1.0, 2.0, 3.0),
-                                                                 carla.Location(4.0, 5.0, 6.0),
-                                                                 carla.Location(7.0, 8.0, 9.0),
-                                                                 carla.Location(10.0, 11.0, 12.0)])
-        carla_actor.get_transform = MagicMock(return_value=MagicMock(rotation=carla.Rotation(30.0, 90.0, 45.0)))
-        carla_actor.get_location = MagicMock(return_value=carla.Location(1.0, 2.0, 3.0))
-        carla_actor.get_velocity = MagicMock(return_value=carla.Vector3D(4.0, 5.0, 6.0))
-        carla_actor.get_angular_velocity = MagicMock(return_value=carla.Vector3D(7.0, 8.0, 9.0))
-
-        detected_object = DetectedObjectBuilder.build_detected_object(carla_actor, ["Vehicle"])
-
-        hitpoints = {0: [MagicMock(object_tag=expected_type)]}
+        expected_id = 1
+        detected_object = MagicMock(id=expected_id)
+        hitpoints = {expected_id: [MagicMock(), MagicMock(), MagicMock()]}
 
         # Call and provide assertions
-        corrected_objects = self.sensor.update_object_types([detected_object], hitpoints)
-        assert expected_type == corrected_objects[0].object_type
+        actual_id = self.sensor.get_highest_counted_target_id(detected_object, hitpoints)
+        self.assertEqual(expected_id, actual_id)
 
-    def test_get_object_type_from_hitpoint(self):
-        original_type = "Vehicle"
-        expected_type = "CorrectedVehicle"
-
-        detected_object = MagicMock(id=0, object_type=original_type)
-        hitpoints = {0: [MagicMock(object_tag=expected_type)]}
-
-        actual_type = self.sensor.get_object_type_from_hitpoint(detected_object, hitpoints)
-        self.assertEqual(expected_type, actual_type)
+    def test_update_object_ids(self):
+        self.assertTrue(False)
 
     def test_apply_occlusion(self):
         detected_object = MagicMock(id=1)
@@ -299,7 +303,42 @@ class TestSemanticLidarSensor(unittest.TestCase):
         noise_model.apply_type_noise.assert_called_once_with(detected_objects)
         noise_model.apply_list_inclusion_noise.assert_called_once_with(detected_objects)
 
-    def test_transform_to_sensor_frame(self):
+    def test_update_object_metadata(self):
+
+        # Build mock objects
+        expected_type = "CorrectedVehicle"
+        carla_actor = MagicMock()
+        carla_actor.id = 0
+        carla_actor.semantic_tags = ["Vehicle"]
+        carla_actor.get_world_vertices = MagicMock(return_value=[carla.Location(1.0, 2.0, 3.0),
+                                                                 carla.Location(4.0, 5.0, 6.0),
+                                                                 carla.Location(7.0, 8.0, 9.0),
+                                                                 carla.Location(10.0, 11.0, 12.0)])
+        carla_actor.get_transform = MagicMock(return_value=MagicMock(rotation=carla.Rotation(30.0, 90.0, 45.0)))
+        carla_actor.get_location = MagicMock(return_value=carla.Location(1.0, 2.0, 3.0))
+        carla_actor.get_velocity = MagicMock(return_value=carla.Vector3D(4.0, 5.0, 6.0))
+        carla_actor.get_angular_velocity = MagicMock(return_value=carla.Vector3D(7.0, 8.0, 9.0))
+
+        detected_object = DetectedObjectBuilder.build_detected_object(carla_actor, ["Vehicle"])
+
+        hitpoints = {0: [MagicMock(object_tag=expected_type)]}
+
+        # Call and provide assertions
+        corrected_objects = self.sensor.update_object_types([detected_object], hitpoints)
+        assert expected_type == corrected_objects[0].object_type
+
+    def test_update_object_metadata_from_hitpoint(self):
+        original_type = "Vehicle"
+        expected_type = "CorrectedVehicle"
+
+        detected_object = MagicMock(id=0, object_type=original_type)
+        hitpoints = {0: [MagicMock(object_tag=expected_type)]}
+
+        actual_type = self.sensor.get_object_type_from_hitpoint(detected_object, hitpoints)
+        self.assertEqual(expected_type, actual_type)
+
+        ########
+
         # Generate objects in original world frame
         detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
         detected_objects = [
