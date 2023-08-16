@@ -35,14 +35,68 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
 
 
+    def test_get_detected_objects_in_frame(self):
 
+        # Generate test data
+        detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
+        object_ranges = dict({
+            0: 10.0,
+            1: 11.0,
+            2: 12.0,
+            3: 13.0,
+            4: 14.0,
+            5: 15.0
+        })
+        hitpoints = dict({
+            0: [MagicMock(), MagicMock(), MagicMock()],
+            1: [MagicMock(), MagicMock(), MagicMock()],
+            2: [MagicMock(), MagicMock(), MagicMock()],
+            3: [MagicMock(), MagicMock(), MagicMock()],
+            4: [MagicMock(), MagicMock(), MagicMock()],
+            5: [MagicMock(), MagicMock(), MagicMock()]
+        })
+        actor_angular_extents = dict({
+            0: (0.0, 1.096),
+            1: (0.0, 1.096),
+            2: (0.0, 1.096),
+            3: (0.0, 1.096),
+            4: (0.0, 1.096),
+            5: (0.0, 1.096)
+        })
+        detection_thresholds = dict({
+            0: 0.5,
+            1: 0.5,
+            2: 0.5,
+            3: 0.6,
+            4: 0.7,
+            5: 0.7
+        })
 
+        # Mock internal functions
+        self.sensor.get_scene_detected_objects = MagicMock(return_value=detected_objects)
+        self.sensor.prefilter = MagicMock(return_value=(detected_objects, object_ranges))
+        self.sensor._SemanticLidarSensor__data_collector.get_carla_lidar_hitpoints = MagicMock(return_value=hitpoints)
+        self.sensor.compute_actor_angular_extents = MagicMock(return_value=actor_angular_extents)
+        self.sensor.compute_adjusted_detection_thresholds = MagicMock(return_value=detection_thresholds)
+        self.sensor.update_object_types = MagicMock(return_value=detected_objects)
+        self.sensor.apply_occlusion = MagicMock(return_value=detected_objects)
+        self.sensor.apply_noise = MagicMock(return_value=detected_objects)
+        self.sensor.transform_to_sensor_frame = MagicMock(return_value=detected_objects)
 
+        # Call and provide assertions
+        result = self.sensor.get_detected_objects_in_frame()
 
+        self.sensor.get_scene_detected_objects.assert_called_once()
+        self.sensor.prefilter.assert_called_once_with(detected_objects)
+        self.sensor._SemanticLidarSensor__data_collector.get_carla_lidar_hitpoints.assert_called_once()
+        self.sensor.compute_actor_angular_extents.assert_called_once_with(detected_objects)
+        self.sensor.compute_adjusted_detection_thresholds.assert_called_once_with(detected_objects, object_ranges)
+        self.sensor.update_object_types.assert_called_once_with(detected_objects, hitpoints)
+        self.sensor.apply_occlusion.assert_called_once_with(detected_objects, actor_angular_extents, hitpoints, detection_thresholds)
+        self.sensor.apply_noise.assert_called_once_with(detected_objects)
+        self.sensor.transform_to_sensor_frame.assert_called_once_with(detected_objects)
 
-
-
-
+        self.assertEqual(result, detected_objects)
 
 
 
@@ -65,6 +119,8 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.assertEqual(len(filtered_objects), 2)
         self.assertEqual(filtered_objects[0].object_type, "Vehicle")
         self.assertEqual(filtered_objects[1].object_type, "Pedestrian")
+        self.assertEqual(object_ranges[0], 38.635709988013005)
+        self.assertEqual(object_ranges[1], 38.635709988013005)
 
         # Forceably adjust configured filter distance and test filtering by distance
         self.sensor._SemanticLidarSensor__simulated_sensor_config["prefilter"]["max_distance_meters"] = 0.0001
