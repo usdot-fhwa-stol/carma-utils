@@ -147,23 +147,23 @@ class SemanticLidarSensor(SimulatedSensor):
         """
         """
         corner_vectors_in_world_frame = detected_object.bounding_box_in_world_coordinate_frame
-        theta = [self.compute_horizontal_angular_extent(vec) for vec in corner_vectors_in_world_frame]
-        phi = [self.compute_vertical_angular_extent(vec) for vec in corner_vectors_in_world_frame]
+        theta = [self.compute_horizontal_angular_offset(vec) for vec in corner_vectors_in_world_frame]
+        phi = [self.compute_vertical_angular_offset(vec) for vec in corner_vectors_in_world_frame]
         horizontal_fov = max(theta) - min(theta)
         vertical_fov = max(phi) - min(phi)
         return horizontal_fov, vertical_fov
 
-    def compute_horizontal_angular_extent(self, vec):
+    def compute_horizontal_angular_offset(self, vec):
         p = vec - self.__sensor.position  # Position vector relative to sensor
         return np.arctan2(p[1], p[0])
 
-    def compute_vertical_angular_extent(self, vec):
+    def compute_vertical_angular_offset(self, vec):
         p = vec - self.__sensor.position
-        return np.arcsin(p[2], np.linalg.norm(p))
+        return np.arcsin(p[2] / np.linalg.norm(p))
 
     def compute_adjusted_detection_thresholds(self, detected_objects, object_ranges):
         return dict([(detected_object.id,
-                      self.compute_adjusted_detection_threshold(object_ranges[detected_object.get_id()]))
+                      self.compute_adjusted_detection_threshold(object_ranges[detected_object.id]))
                      for
                      detected_object in detected_objects])
 
@@ -179,86 +179,86 @@ class SemanticLidarSensor(SimulatedSensor):
     # Geometry Re-Association: Sampling
     # ------------------------------------------------------------------------------
 
-    def sample_hitpoints(self, hitpoints, sample_size):
-        """Randomly sample points inside each object's set of LIDAR hitpoints."""
-        return dict([(obj_id, self.__rng.choice(object_hitpoints, sample_size)) for obj_id, object_hitpoints in
-                     hitpoints.items()])
+    # def sample_hitpoints(self, hitpoints, sample_size):
+    #     """Randomly sample points inside each object's set of LIDAR hitpoints."""
+    #     return dict([(obj_id, self.__rng.choice(object_hitpoints, sample_size)) for obj_id, object_hitpoints in
+    #                  hitpoints.items()])
 
     # ------------------------------------------------------------------------------
     # Geometry Re-Association: Instantaneous Association
     # ------------------------------------------------------------------------------
 
-    def compute_instantaneous_actor_id_association(self, downsampled_hitpoints, scene_objects):
-        """
-        Need:
-        - Hitpoint geometry
-        - Hitpoint wrong association
-        - Available actor ID's
-        - Actor locations
-        - Current association
-
-        return: Actor ID association applicable to this time step based on geometry-based association algorithm.
-        """
-
-        # Compute nearest neighbor for each hitpoint
-        direct_nearest_neighbors = dict(
-            [(obj_id, self.compute_closest_object_list(hitpoint_list, scene_objects)) for obj_id, hitpoint_list in
-             downsampled_hitpoints.items()])
-
-        # Vote within each dictionary key
-        return dict([(obj_id, self.vote_closest_object(object_id_list)) for obj_id, object_id_list in
-                     direct_nearest_neighbors.items()])
-
-    def compute_closest_object_list(self, hitpoints, scene_objects):
-        return [self.compute_closest_object(hitpoint, scene_objects) for hitpoint in hitpoints]
-
-    def compute_closest_object(self, hitpoint, scene_objects):
-        # TODO This function is written inefficiently.
-        import numpy as np
-        from scipy.spatial import distance
-        object_positions = [obj.position for obj in scene_objects]
-        distances = distance.cdist([hitpoint], object_positions)[0]
-        closest_index = np.argmin(distances)
-        closest_distance = distances[closest_index]
-        closest_object = scene_objects[closest_index]
-        return closest_distance, closest_object
-
-    def vote_closest_object(self, object_ids):
-        # Determine the object with the highest number of votes
-        return Counter(object_ids).most_common(1)[0][0]
+    # def compute_instantaneous_actor_id_association(self, downsampled_hitpoints, scene_objects):
+    #     """
+    #     Need:
+    #     - Hitpoint geometry
+    #     - Hitpoint wrong association
+    #     - Available actor ID's
+    #     - Actor locations
+    #     - Current association
+    #
+    #     return: Actor ID association applicable to this time step based on geometry-based association algorithm.
+    #     """
+    #
+    #     # Compute nearest neighbor for each hitpoint
+    #     direct_nearest_neighbors = dict(
+    #         [(obj_id, self.compute_closest_object_list(hitpoint_list, scene_objects)) for obj_id, hitpoint_list in
+    #          downsampled_hitpoints.items()])
+    #
+    #     # Vote within each dictionary key
+    #     return dict([(obj_id, self.vote_closest_object(object_id_list)) for obj_id, object_id_list in
+    #                  direct_nearest_neighbors.items()])
+    #
+    # def compute_closest_object_list(self, hitpoints, scene_objects):
+    #     return [self.compute_closest_object(hitpoint, scene_objects) for hitpoint in hitpoints]
+    #
+    # def compute_closest_object(self, hitpoint, scene_objects):
+    #     # TODO This function is written inefficiently.
+    #     import numpy as np
+    #     from scipy.spatial import distance
+    #     object_positions = [obj.position for obj in scene_objects]
+    #     distances = distance.cdist([hitpoint], object_positions)[0]
+    #     closest_index = np.argmin(distances)
+    #     closest_distance = distances[closest_index]
+    #     closest_object = scene_objects[closest_index]
+    #     return closest_distance, closest_object
+    #
+    # def vote_closest_object(self, object_ids):
+    #     # Determine the object with the highest number of votes
+    #     return Counter(object_ids).most_common(1)[0][0]
 
     # ------------------------------------------------------------------------------
     # Geometry Re-Association: Update Step
     # ------------------------------------------------------------------------------
 
-    def update_actor_id_association(self, instantaneous_actor_id_association, trailing_id_associations):
-        """
-        Update the most recent association based on the current time step's instantaneously-derived association.
-        """
-        # TODO Should UKF be used?
-        # For now the highest-voted id wins.
-
-        # Extract all keys ("from" ID's) from all dictionaries
-        combined = trailing_id_associations + instantaneous_actor_id_association
-        all_keys = [association.keys() for association in combined]
-
-        # Count number of each mapped ID reach from the from ID, and take the highest-voted
-        self.__actor_id_association = dict(
-            [(key, self.get_highest_counted_target_id(key, combined)) for key in all_keys])
-
-        # Update trailing association queue
-        self.__trailing_id_associations.appendleft(instantaneous_actor_id_association)
-
-    def get_highest_counted_target_id(self, key, combined):
-        # Get all targets mapped from the key
-        targets = [association.get(key) for association in combined]
-        targets = filter(lambda x: x is not None, targets)
-
-        # Count the number of times each target is mapped from the key
-        counts = Counter(targets)
-
-        # Return the target with the highest count
-        return counts.most_common(1)[0][0]
+    # def update_actor_id_association(self, instantaneous_actor_id_association, trailing_id_associations):
+    #     """
+    #     Update the most recent association based on the current time step's instantaneously-derived association.
+    #     """
+    #     # TODO Should UKF be used?
+    #     # For now the highest-voted id wins.
+    #
+    #     # Extract all keys ("from" ID's) from all dictionaries
+    #     combined = trailing_id_associations + instantaneous_actor_id_association
+    #     all_keys = [association.keys() for association in combined]
+    #
+    #     # Count number of each mapped ID reach from the from ID, and take the highest-voted
+    #     self.__actor_id_association = dict(
+    #         [(key, self.get_highest_counted_target_id(key, combined)) for key in all_keys])
+    #
+    #     # Update trailing association queue
+    #     self.__trailing_id_associations.appendleft(instantaneous_actor_id_association)
+    #
+    # def get_highest_counted_target_id(self, key, combined):
+    #     # Get all targets mapped from the key
+    #     targets = [association.get(key) for association in combined]
+    #     targets = filter(lambda x: x is not None, targets)
+    #
+    #     # Count the number of times each target is mapped from the key
+    #     counts = Counter(targets)
+    #
+    #     # Return the target with the highest count
+    #     return counts.most_common(1)[0][0]
 
     # ------------------------------------------------------------------------------
     # Update Object IDs and Types

@@ -109,15 +109,6 @@ class TestSimulatedSensorUtilities(unittest.TestCase):
         result = SimulatedSensorUtils.compute_view_angle(sensor, np.array([1.0, 1.0, 0.0]))
         self.assertTrue(result, np.pi / 4)
 
-    def test_compute_adjusted_detection_thresholds(self):
-        sensor = self.sensor
-        sensor.get_position = MagicMock(return_value=np.array([0.0, 0.0, 0.0]))
-        detected_objects = [MagicMock(id=1)]
-        relative_object_position_vectors = [np.array([3.0, 4.0, 0.0])]
-        result = SimulatedSensorUtils.compute_adjusted_detection_thresholds(config, sensor, detected_objects)
-
-        self.assertEqual(len(result), 1)
-        self.assertAlmostEqual(result[0], 5.0)
 
     def test_compute_range(self):
         relative_object_position_vector = np.array([3.0, 4.0, 0.0])

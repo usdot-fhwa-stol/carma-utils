@@ -37,6 +37,59 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
 
 
+    def test_compute_actor_angular_extents(self):
+        self.sensor.compute_actor_angular_extent = MagicMock(return_value=(0.5, 1.0))
+        extents = self.sensor.compute_actor_angular_extents([MagicMock(id=0)])
+        assert extents[0] == (0.5, 1.0)
+
+
+
+
+
+
+
+
+    def test_compute_actor_angular_extent(self):
+        # Data and call
+        vec1 = np.array([4.0, 2.0, 4.0])
+        vec2 = np.array([2.0, 4.0, 2.0])
+        detected_object = MagicMock(id=0,
+                                    bounding_box_in_world_coordinate_frame=[
+                                        vec1,
+                                        vec2
+                                    ])
+        angular_extents = self.sensor.compute_actor_angular_extent(detected_object)
+
+        # Adjust to sensor frame for comparison
+        vec1 = vec1 - np.array([1.0, 1.0, 0.0])
+        vec2 = vec2 - np.array([1.0, 1.0, 0.0])
+
+        h1 = np.arctan(1.0 / 3.0)
+        h2 = np.arctan(3.0 / 1.0)
+        v1 = np.arcsin(4.0 / np.linalg.norm(vec1))
+        v2 = np.arcsin(2.0 / np.linalg.norm(vec2))
+        expected_angular_extents = (np.abs(h2 - h1), np.abs(v2 - v1))
+        assert np.allclose(angular_extents, expected_angular_extents)
+
+    def test_compute_horizontal_angular_offset(self):
+        vec1 = np.array([4.0, 2.0, 0.0])
+        vec2 = np.array([2.0, 4.0, 0.0])
+        angle1 = self.sensor.compute_horizontal_angular_offset(vec1)
+        angle2 = self.sensor.compute_horizontal_angular_offset(vec2)
+        self.assertAlmostEqual(angle1, np.arctan(1.0 / 3.0))
+        self.assertAlmostEqual(angle2, np.arctan(3.0 / 1.0))
+
+
+
+    def test_compute_vertical_angular_offset(self):
+        vec1 = np.array([2.0, 0.0, 4.0])
+        vec2 = np.array([4.0, 0.0, 2.0])
+        angle1 = self.sensor.compute_vertical_angular_offset(vec1)
+        angle2 = self.sensor.compute_vertical_angular_offset(vec2)
+        vec1 = vec1 - np.array([1.0, 1.0, 0.0])
+        vec2 = vec2 - np.array([1.0, 1.0, 0.0])
+        self.assertAlmostEqual(angle1, np.arcsin(vec1[2] / np.linalg.norm(vec1)))
+        self.assertAlmostEqual(angle2, np.arcsin(vec2[2] / np.linalg.norm(vec2)))
 
 
 
@@ -47,32 +100,39 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
 
 
+    def test_compute_adjusted_detection_thresholds(self):
+
+        # Mock internal functions
+        detected_objects = [MagicMock(id=0)]
+        object_ranges = {0: 100.0}
+        self.sensor.compute_adjusted_detection_threshold = MagicMock(return_value=0.0)
+
+        # Call and provide assertions
+        result = self.sensor.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
+        self.assertCalledOnceWith(detected_objects[0], object_ranges[0])
 
 
 
 
 
 
+    def test_compute_adjusted_detection_thresholds(self):
+        result = self.sensor.compute_adjusted_detection_threshold(100.0)
+        self.assertAlmostEqual(-0.0033 * 0.6 * 100.0, result)
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    # def test_get_highest_counted_target_id(self):
+    #     # Build mock objects
+    #     expected_id = 1
+    #     detected_object = MagicMock(id=expected_id)
+    #     hitpoints = {expected_id: [MagicMock(), MagicMock(), MagicMock()]}
+    #
+    #     # Call and provide assertions
+    #     actual_id = self.sensor.get_highest_counted_target_id(detected_object, hitpoints)
+    #     self.assertEqual(expected_id, actual_id)
 
 
     def test_update_object_types(self):
