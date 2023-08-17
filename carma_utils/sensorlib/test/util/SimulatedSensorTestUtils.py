@@ -26,6 +26,7 @@ class SimulatedSensorTestUtils:
                 }
             },
             "geometry_reassociation": {
+                "geometry_association_min_distance_threshold": 2.0,
                 "trailing_id_associations_count": 2,
                 "sample_count": 3
             },

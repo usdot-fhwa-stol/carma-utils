@@ -193,7 +193,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
             np.array([4.0, 4.0, 4.0]),
             np.array([5.0, 5.0, 5.0]),
             np.array([6.0, 6.0, 6.0])
-            ]
+        ]
         hitpoints = {
             0: points_list,
             1: points_list

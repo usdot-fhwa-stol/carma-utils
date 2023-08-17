@@ -201,25 +201,29 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Compute nearest neighbor for each hitpoint
         direct_nearest_neighbors = dict(
-            [(obj_id, self.compute_closest_object_list(hitpoint_list, scene_objects)) for obj_id, hitpoint_list in
+            [(obj_id, self.compute_closest_object_list(hitpoint_list, scene_objects, self.__simulated_sensor_config["geometry_reassociation"]["geometry_association_min_distance_threshold"])) for obj_id, hitpoint_list in
              downsampled_hitpoints.items()])
 
         # Vote within each dictionary key
         return dict([(obj_id, self.vote_closest_object(object_list)) for obj_id, object_list in
                      direct_nearest_neighbors.items()])
 
-    def compute_closest_object_list(self, hitpoints, scene_objects):
-        return [self.compute_closest_object(hitpoint, scene_objects) for hitpoint in hitpoints]
+    def compute_closest_object_list(self, hitpoints, scene_objects, geometry_association_min_distance_threshold):
+        return [self.compute_closest_object(hitpoint, scene_objects, geometry_association_min_distance_threshold) for hitpoint in hitpoints]
 
-    def compute_closest_object(self, hitpoint, scene_objects):
+    def compute_closest_object(self, hitpoint, scene_objects, geometry_association_min_distance_threshold):
         # TODO This function is written inefficiently.
         import numpy as np
         from scipy.spatial import distance
         object_positions = [obj.position for obj in scene_objects]
         distances = distance.cdist([hitpoint], object_positions)[0]
         closest_index = np.argmin(distances)
-        closest_object = scene_objects[closest_index]
-        return closest_object
+
+        if distances[closest_index] >= geometry_association_min_distance_threshold:
+            closest_object = scene_objects[closest_index]
+            return closest_object
+        else:
+            return None
 
     def vote_closest_object(self, object_list):
         # Determine the object with the highest number of votes
