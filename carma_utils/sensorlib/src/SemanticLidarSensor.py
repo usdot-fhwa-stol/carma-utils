@@ -1,3 +1,5 @@
+# TODO copywrite
+
 import itertools
 from collections import deque
 from dataclasses import replace
@@ -42,6 +44,8 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def get_detected_objects_in_frame(self):
+        # TODO desctriptions
+
 
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()

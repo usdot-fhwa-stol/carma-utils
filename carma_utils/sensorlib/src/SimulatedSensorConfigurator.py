@@ -20,6 +20,19 @@ class SimulatedSensorConfigurator:
     # Public Interface
     # ------------------------------------------------------------------------------
 
+    # TODO load config from file
+
+    # TODO Function to build and register a sensor
+    #  def register_sensor(sensor_position, sensor_orientation, [sensor_transform],
+    #  config dictionary)
+
+    # TODO Retrieve data function
+    ## TODO simplify this to require no world, a transform, optional parentobejct, infrasture ID (store it inside an attributes dictionary or something, and possibly keep up-to-date DetectedObject cache), simulate
+    ## TODO return JSON data instead
+
+    # TODO Retrieve sensor by infrastructure ID
+
+
     @staticmethod
     def build_simulated_sensor(carla_world, sensor_transform, parent_actor, simulated_sensor_config_filename,
                                noise_model_config_filename):
