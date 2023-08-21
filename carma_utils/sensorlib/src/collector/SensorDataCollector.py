@@ -1,12 +1,10 @@
 # Copyright (C) 2021 LEIDOS.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+# applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
+# governing permissions and limitations under the License.
 
 from collections import deque
 
@@ -19,9 +17,13 @@ class SensorDataCollector:
     """
     Collects data from the sensor via CARLA's sensor callback feature.
 
-    Hitpiont data specifically from the CARLA Semantic LIDAR Sensor is associated and grouped by actor ID, which is beneficial to preserve.
+    Hitpiont data specifically from the CARLA Semantic LIDAR Sensor is associated and grouped by actor ID,
+    which is beneficial to preserve.
 
-    Hitpoints are stored inside a two-element circular queue, with __data[0] acting as the active object collection and _data[1] the collection from the prior scan. As the LIDAR sensor scans, it may periodically activate the callback. When this happens, data is appended to that inside the active collection __data[0]. When a new scan is detected, the collections are rotated making __data[0] the prior and an empty __data[0] the current.
+    Hitpoints are stored inside a two-element circular queue, with __data[0] acting as the active object collection
+    and _data[1] the collection from the prior scan. As the LIDAR sensor scans, it may periodically activate the
+    callback. When this happens, data is appended to that inside the active collection __data[0]. When a new scan is
+    detected, the collections are rotated making __data[0] the prior and an empty __data[0] the current.
 
     New data scans are detected by a reset in the sensor read angle as reported by the simulator.
     """

@@ -1,12 +1,10 @@
 # Copyright (C) 2021 LEIDOS.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+# applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
+# governing permissions and limitations under the License.
 
 import itertools
 from collections import deque
@@ -53,7 +51,6 @@ class SemanticLidarSensor(SimulatedSensor):
 
     def get_detected_objects_in_frame(self):
         # TODO desctriptions
-
 
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
@@ -213,7 +210,10 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Compute nearest neighbor for each hitpoint
         direct_nearest_neighbors = dict(
-            [(obj_id, self.compute_closest_object_list(hitpoint_list, scene_objects, self.__simulated_sensor_config["geometry_reassociation"]["geometry_association_min_distance_threshold"])) for obj_id, hitpoint_list in
+            [(obj_id, self.compute_closest_object_list(hitpoint_list, scene_objects,
+                                                       self.__simulated_sensor_config["geometry_reassociation"][
+                                                           "geometry_association_min_distance_threshold"])) for
+             obj_id, hitpoint_list in
              downsampled_hitpoints.items()])
 
         # Vote within each dictionary key
@@ -221,7 +221,8 @@ class SemanticLidarSensor(SimulatedSensor):
                      direct_nearest_neighbors.items()])
 
     def compute_closest_object_list(self, hitpoints, scene_objects, geometry_association_min_distance_threshold):
-        return [self.compute_closest_object(hitpoint, scene_objects, geometry_association_min_distance_threshold) for hitpoint in hitpoints]
+        return [self.compute_closest_object(hitpoint, scene_objects, geometry_association_min_distance_threshold) for
+                hitpoint in hitpoints]
 
     def compute_closest_object(self, hitpoint, scene_objects, geometry_association_min_distance_threshold):
         # TODO This function is written inefficiently.

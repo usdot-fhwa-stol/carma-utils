@@ -1,12 +1,10 @@
 # Copyright (C) 2021 LEIDOS.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+# applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
+# governing permissions and limitations under the License.
 
 import unittest
 from collections import deque
@@ -39,7 +37,7 @@ class TestSensorDataCollector(unittest.TestCase):
             MagicMock(object_idx=0, point=MagicMock(x=0.0, y=0.0, z=0.0)),
             MagicMock(object_idx=1, point=MagicMock(x=1.0, y=1.0, z=1.0)),
             MagicMock(object_idx=2, point=MagicMock(x=2.0, y=2.0, z=2.0))
-            ])
+        ])
         self.sensor_data_collector._SensorDataCollector__collect_sensor_data(raw_sensor_data)
 
         # Check if a new data collection is created and the raw_sensor_data is added to it

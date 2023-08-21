@@ -1,12 +1,10 @@
 # Copyright (C) 2021 LEIDOS.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+# applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
+# governing permissions and limitations under the License.
 
 import unittest
 from unittest.mock import MagicMock
@@ -37,7 +35,9 @@ class TestSimulatedSensorConfigurator(unittest.TestCase):
 
     def test_build_simulated_sensor(self):
         mock_sensor = MagicMock()
-        sensor = SimulatedSensorConfigurator.build_simulated_sensor(self.mock_carla_world, MagicMock(), MagicMock(), "../config/simulated_sensor_config.yaml", "../config/noise_model_config.yaml")
+        sensor = SimulatedSensorConfigurator.build_simulated_sensor(self.mock_carla_world, MagicMock(), MagicMock(),
+                                                                    "../config/simulated_sensor_config.yaml",
+                                                                    "../config/noise_model_config.yaml")
         assert isinstance(sensor, SemanticLidarSensor)
 
     def test_build_carla_semantic_lidar_sensor(self):
@@ -46,7 +46,8 @@ class TestSimulatedSensorConfigurator(unittest.TestCase):
         carla_world.get_blueprint_library = MagicMock(find=MagicMock(return_value=MagicMock(set_attribute=MagicMock())))
         carla_world.spawn_actor = carla_sensor
         lidar_sensor_config = SimulatedSensorTestUtils.generate_lidar_sensor_config()
-        sensor = SimulatedSensorConfigurator.build_carla_semantic_lidar_sensor(carla_world, MagicMock(), MagicMock(), lidar_sensor_config)
+        sensor = SimulatedSensorConfigurator.build_carla_semantic_lidar_sensor(carla_world, MagicMock(), MagicMock(),
+                                                                               lidar_sensor_config)
         assert isinstance(sensor, MagicMock)
 
     def test_generate_lidar_bp(self):
