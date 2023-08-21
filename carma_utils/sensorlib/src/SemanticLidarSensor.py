@@ -7,6 +7,7 @@
 # governing permissions and limitations under the License.
 
 import itertools
+import json
 from collections import deque
 from dataclasses import replace
 
@@ -29,7 +30,8 @@ class SemanticLidarSensor(SimulatedSensor):
     https://carla.readthedocs.io/en/latest/python_api/#carla.Sensor.listen
     """
 
-    def __init__(self, simulated_sensor_config, carla_sensor_config, carla_world, sensor, data_collector, noise_model):
+    def __init__(self, infrastructure_id, simulated_sensor_config, carla_sensor_config, carla_world, sensor,
+                 data_collector, noise_model):
         """
         Constructor.
 
@@ -40,6 +42,7 @@ class SemanticLidarSensor(SimulatedSensor):
         :param data_collector: DataCollector object handling collection and caching of raw sensor data from the CARLA simulation.
         :param noise_model: Noise model available to be used for nosie application to the output data.
         """
+        super().__init__(infrastructure_id)
         self.__simulated_sensor_config = simulated_sensor_config
         self.__carla_sensor_config = carla_sensor_config
 
@@ -65,7 +68,7 @@ class SemanticLidarSensor(SimulatedSensor):
         Main function used to query the currently-detected objects. Upon calling, the latest raw data cache is
         retrieved and sent through the processing pipeline to produce a list of DetectedObject objects.
 
-        :return: List of DetectedObject objects.
+        :return: List of DetectedObject objects serialized in JSON form.
         """
 
         # Get detected_object truth states from simulation
@@ -105,7 +108,7 @@ class SemanticLidarSensor(SimulatedSensor):
         # Update object type, reference frame, and detection time
         detected_objects = self.update_object_metadata(detected_objects, hitpoints, timestamp)
 
-        return detected_objects
+        return json.dumps([detected_object.__dict__ for detected_object in detected_objects])
 
     # ------------------------------------------------------------------------------
     # CARLA Scene DetectedObject Retrieval
@@ -379,9 +382,10 @@ class SemanticLidarSensor(SimulatedSensor):
 
     def apply_noise(self, detected_objects):
         """
+        Apply noise to the detected objects.
 
-        :param detected_objects:
-        :return:
+        :param detected_objects: List of objects currently considered for detection.
+        :return: Objects with noise applied.
         """
         detected_objects = self.__noise_model.apply_position_noise(detected_objects)
         detected_objects = self.__noise_model.apply_orientation_noise(detected_objects)
@@ -394,10 +398,28 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def update_object_metadata(self, detected_objects, hitpoints, timestamp):
-        return [self.update_object_metadata_from_hitpoint(obj, hitpoints) for obj in detected_objects]
+        """
+        Update object metadata including object type, detection timestamp, and adjusting the coordinates to the
+        sensor-centric frame.
+
+        :param detected_objects: List of objects currently considered for detection.
+        :param hitpoints: Dictionary containing a list of hitpoints associated with each object ID.
+        :param timestamp: Timestamp of the current frame.
+        :return: List of objects with updated metadata.
+        """
+        return [self.update_object_metadata_from_hitpoint(obj, hitpoints.get(obj.id)) for obj in detected_objects]
 
     def update_object_metadata_from_hitpoint(self, obj, hitpoints, timestamp):
-        """Get the metadata from the first hitpoint associated with the object, per the CARLA API."""
+        """
+        Update the object metadata (object type, timestamp, coordinates).
+
+        :param obj: Detected object.
+        :param hitpoints: Hitpoints associated with the object.
+        :param timestamp: Timestamp of the current frame.
+        :return: Updated object.
+        """
+
+        # Get the metadata from the first hitpoint associated with the object, per the CARLA API.
         hitpoint_list = hitpoints.get(obj.id)
         first_hitpoint = hitpoint_list[0] if hitpoint_list is not None else None
 
