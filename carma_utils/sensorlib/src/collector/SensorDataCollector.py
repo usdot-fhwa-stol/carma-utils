@@ -48,6 +48,14 @@ class SensorDataCollector:
         return self.__timestamp, self.__data[1]
 
     def __collect_sensor_data(self, raw_sensor_data):
+        """
+        Primary function, registered as the callback for the CARLA sensor. This function is called whenever CARLA has
+        updated data. Data is collected and added to the active collection. Collections are rotated when current
+        collection is complete, as determined by sensor rotation angle.
+
+        :param raw_sensor_data: Raw carla.SensorData from the CARLA sensor.
+        :return: None
+        """
 
         # Update the timestamp
         self.__timestamp = int(raw_sensor_data.timestamp)
@@ -62,6 +70,13 @@ class SensorDataCollector:
         self.__collect_raw_point_data(self.__data[0], raw_sensor_data)
 
     def __collect_raw_point_data(self, grouped_data, raw_sensor_data):
+        """
+        Collect the raw hitpoint data from the measurement.
+
+        :param grouped_data: Current active collection being appended to.
+        :param raw_sensor_data: Measurement from CARLA, carla.SemanticLidarMeasurement.
+        :return: None
+        """
 
         # Extract geometric hitpoints and group them by actor ID
         # The resulting dictionary maps actor ID to a list of hitpoints
@@ -72,8 +87,13 @@ class SensorDataCollector:
             else:
                 grouped_data[r.object_idx].append(point)
 
-    # Determines if this data collection belongs to the same data collection run as the previous time step
     def __is_same_data_collection(self, sensor_rotation_angle):
+        """
+        Determine if this data collection belongs to the same data collection run as the previous time step.
+
+        :param sensor_rotation_angle: LIDAR sensor angular position at time of data collection.
+        :return: True if new data belongs to current collection, False if it belongs to the next collection.
+        """
         is_increasing = sensor_rotation_angle > self.__prev_angle
         self.__prev_angle = sensor_rotation_angle
         return is_increasing

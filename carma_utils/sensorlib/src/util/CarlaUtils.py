@@ -37,7 +37,7 @@ class CarlaUtils:
     def get_actor_angular_velocity(carla_actor):
         """
         Get carla.Actor angular velocity in radians per second.
-        :param carla_actor:
+        :param carla_actor: The carla.Actor to obtain data from.
         :return: numpy.array containing angular velocity vector in radians per second.
         """
         angular_velocity_degpersecond = CarlaUtils.vector3d_to_numpy(carla_actor.get_angular_velocity())
@@ -45,6 +45,11 @@ class CarlaUtils:
 
     @staticmethod
     def get_actor_rotation_matrix(carla_actor):
+        """
+        Get the rotation matrix for an actor.
+        :param carla_actor: The carla.Actor to obtain data from.
+        :return: numpy.array containing the rotation matrix in radians.
+        """
         carla_rotation = carla_actor.get_transform().rotation
         rotation_angles_deg = np.array([carla_rotation.roll, carla_rotation.pitch, carla_rotation.yaw])
         rotation_angles = np.deg2rad(rotation_angles_deg)
@@ -53,6 +58,11 @@ class CarlaUtils:
 
     @staticmethod
     def get_actor_bounding_box_points(carla_actor):
+        """
+        Get all corners for an actor's bounding box, in the world frame.
+        :param carla_actor: The carla.Actor to obtain data from.
+        :return: List of numpy.array containing the bounding box points in the world frame.
+        """
         bounding_box_locations = carla_actor.get_world_vertices(carla_actor.get_transform())
         return [CarlaUtils.vector3d_to_numpy(location) for location in bounding_box_locations]
 
@@ -60,6 +70,9 @@ class CarlaUtils:
     def determine_object_type(carla_actor, allowed_semantic_tags):
         """
         Check for identification as one of the accepted types, and mark unidentified otherwise.
+        :param carla_actor: The carla.Actor to obtain data from.
+        :param allowed_semantic_tags: List of semantic tags which are allowed to be detected by the sensor.
+        :return: The object type, or Unknown if not in the allowed list.
         """
 
         # Set intersection, except order matters

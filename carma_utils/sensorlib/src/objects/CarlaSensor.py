@@ -15,6 +15,7 @@ from src.util.CarlaUtils import CarlaUtils
 
 @dataclass(frozen=True)
 class CarlaSensor:
+    """Wrapper class for the carla.Sensor."""
     carla_sensor: carla.Sensor
     position: np.ndarray
     points_per_second: float

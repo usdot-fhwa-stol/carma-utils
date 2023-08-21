@@ -11,6 +11,12 @@ class NoiseModelFactory:
 
     @staticmethod
     def get_noise_model(noise_model_name, noise_model_config):
+        """
+        Build a noise model of the requested type.
+        :param noise_model_name: Name of the noise model.
+        :param noise_model_config: Dictionary containing the noise model configuration.
+        :return: The noise model instance.
+        """
         if noise_model_name == "GaussianNoiseModel":
             from src.noise_models.GaussianNoiseModel import GaussianNoiseModel
             return GaussianNoiseModel(noise_model_config)

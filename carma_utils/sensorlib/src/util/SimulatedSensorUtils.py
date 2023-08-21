@@ -10,13 +10,17 @@ import yaml
 
 
 class SimulatedSensorUtils:
-
-    # ------------------------------------------------------------------------------
-    # Configuration file reading
-    # ------------------------------------------------------------------------------
+    """
+    Generic utilities.
+    """
 
     @staticmethod
     def load_config_from_file(config_filepath):
+        """
+        Load a yaml config file.
+        :param config_filepath: Path to the config file.
+        :return: Dictionary containing the configuration.
+        """
         with open(config_filepath, "r") as file:
             config = yaml.safe_load(file)
             return config

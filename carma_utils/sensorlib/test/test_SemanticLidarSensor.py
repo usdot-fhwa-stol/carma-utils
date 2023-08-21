@@ -352,7 +352,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         result = self.sensor.is_visible((fov, fov), object_hitpoints, detection_threshold_ratio)
         self.assertFalse(result)
 
-    def test_compute_expected_num_hitpoints(self):
+    def test_compute_expected_horizontal_num_hitpoints(self):
         carla_sensor = MagicMock(points_per_second=10000, rotation_frequency=10, fov_angular_width=1.096)
         self.sensor._SemanticLidarSensor__sensor = carla_sensor
 
@@ -361,7 +361,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         theta_resolution = carla_sensor.fov_angular_width / num_points_per_scan
         expected_result = fov / theta_resolution
 
-        result = self.sensor.compute_expected_num_hitpoints(fov)
+        result = self.sensor.compute_expected_num_horizontal_hitpoints(fov)
 
         self.assertEqual(result, expected_result)
 

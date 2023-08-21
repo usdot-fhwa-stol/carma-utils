@@ -19,15 +19,26 @@ from collections import Counter
 
 
 class SemanticLidarSensor(SimulatedSensor):
+    """
+    Wrapper for the CARLA Semantic Lidar Sensor, with additional post-processing logic to compute a list of
+    detected objects in the scene.
+
+    Data is reported as the carla.SemanticLidarMeasurement type through the callback registered to
+    carla.Sensor.listen(self, callback):
+
+    https://carla.readthedocs.io/en/latest/python_api/#carla.Sensor.listen
+    """
 
     def __init__(self, simulated_sensor_config, carla_sensor_config, carla_world, sensor, data_collector, noise_model):
         """
-        :param simulated_sensor_config:
-        :param carla_sensor_config:
-        :param carla_world:
+        Constructor.
+
+        :param simulated_sensor_config: Configuration dictionary containing parameters specific to the wrapped sensor logic.
+        :param carla_sensor_config: Parameters relevant to the CARLA sensor configuration.
+        :param carla_world: Reference to the CARLA world object.
         :param sensor: CarlaSensor object wrapping the CARLA sensor actor.
-        :param data_collector:
-        :param noise_model:
+        :param data_collector: DataCollector object handling collection and caching of raw sensor data from the CARLA simulation.
+        :param noise_model: Noise model available to be used for nosie application to the output data.
         """
         self.__simulated_sensor_config = simulated_sensor_config
         self.__carla_sensor_config = carla_sensor_config
@@ -50,7 +61,12 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def get_detected_objects_in_frame(self):
-        # TODO desctriptions
+        """
+        Main function used to query the currently-detected objects. Upon calling, the latest raw data cache is
+        retrieved and sent through the processing pipeline to produce a list of DetectedObject objects.
+
+        :return: List of DetectedObject objects.
+        """
 
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
@@ -96,6 +112,12 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def get_scene_detected_objects(self):
+        """
+        Retrieve the current objects in scene. This collection is considered the "truth state" as it contains the set
+        of objects in the world, as well as their positions, orientations, and variosu other state data.
+
+        :return: DetectedObject wrappers objects referring to the actors.
+        """
         actors = self.__carla_world.get_actors()
         return [DetectedObjectBuilder.build_detected_object(actor,
                                                             self.__simulated_sensor_config["prefilter"][
@@ -108,19 +130,16 @@ class SemanticLidarSensor(SimulatedSensor):
 
     def prefilter(self, detected_objects):
         """
-        Perform the following operations:
-            1. Compute range from sensor to object.
-            2. Filter objects by allowed type.
-            3. Filter objects beyond the configured range threshold.
+        Filter the truth state for objects of the desired detection type, and within range of the prefilter distance.
 
-        :param detected_objects:
-        :return:
+        :param detected_objects: List of objects currently considered for detection.
+        :return: Filtered set of objects, and associated object ranges in a lookup structure.
         """
         #
 
-        # Filter by detected_object type
-        # Actor.type_id and Actor.semantic_tags are available for determining type; semantic_tags effectively specifies the type of detected_object
-        # Possible types are listed in the CARLA documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
+        # Filter by detected_object type Actor.type_id and Actor.semantic_tags are available for determining type;
+        # semantic_tags effectively specifies the type of detected_object Possible types are listed in the CARLA
+        # documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
         detected_objects = list(
             filter(lambda obj: obj.object_type in self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"],
                    detected_objects))
@@ -144,8 +163,9 @@ class SemanticLidarSensor(SimulatedSensor):
     def compute_actor_angular_extents(self, detected_objects):
         """
         Compute horizontal and vertical angular FOV extent from sensor perspective for each detected object.
-        param: detected_objects: List of DetectedObject objects.
-        return: Dictionary of actor ID to tuple of (horizontal, vertical) angular extents.
+
+        :param detected_objects: List of objects currently considered for detection.
+        :return: Dictionary mapping actor ID to tuple of (horizontal, vertical) angular extents.
         """
         return dict([(detected_object.id,
                       self.compute_actor_angular_extent(detected_object)) for detected_object in
@@ -153,6 +173,11 @@ class SemanticLidarSensor(SimulatedSensor):
 
     def compute_actor_angular_extent(self, detected_object):
         """
+        Compute the horizontal and vertical angular FOV extent from sensor perspective for the given object.
+
+        :param detected_object: Object under consideration.
+        :return: Tuple containing the maximal horizontal and
+        vertical angular extents consumed by the object, from the sensor's perspective.
         """
         corner_vectors_in_world_frame = detected_object.bounding_box_in_world_coordinate_frame
         theta = [self.compute_horizontal_angular_offset(vec) for vec in corner_vectors_in_world_frame]
@@ -162,25 +187,33 @@ class SemanticLidarSensor(SimulatedSensor):
         return horizontal_fov, vertical_fov
 
     def compute_horizontal_angular_offset(self, vec):
+        """Compute horizontal angle of a vector in relation to the sensor, as measured from the x axis."""
         p = vec - self.__sensor.position  # Position vector relative to sensor
         return np.arctan2(p[1], p[0])
 
     def compute_vertical_angular_offset(self, vec):
+        """Compute the vertical angle of a vector in relation to the sensor, as measured from the x-y plane."""
         p = vec - self.__sensor.position
         return np.arcsin(p[2] / np.linalg.norm(p))
 
     def compute_adjusted_detection_thresholds(self, detected_objects, object_ranges):
+        """
+        Compute the adjusted detection threshold for each object, based on the object's range. This threshold varies
+        with distance to accommodate ray spreading which naturally leads to lower hitpoint counts, risking object
+        misdetections.
+        """
         return dict([(detected_object.id,
                       self.compute_adjusted_detection_threshold(object_ranges[detected_object.id]))
                      for
                      detected_object in detected_objects])
 
     def compute_adjusted_detection_threshold(self, range):
+        """Compute the detection threshold appropriate for the given range."""
         dt_dr = self.__simulated_sensor_config["detection_threshold_scaling_formula"][
             "hitpoint_detection_ratio_threshold_per_meter_change_rate"]
         t_nominal = self.__simulated_sensor_config["detection_threshold_scaling_formula"][
             "nominal_hitpoint_detection_ratio_threshold"]
-        # TODO Review this formula
+
         return dt_dr * range * t_nominal
 
     # ------------------------------------------------------------------------------
@@ -188,7 +221,8 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def sample_hitpoints(self, hitpoints, sample_size):
-        """Randomly sample points inside each object's set of LIDAR hitpoints."""
+        """Randomly sample points inside each object's set of LIDAR hitpoints. This is done to reduce size of the
+        data being sent through the distance computation."""
         return dict([(obj_id, self.__rng.choice(object_hitpoints, sample_size)) for obj_id, object_hitpoints in
                      hitpoints.items()])
 
@@ -196,15 +230,13 @@ class SemanticLidarSensor(SimulatedSensor):
     # Geometry Re-Association: Instantaneous Association
     # ------------------------------------------------------------------------------
 
-    def compute_instantaneous_actor_id_association(self, downsampled_hitpoints, scene_objects):
+    def compute_instantaneous_actor_id_association(self, hitpoints, scene_objects):
         """
-        Need:
-        - Hitpoint geometry
-        - Hitpoint wrong association
-        - Available actor ID's
-        - Actor locations
-        - Current association
+        Compute the association of each sampled hitpoint to each actor, based on distance of the hitpoint to the
+        actor's position.
 
+        :param hitpoints: Dictionary mapping actor ID to list of hitpoints.
+        :param scene_objects: List of objects currently considered for detection.
         return: Actor ID association applicable to this time step based on geometry-based association algorithm.
         """
 
@@ -212,34 +244,36 @@ class SemanticLidarSensor(SimulatedSensor):
         direct_nearest_neighbors = dict(
             [(obj_id, self.compute_closest_object_list(hitpoint_list, scene_objects,
                                                        self.__simulated_sensor_config["geometry_reassociation"][
-                                                           "geometry_association_min_distance_threshold"])) for
+                                                           "geometry_association_max_distance_threshold"])) for
              obj_id, hitpoint_list in
-             downsampled_hitpoints.items()])
+             hitpoints.items()])
 
         # Vote within each dictionary key
         return dict([(obj_id, self.vote_closest_object(object_list)) for obj_id, object_list in
                      direct_nearest_neighbors.items()])
 
-    def compute_closest_object_list(self, hitpoints, scene_objects, geometry_association_min_distance_threshold):
-        return [self.compute_closest_object(hitpoint, scene_objects, geometry_association_min_distance_threshold) for
+    def compute_closest_object_list(self, hitpoints, scene_objects, geometry_association_max_distance_threshold):
+        """Get the closest objects to each hitpoint."""
+        return [self.compute_closest_object(hitpoint, scene_objects, geometry_association_max_distance_threshold) for
                 hitpoint in hitpoints]
 
-    def compute_closest_object(self, hitpoint, scene_objects, geometry_association_min_distance_threshold):
-        # TODO This function is written inefficiently.
+    def compute_closest_object(self, hitpoint, scene_objects, geometry_association_max_distance_threshold):
+        """Compute the closest object to this hitpoint."""
         import numpy as np
         from scipy.spatial import distance
         object_positions = [obj.position for obj in scene_objects]
         distances = distance.cdist([hitpoint], object_positions)[0]
         closest_index = np.argmin(distances)
 
-        if distances[closest_index] >= geometry_association_min_distance_threshold:
+        # Observe a maximum object distance to preclude association with far-away objects
+        if distances[closest_index] <= geometry_association_max_distance_threshold:
             closest_object = scene_objects[closest_index]
             return closest_object
         else:
             return None
 
     def vote_closest_object(self, object_list):
-        # Determine the object with the highest number of votes
+        """Determine the object with the highest number of votes as determined by the nearest-neighbor search."""
         return Counter([obj.id for obj in object_list]).most_common(1)[0][0]
 
     # ------------------------------------------------------------------------------
@@ -265,6 +299,8 @@ class SemanticLidarSensor(SimulatedSensor):
         self.__trailing_id_associations.appendleft(instantaneous_actor_id_association)
 
     def get_highest_counted_target_id(self, key, combined):
+        """Get the target ID with the highest count for the given key."""
+
         # Get all targets mapped from the key
         targets = [association.get(key) for association in combined]
         targets = filter(lambda x: x is not None, targets)
@@ -284,12 +320,30 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def apply_occlusion(self, detected_objects, actor_angular_extents, hitpoints, detection_thresholds):
+        """
+        Filter detected objects by occlusion. This is determined by comparing the number of hitpoints expected to hit
+        the object as computed from the problem geometry, with the number of hitpoints detected.
+
+        :param detected_objects: List of objects currently considered for detection.
+        :param actor_angular_extents: Dictionary containing angular extent pairs referenced by object ID.
+        :param hitpoints: Dictionary containing a list of hitpoints associated with each object ID.
+        :param detection_thresholds: Thresholds computed for each object based on distance from the sensor.
+        :return: List of objects filtered by occlusion.
+        """
         return list(filter(
             lambda obj: self.is_visible(actor_angular_extents.get(obj.id), hitpoints.get(obj.id),
                                         detection_thresholds.get(obj.id)),
             detected_objects))
 
     def is_visible(self, actor_angular_extents, object_hitpoints, detection_threshold_ratio):
+        """
+        Compute if an object is visible based on the ratio of actual to expected hitpoints.
+
+        :param actor_angular_extents: Tuple containing the horizontal and vertical angular extents of the object.
+        :param object_hitpoints: List of hitpoints associated with the object.
+        :param detection_threshold_ratio: Threshold ratio computed for this object based on distance from the sensor.
+        :return: True if the object is visible, False otherwise.
+        """
 
         if actor_angular_extents is None or object_hitpoints is None or detection_threshold_ratio is None:
             return False
@@ -299,7 +353,7 @@ class SemanticLidarSensor(SimulatedSensor):
         vertical_fov = actor_angular_extents[1]
 
         # Compute threshold hitpoint count for this object
-        num_expected_hitpoints = self.compute_expected_num_hitpoints(horizontal_fov)
+        num_expected_hitpoints = self.compute_expected_num_horizontal_hitpoints(horizontal_fov)
         min_hitpoint_count = detection_threshold_ratio * num_expected_hitpoints
 
         # Compare hitpoint count
@@ -307,7 +361,14 @@ class SemanticLidarSensor(SimulatedSensor):
 
         return num_hitpoints >= min_hitpoint_count
 
-    def compute_expected_num_hitpoints(self, fov):
+    def compute_expected_num_horizontal_hitpoints(self, fov):
+        """
+        Compute the expected number of hitpoints for the given field of view. This result is heavily determined by
+        the CARLA sensor configuration.
+        
+        :param fov: Scalar unoriented field of view in radians.
+        :return: Expected number of hitpoints in a horizontal scan across a fov-sized sensor rotation.
+        """
         num_points_per_scan = self.__sensor.points_per_second / self.__sensor.rotation_frequency
         theta_resolution = self.__sensor.fov_angular_width / num_points_per_scan
         return fov / theta_resolution
@@ -317,6 +378,11 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def apply_noise(self, detected_objects):
+        """
+
+        :param detected_objects:
+        :return:
+        """
         detected_objects = self.__noise_model.apply_position_noise(detected_objects)
         detected_objects = self.__noise_model.apply_orientation_noise(detected_objects)
         detected_objects = self.__noise_model.apply_type_noise(detected_objects)

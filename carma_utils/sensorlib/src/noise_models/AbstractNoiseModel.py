@@ -17,8 +17,8 @@ class AbstractNoiseModel:
         """
         Apply noise to the object positions.
 
-        param object_list: List of DetectedObject objects to apply noise to.
-        return: List of DetectedObject objects with noise applied.
+        :param object_list: List of DetectedObject objects to apply noise to.
+        :return: List of DetectedObject objects with noise applied.
         """
         pass
 
@@ -27,8 +27,8 @@ class AbstractNoiseModel:
         """
         Apply noise to the object orientations.
 
-        param object_list: List of DetectedObject objects to apply noise to.
-        return: List of DetectedObject objects with noise applied.
+        :param object_list: List of DetectedObject objects to apply noise to.
+        :return: List of DetectedObject objects with noise applied.
         """
         pass
 
@@ -36,11 +36,11 @@ class AbstractNoiseModel:
     def apply_type_noise(self, object_list):
         """
         Adjust the type assigned to each object, for example changing a vehicle to a pedestrian. Designed to simulate
-        sensor mis-identification. param object_list: List of DetectedObject objects to apply noise to. return: List
+        sensor misidentification. param object_list: List of DetectedObject objects to apply noise to. return: List
         of DetectedObject objects with noise applied.
 
-        param object_list: List of DetectedObject objects to apply noise to.
-        return: List of DetectedObject objects with noise applied.
+        :param object_list: List of DetectedObject objects to apply noise to.
+        :return: List of DetectedObject objects with noise applied.
         """
         pass
 
@@ -49,7 +49,7 @@ class AbstractNoiseModel:
         """
         Adjust which objects are included in the final list based on applied noise. Designed to simulate sensor dropout.
 
-        param object_list: List of DetectedObject objects to apply noise to.
-        return: List of DetectedObject objects with noise applied.
+        :param object_list: List of DetectedObject objects to apply noise to.
+        :return: List of DetectedObject objects with noise applied.
         """
         pass

@@ -19,6 +19,7 @@ from src.util.CarlaUtils import CarlaUtils
 
 @dataclass(frozen=True)
 class DetectedObject:
+    """Wrapper class for carla.Actor which are detected by the sensor."""
     carla_actor: carla.Actor
     id: int
     object_type: str
