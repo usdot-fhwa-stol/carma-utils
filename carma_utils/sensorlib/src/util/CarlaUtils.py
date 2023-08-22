@@ -15,6 +15,9 @@ class CarlaUtils:
     Generic CARLA utility functions.
     """
 
+    # CARLA semantic tag lookup table
+    CarlaCityObjectLabelLookup = dict([(id, name) for name, id in carla.CityObjectLabel.names.items()])
+
     @staticmethod
     def vector3d_to_numpy(vec):
         """
@@ -77,8 +80,9 @@ class CarlaUtils:
 
         # Set intersection, except order matters
         for tag in carla_actor.semantic_tags:
-            if CarlaUtils.get_semantic_tag_name(tag) in allowed_semantic_tags:
-                return tag
+            tag_name = CarlaUtils.get_semantic_tag_name(tag)
+            if tag_name in allowed_semantic_tags:
+                return tag_name
         return "NONE"
 
     @staticmethod
@@ -88,7 +92,7 @@ class CarlaUtils:
         :param tag_id: The integer tag ID to look up.
         :return: The tag name.
         """
-        return carla.CityObjectLabel.names.get(tag_id, "NONE")
+        return CarlaUtils.CarlaCityObjectLabelLookup.get(tag_id, "NONE")
 
     @staticmethod
     def get_semantic_tag_id(tag_name):
@@ -97,4 +101,4 @@ class CarlaUtils:
         :param tag_name: The string tag name to look up.
         :return: The tag ID.
         """
-        return carla.CityObjectLabel.get(tag_name, 0)
+        return carla.CityObjectLabel.names.get(tag_name, 0)

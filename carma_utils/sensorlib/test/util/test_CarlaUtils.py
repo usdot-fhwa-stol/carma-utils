@@ -80,5 +80,44 @@ class TestCarlaUtils(unittest.TestCase):
         self.assertEqual(result, "NONE")
 
 
+    def test_get_semantic_tag_name(self):
+        assert CarlaUtils.get_semantic_tag_name(0) == "NONE"
+        assert CarlaUtils.get_semantic_tag_name(3) == "Other"
+        assert CarlaUtils.get_semantic_tag_name(4) == "Pedestrians"
+        assert CarlaUtils.get_semantic_tag_name(5) == "Poles"
+        assert CarlaUtils.get_semantic_tag_name(16) == "RailTrack"
+        assert CarlaUtils.get_semantic_tag_name(6) == "RoadLines"
+        assert CarlaUtils.get_semantic_tag_name(7) == "Roads"
+        assert CarlaUtils.get_semantic_tag_name(8) == "Sidewalks"
+        assert CarlaUtils.get_semantic_tag_name(13) == "Sky"
+        assert CarlaUtils.get_semantic_tag_name(19) == "Static"
+        assert CarlaUtils.get_semantic_tag_name(22) == "Terrain"
+        assert CarlaUtils.get_semantic_tag_name(18) == "TrafficLight"
+        assert CarlaUtils.get_semantic_tag_name(12) == "TrafficSigns"
+        assert CarlaUtils.get_semantic_tag_name(9) == "Vegetation"
+        assert CarlaUtils.get_semantic_tag_name(10) == "Vehicles"
+        assert CarlaUtils.get_semantic_tag_name(11) == "Walls"
+        assert CarlaUtils.get_semantic_tag_name(21) == "Water"
+
+    def test_get_semantic_tag_id(self):
+        assert CarlaUtils.get_semantic_tag_id("NONE") == 0
+        assert CarlaUtils.get_semantic_tag_id("Other") == 3
+        assert CarlaUtils.get_semantic_tag_id("Pedestrians") == 4
+        assert CarlaUtils.get_semantic_tag_id("Poles") == 5
+        assert CarlaUtils.get_semantic_tag_id("RailTrack") == 16
+        assert CarlaUtils.get_semantic_tag_id("RoadLines") == 6
+        assert CarlaUtils.get_semantic_tag_id("Roads") == 7
+        assert CarlaUtils.get_semantic_tag_id("Sidewalks") == 8
+        assert CarlaUtils.get_semantic_tag_id("Sky") == 13
+        assert CarlaUtils.get_semantic_tag_id("Static") == 19
+        assert CarlaUtils.get_semantic_tag_id("Terrain") == 22
+        assert CarlaUtils.get_semantic_tag_id("TrafficLight") == 18
+        assert CarlaUtils.get_semantic_tag_id("TrafficSigns") == 12
+        assert CarlaUtils.get_semantic_tag_id("Vegetation") == 9
+        assert CarlaUtils.get_semantic_tag_id("Vehicles") == 10
+        assert CarlaUtils.get_semantic_tag_id("Walls") == 11
+        assert CarlaUtils.get_semantic_tag_id("Water") == 21
+
+
 if __name__ == "__main__":
     unittest.main()

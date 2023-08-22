@@ -21,7 +21,7 @@ class TestDetectedObject(unittest.TestCase):
     def setUp(self):
         self.carla_actor = MagicMock()
         self.carla_actor.id = 1
-        self.carla_actor.semantic_tags = ["car"]
+        self.carla_actor.semantic_tags = [int(carla.CityObjectLabel.Vehicles)]
         self.carla_actor.get_world_vertices = MagicMock(return_value=[carla.Location(1.0, 2.0, 3.0),
                                                                       carla.Location(4.0, 5.0, 6.0),
                                                                       carla.Location(7.0, 8.0, 9.0),
@@ -32,11 +32,11 @@ class TestDetectedObject(unittest.TestCase):
         self.carla_actor.get_angular_velocity = MagicMock(return_value=carla.Vector3D(7.0, 8.0, 9.0))
 
     def test_builder(self):
-        detected_object = DetectedObjectBuilder.build_detected_object(self.carla_actor, ["car"])
+        detected_object = DetectedObjectBuilder.build_detected_object(self.carla_actor, ["Vehicles"])
 
         assert detected_object.carla_actor == self.carla_actor
         assert detected_object.id == 1
-        assert detected_object.object_type == "car"
+        assert detected_object.object_type == "Vehicles"
 
         # Bounding box
         assert (detected_object.bounding_box_in_world_coordinate_frame[0] == np.array([1.0, 2.0, 3.0])).all()
