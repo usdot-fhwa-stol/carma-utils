@@ -25,7 +25,7 @@ class SimulatedSensorTestUtils:
     def generate_simulated_sensor_config():
         return {
             "prefilter": {
-                "allowed_semantic_tags": ["Pedestrians", "Vehicles"],
+                "allowed_semantic_tags": [4, 10],
                 "max_distance_meters": 42
             },
             "detection_threshold_scaling_formula": {
@@ -64,13 +64,22 @@ class SimulatedSensorTestUtils:
             },
             "type_noise": {
                 "allowed_semantic_tags": [
-                    "Vehicles",
-                    "Pedestrians",
-                    "Cyclist",
-                    "TrafficSign",
-                    "TrafficLight",
-                    "RoadMarking",
-                    "Wall"
+                    10,
+                    1,
+                    14,
+                    17,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    13,
+                    22,
+                    18,
+                    12,
+                    9,
+                    11,
+                    21
                 ]
             }
         }
@@ -95,18 +104,6 @@ class SimulatedSensorTestUtils:
             return_value=carla.Transform(carla.Location(10.0, 15.0, 7.0), rotation))
 
         return carla_sensor
-
-    # @staticmethod
-    # def generate_test_data_detected_object_list(num_objects):
-    #     nominal_detected_object = SimulatedSensorTestUtils.generate_test_data_detected_object()
-    #     detected_objects = []
-    #     for n in num_objects:
-    #         detected_object = DetectedObject(nominal_detected_object)
-    #         detected_object.id = n
-    #         detected_object.position = nominal_detected_object.position + n * carla.Vector3D(1, 1, 1)
-    #         detected_objects.append(detected_object)
-    #
-    #     return detected_objects
 
     @staticmethod
     def generate_test_data_detected_objects():
@@ -135,7 +132,8 @@ class SimulatedSensorTestUtils:
 
         # Construct the DetectedObject
         simulated_sensor_config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
-        detected_object = DetectedObjectBuilder.build_detected_object(carla_actor, simulated_sensor_config["prefilter"]["allowed_semantic_tags"])
+        detected_object = DetectedObjectBuilder.build_detected_object(carla_actor, simulated_sensor_config["prefilter"][
+            "allowed_semantic_tags"])
 
         # Construct additional DetectedObject by adjustment
         return [
