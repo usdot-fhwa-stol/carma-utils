@@ -25,7 +25,7 @@ class SimulatedSensorTestUtils:
     def generate_simulated_sensor_config():
         return {
             "prefilter": {
-                "allowed_semantic_tags": ["Pedestrian", "Vehicle"],
+                "allowed_semantic_tags": ["Pedestrians", "Vehicles"],
                 "max_distance_meters": 42
             },
             "detection_threshold_scaling_formula": {
@@ -64,8 +64,8 @@ class SimulatedSensorTestUtils:
             },
             "type_noise": {
                 "allowed_semantic_tags": [
-                    "Vehicle",
-                    "Pedestrian",
+                    "Vehicles",
+                    "Pedestrians",
                     "Cyclist",
                     "TrafficSign",
                     "TrafficLight",
@@ -139,12 +139,12 @@ class SimulatedSensorTestUtils:
 
         # Construct additional DetectedObject by adjustment
         return [
-            replace(detected_object, id=0, object_type="Vehicle"),
-            replace(detected_object, id=1, object_type="Pedestrian"),
-            replace(detected_object, id=2, object_type="Pedestrian"),
-            replace(detected_object, id=3, object_type="Pedestrian"),
-            replace(detected_object, id=4, object_type="Vehicle"),
-            replace(detected_object, id=5, object_type="Vehicle")
+            replace(detected_object, id=0, object_type="Vehicles"),
+            replace(detected_object, id=1, object_type="Pedestrians"),
+            replace(detected_object, id=2, object_type="Pedestrians"),
+            replace(detected_object, id=3, object_type="Pedestrians"),
+            replace(detected_object, id=4, object_type="Vehicles"),
+            replace(detected_object, id=5, object_type="Vehicles")
         ]
 
     @staticmethod

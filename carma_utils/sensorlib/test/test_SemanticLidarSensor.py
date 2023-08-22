@@ -111,7 +111,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         detected_object = MagicMock(id=0)
         old_fcn = DetectedObjectBuilder.build_detected_object
         DetectedObjectBuilder.build_detected_object = MagicMock(return_value=detected_object)
-        DetectedObjectBuilder.build_detected_object.isCalledWith(actors[0], ["Pedestrian", "Vehicle"])
+        DetectedObjectBuilder.build_detected_object.isCalledWith(actors[0], ["Pedestrians", "Vehicles"])
 
         # Undo the mock to avoid side effects which cause other tests to fail
         DetectedObjectBuilder.build_detected_object = old_fcn
@@ -123,8 +123,8 @@ class TestSemanticLidarSensor(unittest.TestCase):
         detected_objects[2] = replace(detected_objects[2], object_type="Pole")
         filtered_objects, object_ranges = self.sensor.prefilter(detected_objects)
         self.assertEqual(len(filtered_objects), 2)
-        self.assertEqual(filtered_objects[0].object_type, "Vehicle")
-        self.assertEqual(filtered_objects[1].object_type, "Pedestrian")
+        self.assertEqual(filtered_objects[0].object_type, "Vehicles")
+        self.assertEqual(filtered_objects[1].object_type, "Pedestrians")
         self.assertEqual(object_ranges[0], 38.635709988013005)
         self.assertEqual(object_ranges[1], 38.635709988013005)
 
@@ -391,7 +391,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         expected_type = "CorrectedVehicle"
         carla_actor = MagicMock()
         carla_actor.id = 0
-        carla_actor.semantic_tags = ["Vehicle"]
+        carla_actor.semantic_tags = ["Vehicles"]
         carla_actor.get_world_vertices = MagicMock(return_value=[carla.Location(1.0, 2.0, 3.0),
                                                                  carla.Location(4.0, 5.0, 6.0),
                                                                  carla.Location(7.0, 8.0, 9.0),
@@ -401,7 +401,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         carla_actor.get_velocity = MagicMock(return_value=carla.Vector3D(4.0, 5.0, 6.0))
         carla_actor.get_angular_velocity = MagicMock(return_value=carla.Vector3D(7.0, 8.0, 9.0))
 
-        detected_object = DetectedObjectBuilder.build_detected_object(carla_actor, ["Vehicle"])
+        detected_object = DetectedObjectBuilder.build_detected_object(carla_actor, ["Vehicles"])
 
         hitpoints = {0: [MagicMock(object_tag=expected_type)]}
 
@@ -410,7 +410,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert expected_type == corrected_objects[0].object_type
 
     def test_update_object_metadata_from_hitpoint(self):
-        original_type = "Vehicle"
+        original_type = "Vehicles"
         expected_type = "CorrectedVehicle"
 
         detected_object = MagicMock(id=0, object_type=original_type)

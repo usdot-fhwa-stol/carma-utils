@@ -65,18 +65,18 @@ class TestCarlaUtils(unittest.TestCase):
 
     def test_determine_object_type(self):
         # Nominal case
-        carla_actor = MagicMock(semantic_tags=["Vehicle"])
-        assert "Vehicle" == CarlaUtils.determine_object_type(carla_actor, ["Pedestrian", "Vehicle"])
+        carla_actor = MagicMock(semantic_tags=[10])
+        assert "Vehicles" == CarlaUtils.determine_object_type(carla_actor, ["Pedestrians", "Vehicles"])
 
         # Multiple types
-        assert "Vehicle" == CarlaUtils.determine_object_type(carla_actor, ["Invalid Type", "Vehicle"])
+        assert "Vehicles" == CarlaUtils.determine_object_type(carla_actor, ["NONE", "Vehicles"])
 
         # No allowed type
-        assert "NONE" == CarlaUtils.determine_object_type(carla_actor, ["Invalid Type"])
+        assert "NONE" == CarlaUtils.determine_object_type(carla_actor, ["NONE"])
 
         # NONE
-        carla_actor = MagicMock(semantic_tags=["Cyclist"])
-        result = CarlaUtils.determine_object_type(carla_actor, ["Pedestrian", "Vehicle"])
+        carla_actor = MagicMock(semantic_tags=[9])
+        result = CarlaUtils.determine_object_type(carla_actor, ["Pedestrians", "Vehicles"])
         self.assertEqual(result, "NONE")
 
 
