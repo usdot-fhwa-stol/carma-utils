@@ -18,6 +18,8 @@ from src.SimulatedSensor import SimulatedSensor
 from src.objects.DetectedObject import DetectedObject, DetectedObjectBuilder
 from collections import Counter
 
+from src.util.CarlaUtils import CarlaUtils
+
 
 class SemanticLidarSensor(SimulatedSensor):
     """
@@ -351,12 +353,11 @@ class SemanticLidarSensor(SimulatedSensor):
         if actor_angular_extents is None or object_hitpoints is None or detection_threshold_ratio is None:
             return False
 
-        # TODO Review vertical component for computation
         horizontal_fov = actor_angular_extents[0]
         vertical_fov = actor_angular_extents[1]
 
         # Compute threshold hitpoint count for this object
-        num_expected_hitpoints = self.compute_expected_num_horizontal_hitpoints(horizontal_fov)
+        num_expected_hitpoints = self.compute_expected_num_horizontal_hitpoints(horizontal_fov, vertical_fov)
         min_hitpoint_count = detection_threshold_ratio * num_expected_hitpoints
 
         # Compare hitpoint count
@@ -364,7 +365,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         return num_hitpoints >= min_hitpoint_count
 
-    def compute_expected_num_horizontal_hitpoints(self, fov):
+    def compute_expected_num_horizontal_hitpoints(self, horizontal_fov, vertical_fov):
         """
         Compute the expected number of hitpoints for the given field of view. This result is heavily determined by
         the CARLA sensor configuration.
@@ -372,9 +373,13 @@ class SemanticLidarSensor(SimulatedSensor):
         :param fov: Scalar unoriented field of view in radians.
         :return: Expected number of hitpoints in a horizontal scan across a fov-sized sensor rotation.
         """
-        num_points_per_scan = self.__sensor.points_per_second / self.__sensor.rotation_frequency
-        theta_resolution = self.__sensor.fov_angular_width / num_points_per_scan
-        return fov / theta_resolution
+        num_horizontal_points_per_scan = self.__sensor.points_per_second / self.__sensor.rotation_frequency
+        horizontal_angular_resolution = self.__sensor.horizontal_fov / num_horizontal_points_per_scan
+
+        num_vertical_points_per_scan = self.__sensor.number_of_channels
+        vertical_angular_resolution = num_vertical_points_per_scan / self.__sensor.vertical_fov
+
+        return (horizontal_fov / horizontal_angular_resolution) * (vertical_fov / vertical_angular_resolution)
 
     # ------------------------------------------------------------------------------
     # Noise Filter
@@ -426,7 +431,7 @@ class SemanticLidarSensor(SimulatedSensor):
         # Update object type to match that reported from the CARLA semantic LIDAR sensor
         new_object_type = obj.object_type
         if first_hitpoint is not None:
-            new_object_type = first_hitpoint.object_tag
+            new_object_type = CarlaUtils.get_semantic_tag_name(first_hitpoint.object_tag)
 
         # If enabled, convert coordinates to sensor-centric frame
         new_position = obj.position

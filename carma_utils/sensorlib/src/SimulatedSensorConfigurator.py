@@ -43,7 +43,6 @@ class SimulatedSensorConfigurator:
         """
 
         carla_world = SimulatedSensorConfigurator.__get_initialized_carla_world(simulated_sensor_config)
-        carla_world = SimulatedSensorConfigurator.carla_world
 
         # Retrieve the CARLA sensor
         blueprint_library = carla_world.get_blueprint_library()

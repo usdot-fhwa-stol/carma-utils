@@ -72,12 +72,12 @@ class TestCarlaUtils(unittest.TestCase):
         assert "Vehicle" == CarlaUtils.determine_object_type(carla_actor, ["Invalid Type", "Vehicle"])
 
         # No allowed type
-        assert "Unknown" == CarlaUtils.determine_object_type(carla_actor, ["Invalid Type"])
+        assert "NONE" == CarlaUtils.determine_object_type(carla_actor, ["Invalid Type"])
 
-        # Unknown
+        # NONE
         carla_actor = MagicMock(semantic_tags=["Cyclist"])
         result = CarlaUtils.determine_object_type(carla_actor, ["Pedestrian", "Vehicle"])
-        self.assertEqual(result, "Unknown")
+        self.assertEqual(result, "NONE")
 
 
 if __name__ == "__main__":

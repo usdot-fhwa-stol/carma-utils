@@ -5,7 +5,7 @@
 # applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
 # governing permissions and limitations under the License.
-
+import carla
 import numpy as np
 from scipy.spatial.transform import Rotation
 
@@ -72,11 +72,29 @@ class CarlaUtils:
         Check for identification as one of the accepted types, and mark unidentified otherwise.
         :param carla_actor: The carla.Actor to obtain data from.
         :param allowed_semantic_tags: List of semantic tags which are allowed to be detected by the sensor.
-        :return: The object type, or Unknown if not in the allowed list.
+        :return: The object type, or NONE if not in the allowed list.
         """
 
         # Set intersection, except order matters
         for tag in carla_actor.semantic_tags:
-            if tag in allowed_semantic_tags:
+            if CarlaUtils.get_semantic_tag_name(tag) in allowed_semantic_tags:
                 return tag
-        return "Unknown"
+        return "NONE"
+
+    @staticmethod
+    def get_semantic_tag_name(tag_id):
+        """
+        Get the semantic tag name for a given tag ID.
+        :param tag_id: The integer tag ID to look up.
+        :return: The tag name.
+        """
+        return carla.CityObjectLabel.names.get(tag_id, "NONE")
+
+    @staticmethod
+    def get_semantic_tag_id(tag_name):
+        """
+        Get the integer semantic tag ID for a given tag name.
+        :param tag_name: The string tag name to look up.
+        :return: The tag ID.
+        """
+        return carla.CityObjectLabel.get(tag_name, 0)

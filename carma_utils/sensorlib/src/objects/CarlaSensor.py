@@ -20,8 +20,9 @@ class CarlaSensor:
     position: np.ndarray
     points_per_second: float
     rotation_frequency: float
-    fov_angular_width: float
-
+    horizontal_fov: float
+    vertical_fov: float
+    number_of_channels: int
 
 class CarlaSensorBuilder:
     @staticmethod
@@ -30,4 +31,6 @@ class CarlaSensorBuilder:
                            CarlaUtils.vector3d_to_numpy(carla_sensor.get_location()),
                            carla_sensor.points_per_second,
                            carla_sensor.rotation_frequency,
-                           np.deg2rad(carla_sensor.upper_fov - carla_sensor.lower_fov))
+                           np.deg2rad(carla_sensor.horizontal_fov),
+                           np.deg2rad(carla_sensor.upper_fov - carla_sensor.lower_fov),
+                           carla_sensor.channels)
