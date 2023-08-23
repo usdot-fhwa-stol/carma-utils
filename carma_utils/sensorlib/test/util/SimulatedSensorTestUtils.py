@@ -135,6 +135,7 @@ class SimulatedSensorTestUtils:
         detected_object = DetectedObjectBuilder.build_detected_object(carla_actor, simulated_sensor_config["prefilter"][
             "allowed_semantic_tags"])
 
+
         # Construct additional DetectedObject by adjustment
         return [
             replace(detected_object, id=0, object_type="Vehicles"),

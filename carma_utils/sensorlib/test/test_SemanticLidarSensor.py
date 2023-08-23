@@ -85,10 +85,11 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor._SemanticLidarSensor__data_collector.get_carla_lidar_hitpoints = MagicMock(return_value=(0, hitpoints))
         self.sensor.compute_actor_angular_extents = MagicMock(return_value=actor_angular_extents)
         self.sensor.compute_adjusted_detection_thresholds = MagicMock(return_value=detection_thresholds)
-        self.sensor.update_object_types = MagicMock(return_value=detected_objects)
         self.sensor.apply_occlusion = MagicMock(return_value=detected_objects)
         self.sensor.apply_noise = MagicMock(return_value=detected_objects)
-        self.sensor.transform_to_sensor_frame = MagicMock(return_value=detected_objects)
+        class SerializeableTestDetectedObject:
+
+        self.sensor.update_object_metadata = {"a": 1, "b": 2, "c": 3}
 
         # Call and provide assertions
         result = self.sensor.get_detected_objects_in_frame()

@@ -303,7 +303,8 @@ class SemanticLidarSensor(SimulatedSensor):
         :param timestamp: Timestamp of the current frame.
         :return: List of objects with updated metadata.
         """
-        return [self.update_object_metadata_from_hitpoint(obj, hitpoints.get(obj.id)) for obj in detected_objects]
+        return [self.update_object_metadata_from_hitpoint(obj, hitpoints.get(obj.id), timestamp)
+                for obj in detected_objects]
 
     def update_object_metadata_from_hitpoint(self, obj, hitpoints, timestamp):
         """
@@ -316,7 +317,7 @@ class SemanticLidarSensor(SimulatedSensor):
         """
 
         # Get the metadata from the first hitpoint associated with the object, per the CARLA API.
-        hitpoint_list = hitpoints.get(obj.id)
+        hitpoint_list = hitpoints
         first_hitpoint = hitpoint_list[0] if hitpoint_list is not None else None
 
         # Update object type to match that reported from the CARLA semantic LIDAR sensor
