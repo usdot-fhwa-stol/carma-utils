@@ -52,18 +52,18 @@ class TestGaussianNoiseModel(unittest.TestCase):
     def test_apply_type_noise(self):
         object_list = SimulatedSensorTestUtils.generate_test_data_detected_objects()
 
-        np.random.default_rng = MagicMock(return_value=MagicMock(choice=MagicMock(return_value="TestValue")))
+        np.random.default_rng = MagicMock(return_value=MagicMock(choice=MagicMock(return_value=4)))
 
         noise_model = GaussianNoiseModel(self.config)
 
         object_list = noise_model.apply_type_noise(object_list)
 
-        self.assertEqual(object_list[0].object_type, "TestValue")
-        self.assertEqual(object_list[1].object_type, "TestValue")
-        self.assertEqual(object_list[2].object_type, "TestValue")
-        self.assertEqual(object_list[3].object_type, "TestValue")
-        self.assertEqual(object_list[4].object_type, "TestValue")
-        self.assertEqual(object_list[5].object_type, "TestValue")
+        self.assertEqual(object_list[0].object_type, "Pedestrians")
+        self.assertEqual(object_list[1].object_type, "Pedestrians")
+        self.assertEqual(object_list[2].object_type, "Pedestrians")
+        self.assertEqual(object_list[3].object_type, "Pedestrians")
+        self.assertEqual(object_list[4].object_type, "Pedestrians")
+        self.assertEqual(object_list[5].object_type, "Pedestrians")
 
     def test_apply_list_inclusion_noise(self):
         object_list = [MagicMock(), MagicMock(), MagicMock()]

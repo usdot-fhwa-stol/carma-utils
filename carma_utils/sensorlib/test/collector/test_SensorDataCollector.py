@@ -29,7 +29,7 @@ class TestSensorDataCollector(unittest.TestCase):
 
         # Test the get_carla_lidar_hitpoints function
         result = self.sensor_data_collector.get_carla_lidar_hitpoints()
-        self.assertEqual(result, data_collection)
+        self.assertEqual(result, (0, data_collection))
 
     def test__collect_sensor_data(self):
         # Call __collect_sensor_data

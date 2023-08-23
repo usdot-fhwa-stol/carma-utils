@@ -13,6 +13,7 @@ from dataclasses import replace
 import numpy as np
 
 from src.noise_models.AbstractNoiseModel import AbstractNoiseModel
+from src.util.CarlaUtils import CarlaUtils
 
 
 class GaussianNoiseModel(AbstractNoiseModel):
@@ -45,8 +46,10 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
     def apply_type_noise(self, object_list):
         # Apply type noise to the object_list
-        return [replace(obj, object_type=self.__rng.choice(self.__config["type_noise"]["allowed_semantic_tags"], 1,
-                                                           replace=False))
+        return [replace(obj,
+                        object_type=CarlaUtils.get_semantic_tag_name(
+                            self.__rng.choice(self.__config["type_noise"]["allowed_semantic_tags"],
+                                                      1, replace=False)))
                 for obj in object_list]
 
     def apply_list_inclusion_noise(self, object_list):
