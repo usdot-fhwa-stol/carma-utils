@@ -7,6 +7,7 @@
 # governing permissions and limitations under the License.
 import json
 
+import jsonpickle
 import yaml
 
 from src.util.NumpyEncoder import NumpyEncoder
@@ -36,8 +37,4 @@ class SimulatedSensorUtils:
         :param obj: Object to serialize.
         :return: JSON string.
         """
-        if isinstance(obj, list):
-            return json.dumps(obj, cls=NumpyEncoder)
-            # return json.dumps([o.__dict__ for o in obj], cls=NumpyEncoder)
-        else:
-            return json.dumps(obj.__dict__, cls=NumpyEncoder)
+        return jsonpickle.encode(obj, unpicklable=True, make_refs=False)
