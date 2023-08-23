@@ -100,7 +100,7 @@ class SemanticLidarSensor(SimulatedSensor):
         # Update object type, reference frame, and detection time
         detected_objects = self.update_object_metadata(detected_objects, hitpoints, timestamp)
 
-        return json.dumps([detected_object.__dict__ for detected_object in detected_objects])
+        return SimulatedSensorUtils.serialize_to_json([(detected_object.__dict__) for detected_object in detected_objects])
 
     # ------------------------------------------------------------------------------
     # CARLA Scene DetectedObject Retrieval

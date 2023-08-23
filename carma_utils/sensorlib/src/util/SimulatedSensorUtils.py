@@ -5,8 +5,11 @@
 # applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
 # governing permissions and limitations under the License.
+import json
 
 import yaml
+
+from src.util.NumpyEncoder import NumpyEncoder
 
 
 class SimulatedSensorUtils:
@@ -24,3 +27,17 @@ class SimulatedSensorUtils:
         with open(config_filepath, "r") as file:
             config = yaml.safe_load(file)
             return config
+
+    @staticmethod
+    def serialize_to_json(obj):
+        """
+        Serialize any object to JSON. Specialized handling is provided for fields of type numpy.ndarray. Generalized deserialization is not possible.
+
+        :param obj: Object to serialize.
+        :return: JSON string.
+        """
+        if isinstance(obj, list):
+            return json.dumps(obj, cls=NumpyEncoder)
+            # return json.dumps([o.__dict__ for o in obj], cls=NumpyEncoder)
+        else:
+            return json.dumps(obj.__dict__, cls=NumpyEncoder)

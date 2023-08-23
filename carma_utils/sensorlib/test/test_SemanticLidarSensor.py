@@ -39,7 +39,8 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.carla_world = MagicMock()
         self.data_collector = SensorDataCollector(self.carla_world, self.raw_carla_sensor)
         self.noise_model = GaussianNoiseModel(self.noise_model_config)
-        self.sensor = SemanticLidarSensor(self.infrastructure_id, self.simulated_sensor_config, self.carla_sensor_config, self.carla_world,
+        self.sensor = SemanticLidarSensor(self.infrastructure_id, self.simulated_sensor_config,
+                                          self.carla_sensor_config, self.carla_world,
                                           self.carla_sensor, self.data_collector, self.noise_model)
 
     def test_get_detected_objects_in_frame(self):
@@ -82,14 +83,14 @@ class TestSemanticLidarSensor(unittest.TestCase):
         # Mock internal functions
         self.sensor.get_scene_detected_objects = MagicMock(return_value=detected_objects)
         self.sensor.prefilter = MagicMock(return_value=(detected_objects, object_ranges))
-        self.sensor._SemanticLidarSensor__data_collector.get_carla_lidar_hitpoints = MagicMock(return_value=(0, hitpoints))
+        self.sensor._SemanticLidarSensor__data_collector.get_carla_lidar_hitpoints = MagicMock(
+            return_value=(0, hitpoints))
         self.sensor.compute_actor_angular_extents = MagicMock(return_value=actor_angular_extents)
         self.sensor.compute_adjusted_detection_thresholds = MagicMock(return_value=detection_thresholds)
         self.sensor.apply_occlusion = MagicMock(return_value=detected_objects)
         self.sensor.apply_noise = MagicMock(return_value=detected_objects)
-        class SerializeableTestDetectedObject:
-
-        self.sensor.update_object_metadata = {"a": 1, "b": 2, "c": 3}
+        self.sensor.update_object_metadata = MagicMock(return_value=[replace(obj, carla_actor=None)
+                                                                     for obj in detected_objects])
 
         # Call and provide assertions
         result = self.sensor.get_detected_objects_in_frame()
@@ -294,8 +295,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
         actual_type = self.sensor.get_object_type_from_hitpoint(detected_object, hitpoints)
         self.assertEqual(expected_type, actual_type)
-
-        ########
 
         # Generate objects in original world frame
         detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
