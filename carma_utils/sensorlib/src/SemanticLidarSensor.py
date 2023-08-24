@@ -65,7 +65,7 @@ class SemanticLidarSensor(SimulatedSensor):
     # Operation
     # ------------------------------------------------------------------------------
 
-    def get_detected_objects_in_frame(self):
+    def compute_detected_objects_in_frame(self):
         """
         Main function used to query the currently-detected objects. Upon calling, the latest raw data cache is
         retrieved and sent through the processing pipeline to produce a list of DetectedObject objects.
@@ -75,11 +75,6 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
-
-        # Build the following lookup structures for infomration related to the detection or relationship between Sensor and DetectedObject:
-        #   - Range
-        #   - Angular extents
-        #   - Confidence
 
         # Prefilter
         detected_objects, object_ranges = self.prefilter(detected_objects)

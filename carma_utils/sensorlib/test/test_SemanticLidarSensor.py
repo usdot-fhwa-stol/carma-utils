@@ -43,7 +43,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
                                           self.carla_sensor_config, self.carla_world,
                                           self.carla_sensor, self.data_collector, self.noise_model)
 
-    def test_get_detected_objects_in_frame(self):
+    def test_compute_detected_objects_in_frame(self):
 
         # Generate test data
         detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
@@ -93,7 +93,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
                                                                      for obj in detected_objects])
 
         # Call and provide assertions
-        result = self.sensor.get_detected_objects_in_frame()
+        result = self.sensor.compute_detected_objects_in_frame()
 
         self.sensor.get_scene_detected_objects.assert_called_once()
         self.sensor.prefilter.assert_called_once_with(detected_objects)

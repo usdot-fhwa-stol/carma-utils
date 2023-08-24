@@ -52,3 +52,4 @@ class TestSimulatedSensorUtils(unittest.TestCase):
         expected_json_str = ('[{"a": "Some string.", "b": [20.1, 30.0, 40.1], "c": 3, "d": [[1, 2, 3], [4, 5, 6]]}, '
                              '{"a": "Some string.", "b": [20.1, 30.0, 40.1], "c": 3, "d": [[1, 2, 3], [4, 5, 6]]}]')
         self.assertEqual(json_str, expected_json_str)
+
