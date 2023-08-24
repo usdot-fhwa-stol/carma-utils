@@ -19,6 +19,7 @@ from src.objects.DetectedObject import DetectedObject, DetectedObjectBuilder
 from collections import Counter
 
 from src.util.CarlaUtils import CarlaUtils
+from src.util.SimulatedSensorUtils import SimulatedSensorUtils
 
 
 class SemanticLidarSensor(SimulatedSensor):
@@ -44,28 +45,31 @@ class SemanticLidarSensor(SimulatedSensor):
         :param data_collector: DataCollector object handling collection and caching of raw sensor data from the CARLA simulation.
         :param noise_model: Noise model available to be used for nosie application to the output data.
         """
+
+        # Configuration
         super().__init__(infrastructure_id)
         self.__simulated_sensor_config = simulated_sensor_config
         self.__carla_sensor_config = carla_sensor_config
 
-        # Fundamental internal objects
+        # CARLA connection
         self.__carla_world = carla_world
+
+        # Internal objects
         self.__sensor = sensor
         self.__data_collector = data_collector
         self.__noise_model = noise_model
 
-        # Structures to store reassociation information
-        self.__actor_id_association = {}
-        trailing_id_associations_count = simulated_sensor_config["geometry_reassociation"][
-            "trailing_id_associations_count"]
-        self.__trailing_id_associations = deque([{}], maxlen=trailing_id_associations_count)
-        self.__rng = np.random.default_rng()
+        # Object cache
+        self.__detected_objects = None
+
+    def get_detected_objects_json(self):
+        return SimulatedSensorUtils.serialize_to_json(self.__detected_objects)
 
     # ------------------------------------------------------------------------------
-    # Operation
+    # Primary functions
     # ------------------------------------------------------------------------------
 
-    def compute_detected_objects_in_frame(self):
+    def compute_detected_objects(self):
         """
         Main function used to query the currently-detected objects. Upon calling, the latest raw data cache is
         retrieved and sent through the processing pipeline to produce a list of DetectedObject objects.
@@ -95,7 +99,9 @@ class SemanticLidarSensor(SimulatedSensor):
         # Update object type, reference frame, and detection time
         detected_objects = self.update_object_metadata(detected_objects, hitpoints, timestamp)
 
-        return SimulatedSensorUtils.serialize_to_json([(detected_object.__dict__) for detected_object in detected_objects])
+        self.__detected_objects = detected_objects
+
+        return detected_objects
 
     # ------------------------------------------------------------------------------
     # CARLA Scene DetectedObject Retrieval
@@ -330,5 +336,3 @@ class SemanticLidarSensor(SimulatedSensor):
                        timestamp=timestamp,
                        position=new_position
                        )
-
-# TODO Add a main function

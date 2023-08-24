@@ -18,7 +18,7 @@ class SimulatedSensor:
         self.infrastructure_id = infrastructure_id
 
     @abstractmethod
-    def compute_detected_objects_in_frame(self):
+    def compute_detected_objects(self):
         """
         Retrieve the sensor's latest perception of objects detected in the scene.
         :return: List of DetectedObject objects serialized in JSON form.

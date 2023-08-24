@@ -35,11 +35,6 @@ class SimulatedSensorTestUtils:
                     "dropoff_rate": 0.01
                 }
             },
-            "geometry_reassociation": {
-                "geometry_association_max_distance_threshold": 2.0,
-                "trailing_id_associations_count": 2,
-                "sample_count": 3
-            },
             "use_sensor_centric_frame": True
         }
 

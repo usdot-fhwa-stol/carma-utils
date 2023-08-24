@@ -225,7 +225,7 @@ def main(arg):
             vis.update_renderer()
 
             if frame % 120 == 0:
-                detected_objects = sensor.compute_detected_objects_in_frame__simple()
+                detected_objects = sensor.compute_detected_objects__simple()
 
             # # This can fix Open3D jittering issues:
             time.sleep(0.005)

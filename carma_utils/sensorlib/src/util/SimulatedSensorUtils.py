@@ -7,7 +7,6 @@
 # governing permissions and limitations under the License.
 import json
 
-import jsonpickle
 import yaml
 
 from src.util.NumpyEncoder import NumpyEncoder
@@ -32,7 +31,8 @@ class SimulatedSensorUtils:
     @staticmethod
     def serialize_to_json(obj):
         """
-        Serialize any object to JSON. Specialized handling is provided for fields of type numpy.ndarray. Generalized deserialization is not possible.
+        Serialize any object to JSON. Specialized handling is provided for fields of type numpy.ndarray. Generalized
+        deserialization is not possible.
 
         :param obj: Object to serialize.
         :return: JSON string.

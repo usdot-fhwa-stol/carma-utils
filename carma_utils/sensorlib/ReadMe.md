@@ -18,7 +18,7 @@ The SimulatedSensor manages a CarlaSensor, which is a light wrapper around the C
 
 High-speed LIDAR data is collected into a DataCollector class running in a separate context which self-populates via a callback.
 
-The SimulatedSensor.compute_detected_objects_in_frame() function presents the primary processing sequence performing the following stages:
+The SimulatedSensor.compute_detected_objects() function presents the primary processing sequence performing the following stages:
 
 1. Truth state retrieval.
 1. Pre-filter by distance from sensor, and allowed object types.
