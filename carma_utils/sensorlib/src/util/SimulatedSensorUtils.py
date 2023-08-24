@@ -37,4 +37,7 @@ class SimulatedSensorUtils:
         :param obj: Object to serialize.
         :return: JSON string.
         """
-        return jsonpickle.encode(obj, unpicklable=True, make_refs=False)
+        if isinstance(obj, list):
+            return [SimulatedSensorUtils.serialize_to_json(item) for item in obj]
+        else:
+            return json.dumps(obj.__dict__, cls=NumpyEncoder)

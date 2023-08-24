@@ -330,3 +330,5 @@ class SemanticLidarSensor(SimulatedSensor):
                        timestamp=timestamp,
                        position=new_position
                        )
+
+# TODO Add a main function
