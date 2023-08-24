@@ -6,17 +6,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
 # governing permissions and limitations under the License.
 
-import itertools
-import json
-from collections import deque
 from dataclasses import replace
 
 import numpy as np
-from scipy.spatial import distance
 
 from src.SimulatedSensor import SimulatedSensor
-from src.objects.DetectedObject import DetectedObject, DetectedObjectBuilder
-from collections import Counter
+from src.objects.DetectedObject import DetectedObjectBuilder
 
 from src.util.CarlaUtils import CarlaUtils
 from src.util.SimulatedSensorUtils import SimulatedSensorUtils

@@ -4,8 +4,8 @@ simulated_sensor:
     carla_port: 2000
   prefilter:
     allowed_semantic_tags:
-      - 4
-      - 10
+      - Vehicles
+      - Pedestrians
     max_distance_meters: 100
   detection_threshold_scaling_formula:
     nominal_hitpoint_detection_ratio_threshold: 0.6

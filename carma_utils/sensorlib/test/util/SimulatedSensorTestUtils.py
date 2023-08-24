@@ -25,7 +25,7 @@ class SimulatedSensorTestUtils:
     def generate_simulated_sensor_config():
         return {
             "prefilter": {
-                "allowed_semantic_tags": [4, 10],
+                "allowed_semantic_tags": ["Vehicles", "Pedestrians"],
                 "max_distance_meters": 42
             },
             "detection_threshold_scaling_formula": {
@@ -59,22 +59,23 @@ class SimulatedSensorTestUtils:
             },
             "type_noise": {
                 "allowed_semantic_tags": [
-                    10,
-                    1,
-                    14,
-                    17,
-                    4,
-                    5,
-                    6,
-                    7,
-                    8,
-                    13,
-                    22,
-                    18,
-                    12,
-                    9,
-                    11,
-                    21
+                    "Buildings",
+                    "Fences",
+                    "Ground",
+                    "GuardRail",
+                    "Pedestrians",
+                    "Poles",
+                    "RoadLines",
+                    "Roads",
+                    "Sidewalks",
+                    "Sky",
+                    "Terrain",
+                    "TrafficLight",
+                    "TrafficSigns",
+                    "Vegetation",
+                    "Vehicles",
+                    "Walls",
+                    "Water"
                 ]
             }
         }

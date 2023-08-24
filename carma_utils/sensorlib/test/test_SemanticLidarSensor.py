@@ -100,13 +100,15 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor._SemanticLidarSensor__data_collector.get_carla_lidar_hitpoints.assert_called_once()
         self.sensor.compute_actor_angular_extents.assert_called_once_with(detected_objects)
         self.sensor.compute_adjusted_detection_thresholds.assert_called_once_with(detected_objects, object_ranges)
-        self.sensor.update_object_types.assert_called_once_with(detected_objects, hitpoints)
         self.sensor.apply_occlusion.assert_called_once_with(detected_objects, actor_angular_extents, hitpoints,
                                                             detection_thresholds)
         self.sensor.apply_noise.assert_called_once_with(detected_objects)
-        self.sensor.transform_to_sensor_frame.assert_called_once_with(detected_objects)
+        self.sensor.update_object_metadata.assert_called_once_with(detected_objects)
 
         self.assertEqual(result, detected_objects)
+
+    def test_get_detected_objects_json(self):
+        assert False
 
     def test_get_scene_detected_objects(self):
         actors = [MagicMock()]
@@ -123,7 +125,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
         # Test filtering by type
         detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()[0:3]
-        detected_objects[2] = replace(detected_objects[2], object_type="Pole")
+        detected_objects[2] = replace(detected_objects[2], object_type="Bridge")
         filtered_objects, object_ranges = self.sensor.prefilter(detected_objects)
         self.assertEqual(len(filtered_objects), 2)
         self.assertEqual(filtered_objects[0].object_type, "Vehicles")
@@ -190,7 +192,11 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
         # Call and provide assertions
         result = self.sensor.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
-        self.assertCalledOnceWith(detected_objects[0], object_ranges[0])
+        self.sensor.compute_adjusted_detection_threshold.assert_called_once_with(object_ranges[0])
+        assert False
+
+    def test_compute_adjusted_detection_threshold(self):
+        assert False
 
     def test_apply_occlusion(self):
         detected_object = MagicMock(id=1)
@@ -208,6 +214,8 @@ class TestSemanticLidarSensor(unittest.TestCase):
                                                   hitpoints[detected_object.id],
                                                   detection_thresholds[detected_object.id]
                                                   )
+    def test_apply_occlusion(self):
+        assert False
 
     def test_is_visible(self):
         carla_sensor = MagicMock(points_per_second=10000, rotation_frequency=10, fov_angular_width=1.096)
@@ -241,6 +249,9 @@ class TestSemanticLidarSensor(unittest.TestCase):
         result = self.sensor.compute_expected_num_horizontal_hitpoints(fov)
 
         self.assertEqual(result, expected_result)
+
+    def test_compute_expected_num_vertical_hitpoints(self):
+        assert False
 
     def test_apply_noise(self):
         detected_objects = [MagicMock(), MagicMock()]
