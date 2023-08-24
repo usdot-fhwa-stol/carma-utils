@@ -244,7 +244,7 @@ class SemanticLidarSensor(SimulatedSensor):
         vertical_fov = actor_angular_extents[1]
 
         # Compute threshold hitpoint count for this object
-        num_expected_hitpoints = self.compute_expected_num_horizontal_hitpoints(horizontal_fov, vertical_fov)
+        num_expected_hitpoints = self.compute_expected_num_hitpoints(horizontal_fov, vertical_fov)
         min_hitpoint_count = detection_threshold_ratio * num_expected_hitpoints
 
         # Compare hitpoint count
@@ -252,13 +252,14 @@ class SemanticLidarSensor(SimulatedSensor):
 
         return num_hitpoints >= min_hitpoint_count
 
-    def compute_expected_num_horizontal_hitpoints(self, horizontal_fov, vertical_fov):
+    def compute_expected_num_hitpoints(self, horizontal_fov, vertical_fov):
         """
         Compute the expected number of hitpoints for the given field of view. This result is heavily determined by
         the CARLA sensor configuration.
         
-        :param fov: Scalar unoriented field of view in radians.
-        :return: Expected number of hitpoints in a horizontal scan across a fov-sized sensor rotation.
+        :param horizontal_fov: Horizontal field of view in radians.
+        :param vertical_fov: Vertical field of view in radians.
+        :return: Expected number of hitpoints in a scan across the specified field of view.
         """
         num_horizontal_points_per_scan = self.__sensor.points_per_second / self.__sensor.rotation_frequency
         horizontal_angular_resolution = self.__sensor.horizontal_fov / num_horizontal_points_per_scan

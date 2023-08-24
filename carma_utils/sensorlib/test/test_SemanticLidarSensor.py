@@ -257,6 +257,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor.is_visible.assert_called_with(actor_angular_extents[5], hitpoints[5], detection_thresholds[5])
 
     def test_is_visible(self):
+
         carla_sensor = MagicMock(points_per_second=10000, rotation_frequency=10, horizontal_fov=1.096,
                                  vertical_fov=1.096, number_of_channels=10)
         self.sensor._SemanticLidarSensor__sensor = carla_sensor
@@ -277,8 +278,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         result = self.sensor.is_visible((fov, fov), object_hitpoints, detection_threshold_ratio)
         self.assertFalse(result)
 
-
-    def test_compute_expected_num_horizontal_hitpoints(self):
+    def test_compute_expected_num_hitpoints(self):
         carla_sensor = MagicMock(points_per_second=10000, rotation_frequency=10, fov_angular_width=1.096)
         self.sensor._SemanticLidarSensor__sensor = carla_sensor
 
@@ -287,13 +287,54 @@ class TestSemanticLidarSensor(unittest.TestCase):
         theta_resolution = carla_sensor.fov_angular_width / num_points_per_scan
         expected_result = fov / theta_resolution
 
-        result = self.sensor.compute_expected_num_horizontal_hitpoints(fov)
+        result = self.sensor.compute_expected_num_hitpoints(fov)
 
         self.assertEqual(result, expected_result)
 
 
+
+    def test_is_visible(self):
+
+
+
+        .7
+        105
+
+
+
+
+
+
+
+
+
+
     def test_compute_expected_num_vertical_hitpoints(self):
-        assert False
+
+        # Problem setup
+        num_horizontal_points_per_scan=360
+        num_vertical_points_per_scan=60
+
+        horizontal_fov = np.deg2rad(15)
+        vertical_fov = np.deg2rad(10)
+
+        sensor_horizontal_fov = np.deg2rad(360)
+        sensor_vertical_fov = np.deg2rad(60)
+
+        rotation_frequency = 1
+        points_per_second = num_horizontal_points_per_scan * rotation_frequency
+
+        # Mock the carla sensor
+        carla_sensor = MagicMock(points_per_second=points_per_second, rotation_frequency=rotation_frequency, horizontal_fov=sensor_horizontal_fov,
+                                 vertical_fov=sensor_vertical_fov, number_of_channels=num_vertical_points_per_scan)
+        self.sensor._SemanticLidarSensor__sensor = carla_sensor
+
+        expected_expected_num_hitpoints = 150
+
+        # Run and assertions
+        expected_num_hitpoints = self.sensor.compute_expected_num_hitpoints(horizontal_fov, vertical_fov)
+        assert expected_expected_num_hitpoints == expected_num_hitpoints
+
 
 
     def test_apply_noise(self):
@@ -315,7 +356,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         noise_model.apply_orientation_noise.assert_called_once_with(detected_objects)
         noise_model.apply_type_noise.assert_called_once_with(detected_objects)
         noise_model.apply_list_inclusion_noise.assert_called_once_with(detected_objects)
-
 
     def test_update_object_metadata(self):
         # Build mock objects
@@ -339,7 +379,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         # Call and provide assertions
         corrected_objects = self.sensor.update_object_types([detected_object], hitpoints)
         assert expected_type == corrected_objects[0].object_type
-
 
     def test_update_object_metadata_from_hitpoint(self):
         original_type = "Vehicles"
