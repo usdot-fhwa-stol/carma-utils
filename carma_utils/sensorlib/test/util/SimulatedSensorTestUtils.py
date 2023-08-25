@@ -24,6 +24,10 @@ class SimulatedSensorTestUtils:
     @staticmethod
     def generate_simulated_sensor_config():
         return {
+            "carla_connection": {
+                "carla_host": "127.0.0.1",
+                "carla_port": 2000
+            },
             "prefilter": {
                 "allowed_semantic_tags": ["Vehicles", "Pedestrians"],
                 "max_distance_meters": 42

@@ -21,9 +21,9 @@ class SimulatedSensorConfigurator:
     """
 
     # Static fields
-    infrastructure_sensors = {}
-    client = None
-    carla_world = None
+    __infrastructure_sensors = {}
+    __client = None
+    __carla_world = None
 
     # ------------------------------------------------------------------------------
     # SimulatedSensor Management Interface
@@ -31,7 +31,7 @@ class SimulatedSensorConfigurator:
 
     @staticmethod
     def register_simulated_semantic_lidar_sensor(simulated_sensor_config, carla_sensor_config, noise_model_config,
-                                              infrastructure_id, sensor_transform, parent_actor=None):
+                                                 infrastructure_id, sensor_transform, parent_actor=None):
         """
         Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
         :param simulated_sensor_config: The configuration for the simulated sensor.
@@ -61,15 +61,14 @@ class SimulatedSensorConfigurator:
                                                data_collector, noise_model)
 
         # Register the sensor for fast retrieval
-        SimulatedSensorConfigurator.infrastructure_sensors[infrastructure_id] = simulated_sensor
+        SimulatedSensorConfigurator.__infrastructure_sensors[infrastructure_id] = simulated_sensor
 
-        return SemanticLidarSensor(infrastructure_id, simulated_sensor_config, carla_sensor_config, carla_world, sensor,
-                                   data_collector, noise_model)
+        return simulated_sensor
 
     @staticmethod
     def get_simulated_sensor(infrastructure_id):
         """Retrieve a SimulatedSensor."""
-        return SimulatedSensorConfigurator.infrastructure_sensors.get(infrastructure_id)
+        return SimulatedSensorConfigurator.__infrastructure_sensors.get(infrastructure_id)
 
     # ------------------------------------------------------------------------------
     # Helper Functions
@@ -79,13 +78,14 @@ class SimulatedSensorConfigurator:
     def __get_initialized_carla_world(simulated_sensor_config):
         """Initialize the CARLA connection, which only needs to be done once."""
 
-        if SimulatedSensorConfigurator.client is None:
-            SimulatedSensorConfigurator.client = carla.Client(simulated_sensor_config["carla_connection"]["carla_host"],
-                                                              simulated_sensor_config["carla_connection"]["carla_port"])
-            SimulatedSensorConfigurator.client.set_timeout(2.0)
-            SimulatedSensorConfigurator.carla_world = SimulatedSensorConfigurator.client.get_world()
+        if SimulatedSensorConfigurator.__client is None:
+            SimulatedSensorConfigurator.__client = carla.Client(
+                simulated_sensor_config["carla_connection"]["carla_host"],
+                simulated_sensor_config["carla_connection"]["carla_port"])
+            SimulatedSensorConfigurator.__client.set_timeout(2.0)
+            SimulatedSensorConfigurator.__carla_world = SimulatedSensorConfigurator.__client.get_world()
 
-        return SimulatedSensorConfigurator.carla_world
+        return SimulatedSensorConfigurator.__carla_world
 
     @staticmethod
     def __generate_lidar_bp(blueprint_library, carla_sensor_config):

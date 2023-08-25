@@ -55,7 +55,7 @@ class SemanticLidarSensor(SimulatedSensor):
         self.__noise_model = noise_model
 
         # Object cache
-        self.__detected_objects = None
+        self.__detected_objects = []
 
     def get_detected_objects_json(self):
         return SimulatedSensorUtils.serialize_to_json(self.__detected_objects)

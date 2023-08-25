@@ -48,6 +48,8 @@ class TestSemanticLidarSensor(unittest.TestCase):
     def test_compute_detected_objects(self):
         # Generate test data
         detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
+        detected_objects = [replace(obj, carla_actor=None)
+                            for obj in detected_objects]
         object_ranges = dict({
             0: 10.0,
             1: 11.0,
@@ -80,6 +82,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
             4: 0.7,
             5: 0.7
         })
+        timestamp = 0
 
         # Mock internal functions
         self.sensor.get_scene_detected_objects = MagicMock(return_value=detected_objects)
@@ -90,8 +93,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor.compute_adjusted_detection_thresholds = MagicMock(return_value=detection_thresholds)
         self.sensor.apply_occlusion = MagicMock(return_value=detected_objects)
         self.sensor.apply_noise = MagicMock(return_value=detected_objects)
-        self.sensor.update_object_metadata = MagicMock(return_value=[replace(obj, carla_actor=None)
-                                                                     for obj in detected_objects])
+        self.sensor.update_object_metadata = MagicMock(return_value=detected_objects)
 
         # Call and provide assertions
         result = self.sensor.compute_detected_objects()
@@ -104,7 +106,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor.apply_occlusion.assert_called_once_with(detected_objects, actor_angular_extents, hitpoints,
                                                             detection_thresholds)
         self.sensor.apply_noise.assert_called_once_with(detected_objects)
-        self.sensor.update_object_metadata.assert_called_once_with(detected_objects)
+        self.sensor.update_object_metadata.assert_called_once_with(detected_objects, hitpoints, timestamp)
 
         self.assertEqual(result, detected_objects)
         self.assertEqual(self.sensor._SemanticLidarSensor__detected_objects, detected_objects)
@@ -113,16 +115,10 @@ class TestSemanticLidarSensor(unittest.TestCase):
         detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
         detected_objects = [replace(obj, carla_actor=None) for obj in detected_objects]
         self.sensor._SemanticLidarSensor__detected_objects = detected_objects
-        serialized  = self.sensor.get_detected_objects_json()
+        serialized = self.sensor.get_detected_objects_json()
         with open("data/test_data_serialized_detected_objects.json", "r") as file:
             expected_serialized_data = json.load(file)
             assert serialized == expected_serialized_data
-
-
-
-
-
-
 
     def test_get_scene_detected_objects(self):
         actors = [MagicMock()]
@@ -255,11 +251,9 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor.is_visible.assert_called_with(actor_angular_extents[5], hitpoints[5], detection_thresholds[5])
 
     def test_is_visible(self):
-
-
         # Problem setup
-        num_horizontal_points_per_scan=360
-        num_vertical_points_per_scan=60
+        num_horizontal_points_per_scan = 360
+        num_vertical_points_per_scan = 60
 
         horizontal_fov = np.deg2rad(15)
         vertical_fov = np.deg2rad(10)
@@ -271,7 +265,8 @@ class TestSemanticLidarSensor(unittest.TestCase):
         points_per_second = num_horizontal_points_per_scan * rotation_frequency
 
         # Mock the carla sensor
-        carla_sensor = MagicMock(points_per_second=points_per_second, rotation_frequency=rotation_frequency, horizontal_fov=sensor_horizontal_fov,
+        carla_sensor = MagicMock(points_per_second=points_per_second, rotation_frequency=rotation_frequency,
+                                 horizontal_fov=sensor_horizontal_fov,
                                  vertical_fov=sensor_vertical_fov, number_of_channels=num_vertical_points_per_scan)
         self.sensor._SemanticLidarSensor__sensor = carla_sensor
 
@@ -295,15 +290,10 @@ class TestSemanticLidarSensor(unittest.TestCase):
         result = self.sensor.is_visible(actor_angular_extents, object_hitpoints, detection_threshold_ratio)
         self.assertFalse(result)
 
-
-
-
-
     def test_compute_expected_num_hitpoints(self):
-
         # Problem setup
-        num_horizontal_points_per_scan=360
-        num_vertical_points_per_scan=60
+        num_horizontal_points_per_scan = 360
+        num_vertical_points_per_scan = 60
 
         horizontal_fov = np.deg2rad(15)
         vertical_fov = np.deg2rad(10)
@@ -315,7 +305,8 @@ class TestSemanticLidarSensor(unittest.TestCase):
         points_per_second = num_horizontal_points_per_scan * rotation_frequency
 
         # Mock the carla sensor
-        carla_sensor = MagicMock(points_per_second=points_per_second, rotation_frequency=rotation_frequency, horizontal_fov=sensor_horizontal_fov,
+        carla_sensor = MagicMock(points_per_second=points_per_second, rotation_frequency=rotation_frequency,
+                                 horizontal_fov=sensor_horizontal_fov,
                                  vertical_fov=sensor_vertical_fov, number_of_channels=num_vertical_points_per_scan)
         self.sensor._SemanticLidarSensor__sensor = carla_sensor
 
@@ -349,7 +340,8 @@ class TestSemanticLidarSensor(unittest.TestCase):
         original_type = "Vehicles"
         expected_type = "Bridge"
 
-        hitpoints = dict([(i, [MagicMock(object_tag=CarlaUtils.get_semantic_tag_id(expected_type))]) for i in range(0, 6)])
+        hitpoints = dict(
+            [(i, [MagicMock(object_tag=CarlaUtils.get_semantic_tag_id(expected_type))]) for i in range(0, 6)])
         timestamp = 3
 
         # Generate objects in original world frame
@@ -390,12 +382,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert np.allclose(new_detected_objects[4].position, np.array([7.0, 13.0, 0.0]))
         assert np.allclose(new_detected_objects[5].position, np.array([13.0, 13.0, 0.0]))
 
-
-
-
-
     def test_update_object_metadata_from_hitpoint(self):
-
         # Build mock objects
         expected_type = 15
         carla_actor = MagicMock()
@@ -417,6 +404,8 @@ class TestSemanticLidarSensor(unittest.TestCase):
         timestamp = 3
 
         # Call and provide assertions
-        corrected_objects = self.sensor.update_object_metadata_from_hitpoint(detected_object, hitpoints.get(detected_object.id), timestamp)
+        corrected_objects = self.sensor.update_object_metadata_from_hitpoint(detected_object,
+                                                                             hitpoints.get(detected_object.id),
+                                                                             timestamp)
         assert "Bridge" == corrected_objects.object_type
         assert timestamp == corrected_objects.timestamp
