@@ -7,6 +7,7 @@
 # governing permissions and limitations under the License.
 
 import carla
+import numpy as np
 
 from src.SemanticLidarSensor import SemanticLidarSensor
 from src.collector.SensorDataCollector import SensorDataCollector
@@ -31,14 +32,16 @@ class SimulatedSensorConfigurator:
 
     @staticmethod
     def register_simulated_semantic_lidar_sensor(simulated_sensor_config, carla_sensor_config, noise_model_config,
-                                                 infrastructure_id, sensor_transform, parent_actor=None):
+                                                 sensor_transform, infrastructure_id=-1, parent_actor=None):
         """
         Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
         :param simulated_sensor_config: The configuration for the simulated sensor.
         :param carla_sensor_config: The configuration for the CARLA sensor.
         :param noise_model_config: The configuration for the noise model.
-        :param infrastructure_id: The ID of the infrastructure.
         :param sensor_transform: The transform of the sensor.
+        :param infrastructure_id: The ID of the infrastructure. Any existing sensor with this ID is overwritten
+                        in the registry, but references to the sensor are not invalidated. Negative value or
+                        None forces auto-assignment.
         :param parent_actor: The parent actor of the sensor (optional).
         :return: A registered SemanticLidarSensor.
         """
@@ -54,6 +57,10 @@ class SimulatedSensorConfigurator:
         sensor = CarlaSensorBuilder.build_sensor(carla_sensor)
         data_collector = SensorDataCollector(carla_world, carla_sensor)
         noise_model = NoiseModelFactory.get_noise_model(noise_model_config["noise_model_name"], noise_model_config)
+
+        # Determine the infrastructure ID
+        if infrastructure_id is None or infrastructure_id < 0:
+            infrastructure_id = np.max(list(SimulatedSensorConfigurator.__infrastructure_sensors.keys())) + 1
 
         # Construct the SimulatedSensor
         simulated_sensor = SemanticLidarSensor(infrastructure_id, simulated_sensor_config, carla_sensor_config,

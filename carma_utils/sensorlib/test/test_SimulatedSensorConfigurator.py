@@ -56,8 +56,9 @@ class TestSimulatedSensorConfigurator(unittest.TestCase):
         sensor = SimulatedSensorConfigurator.register_simulated_semantic_lidar_sensor(simulated_sensor_config,
                                                                                       carla_sensor_config,
                                                                                       noise_model_config,
+                                                                                      sensor_transform,
                                                                                       infrastructure_id,
-                                                                                      sensor_transform, parent_actor)
+                                                                                      parent_actor)
 
         # Validate sensor fields have been correctly constructed
         assert sensor.infrastructure_id == infrastructure_id
