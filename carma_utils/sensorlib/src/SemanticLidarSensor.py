@@ -5,7 +5,7 @@
 # applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
 # governing permissions and limitations under the License.
-
+from collections import deque
 from dataclasses import replace
 
 import numpy as np
@@ -54,6 +54,13 @@ class SemanticLidarSensor(SimulatedSensor):
         self.__data_collector = data_collector
         self.__noise_model = noise_model
 
+        # Structures to store reassociation information
+        self.__actor_id_association = {}
+        trailing_id_associations_count = simulated_sensor_config["geometry_reassociation"][
+            "trailing_id_associations_count"]
+        self.__trailing_id_associations = deque([{}], maxlen=trailing_id_associations_count)
+        self.__rng = np.random.default_rng()
+
         # Object cache
         self.__detected_objects = []
 
@@ -84,6 +91,24 @@ class SemanticLidarSensor(SimulatedSensor):
         # Compute data needed for occlusion operation
         actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
         detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
+
+
+
+
+
+        # Instantaneous geometry association
+        downsampled_hitpoints = self.sample_hitpoints(hitpoints,
+                                                      self.__simulated_sensor_config.geometry_reassociation.sample_count)
+        instantaneous_actor_id_association = self.compute_instantaneous_actor_id_association(downsampled_hitpoints,
+                                                                                             detected_objects)
+
+        # Geometry re-association
+        self.update_actor_id_association(instantaneous_actor_id_association, self.__trailing_id_associations)
+        hitpoints = self.update_object_ids(hitpoints)
+
+
+
+
 
         # Apply occlusion
         detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
@@ -206,6 +231,122 @@ class SemanticLidarSensor(SimulatedSensor):
             "nominal_hitpoint_detection_ratio_threshold"]
 
         return dt_dr * range * t_nominal
+
+
+
+
+
+
+
+
+
+
+    # ------------------------------------------------------------------------------
+    # Geometry Re-Association: Sampling
+    # ------------------------------------------------------------------------------
+
+    def sample_hitpoints(self, hitpoints, sample_size):
+        """Randomly sample points inside each object's set of LIDAR hitpoints. This is done to reduce size of the
+        data being sent through the distance computation."""
+        return dict([(obj_id, self.__rng.choice(object_hitpoints, sample_size)) for obj_id, object_hitpoints in
+                     hitpoints.items()])
+
+    # ------------------------------------------------------------------------------
+    # Geometry Re-Association: Instantaneous Association
+    # ------------------------------------------------------------------------------
+
+    def compute_instantaneous_actor_id_association(self, hitpoints, scene_objects):
+        """
+        Compute the association of each sampled hitpoint to each actor, based on distance of the hitpoint to the
+        actor's position.
+
+        :param hitpoints: Dictionary mapping actor ID to list of hitpoints.
+        :param scene_objects: List of objects currently considered for detection.
+        return: Actor ID association applicable to this time step based on geometry-based association algorithm.
+        """
+
+        # Compute nearest neighbor for each hitpoint
+        direct_nearest_neighbors = dict(
+            [(obj_id, self.compute_closest_object_list(hitpoint_list, scene_objects,
+                                                       self.__simulated_sensor_config["geometry_reassociation"][
+                                                           "geometry_association_max_distance_threshold"])) for
+             obj_id, hitpoint_list in
+             hitpoints.items()])
+
+        # Vote within each dictionary key
+        return dict([(obj_id, self.vote_closest_object(object_list)) for obj_id, object_list in
+                     direct_nearest_neighbors.items()])
+
+    def compute_closest_object_list(self, hitpoints, scene_objects, geometry_association_max_distance_threshold):
+        """Get the closest objects to each hitpoint."""
+        return [self.compute_closest_object(hitpoint, scene_objects, geometry_association_max_distance_threshold) for
+                hitpoint in hitpoints]
+
+    def compute_closest_object(self, hitpoint, scene_objects, geometry_association_max_distance_threshold):
+        """Compute the closest object to this hitpoint."""
+        import numpy as np
+        from scipy.spatial import distance
+        object_positions = [obj.position for obj in scene_objects]
+        distances = distance.cdist([hitpoint], object_positions)[0]
+        closest_index = np.argmin(distances)
+
+        # Observe a maximum object distance to preclude association with far-away objects
+        if distances[closest_index] <= geometry_association_max_distance_threshold:
+            closest_object = scene_objects[closest_index]
+            return closest_object
+        else:
+            return None
+
+    def vote_closest_object(self, object_list):
+        """Determine the object with the highest number of votes as determined by the nearest-neighbor search."""
+        return Counter([obj.id for obj in object_list]).most_common(1)[0][0]
+
+    # ------------------------------------------------------------------------------
+    # Geometry Re-Association: Update Step
+    # ------------------------------------------------------------------------------
+
+    def update_actor_id_association(self, instantaneous_actor_id_association, trailing_id_associations):
+        """
+        Update the most recent association based on the current time step's instantaneously-derived association.
+        """
+        # TODO Should UKF be used?
+        # For now the highest-voted id wins.
+
+        # Extract all keys ("from" ID's) from all dictionaries
+        combined = trailing_id_associations + instantaneous_actor_id_association
+        all_keys = [association.keys() for association in combined]
+
+        # Count number of each mapped ID reach from the from ID, and take the highest-voted
+        self.__actor_id_association = dict(
+            [(key, self.get_highest_counted_target_id(key, combined)) for key in all_keys])
+
+        # Update trailing association queue
+        self.__trailing_id_associations.appendleft(instantaneous_actor_id_association)
+
+    def get_highest_counted_target_id(self, key, combined):
+        """Get the target ID with the highest count for the given key."""
+
+        # Get all targets mapped from the key
+        targets = [association.get(key) for association in combined]
+        targets = filter(lambda x: x is not None, targets)
+
+        # Count the number of times each target is mapped from the key
+        counts = Counter(targets)
+
+        # Return the target with the highest count
+        return counts.most_common(1)[0][0]
+
+    def update_object_ids(self, hitpoints):
+        """Update object ID using the latest ID association"""
+        return dict([(self.self.__actor_id_association[id], hitpoint_list) for id, hitpoint_list in hitpoints])
+
+
+
+
+
+
+
+
 
     # ------------------------------------------------------------------------------
     # Occlusion Filter

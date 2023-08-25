@@ -222,6 +222,155 @@ class TestSemanticLidarSensor(unittest.TestCase):
         # Compare
         assert expected_threshold == threshold
 
+
+
+
+
+
+
+
+
+    def test_sample_hitpoints(self):
+        assert False
+        points_list = [
+            np.array([1.0, 1.0, 1.0]),
+            np.array([2.0, 2.0, 2.0]),
+            np.array([3.0, 3.0, 3.0]),
+            np.array([4.0, 4.0, 4.0]),
+            np.array([5.0, 5.0, 5.0]),
+            np.array([6.0, 6.0, 6.0])
+        ]
+        hitpoints = {
+            0: points_list,
+            1: points_list
+        }
+        self.sensor._SemanticLidarSensor__rng = MagicMock(choice=MagicMock(return_value=points_list[0:3]))
+        sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 3)
+        assert len(sampled_hitpoints[0]) == 3
+        assert len(sampled_hitpoints[1]) == 3
+        assert np.allclose(sampled_hitpoints[0][0], np.array([1.0, 1.0, 1.0]))
+        assert np.allclose(sampled_hitpoints[1][0], np.array([1.0, 1.0, 1.0]))
+
+    def test_compute_instantaneous_actor_id_association(self):
+        assert False
+
+        # Generate test scenario with hitpoints clustered around the object positions
+        pos1 = np.array([4.0, 2.0, 0.0])
+        pos2 = np.array([2.0, 4.0, 0.0])
+        generated_detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
+        scene_objects = [
+            replace(generated_detected_objects[0], id=0, position=pos1),
+            replace(generated_detected_objects[1], id=1, position=pos2)
+        ]
+        points_list_1 = [
+            pos1 + np.array([0.0, 0.0, 0.0]),
+            pos1 + np.array([0.1, 0.0, 0.0]),
+            pos1 + np.array([0.0, 0.1, 0.0]),
+            pos1 + np.array([0.1, 0.1, 0.0]),
+            pos1 + np.array([0.2, 0.0, 0.0]),
+            pos1 + np.array([0.0, 0.2, 0.0])
+        ]
+        points_list_2 = [
+            pos2 + np.array([0.0, 0.0, 0.0]),
+            pos2 + np.array([0.1, 0.0, 0.0]),
+            pos2 + np.array([0.0, 0.1, 0.0]),
+            pos2 + np.array([0.1, 0.1, 0.0]),
+            pos2 + np.array([0.2, 0.0, 0.0]),
+            pos2 + np.array([0.0, 0.2, 0.0])
+        ]
+        downsampled_hitpoints = {
+            0: points_list_1,
+            1: points_list_2
+        }
+
+        # No change to a correct association
+        id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert id_association[0] == 0
+        assert id_association[1] == 1
+
+        # Opposite association
+        downsampled_hitpoints = {
+            1: points_list_1,
+            0: points_list_2
+        }
+        id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert id_association[0] == 1
+        assert id_association[1] == 0
+
+        # Test detected_objects with object IDs not picked up in the scan
+        pos3 = np.array([100.0, 100.0, 0.0])
+        scene_objects.append(replace(generated_detected_objects[2], id=100, position=pos3))
+        downsampled_hitpoints = {
+            0: points_list_1,
+            1: points_list_2
+        }
+        id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert len(id_association) == 2
+        assert id_association[0] == 0
+        assert id_association[1] == 1
+
+        # Test objects picked up in the scan which are not known in the truth state
+        points_list_3 = [
+            pos3 + np.array([0.0, 0.0, 0.0]),
+            pos3 + np.array([0.1, 0.0, 0.0]),
+            pos3 + np.array([0.0, 0.1, 0.0]),
+            pos3 + np.array([0.1, 0.1, 0.0]),
+            pos3 + np.array([0.2, 0.0, 0.0]),
+            pos3 + np.array([0.0, 0.2, 0.0])
+        ]
+        downsampled_hitpoints = {
+            0: points_list_1,
+            1: points_list_2,
+            2: points_list_3
+        }
+        scene_objects = scene_objects[0:-1]
+        id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert len(id_association) == 2
+        assert id_association[0] == 0
+        assert id_association[1] == 1
+
+    def test_compute_closest_object_list(self):
+        self.assertTrue(False)
+
+    def test_compute_closest_object(self):
+        self.assertTrue(False)
+
+    def test_vote_closest_object(self):
+        self.assertTrue(False)
+
+    def test_update_actor_id_association(self):
+        self.assertTrue(False)
+
+    def test_get_highest_counted_target_id(self):
+        assert False
+        # Build mock objects
+        expected_id = 1
+        detected_object = MagicMock(id=expected_id)
+        hitpoints = {expected_id: [MagicMock(), MagicMock(), MagicMock()]}
+
+        # Call and provide assertions
+        actual_id = self.sensor.get_highest_counted_target_id(detected_object, hitpoints)
+        self.assertEqual(expected_id, actual_id)
+
+    def test_update_object_ids(self):
+        self.assertTrue(False)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def test_apply_occlusion(self):
         # Specify inputs
         detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
