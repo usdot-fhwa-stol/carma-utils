@@ -333,9 +333,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
         # Run and assertions
         expected_num_hitpoints = self.sensor.compute_expected_num_hitpoints(horizontal_fov, vertical_fov)
-        assert expected_expected_num_hitpoints == expected_num_hitpoints
-
-
+        self.assertAlmostEqual(expected_expected_num_hitpoints, expected_num_hitpoints)
 
     def test_apply_noise(self):
         detected_objects = [MagicMock(), MagicMock()]

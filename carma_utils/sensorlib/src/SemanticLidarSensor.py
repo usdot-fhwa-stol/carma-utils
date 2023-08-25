@@ -265,7 +265,7 @@ class SemanticLidarSensor(SimulatedSensor):
         horizontal_angular_resolution = self.__sensor.horizontal_fov / num_horizontal_points_per_scan
 
         num_vertical_points_per_scan = self.__sensor.number_of_channels
-        vertical_angular_resolution = num_vertical_points_per_scan / self.__sensor.vertical_fov
+        vertical_angular_resolution = self.__sensor.vertical_fov / num_vertical_points_per_scan
 
         return (horizontal_fov / horizontal_angular_resolution) * (vertical_fov / vertical_angular_resolution)
 
