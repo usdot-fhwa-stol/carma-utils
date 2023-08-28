@@ -5,7 +5,7 @@
 # applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
 # governing permissions and limitations under the License.
-from collections import deque
+from collections import deque, Counter
 from dataclasses import replace
 
 import numpy as np
@@ -87,9 +87,11 @@ class SemanticLidarSensor(SimulatedSensor):
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
 
+# Filter > Prefilter
         # Prefilter
         detected_objects, object_ranges = self.prefilter(detected_objects)
 
+# CarlaDataObject
         # Get LIDAR hitpoints with Actor ID associations
         timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
 
@@ -263,6 +265,14 @@ class SemanticLidarSensor(SimulatedSensor):
         return dict([(obj_id, self.__rng.choice(object_hitpoints, sample_size, replace=False)) for obj_id, object_hitpoints in
                      hitpoints.items()])
 
+
+
+
+
+
+
+
+
     # ------------------------------------------------------------------------------
     # Geometry Re-Association: Instantaneous Association
     # ------------------------------------------------------------------------------
@@ -274,27 +284,28 @@ class SemanticLidarSensor(SimulatedSensor):
 
         :param hitpoints: Dictionary mapping actor ID to list of hitpoints.
         :param scene_objects: List of objects currently considered for detection.
-        return: Actor ID association applicable to this time step based on geometry-based association algorithm.
+        :return: Actor ID association applicable to this time step based on geometry-based association algorithm,
+            in the form of a dictionary mapping {hitpoint ID -> actor ID}.
         """
 
         # Compute nearest neighbor for each hitpoint
         direct_nearest_neighbors = dict(
-            [(obj_id, self.compute_closest_object_list(hitpoint_list, scene_objects,
+            [(hit_id, self.compute_closest_object_id_list(hitpoint_list, scene_objects,
                                                        self.__simulated_sensor_config["geometry_reassociation"][
                                                            "geometry_association_max_distance_threshold"])) for
-             obj_id, hitpoint_list in
+             hit_id, hitpoint_list in
              hitpoints.items()])
 
         # Vote within each dictionary key
-        return dict([(obj_id, self.vote_closest_object(object_list)) for obj_id, object_list in
+        return dict([(hit_id, self.vote_closest_object_id(object_id_list)) for hit_id, object_id_list in
                      direct_nearest_neighbors.items()])
 
-    def compute_closest_object_list(self, hitpoints, scene_objects, geometry_association_max_distance_threshold):
+    def compute_closest_object_id_list(self, hitpoint_list, scene_objects, geometry_association_max_distance_threshold):
         """Get the closest objects to each hitpoint."""
-        return [self.compute_closest_object(hitpoint, scene_objects, geometry_association_max_distance_threshold) for
-                hitpoint in hitpoints]
+        return [self.compute_closest_object_id(hitpoint, scene_objects, geometry_association_max_distance_threshold) for
+                hitpoint in hitpoint_list]
 
-    def compute_closest_object(self, hitpoint, scene_objects, geometry_association_max_distance_threshold):
+    def compute_closest_object_id(self, hitpoint, scene_objects, geometry_association_max_distance_threshold):
         """Compute the closest object to this hitpoint."""
         import numpy as np
         from scipy.spatial import distance
@@ -305,13 +316,39 @@ class SemanticLidarSensor(SimulatedSensor):
         # Observe a maximum object distance to preclude association with far-away objects
         if distances[closest_index] <= geometry_association_max_distance_threshold:
             closest_object = scene_objects[closest_index]
-            return closest_object
+            return closest_object.id
         else:
             return None
 
-    def vote_closest_object(self, object_list):
+    def vote_closest_object_id(self, object_id_list):
         """Determine the object with the highest number of votes as determined by the nearest-neighbor search."""
-        return Counter([obj.id for obj in object_list]).most_common(1)[0][0]
+
+        # Do not consider incorrectly associated ID's
+        object_id_list = list(filter(lambda x: x is not None, object_id_list))
+
+        # Identify the most frequently occurring ID
+        most_frequent_pair = Counter(object_id_list).most_common(1)
+        if most_frequent_pair is not None and len(most_frequent_pair) > 0:
+            return most_frequent_pair[0][0]
+        else:
+            return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # ------------------------------------------------------------------------------
     # Geometry Re-Association: Update Step

@@ -274,8 +274,13 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert np.alltrue( [points_list[i] in sampled_hitpoints[1] for i in range(0, 6)] )
 
 
+
+
+
+
+
+
     def test_compute_instantaneous_actor_id_association(self):
-        assert False
 
         # Generate test scenario with hitpoints clustered around the object positions
         pos1 = np.array([4.0, 2.0, 0.0])
@@ -308,6 +313,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
         # No change to a correct association
         id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert len(id_association) == 2
         assert id_association[0] == 0
         assert id_association[1] == 1
 
@@ -317,6 +323,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
             0: points_list_2
         }
         id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert len(id_association) == 2
         assert id_association[0] == 1
         assert id_association[1] == 0
 
@@ -351,6 +358,30 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert len(id_association) == 2
         assert id_association[0] == 0
         assert id_association[1] == 1
+
+        # Add third object within range of third point scan
+        scene_objects.append(replace(generated_detected_objects[2], id=100, position=pos3))
+        downsampled_hitpoints = {
+            0: points_list_1,
+            1: points_list_2,
+            2: points_list_3
+        }
+        id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert len(id_association) == 3
+        assert id_association[0] == 0
+        assert id_association[1] == 1
+        assert id_association[2] == 100
+
+        # Move third object away from range of point scan (both points and truth state exist but are not within
+        # association range)
+        scene_objects[2] = replace(scene_objects[2], position=np.array([1000.0, 1000.0, 0.0]))
+        id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert len(id_association) == 2
+        assert id_association[0] == 0
+        assert id_association[1] == 1
+
+
+
 
     def test_compute_closest_object_list(self):
         self.assertTrue(False)
