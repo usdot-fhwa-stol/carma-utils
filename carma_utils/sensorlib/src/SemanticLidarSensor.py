@@ -9,6 +9,7 @@ from collections import deque, Counter
 from dataclasses import replace
 
 import numpy as np
+from scipy.spatial import distance
 
 from src.SimulatedSensor import SimulatedSensor
 from src.objects.DetectedObject import DetectedObjectBuilder
@@ -306,19 +307,26 @@ class SemanticLidarSensor(SimulatedSensor):
                 hitpoint in hitpoint_list]
 
     def compute_closest_object_id(self, hitpoint, scene_objects, geometry_association_max_distance_threshold):
-        """Compute the closest object to this hitpoint."""
-        import numpy as np
-        from scipy.spatial import distance
+        """
+        Compute the closest object to this hitpoint, which lies within a maximum distance threshold.
+
+        The threshold prevents association between a point and object which are very far apart.
+        """
         object_positions = [obj.position for obj in scene_objects]
-        distances = distance.cdist([hitpoint], object_positions)[0]
+        distances = distance.cdist([hitpoint], object_positions, 'seuclidean', V=None)[0]
         closest_index = np.argmin(distances)
 
-        # Observe a maximum object distance to preclude association with far-away objects
-        if distances[closest_index] <= geometry_association_max_distance_threshold:
-            closest_object = scene_objects[closest_index]
-            return closest_object.id
-        else:
+        # May result from bad or empty data
+        if closest_index is None or closest_index < 0:
             return None
+
+        # Observe a maximum object distance to preclude association with far-away objects
+        if distances[closest_index] > geometry_association_max_distance_threshold:
+            return None
+
+        # Return closest object's ID
+        closest_object = scene_objects[closest_index]
+        return closest_object.id
 
     def vote_closest_object_id(self, object_id_list):
         """Determine the object with the highest number of votes as determined by the nearest-neighbor search."""
