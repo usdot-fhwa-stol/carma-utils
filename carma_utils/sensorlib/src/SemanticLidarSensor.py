@@ -79,6 +79,11 @@ class SemanticLidarSensor(SimulatedSensor):
         :return: List of DetectedObject objects serialized in JSON form.
         """
 
+
+
+
+# CarlaDataObject
+
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
 
@@ -88,6 +93,9 @@ class SemanticLidarSensor(SimulatedSensor):
         # Get LIDAR hitpoints with Actor ID associations
         timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
 
+
+
+#calculations
         # Compute data needed for occlusion operation
         actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
         detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
@@ -95,26 +103,30 @@ class SemanticLidarSensor(SimulatedSensor):
 
 
 
-
+#GeometryAssociationObject
         # Instantaneous geometry association
-        downsampled_hitpoints = self.sample_hitpoints(hitpoints,
-                                                      self.__simulated_sensor_config.geometry_reassociation.sample_count)
+        sample_size = self.__simulated_sensor_config.geometry_reassociation.sample_count
+        downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
         instantaneous_actor_id_association = self.compute_instantaneous_actor_id_association(downsampled_hitpoints,
                                                                                              detected_objects)
 
         # Geometry re-association
-        self.update_actor_id_association(instantaneous_actor_id_association, self.__trailing_id_associations)
-        hitpoints = self.update_object_ids(hitpoints)
+        self.update_actor_id_association(instantaneous_actor_id_association)
+        hitpoints = self.update_object_ids_from_association(hitpoints)
 
 
 
 
-
+#Occlusion Filter
         # Apply occlusion
         detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
                                                 detection_thresholds)
+
+# NoiseFilter
         # Apply noise
         detected_objects = self.apply_noise(detected_objects)
+
+
 
         # Update object type, reference frame, and detection time
         detected_objects = self.update_object_metadata(detected_objects, hitpoints, timestamp)
@@ -248,7 +260,7 @@ class SemanticLidarSensor(SimulatedSensor):
     def sample_hitpoints(self, hitpoints, sample_size):
         """Randomly sample points inside each object's set of LIDAR hitpoints. This is done to reduce size of the
         data being sent through the distance computation."""
-        return dict([(obj_id, self.__rng.choice(object_hitpoints, sample_size)) for obj_id, object_hitpoints in
+        return dict([(obj_id, self.__rng.choice(object_hitpoints, sample_size, replace=False)) for obj_id, object_hitpoints in
                      hitpoints.items()])
 
     # ------------------------------------------------------------------------------
@@ -305,7 +317,7 @@ class SemanticLidarSensor(SimulatedSensor):
     # Geometry Re-Association: Update Step
     # ------------------------------------------------------------------------------
 
-    def update_actor_id_association(self, instantaneous_actor_id_association, trailing_id_associations):
+    def update_actor_id_association(self, instantaneous_actor_id_association):
         """
         Update the most recent association based on the current time step's instantaneously-derived association.
         """
@@ -313,7 +325,7 @@ class SemanticLidarSensor(SimulatedSensor):
         # For now the highest-voted id wins.
 
         # Extract all keys ("from" ID's) from all dictionaries
-        combined = trailing_id_associations + instantaneous_actor_id_association
+        combined = self.__trailing_id_associations + instantaneous_actor_id_association
         all_keys = [association.keys() for association in combined]
 
         # Count number of each mapped ID reach from the from ID, and take the highest-voted
@@ -336,7 +348,7 @@ class SemanticLidarSensor(SimulatedSensor):
         # Return the target with the highest count
         return counts.most_common(1)[0][0]
 
-    def update_object_ids(self, hitpoints):
+    def update_object_ids_from_association(self, hitpoints):
         """Update object ID using the latest ID association"""
         return dict([(self.self.__actor_id_association[id], hitpoint_list) for id, hitpoint_list in hitpoints])
 

@@ -10,34 +10,34 @@ from src.util.SimulatedSensorUtils import SimulatedSensorUtils
 if __name__ == "__main__":
 
     # Parse arguments
-    argparser = argparse.ArgumentParser(
+    arg_parser = argparse.ArgumentParser(
         description=__doc__)
 
-    argparser.add_argument(
+    arg_parser.add_argument(
         "--id",
         default=-1,
         type=int,
         help="Infrastructure ID to assign to the sensor. Negative value forces auto-assignment. (default: -1)")
 
-    argparser.add_argument(
+    arg_parser.add_argument(
         "--detection-cycle-delay-seconds",
         default=0.5,
         type=float,
         help="Delay in continuous sensor processing loop in seconds. (default: 0.5)")
 
-    argparser.add_argument(
+    arg_parser.add_argument(
         "--sensor-config",
         default="",
         type=str,
         help="Sensor configuration as JSON dictionary. (default: \"\")")
 
-    argparser.add_argument(
+    arg_parser.add_argument(
         "--noise-model-config",
         default="",
         type=str,
         help="Noise model configuration as JSON dictionary. (default: \"\")")
 
-    args = argparser.parse_args()
+    args = arg_parser.parse_args()
 
     # Get inputs
     infrastructure_id = args.id

@@ -231,7 +231,8 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
 
     def test_sample_hitpoints(self):
-        assert False
+
+        # Test data
         points_list = [
             np.array([1.0, 1.0, 1.0]),
             np.array([2.0, 2.0, 2.0]),
@@ -244,12 +245,34 @@ class TestSemanticLidarSensor(unittest.TestCase):
             0: points_list,
             1: points_list
         }
+
+        # Mock the random number generator
+        rng = self.sensor._SemanticLidarSensor__rng
         self.sensor._SemanticLidarSensor__rng = MagicMock(choice=MagicMock(return_value=points_list[0:3]))
         sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 3)
+
+        # Verify mock sampling process works as expected
         assert len(sampled_hitpoints[0]) == 3
         assert len(sampled_hitpoints[1]) == 3
         assert np.allclose(sampled_hitpoints[0][0], np.array([1.0, 1.0, 1.0]))
         assert np.allclose(sampled_hitpoints[1][0], np.array([1.0, 1.0, 1.0]))
+
+        # Restore and verify real sampling returns the expected sample size
+        self.sensor._SemanticLidarSensor__rng = rng
+        sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 4)
+        assert len(sampled_hitpoints[0]) == 4
+        assert len(sampled_hitpoints[1]) == 4
+        sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 5)
+        assert len(sampled_hitpoints[0]) == 5
+        assert len(sampled_hitpoints[1]) == 5
+
+        # Verify sampling does not repeat points
+        sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 6)
+        assert len(sampled_hitpoints[0]) == 6
+        assert len(sampled_hitpoints[1]) == 6
+        assert np.alltrue( [points_list[i] in sampled_hitpoints[0] for i in range(0, 6)] )
+        assert np.alltrue( [points_list[i] in sampled_hitpoints[1] for i in range(0, 6)] )
+
 
     def test_compute_instantaneous_actor_id_association(self):
         assert False

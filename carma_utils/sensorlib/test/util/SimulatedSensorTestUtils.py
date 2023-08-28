@@ -40,9 +40,9 @@ class SimulatedSensorTestUtils:
                 }
             },
             "geometry_reassociation": {
+                "sample_count": 3,
                 "geometry_association_max_distance_threshold": 2.0,
-                "trailing_id_associations_count": 2,
-                "sample_count": 3
+                "trailing_id_associations_count": 2
             },
             "use_sensor_centric_frame": True
         }
