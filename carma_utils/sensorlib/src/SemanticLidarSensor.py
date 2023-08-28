@@ -298,8 +298,11 @@ class SemanticLidarSensor(SimulatedSensor):
              hitpoints.items()])
 
         # Vote within each dictionary key
-        return dict([(hit_id, self.vote_closest_object_id(object_id_list)) for hit_id, object_id_list in
-                     direct_nearest_neighbors.items()])
+        id_association = [(hit_id, self.vote_closest_object_id(object_id_list)) for hit_id, object_id_list in
+            direct_nearest_neighbors.items()]
+
+        # Filter unassociated hitpoints
+        return dict(filter(lambda x: x[1] is not None, id_association))
 
     def compute_closest_object_id_list(self, hitpoint_list, scene_objects, geometry_association_max_distance_threshold):
         """Get the closest objects to each hitpoint."""
@@ -313,7 +316,10 @@ class SemanticLidarSensor(SimulatedSensor):
         The threshold prevents association between a point and object which are very far apart.
         """
         object_positions = [obj.position for obj in scene_objects]
-        distances = distance.cdist([hitpoint], object_positions, 'seuclidean', V=None)[0]
+        distances_list = distance.cdist([hitpoint], object_positions)
+        if len(distances_list) <= 0 or len(distances_list[0]) <= 0:
+            return None
+        distances = distances_list[0]
         closest_index = np.argmin(distances)
 
         # May result from bad or empty data
