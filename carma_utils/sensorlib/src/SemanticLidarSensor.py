@@ -59,7 +59,7 @@ class SemanticLidarSensor(SimulatedSensor):
         self.__actor_id_association = {}
         trailing_id_associations_count = simulated_sensor_config["geometry_reassociation"][
             "trailing_id_associations_count"]
-        self.__trailing_id_associations = deque([{}], maxlen=trailing_id_associations_count)
+        self.__trailing_id_associations = deque([dict() for _ in range(0, trailing_id_associations_count)], maxlen=trailing_id_associations_count)
         self.__rng = np.random.default_rng()
 
         # Object cache
@@ -376,8 +376,9 @@ class SemanticLidarSensor(SimulatedSensor):
         # For now the highest-voted id wins.
 
         # Extract all keys ("from" ID's) from all dictionaries
-        combined = self.__trailing_id_associations + instantaneous_actor_id_association
-        all_keys = [association.keys() for association in combined]
+        ids1 = set(instantaneous_actor_id_association.keys())
+        ids2 = set(inst.keys() for inst in self.__trailing_id_associations)
+        all_ids = ids1.union(ids2)
 
         # Count number of each mapped ID reach from the from ID, and take the highest-voted
         self.__actor_id_association = dict(

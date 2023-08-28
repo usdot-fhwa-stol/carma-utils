@@ -7,6 +7,7 @@
 # governing permissions and limitations under the License.
 
 import unittest
+from collections import deque
 from dataclasses import replace
 from unittest.mock import MagicMock
 
@@ -383,17 +384,67 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
 
 
-    def test_compute_closest_object_list(self):
+    def test_compute_closest_object_id_list(self):
         self.assertTrue(False)
 
-    def test_compute_closest_object(self):
+    def test_compute_closest_object_id(self):
         self.assertTrue(False)
 
-    def test_vote_closest_object(self):
+    def test_vote_closest_object_id(self):
         self.assertTrue(False)
+
+
+
+
+
+
+
+
 
     def test_update_actor_id_association(self):
-        self.assertTrue(False)
+
+        trailing_id_associations_count = 2
+        self.sensor._SemanticLidarSensor__trailing_id_associations = deque([dict() for _ in range(0, trailing_id_associations_count)], maxlen=trailing_id_associations_count)
+
+        # Inject a mapping into initial empty state
+        idmap_i = {0: 0, 1: 1, 2: 2}
+        idmap_iminus1 = dict()
+        idmap_iminus2 = dict()
+
+        self.sensor._SemanticLidarSensor__trailing_id_associations[0] = idmap_iminus1
+        self.sensor._SemanticLidarSensor__trailing_id_associations[1] = idmap_iminus2
+
+        self.sensor.update_actor_id_association(idmap_i)
+
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations[0] == idmap_i
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations[1] == idmap_iminus1
+
+
+
+
+        # Inject empty mapping
+
+
+
+        # Inject same mapping (full)
+        # Inject different mapping (full)
+
+
+        # Inject same mapping (partial)
+        # Inject different mapping (partial)
+
+
+
+        # Inject same mapping (more)
+        # Inject different mapping (more)
+
+
+
+        # Empty trailing structure
+        # Singular trailing structure (even-numbered voting dilemma)
+
+
+
 
     def test_get_highest_counted_target_id(self):
         assert False
@@ -406,7 +457,18 @@ class TestSemanticLidarSensor(unittest.TestCase):
         actual_id = self.sensor.get_highest_counted_target_id(detected_object, hitpoints)
         self.assertEqual(expected_id, actual_id)
 
-    def test_update_object_ids(self):
+
+
+
+
+
+
+
+
+
+
+
+    def test_update_object_ids_from_association(self):
         self.assertTrue(False)
 
 
