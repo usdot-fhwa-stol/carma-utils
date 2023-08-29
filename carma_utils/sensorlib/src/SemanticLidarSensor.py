@@ -292,12 +292,12 @@ class SemanticLidarSensor(SimulatedSensor):
 
     def update_object_metadata(self, detected_objects, hitpoints, timestamp):
         """
-        Update object metadata including object type, detection timestamp, and adjusting the coordinates to the
+        Update object metadata including object type, detection timestamp in seconds, and adjusting the coordinates to the
         sensor-centric frame.
 
         :param detected_objects: List of objects currently considered for detection.
         :param hitpoints: Dictionary containing a list of hitpoints associated with each object ID.
-        :param timestamp: Timestamp of the current frame.
+        :param timestamp: Timestamp of the current frame (seconds).
         :return: List of objects with updated metadata.
         """
         return [self.update_object_metadata_from_hitpoint(obj, hitpoints.get(obj.id), timestamp)
@@ -309,7 +309,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         :param obj: Detected object.
         :param hitpoints: Hitpoints associated with the object.
-        :param timestamp: Timestamp of the current frame.
+        :param timestamp: Timestamp of the current frame (seconds).
         :return: Updated object.
         """
 
