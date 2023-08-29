@@ -70,6 +70,7 @@ add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/timers/ROSTimerFactory.cpp
   src/${PROJECT_NAME}/timers/testing/TestTimer.cpp
   src/${PROJECT_NAME}/timers/testing/TestTimerFactory.cpp
+  )
 add_dependencies( ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
