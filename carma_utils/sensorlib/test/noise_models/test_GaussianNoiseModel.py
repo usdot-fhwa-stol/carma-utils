@@ -47,7 +47,7 @@ class TestGaussianNoiseModel(unittest.TestCase):
         self.assertEqual(object_list[1].rotation.tolist(),
                          [[5.1, 6.1, 7.1], [5.1, 6.1, 7.1], [5.1, 6.1, 7.1], [5.1, 6.1, 7.1]])
 
-        np.random.normal.assert_called_with(0.0, [0.1, 0.1, 0.1], size=(3, 3))
+        np.random.normal.assert_called_with(0.0, [0.1, 0.1, 0.1], size=3)
 
     def test_apply_type_noise(self):
         object_list = SimulatedSensorTestUtils.generate_test_data_detected_objects()
