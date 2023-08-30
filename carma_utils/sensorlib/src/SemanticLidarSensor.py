@@ -15,6 +15,7 @@ from src.SimulatedSensor import SimulatedSensor
 from src.objects.DetectedObject import DetectedObjectBuilder
 
 from src.util.CarlaUtils import CarlaUtils
+from src.util.HistoricalMapper import HistoricalMapper
 from src.util.SimulatedSensorUtils import SimulatedSensorUtils
 
 
@@ -57,9 +58,9 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Structures to store reassociation information
         self.__actor_id_association = {}
-        trailing_id_associations_count = simulated_sensor_config["geometry_reassociation"][
-            "trailing_id_associations_count"]
-        self.__trailing_id_associations = deque([dict() for _ in range(0, trailing_id_associations_count)], maxlen=trailing_id_associations_count)
+        trailing_id_associations_count = simulated_sensor_config[
+            "geometry_reassociation"]["trailing_id_associations_count"]
+        self.__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
         self.__rng = np.random.default_rng()
 
         # Object cache
@@ -371,9 +372,41 @@ class SemanticLidarSensor(SimulatedSensor):
     def update_actor_id_association(self, instantaneous_actor_id_association):
         """
         Update the most recent association based on the current time step's instantaneously-derived association.
+
+         Currently-accepted association
+        queue[0] Prior instantaneous
+        queue[0]
+        queue[0]
+        queue[0]
+        queue[0]
+        queue[0]
+        queue[0]
+        queue[0]
+
+
+        Currently accepted association
+        Prior instantaneous associations
+        Prior missed ....
+
+        For each ID:
+            The history of detected mapping ID's
+            The currently-selected mapping
+
+
+
+
+
         """
+
+
+
         # TODO Should UKF be used?
         # For now the highest-voted id wins.
+
+        # Rotate trailing association queue
+        self.__trailing_id_associations.appendleft(instantaneous_actor_id_association)
+
+
 
         # Extract all keys ("from" ID's) from all dictionaries
         ids1 = set(instantaneous_actor_id_association.keys())
@@ -384,8 +417,6 @@ class SemanticLidarSensor(SimulatedSensor):
         self.__actor_id_association = dict(
             [(key, self.get_highest_counted_target_id(key, combined)) for key in all_keys])
 
-        # Update trailing association queue
-        self.__trailing_id_associations.appendleft(instantaneous_actor_id_association)
 
     def get_highest_counted_target_id(self, key, combined):
         """Get the target ID with the highest count for the given key."""

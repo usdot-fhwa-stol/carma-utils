@@ -484,7 +484,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
     def test_update_actor_id_association_conflict_handling(self):
 
-        trailing_id_associations_count = 2
+        trailing_id_associations_count = 3
         self.sensor._SemanticLidarSensor__trailing_id_associations = deque([dict() for _ in range(0, trailing_id_associations_count)], maxlen=trailing_id_associations_count)
 
         # Empty trailing structure
@@ -512,13 +512,23 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor._SemanticLidarSensor__trailing_id_associations[0] = {0: 0, 1: 1}
         self.sensor._SemanticLidarSensor__trailing_id_associations[1] = {0: 0, 1: 1}
 
-        self.sensor.update_actor_id_association({0: 10, 1: 11, 2: 12})
+        self.sensor.update_actor_id_association({0: 10})
 
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations[0] == {0: 0, 1: 1, 2: 12}
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations[1] == {0: 0, 1: 1, 2: 2}
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations[0] == {}
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations[1] == {}
 
 
         # Reversion
+        self.sensor._SemanticLidarSensor__trailing_id_associations[0] = {0: 0, 1: 1}
+        self.sensor._SemanticLidarSensor__trailing_id_associations[1] = {0: 0, 1: 3}
+        self.sensor._SemanticLidarSensor__trailing_id_associations[2] = {}
+
+        self.sensor.update_actor_id_association({1: 3})
+
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations[0] == {1: 3}
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations[1] == {0: 0, 1: 1}
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations[1] == {0: 0, 1: 3}
+
 
 
 
