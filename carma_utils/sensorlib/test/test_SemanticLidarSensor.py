@@ -93,6 +93,11 @@ class TestSemanticLidarSensor(unittest.TestCase):
             return_value=(0, hitpoints))
         self.sensor.compute_actor_angular_extents = MagicMock(return_value=actor_angular_extents)
         self.sensor.compute_adjusted_detection_thresholds = MagicMock(return_value=detection_thresholds)
+        self.sensor.sample_hitpoints = MagicMock(return_value=hitpoints)
+        self.sensor.compute_instantaneous_actor_id_association = MagicMock(
+            return_value={0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5})
+        self.sensor.update_actor_id_association = MagicMock(return_value={0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5})
+        self.sensor.update_hitpoint_ids_from_association = MagicMock(return_value=hitpoints)
         self.sensor.apply_occlusion = MagicMock(return_value=detected_objects)
         self.sensor.apply_noise = MagicMock(return_value=detected_objects)
         self.sensor.update_object_metadata = MagicMock(return_value=detected_objects)
@@ -225,6 +230,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert expected_threshold == threshold
 
     def test_sample_hitpoints(self):
+
         # Test data
         points_list = [
             np.array([1.0, 1.0, 1.0]),
