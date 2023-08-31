@@ -21,6 +21,7 @@ from src.noise_models.GaussianNoiseModel import GaussianNoiseModel
 from src.objects.CarlaSensor import CarlaSensorBuilder
 from src.objects.DetectedObject import DetectedObjectBuilder
 from src.util.CarlaUtils import CarlaUtils
+from src.util.HistoricalMapper import HistoricalMapper
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
@@ -403,38 +404,37 @@ class TestSemanticLidarSensor(unittest.TestCase):
     # 2
     def test_update_actor_id_association(self):
 
-        trailing_id_associations_count = 2
-        self.sensor._SemanticLidarSensor__trailing_id_associations = deque([dict() for _ in range(0, trailing_id_associations_count)], maxlen=trailing_id_associations_count)
-
-        # Inject a mapping into initial empty state
-        self.sensor._SemanticLidarSensor__trailing_id_associations[0] = dict()
-        self.sensor._SemanticLidarSensor__trailing_id_associations[1] = dict()
-
-        self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
-
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations[0] == {0: 0, 1: 1, 2: 2}
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations[1] == dict()
-
-
-        # Ensure trailing structure is rotated correctly
-        self.sensor._SemanticLidarSensor__trailing_id_associations[0] = {0: 0, 1: 1, 2: 2}
-        self.sensor._SemanticLidarSensor__trailing_id_associations[1] = {0: 0, 1: 1}
-
-        self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2, 3: 3})
-
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations[0] == {0: 0, 1: 1, 2: 2, 3: 3}
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations[1] == {0: 0, 1: 1, 2: 2}
-
-
+        trailing_id_associations_count = 1
+        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
+        instantaneous_actor_id_association = {
+            0: 0,
+            1: 1,
+            2: 2
+        }
 
         # Inject empty mapping
-        self.sensor._SemanticLidarSensor__trailing_id_associations[0] = {0: 0, 1: 1, 2: 2}
-        self.sensor._SemanticLidarSensor__trailing_id_associations[1] = {0: 0, 1: 1}
-
         self.sensor.update_actor_id_association({})
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == []
+        assert self.sensor._SemanticLidarSensor__actor_id_association == {}
 
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations[0] == {0: 0, 1: 1, 2: 2}
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations[1] == {0: 0, 1: 1, 2: 2}
+        # Inject one mapping
+        current_mapping = self.sensor.update_actor_id_association(instantaneous_actor_id_association)
+        assert current_mapping == {0: 0, 1: 1, 2: 2}
+        assert self.sensor._SemanticLidarSensor__actor_id_association == {0: 0, 1: 1, 2: 2}
+
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2]
+
+
+    def test_hold(self):
+        # Accumulate mapping
+        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
+        for hitpoint_id, object_id in instantaneous_actor_id_association.items():
+            self.sensor.update_actor_id_association({hitpoint_id: object_id})
+
+
 
 
 

@@ -33,6 +33,9 @@ class HistoricalMapper:
     # Queue management operations
     # ------------------------------------------------------------------------------
 
+    def get_keys(self):
+        return list(self.__trailing_dictionary.keys())
+
     def get_queue(self, key):
         return self.__get_queue(key)
 

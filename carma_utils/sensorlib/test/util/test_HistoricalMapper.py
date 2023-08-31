@@ -106,6 +106,15 @@ class TestHistoricalMapper(unittest.TestCase):
         v = mapper.pop(1000)
         assert v == None
 
+    def test_get_keys(self):
+
+        mapper = HistoricalMapper(3)
+        mapper.push(0, 0)
+        mapper.push(2, 3)
+        mapper.push(3, 3)
+        assert mapper.get_keys() == [0, 2, 3]
+
+
     def test_get_queue(self):
 
         mapper = HistoricalMapper(3)

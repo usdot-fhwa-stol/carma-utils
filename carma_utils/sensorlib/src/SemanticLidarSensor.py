@@ -335,7 +335,7 @@ class SemanticLidarSensor(SimulatedSensor):
         closest_object = scene_objects[closest_index]
         return closest_object.id
 
-    def vote_closest_object_id(self, object_id_list):
+    def vote_most_frequent_id(self, object_id_list):
         """Determine the object with the highest number of votes as determined by the nearest-neighbor search."""
 
         # Do not consider incorrectly associated ID's
@@ -372,64 +372,26 @@ class SemanticLidarSensor(SimulatedSensor):
     def update_actor_id_association(self, instantaneous_actor_id_association):
         """
         Update the most recent association based on the current time step's instantaneously-derived association.
-
-         Currently-accepted association
-        queue[0] Prior instantaneous
-        queue[0]
-        queue[0]
-        queue[0]
-        queue[0]
-        queue[0]
-        queue[0]
-        queue[0]
-
-
-        Currently accepted association
-        Prior instantaneous associations
-        Prior missed ....
-
-        For each ID:
-            The history of detected mapping ID's
-            The currently-selected mapping
-
-
-
-
-
         """
 
+        if instantaneous_actor_id_association is None or len(instantaneous_actor_id_association) == 0:
+            return self.__actor_id_association
+
+        # Prepend instantaneous association to trailing associations
+        for hitpoint_id, obj_id in instantaneous_actor_id_association.items():
+            self.__trailing_id_associations.push(hitpoint_id, obj_id)
+
+        # Recompute current association
+        self.__actor_id_association = dict()
+        for hitpoint_id in instantaneous_actor_id_association.keys():
+            q = list(self.__trailing_id_associations.get_queue(hitpoint_id))
+            obj_id = self.vote_most_frequent_id(q)
+            self.__actor_id_association[hitpoint_id] = obj_id
+
+        return self.__actor_id_association
 
 
-        # TODO Should UKF be used?
-        # For now the highest-voted id wins.
 
-        # Rotate trailing association queue
-        self.__trailing_id_associations.appendleft(instantaneous_actor_id_association)
-
-
-
-        # Extract all keys ("from" ID's) from all dictionaries
-        ids1 = set(instantaneous_actor_id_association.keys())
-        ids2 = set(inst.keys() for inst in self.__trailing_id_associations)
-        all_ids = ids1.union(ids2)
-
-        # Count number of each mapped ID reach from the from ID, and take the highest-voted
-        self.__actor_id_association = dict(
-            [(key, self.get_highest_counted_target_id(key, combined)) for key in all_keys])
-
-
-    def get_highest_counted_target_id(self, key, combined):
-        """Get the target ID with the highest count for the given key."""
-
-        # Get all targets mapped from the key
-        targets = [association.get(key) for association in combined]
-        targets = filter(lambda x: x is not None, targets)
-
-        # Count the number of times each target is mapped from the key
-        counts = Counter(targets)
-
-        # Return the target with the highest count
-        return counts.most_common(1)[0][0]
 
     def update_object_ids_from_association(self, hitpoints):
         """Update object ID using the latest ID association"""
