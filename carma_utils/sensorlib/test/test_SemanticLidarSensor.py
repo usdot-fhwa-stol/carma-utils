@@ -7,7 +7,6 @@
 # governing permissions and limitations under the License.
 
 import unittest
-from collections import deque
 from dataclasses import replace
 from unittest.mock import MagicMock
 
@@ -230,7 +229,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert expected_threshold == threshold
 
     def test_sample_hitpoints(self):
-
         # Test data
         points_list = [
             np.array([1.0, 1.0, 1.0]),

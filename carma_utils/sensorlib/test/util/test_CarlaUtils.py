@@ -77,7 +77,6 @@ class TestCarlaUtils(unittest.TestCase):
         result = CarlaUtils.determine_object_type(carla_actor, ["Pedestrians", "Vehicles"])
         self.assertEqual(result, "NONE")
 
-
     def test_get_semantic_tag_name(self):
         assert CarlaUtils.get_semantic_tag_name(0) == "NONE"
         assert CarlaUtils.get_semantic_tag_name(3) == "Other"

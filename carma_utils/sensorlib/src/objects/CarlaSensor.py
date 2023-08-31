@@ -13,6 +13,7 @@ import numpy as np
 
 from src.util.CarlaUtils import CarlaUtils
 
+
 @dataclass(frozen=True)
 class CarlaSensor:
     """Wrapper class for the carla.Sensor."""
@@ -23,6 +24,7 @@ class CarlaSensor:
     horizontal_fov: float
     vertical_fov: float
     number_of_channels: int
+
 
 class CarlaSensorBuilder:
     @staticmethod

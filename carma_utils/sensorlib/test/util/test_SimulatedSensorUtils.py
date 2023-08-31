@@ -50,4 +50,3 @@ class TestSimulatedSensorUtils(unittest.TestCase):
         assert len(json_str_list) == 2
         self.assertEqual(json_str_list[0], expected_json_str)
         self.assertEqual(json_str_list[1], expected_json_str)
-
