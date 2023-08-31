@@ -383,7 +383,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Recompute current association
         self.__actor_id_association = dict()
-        for hitpoint_id in instantaneous_actor_id_association.keys():
+        for hitpoint_id in self.__trailing_id_associations.get_keys():
             q = list(self.__trailing_id_associations.get_queue(hitpoint_id))
             obj_id = self.vote_most_frequent_id(q)
             self.__actor_id_association[hitpoint_id] = obj_id
