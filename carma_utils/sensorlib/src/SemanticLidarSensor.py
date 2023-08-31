@@ -116,7 +116,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Geometry re-association
         self.update_actor_id_association(instantaneous_actor_id_association)
-        hitpoints = self.update_object_ids_from_association(hitpoints)
+        hitpoints = self.update_hitpoint_ids_from_association(hitpoints)
 
 
 
@@ -299,7 +299,7 @@ class SemanticLidarSensor(SimulatedSensor):
              hitpoints.items()])
 
         # Vote within each dictionary key
-        id_association = [(hit_id, self.vote_closest_object_id(object_id_list)) for hit_id, object_id_list in
+        id_association = [(hit_id, self.vote_most_frequent_id(object_id_list)) for hit_id, object_id_list in
             direct_nearest_neighbors.items()]
 
         # Filter unassociated hitpoints
@@ -393,9 +393,11 @@ class SemanticLidarSensor(SimulatedSensor):
 
 
 
-    def update_object_ids_from_association(self, hitpoints):
+    def update_hitpoint_ids_from_association(self, hitpoints):
         """Update object ID using the latest ID association"""
-        return dict([(self.self.__actor_id_association[id], hitpoint_list) for id, hitpoint_list in hitpoints])
+
+        # Update to the current association's mapped ID, or use the original ID as default
+        return dict([(self.__actor_id_association.get(id, id), hitpoint_list) for id, hitpoint_list in hitpoints.items()])
 
 
 

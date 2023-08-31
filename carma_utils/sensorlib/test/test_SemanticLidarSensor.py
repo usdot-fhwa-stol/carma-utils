@@ -386,10 +386,37 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
 
     def test_compute_closest_object_id_list(self):
-        self.assertTrue(False)
+
+        # Build test data
+        hitpoint_list = [MagicMock(id=0), MagicMock(id=1)]
+        generated_detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
+        scene_objects = [
+            replace(generated_detected_objects[0], id=0),
+            replace(generated_detected_objects[1], id=1)
+        ]
+        geometry_association_max_distance_threshold = 0.2
+
+        # Mock internal function
+        self.sensor.compute_closest_object_id = MagicMock(return_value=0)
+
+        # Call
+        self.sensor.compute_closest_object_id_list(hitpoint_list, scene_objects,
+                                                   geometry_association_max_distance_threshold)
+
+        # Assert internal function called correctly
+        assert self.sensor.compute_closest_object_id.call_count == 2
+        self.sensor.compute_closest_object_id.assert_any_call(hitpoint_list[0], scene_objects,
+                                                                geometry_association_max_distance_threshold)
+        self.sensor.compute_closest_object_id.assert_any_call(hitpoint_list[1], scene_objects,
+                                                                geometry_association_max_distance_threshold)
+
+
 
     def test_compute_closest_object_id(self):
-        self.assertTrue(False)
+        def compute_closest_object_id(self, hitpoint, scene_objects, geometry_association_max_distance_threshold):
+
+
+
 
     def test_vote_most_frequent_id(self):
         self.assertTrue(False)
@@ -577,12 +604,55 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
 
     # 3
-    def test_update_object_ids_from_association(self):
-        self.assertTrue(False)
+    def test_update_hitpoint_ids_from_association(self):
+        
+        hitpoints = {
+            0: "Point 0",
+            1: "Point 1",
+            2: "Point 2",
+            3: "Point 3",
+            4: "Point 4",
+            5: "Point 5"
+        }
 
+        # Same mapping
+        self.sensor._SemanticLidarSensor__actor_id_association = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+        updated_hitpoints = self.sensor.update_hitpoint_ids_from_association(hitpoints)
+        assert updated_hitpoints[0] == "Point 0"
+        assert updated_hitpoints[1] == "Point 1"
+        assert updated_hitpoints[2] == "Point 2"
+        assert updated_hitpoints[3] == "Point 3"
+        assert updated_hitpoints[4] == "Point 4"
+        assert updated_hitpoints[5] == "Point 5"
 
+        # Full new mapping
+        self.sensor._SemanticLidarSensor__actor_id_association = {0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 0}
+        updated_hitpoints = self.sensor.update_hitpoint_ids_from_association(hitpoints)
+        assert updated_hitpoints[1] == "Point 0"
+        assert updated_hitpoints[2] == "Point 1"
+        assert updated_hitpoints[3] == "Point 2"
+        assert updated_hitpoints[4] == "Point 3"
+        assert updated_hitpoints[5] == "Point 4"
+        assert updated_hitpoints[0] == "Point 5"
 
+        # Partial new mapping - Preserve unmapped ID's
+        self.sensor._SemanticLidarSensor__actor_id_association = {0: 10, 3: 100}
+        updated_hitpoints = self.sensor.update_hitpoint_ids_from_association(hitpoints)
+        assert updated_hitpoints[10] == "Point 0"
+        assert updated_hitpoints[1] == "Point 1"
+        assert updated_hitpoints[2] == "Point 2"
+        assert updated_hitpoints[100] == "Point 3"
+        assert updated_hitpoints[4] == "Point 4"
+        assert updated_hitpoints[5] == "Point 5"
 
+        # Conflicted mapping
+        self.sensor._SemanticLidarSensor__actor_id_association = {0: 10, 1: 10}
+        updated_hitpoints = self.sensor.update_hitpoint_ids_from_association(hitpoints)
+        assert updated_hitpoints[10] == "Point 1"
+        assert updated_hitpoints[2] == "Point 2"
+        assert updated_hitpoints[3] == "Point 3"
+        assert updated_hitpoints[4] == "Point 4"
+        assert updated_hitpoints[5] == "Point 5"
 
 
 
