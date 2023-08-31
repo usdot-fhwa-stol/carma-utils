@@ -1,4 +1,4 @@
-# Copyright (C) 2021 LEIDOS.
+# Copyright (C) 2023 LEIDOS.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
@@ -34,7 +34,7 @@ class SensorDataCollector:
         self.__carla_sensor = carla_sensor
         self.__prev_angle = 0.0
 
-        # Time of latest data capture
+        # Time of latest data capture (in seconds)
         self.__timestamp = 0
 
         # Store current and prior data collections. The current is actively being added to, previous is finalized.
@@ -44,7 +44,12 @@ class SensorDataCollector:
         self.__carla_sensor.listen(self.__collect_sensor_data)
 
     def get_carla_lidar_hitpoints(self):
-        # Prior collection is always complete
+        """
+        Prior collection is always complete.
+
+        :return: Timestamp (in seconds), and collected hitpoints from most recent frame (dictionary mapping object ID
+            to list of np.array points).
+        """
         return self.__timestamp, self.__data[1]
 
     def __collect_sensor_data(self, raw_sensor_data):
@@ -57,7 +62,7 @@ class SensorDataCollector:
         :return: None
         """
 
-        # Update the timestamp
+        # Update the timestamp (in integer seconds)
         self.__timestamp = int(raw_sensor_data.timestamp)
 
         # Check if this data collection belongs to the same data collection run as the previous time step
