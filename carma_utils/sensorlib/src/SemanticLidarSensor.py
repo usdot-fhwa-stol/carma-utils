@@ -338,6 +338,9 @@ class SemanticLidarSensor(SimulatedSensor):
     def vote_most_frequent_id(self, object_id_list):
         """Determine the object with the highest number of votes as determined by the nearest-neighbor search."""
 
+        if object_id_list is None or len(object_id_list) == 0:
+            return None
+
         # Do not consider incorrectly associated ID's
         object_id_list = list(filter(lambda x: x is not None, object_id_list))
 

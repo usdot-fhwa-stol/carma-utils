@@ -224,16 +224,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         # Compare
         assert expected_threshold == threshold
 
-
-
-
-
-
-
-
-
     def test_sample_hitpoints(self):
-
         # Test data
         points_list = [
             np.array([1.0, 1.0, 1.0]),
@@ -272,18 +263,10 @@ class TestSemanticLidarSensor(unittest.TestCase):
         sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 6)
         assert len(sampled_hitpoints[0]) == 6
         assert len(sampled_hitpoints[1]) == 6
-        assert np.alltrue( [points_list[i] in sampled_hitpoints[0] for i in range(0, 6)] )
-        assert np.alltrue( [points_list[i] in sampled_hitpoints[1] for i in range(0, 6)] )
+        assert np.alltrue([points_list[i] in sampled_hitpoints[0] for i in range(0, 6)])
+        assert np.alltrue([points_list[i] in sampled_hitpoints[1] for i in range(0, 6)])
 
-
-
-
-
-
-
-    # 1
     def test_compute_instantaneous_actor_id_association(self):
-
         # Generate test scenario with hitpoints clustered around the object positions
         pos1 = np.array([4.0, 2.0, 0.0])
         pos2 = np.array([2.0, 4.0, 0.0])
@@ -382,11 +365,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert id_association[0] == 0
         assert id_association[1] == 1
 
-
-
-
     def test_compute_closest_object_id_list(self):
-
         # Build test data
         hitpoint_list = [MagicMock(id=0), MagicMock(id=1)]
         generated_detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
@@ -406,31 +385,106 @@ class TestSemanticLidarSensor(unittest.TestCase):
         # Assert internal function called correctly
         assert self.sensor.compute_closest_object_id.call_count == 2
         self.sensor.compute_closest_object_id.assert_any_call(hitpoint_list[0], scene_objects,
-                                                                geometry_association_max_distance_threshold)
+                                                              geometry_association_max_distance_threshold)
         self.sensor.compute_closest_object_id.assert_any_call(hitpoint_list[1], scene_objects,
-                                                                geometry_association_max_distance_threshold)
-
-
+                                                              geometry_association_max_distance_threshold)
 
     def test_compute_closest_object_id(self):
-        def compute_closest_object_id(self, hitpoint, scene_objects, geometry_association_max_distance_threshold):
+        # Generate test scenario with hitpoints clustered around the object positions
+        pos1 = np.array([4.0, 2.0, 0.0])
+        pos2 = np.array([2.0, 4.0, 0.0])
+        generated_detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
+        scene_objects = [
+            replace(generated_detected_objects[0], id=0, position=pos1),
+            replace(generated_detected_objects[1], id=1, position=pos2)
+        ]
+        points_list_1 = [
+            pos1 + np.array([0.0, 0.0, 0.0]),
+            pos1 + np.array([0.1, 0.0, 0.0]),
+            pos1 + np.array([0.0, 0.1, 0.0]),
+            pos1 + np.array([0.1, 0.1, 0.0]),
+            pos1 + np.array([0.2, 0.0, 0.0]),
+            pos1 + np.array([0.0, 0.2, 0.0])
+        ]
+        points_list_2 = [
+            pos2 + np.array([0.0, 0.0, 0.0]),
+            pos2 + np.array([0.1, 0.0, 0.0]),
+            pos2 + np.array([0.0, 0.1, 0.0]),
+            pos2 + np.array([0.1, 0.1, 0.0]),
+            pos2 + np.array([0.2, 0.0, 0.0]),
+            pos2 + np.array([0.0, 0.2, 0.0])
+        ]
+        downsampled_hitpoints = {
+            0: points_list_1,
+            1: points_list_2
+        }
+        geometry_association_max_distance_threshold = 0.6
 
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][0], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 0
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][1], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 0
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][2], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 0
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][3], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 0
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][4], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 0
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][5], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 0
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][0], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 1
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][1], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 1
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][2], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 1
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][3], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 1
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][4], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 1
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][5], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 1
 
-
+        # Point out of range
+        geometry_association_max_distance_threshold = 0.001
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][1], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id is None
 
     def test_vote_most_frequent_id(self):
-        self.assertTrue(False)
+        # Same
+        assert 1 == self.sensor.vote_most_frequent_id([1, 1, 1])
 
+        # Odd voting
+        assert 1 == self.sensor.vote_most_frequent_id([1, 2, 1])
+        assert 1 == self.sensor.vote_most_frequent_id([1, 1, 2])
+        assert 2 == self.sensor.vote_most_frequent_id([2, 2, 1])
 
+        # Even voting
+        assert 1 == self.sensor.vote_most_frequent_id([1, 1])
+        assert 1 == self.sensor.vote_most_frequent_id([1, 2])
+        assert 2 == self.sensor.vote_most_frequent_id([2, 1])
 
+        # Bad data
+        assert 1 == self.sensor.vote_most_frequent_id([1, None, 1])
+        assert 1 == self.sensor.vote_most_frequent_id([None, None, 1, None])
+        assert self.sensor.vote_most_frequent_id([None, None]) is None
+        assert self.sensor.vote_most_frequent_id([]) is None
+        assert self.sensor.vote_most_frequent_id(None) is None
 
-
-
-
-
-    # 2
     def test_update_actor_id_association(self):
-
         trailing_id_associations_count = 3
         self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
         instantaneous_actor_id_association = {
@@ -490,9 +544,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1, 1]
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2, 2, 2]
 
-
-
-
         # Inject different mapping (full)
         self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
         current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
@@ -505,8 +556,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [2, 0, 0]
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [0, 1, 1]
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [1, 2, 2]
-
-
 
         # Inject same mapping (partial)
         self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
@@ -521,8 +570,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2, 2]
 
-
-
         # Inject different mapping (partial)
         self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
         current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
@@ -535,8 +582,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0]
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [1, 2, 2]
-
-
 
         # Odd voting
         self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(3)
@@ -551,9 +596,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2, 1, 2]
 
-
-
-
         # Even voting - Previous incorrect - Newer information should be preferred
         self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(2)
         current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
@@ -566,7 +608,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0]
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2, 1]
-
 
         # Even voting - Current incorrect - Newer information should be preferred
         self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(2)
@@ -581,31 +622,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
         assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [1, 2]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # 3
     def test_update_hitpoint_ids_from_association(self):
-        
         hitpoints = {
             0: "Point 0",
             1: "Point 1",
@@ -653,18 +670,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert updated_hitpoints[3] == "Point 3"
         assert updated_hitpoints[4] == "Point 4"
         assert updated_hitpoints[5] == "Point 5"
-
-
-
-
-
-
-
-
-
-
-
-
 
     def test_apply_occlusion(self):
         # Specify inputs

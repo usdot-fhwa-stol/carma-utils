@@ -114,7 +114,6 @@ class TestHistoricalMapper(unittest.TestCase):
         mapper.push(3, 3)
         assert mapper.get_keys() == [0, 2, 3]
 
-
     def test_get_queue(self):
 
         mapper = HistoricalMapper(3)
