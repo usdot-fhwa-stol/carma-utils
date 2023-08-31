@@ -59,8 +59,3 @@ class HistoricalMapper:
         q = deque(maxlen=self.__queue_length)
         self.__trailing_dictionary[key] = q
         return q
-
-    #
-    # def update_actor_id_association(instantaneous_actor_id_association):
-    #
-    #     def update_object_ids_from_association(hitpoints):
