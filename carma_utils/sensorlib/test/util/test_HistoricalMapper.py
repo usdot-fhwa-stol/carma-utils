@@ -1,4 +1,5 @@
 import unittest
+from collections import deque
 
 from src.util.HistoricalMapper import HistoricalMapper
 
@@ -8,7 +9,6 @@ class TestHistoricalMapper(unittest.TestCase):
     def setUp(self):
         self.data_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 999]
 
-
     # ------------------------------------------------------------------------------
     # Unit tests
     # ------------------------------------------------------------------------------
@@ -17,28 +17,129 @@ class TestHistoricalMapper(unittest.TestCase):
         mapper = HistoricalMapper(3)
 
         # Build 0 queue
-        assert len(mapper.get_queue(0)) == 0
+        assert mapper._HistoricalMapper__trailing_dictionary == {}
         mapper.push(0, 0)
-        assert len(mapper.get_queue(0)) == 1
-        assert list(mapper.get_queue(0)) == [0]
+        assert list(mapper._HistoricalMapper__trailing_dictionary[0]) == [0]
+
         mapper.push(0, 0)
-        assert len(mapper.get_queue(0)) == 2
-        assert list(mapper.get_queue(0)) == [0, 0]
+        assert list(mapper._HistoricalMapper__trailing_dictionary[0]) == [0, 0]
 
         # Queues should not interfere with each other
-        assert len(mapper.get_queue(1)) == 0
-        mapper.push(0, 0)
-        assert len(mapper.get_queue(0)) == 1
-        assert list(mapper.get_queue(0)) == [0]
+        mapper.push(1, 1)
+        assert list(mapper._HistoricalMapper__trailing_dictionary[0]) == [0, 0]
+        assert list(mapper._HistoricalMapper__trailing_dictionary[1]) == [1]
 
+        # Queue length should be limited
+        mapper.push(10, 0)
+        mapper.push(10, 1)
+        mapper.push(10, 2)
+        assert list(mapper._HistoricalMapper__trailing_dictionary[10]) == [2, 1, 0]
+        mapper.push(10, 3)
+        mapper.push(10, 4)
+        mapper.push(10, 5)
+        assert list(mapper._HistoricalMapper__trailing_dictionary[10]) == [5, 4, 3]
+
+        # Queue order should be LIFO
+        mapper.push(2, 0)
+        mapper.push(2, 1)
+        mapper.push(2, 2)
+        assert list(mapper._HistoricalMapper__trailing_dictionary[2]) == [2, 1, 0]
 
     def test_get(self):
-        pass
-    def test_get_queue(self):
-        pass
-    def test_remove(self):
-        pass
+        mapper = HistoricalMapper(3)
 
+        mapper._HistoricalMapper__trailing_dictionary = {
+            0: deque([2, 1, 0], maxlen=3),
+            1: deque([2, 1], maxlen=3),
+            2: deque([3], maxlen=3)
+        }
+
+        # Assert get accesses queues by key and index correctly
+        assert mapper.get(0, 0) == 2
+        assert mapper.get(0, 1) == 1
+        assert mapper.get(0, 2) == 0
+
+        assert mapper.get(1, 0) == 2
+        assert mapper.get(1, 1) == 1
+
+        assert mapper.get(2, 0) == 3
+
+        # Default index should be 0
+        assert mapper.get(0) == 2
+        assert mapper.get(1) == 2
+        assert mapper.get(2) == 3
+
+        # Error conditions
+        assert mapper.get(100) is None
+        assert mapper.get(100, 0) is None
+        assert mapper.get(100, 10) is None
+        assert mapper.get(1, 1000) is None
+        assert mapper.get(1, -1) is None
+
+    def test_pop(self):
+        mapper = HistoricalMapper(3)
+
+        mapper._HistoricalMapper__trailing_dictionary = {
+            0: deque([2, 1, 0], maxlen=3),
+            1: deque([2, 1], maxlen=3),
+            2: deque([3], maxlen=3)
+        }
+
+        # Nominal
+        v = mapper.pop(0)
+        assert v == 2
+        assert list(mapper._HistoricalMapper__trailing_dictionary[0]) == [1, 0]
+
+        v = mapper.pop(0)
+        assert v == 1
+        assert list(mapper._HistoricalMapper__trailing_dictionary[0]) == [0]
+
+        v = mapper.pop(0)
+        assert v == 0
+        assert list(mapper._HistoricalMapper__trailing_dictionary[0]) == []
+
+        v = mapper.pop(0)
+        assert v == None
+        assert list(mapper._HistoricalMapper__trailing_dictionary[0]) == []
+
+        # Error conditions
+        v = mapper.pop(1000)
+        assert v == None
+
+    def test_get_queue(self):
+
+        mapper = HistoricalMapper(3)
+
+        mapper._HistoricalMapper__trailing_dictionary = {
+            0: deque([2, 1, 0], maxlen=3),
+            1: deque([2, 1], maxlen=3),
+            2: deque([3], maxlen=3)
+        }
+
+        assert list(mapper.get_queue(0)) == [2, 1, 0]
+        assert list(mapper.get_queue(100)) == []
+
+    def test_remove_queue(self):
+
+        mapper = HistoricalMapper(3)
+
+        mapper._HistoricalMapper__trailing_dictionary = {
+            0: deque([2, 1, 0], maxlen=3),
+            1: deque([2, 1], maxlen=3),
+            2: deque([3], maxlen=3)
+        }
+
+        # Nominal operation
+        assert list(mapper.get_queue(0)) == [2, 1, 0]
+        mapper.remove_queue(0)
+        assert list(mapper.get_queue(0)) == []
+
+        # Error conditions - don't throw exception
+        mapper.remove_queue(100)
+
+
+    def test_remove(self):
+            pass
 
     # ------------------------------------------------------------------------------
     # Integration tests
@@ -70,7 +171,6 @@ class TestHistoricalMapper(unittest.TestCase):
         assert mapper.get(2, 2) == 2
 
     def test_stairstep_down(self):
-
         mapper = HistoricalMapper(3)
 
         mapper.push(0, 0)
@@ -108,96 +208,4 @@ class TestHistoricalMapper(unittest.TestCase):
         assert list(q0) == [0, 0, 0]
         assert list(q1) == [1, 1]
         assert list(q2) == [2]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        def test_case_nominal_usage_list(self):
-
-            # Set up the switch
-            data_pipe = switch()
-
-            # Assign a value through a function
-            case(data_pipe, 1, lambda x: "One")
-
-            # Assign values directly
-            case(data_pipe, 2, "Two")
-            case(data_pipe, 3, "Three")
-            case(data_pipe, 4, "Four")
-            case(data_pipe, 5, "Five")
-            case(data_pipe, 6, "Six")
-            case(data_pipe, 7, "Seven")
-            case(data_pipe, 8, "Eight")
-            case(data_pipe, 9, "Nine")
-            case(data_pipe, 10, "Ten")
-
-            # Assign a default value
-            case(data_pipe, default=lambda x: "Unknown")
-
-            # Run the switch
-            out = list(map(data_pipe, self.data_list))
-            self.assertListEqual(out, self.expected_data_list)
-
-        def test_case_nominal_usage_dict(self):
-
-            # Set up the switch
-            data_pipe = switch()
-
-            # Assign a value through a function
-            case(data_pipe, 1, lambda x: "One")
-
-            # Assign values directly
-            case(data_pipe, 2, "Two")
-            case(data_pipe, 3, "Three")
-            case(data_pipe, 4, "Four")
-            case(data_pipe, 5, "Five")
-            case(data_pipe, 6, "Six")
-            case(data_pipe, 7, "Seven")
-            case(data_pipe, 8, "Eight")
-            case(data_pipe, 9, "Nine")
-            case(data_pipe, 10, "Ten")
-
-            # Assign a default value
-            case(data_pipe, default=lambda x: "Unknown")
-
-            # Run the switch
-            out = list(map(data_pipe, self.data_dict))
-            self.assertListEqual(out, self.expected_data_list)
-
-        def test_case_nominal_usage_dict_with_default(self):
-
-            # Set up the switch
-            data_pipe = switch()
-
-            # Assign a value through a function
-            case(data_pipe, 1, lambda x: "One")
-
-            # Assign values directly
-            case(data_pipe, 2, "Two")
-            case(data_pipe, 3, "Three")
-            case(data_pipe, 4, "Four")
-            case(data_pipe, 5, "Five")
-
-
-
 

@@ -7,37 +7,50 @@ class HistoricalMapper:
         self.__queue_length = length
         self.__trailing_dictionary = dict()
 
+    # ------------------------------------------------------------------------------
+    # Queue operations
+    # ------------------------------------------------------------------------------
+
     def push(self, key, value):
-        if key in self.__trailing_dictionary.get:
-            q = self.__trailing_dictionary.get(key)
-            q.pushLeft(value)
-        else:
-            q = build_queue(key)
-            build_queue(key)
-            q = deque(maxlen=self.__queue_length)
-            q.pushLeft(value)
-            self.__trailing_dictionary[key] = q
+        q = self.__get_queue(key)
+        q.appendleft(value)
 
     def get(self, key, index=0):
-        if key in self.__trailing_dictionary.get:
-            q = self.__trailing_dictionary.get(key)
-            return q.get(index)
+        q = self.get_queue(key)
+        if 0 <= index < len(q):
+            return q[index]
         else:
             return None
 
+    def pop(self, key):
+        q = self.__get_queue(key)
+        if len(q) > 0:
+            return q.popleft()
+        else:
+            return None
+
+    # ------------------------------------------------------------------------------
+    # Queue management operations
+    # ------------------------------------------------------------------------------
+
     def get_queue(self, key):
-        if key not in self.__trailing_dictionary:
-            build_queue
-        return self.__trailing_dictionary.get(key)
+        return self.__get_queue(key)
 
-    def remove(self, key):
-        if key in self.__trailing_dictionary.get:
-            self.__trailing_dictionary.pop(key)
+    def remove_queue(self, key):
+        if key in self.__trailing_dictionary:
+            del self.__trailing_dictionary[key]
 
-    # deque([dict() for _ in range(0, trailing_id_associations_count)],
-    # maxlen=trailing_id_associations_count))
+    # ------------------------------------------------------------------------------
+    # Helper functions
+    # ------------------------------------------------------------------------------
 
-    def __build_queue_and_overwrite(self, key):
+    def __get_queue(self, key):
+        if key in self.__trailing_dictionary:
+            return self.__trailing_dictionary.get(key)
+        else:
+            return self.__build_new_queue(key)
+
+    def __build_new_queue(self, key):
         """
         Builds a new queue associated with key, and overwrites any existing.
         :param key:
@@ -47,6 +60,7 @@ class HistoricalMapper:
         self.__trailing_dictionary[key] = q
         return q
 
-    def update_actor_id_association(instantaneous_actor_id_association):
-
-        def update_object_ids_from_association(hitpoints):
+    #
+    # def update_actor_id_association(instantaneous_actor_id_association):
+    #
+    #     def update_object_ids_from_association(hitpoints):
