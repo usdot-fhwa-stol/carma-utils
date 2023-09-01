@@ -862,3 +862,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
                                                                              timestamp)
         assert "Bridge" == corrected_objects.object_type
         assert timestamp == corrected_objects.timestamp
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -20,7 +20,7 @@ simulated_sensor:
 lidar_sensor:
   lower_fov: -80.0
   upper_fov: 30.0
-  channels: 60
+  channels: 32
   range: 100.0
-  rotation_period: 0.05
+  rotation_period: 0.1
   points_per_second: 10000
