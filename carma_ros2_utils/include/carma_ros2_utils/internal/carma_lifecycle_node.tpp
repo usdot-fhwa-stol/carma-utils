@@ -56,6 +56,10 @@ namespace carma_ros2_utils
           {
             handle_primary_state_exception(e);
           }
+          catch(...)
+          {
+            handle_primary_state_exception(e); 
+          }
         },
         options, msg_mem_strat);
   }
@@ -91,6 +95,10 @@ namespace carma_ros2_utils
       {
         handle_primary_state_exception(e);
       }
+      catch(...)
+      {
+        handle_primary_state_exception(e); 
+      }
     };
 
     auto timer = rclcpp_lifecycle::LifecycleNode::create_wall_timer(period, callack_func, group);
@@ -120,6 +128,10 @@ namespace carma_ros2_utils
           {
             handle_primary_state_exception(e);
           }
+          catch(...)
+          {
+            handle_primary_state_exception(e); 
+          }
         },
         group);
 
@@ -145,6 +157,10 @@ namespace carma_ros2_utils
           catch (const std::exception &e)
           {
             handle_primary_state_exception(e);
+          }
+          catch(...)
+          {
+            handle_primary_state_exception(e); 
           }
         },
         qos_profile, group);
