@@ -375,7 +375,7 @@ namespace carma_ros2_utils
    *        Current ROS2 Issue/PR: https://github.com/ros2/rclcpp/pull/1064
    * 
    */
-    void CarmaLifecycleNode::handle_primary_state_exception();
+    void handle_primary_state_exception();
 
     /**
    * \brief Helper method to publish a system alert of type FATAL with the provided error string.
