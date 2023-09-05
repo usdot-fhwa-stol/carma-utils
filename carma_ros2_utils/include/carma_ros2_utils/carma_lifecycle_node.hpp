@@ -367,6 +367,15 @@ namespace carma_ros2_utils
    * \param e The exception to be handled
    */
     void handle_primary_state_exception(const std::exception &e);
+    
+    /**
+   * \brief Helper method to handle "unknown" exceptions which occurred in primary states.
+   *        This is needed as the life cycle diagram described here https://design.ros2.org/articles/node_lifecycle.html
+   *        does not reflect current implementation where error handling is only handled by transition states. 
+   *        Current ROS2 Issue/PR: https://github.com/ros2/rclcpp/pull/1064
+   * 
+   */
+    void CarmaLifecycleNode::handle_primary_state_exception();
 
     /**
    * \brief Helper method to publish a system alert of type FATAL with the provided error string.

@@ -224,6 +224,40 @@ namespace carma_ros2_utils
     }
   }
 
+  void CarmaLifecycleNode::handle_primary_state_exception()
+  {
+    std::lock_guard<std::mutex> lock(exception_mutex_);
+
+    rclcpp_lifecycle::State state_at_exception = get_current_state();
+
+    if (get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) // If the exception was caught in the ACTIVE state we can try to gracefully fail to on_error, by transitioning to deactivate and then throwning an exception
+    {
+      std::string error_msg = "Uncaught Exception from node: " + std::string(get_name()) + " exception while in ACTIVE state.";
+      caught_exception_ = error_msg;
+      deactivate();
+    }
+    else
+    {
+      std::string error_msg = "Uncaught Exception from node: " + std::string(get_name()) + " caught exception while in unsupported exception handling state: " + std::to_string(get_current_state().id());
+
+      RCLCPP_ERROR_STREAM(get_logger(), error_msg); // Log exception
+
+      try
+      {
+
+        send_error_alert_msg_for_string(error_msg);
+        RCLCPP_ERROR_STREAM(get_logger(), "Sent handle_primary_state_exception system alert");
+      }
+      catch (const std::exception &e)
+      {
+
+        RCLCPP_ERROR_STREAM(get_logger(), "Failed to send handle_primary_state_exception system alert. Forcing shutdown.");
+      }
+
+      shutdown(); // Shutdown as an exception while in a non-active state is very likely not recoverable and notification to the larger system may not work
+    }
+  }
+
   void CarmaLifecycleNode::activate_publishers()
   {
     for (auto pub : lifecycle_publishers_)
