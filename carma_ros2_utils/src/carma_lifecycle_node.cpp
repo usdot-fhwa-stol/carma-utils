@@ -229,6 +229,8 @@ namespace carma_ros2_utils
     std::lock_guard<std::mutex> lock(exception_mutex_);
 
     rclcpp_lifecycle::State state_at_exception = get_current_state();
+    
+    RCLCPP_WARN_STREAM(get_logger(), "Entering handle error stream"); // Log exception
 
     if (get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) // If the exception was caught in the ACTIVE state we can try to gracefully fail to on_error, by transitioning to deactivate and then throwning an exception
     {
