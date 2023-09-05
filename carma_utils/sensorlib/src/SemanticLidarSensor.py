@@ -401,7 +401,7 @@ class SemanticLidarSensor(SimulatedSensor):
         :param vertical_fov: Vertical field of view in radians.
         :return: Expected number of hitpoints in a scan across the specified field of view.
         """
-        num_horizontal_points_per_scan = self.__sensor.points_per_second / self.__sensor.rotation_frequency
+        num_horizontal_points_per_scan = (self.__sensor.points_per_second / self.__sensor.rotation_frequency) / self.__sensor.number_of_channels
         horizontal_angular_resolution = self.__sensor.horizontal_fov / num_horizontal_points_per_scan
 
         num_vertical_points_per_scan = self.__sensor.number_of_channels
