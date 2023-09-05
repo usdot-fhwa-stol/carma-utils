@@ -13,7 +13,6 @@ from src.SemanticLidarSensor import SemanticLidarSensor
 from src.collector.SensorDataCollector import SensorDataCollector
 from src.noise_models.NoiseModelFactory import NoiseModelFactory
 from src.objects.CarlaSensor import CarlaSensorBuilder
-from src.util.SimulatedSensorUtils import SimulatedSensorUtils
 
 
 class SimulatedSensorConfigurator:

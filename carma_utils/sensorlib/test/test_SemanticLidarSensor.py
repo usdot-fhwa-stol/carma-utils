@@ -20,6 +20,7 @@ from src.noise_models.GaussianNoiseModel import GaussianNoiseModel
 from src.objects.CarlaSensor import CarlaSensorBuilder
 from src.objects.DetectedObject import DetectedObjectBuilder
 from src.util.CarlaUtils import CarlaUtils
+from src.util.HistoricalMapper import HistoricalMapper
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
@@ -91,6 +92,11 @@ class TestSemanticLidarSensor(unittest.TestCase):
             return_value=(0, hitpoints))
         self.sensor.compute_actor_angular_extents = MagicMock(return_value=actor_angular_extents)
         self.sensor.compute_adjusted_detection_thresholds = MagicMock(return_value=detection_thresholds)
+        self.sensor.sample_hitpoints = MagicMock(return_value=hitpoints)
+        self.sensor.compute_instantaneous_actor_id_association = MagicMock(
+            return_value={0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5})
+        self.sensor.update_actor_id_association = MagicMock(return_value={0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5})
+        self.sensor.update_hitpoint_ids_from_association = MagicMock(return_value=hitpoints)
         self.sensor.apply_occlusion = MagicMock(return_value=detected_objects)
         self.sensor.apply_noise = MagicMock(return_value=detected_objects)
         self.sensor.update_object_metadata = MagicMock(return_value=detected_objects)
@@ -221,6 +227,453 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
         # Compare
         assert expected_threshold == threshold
+
+    def test_sample_hitpoints(self):
+        # Test data
+        points_list = [
+            np.array([1.0, 1.0, 1.0]),
+            np.array([2.0, 2.0, 2.0]),
+            np.array([3.0, 3.0, 3.0]),
+            np.array([4.0, 4.0, 4.0]),
+            np.array([5.0, 5.0, 5.0]),
+            np.array([6.0, 6.0, 6.0])
+        ]
+        hitpoints = {
+            0: points_list,
+            1: points_list
+        }
+
+        # Mock the random number generator
+        rng = self.sensor._SemanticLidarSensor__rng
+        self.sensor._SemanticLidarSensor__rng = MagicMock(choice=MagicMock(return_value=points_list[0:3]))
+        sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 3)
+
+        # Verify mock sampling process works as expected
+        assert len(sampled_hitpoints[0]) == 3
+        assert len(sampled_hitpoints[1]) == 3
+        assert np.allclose(sampled_hitpoints[0][0], np.array([1.0, 1.0, 1.0]))
+        assert np.allclose(sampled_hitpoints[1][0], np.array([1.0, 1.0, 1.0]))
+
+        # Restore and verify real sampling returns the expected sample size
+        self.sensor._SemanticLidarSensor__rng = rng
+        sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 4)
+        assert len(sampled_hitpoints[0]) == 4
+        assert len(sampled_hitpoints[1]) == 4
+        sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 5)
+        assert len(sampled_hitpoints[0]) == 5
+        assert len(sampled_hitpoints[1]) == 5
+
+        # Verify sampling does not repeat points
+        sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 6)
+        assert len(sampled_hitpoints[0]) == 6
+        assert len(sampled_hitpoints[1]) == 6
+        assert np.alltrue([points_list[i] in sampled_hitpoints[0] for i in range(0, 6)])
+        assert np.alltrue([points_list[i] in sampled_hitpoints[1] for i in range(0, 6)])
+
+    def test_compute_instantaneous_actor_id_association(self):
+        # Generate test scenario with hitpoints clustered around the object positions
+        pos1 = np.array([4.0, 2.0, 0.0])
+        pos2 = np.array([2.0, 4.0, 0.0])
+        generated_detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
+        scene_objects = [
+            replace(generated_detected_objects[0], id=0, position=pos1),
+            replace(generated_detected_objects[1], id=1, position=pos2)
+        ]
+        points_list_1 = [
+            pos1 + np.array([0.0, 0.0, 0.0]),
+            pos1 + np.array([0.1, 0.0, 0.0]),
+            pos1 + np.array([0.0, 0.1, 0.0]),
+            pos1 + np.array([0.1, 0.1, 0.0]),
+            pos1 + np.array([0.2, 0.0, 0.0]),
+            pos1 + np.array([0.0, 0.2, 0.0])
+        ]
+        points_list_2 = [
+            pos2 + np.array([0.0, 0.0, 0.0]),
+            pos2 + np.array([0.1, 0.0, 0.0]),
+            pos2 + np.array([0.0, 0.1, 0.0]),
+            pos2 + np.array([0.1, 0.1, 0.0]),
+            pos2 + np.array([0.2, 0.0, 0.0]),
+            pos2 + np.array([0.0, 0.2, 0.0])
+        ]
+        downsampled_hitpoints = {
+            0: points_list_1,
+            1: points_list_2
+        }
+
+        # No change to a correct association
+        id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert len(id_association) == 2
+        assert id_association[0] == 0
+        assert id_association[1] == 1
+
+        # Opposite association
+        downsampled_hitpoints = {
+            1: points_list_1,
+            0: points_list_2
+        }
+        id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert len(id_association) == 2
+        assert id_association[0] == 1
+        assert id_association[1] == 0
+
+        # Test detected_objects with object IDs not picked up in the scan
+        pos3 = np.array([100.0, 100.0, 0.0])
+        scene_objects.append(replace(generated_detected_objects[2], id=100, position=pos3))
+        downsampled_hitpoints = {
+            0: points_list_1,
+            1: points_list_2
+        }
+        id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert len(id_association) == 2
+        assert id_association[0] == 0
+        assert id_association[1] == 1
+
+        # Test objects picked up in the scan which are not known in the truth state
+        points_list_3 = [
+            pos3 + np.array([0.0, 0.0, 0.0]),
+            pos3 + np.array([0.1, 0.0, 0.0]),
+            pos3 + np.array([0.0, 0.1, 0.0]),
+            pos3 + np.array([0.1, 0.1, 0.0]),
+            pos3 + np.array([0.2, 0.0, 0.0]),
+            pos3 + np.array([0.0, 0.2, 0.0])
+        ]
+        downsampled_hitpoints = {
+            0: points_list_1,
+            1: points_list_2,
+            2: points_list_3
+        }
+        scene_objects = scene_objects[0:-1]
+        id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert len(id_association) == 2
+        assert id_association[0] == 0
+        assert id_association[1] == 1
+
+        # Add third object within range of third point scan
+        scene_objects.append(replace(generated_detected_objects[2], id=100, position=pos3))
+        downsampled_hitpoints = {
+            0: points_list_1,
+            1: points_list_2,
+            2: points_list_3
+        }
+        id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert len(id_association) == 3
+        assert id_association[0] == 0
+        assert id_association[1] == 1
+        assert id_association[2] == 100
+
+        # Move third object away from range of point scan (both points and truth state exist but are not within
+        # association range)
+        scene_objects[2] = replace(scene_objects[2], position=np.array([1000.0, 1000.0, 0.0]))
+        id_association = self.sensor.compute_instantaneous_actor_id_association(downsampled_hitpoints, scene_objects)
+        assert len(id_association) == 2
+        assert id_association[0] == 0
+        assert id_association[1] == 1
+
+    def test_compute_closest_object_id_list(self):
+        # Build test data
+        hitpoint_list = [MagicMock(id=0), MagicMock(id=1)]
+        generated_detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
+        scene_objects = [
+            replace(generated_detected_objects[0], id=0),
+            replace(generated_detected_objects[1], id=1)
+        ]
+        geometry_association_max_distance_threshold = 0.2
+
+        # Mock internal function
+        self.sensor.compute_closest_object_id = MagicMock(return_value=0)
+
+        # Call
+        self.sensor.compute_closest_object_id_list(hitpoint_list, scene_objects,
+                                                   geometry_association_max_distance_threshold)
+
+        # Assert internal function called correctly
+        assert self.sensor.compute_closest_object_id.call_count == 2
+        self.sensor.compute_closest_object_id.assert_any_call(hitpoint_list[0], scene_objects,
+                                                              geometry_association_max_distance_threshold)
+        self.sensor.compute_closest_object_id.assert_any_call(hitpoint_list[1], scene_objects,
+                                                              geometry_association_max_distance_threshold)
+
+    def test_compute_closest_object_id(self):
+        # Generate test scenario with hitpoints clustered around the object positions
+        pos1 = np.array([4.0, 2.0, 0.0])
+        pos2 = np.array([2.0, 4.0, 0.0])
+        generated_detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
+        scene_objects = [
+            replace(generated_detected_objects[0], id=0, position=pos1),
+            replace(generated_detected_objects[1], id=1, position=pos2)
+        ]
+        points_list_1 = [
+            pos1 + np.array([0.0, 0.0, 0.0]),
+            pos1 + np.array([0.1, 0.0, 0.0]),
+            pos1 + np.array([0.0, 0.1, 0.0]),
+            pos1 + np.array([0.1, 0.1, 0.0]),
+            pos1 + np.array([0.2, 0.0, 0.0]),
+            pos1 + np.array([0.0, 0.2, 0.0])
+        ]
+        points_list_2 = [
+            pos2 + np.array([0.0, 0.0, 0.0]),
+            pos2 + np.array([0.1, 0.0, 0.0]),
+            pos2 + np.array([0.0, 0.1, 0.0]),
+            pos2 + np.array([0.1, 0.1, 0.0]),
+            pos2 + np.array([0.2, 0.0, 0.0]),
+            pos2 + np.array([0.0, 0.2, 0.0])
+        ]
+        downsampled_hitpoints = {
+            0: points_list_1,
+            1: points_list_2
+        }
+        geometry_association_max_distance_threshold = 0.6
+
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][0], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 0
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][1], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 0
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][2], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 0
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][3], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 0
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][4], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 0
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][5], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 0
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][0], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 1
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][1], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 1
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][2], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 1
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][3], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 1
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][4], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 1
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][5], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id == 1
+
+        # Point out of range
+        geometry_association_max_distance_threshold = 0.001
+        id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][1], scene_objects,
+                                                   geometry_association_max_distance_threshold)
+        assert id is None
+
+    def test_vote_most_frequent_id(self):
+        # Same
+        assert 1 == self.sensor.vote_most_frequent_id([1, 1, 1])
+
+        # Odd voting
+        assert 1 == self.sensor.vote_most_frequent_id([1, 2, 1])
+        assert 1 == self.sensor.vote_most_frequent_id([1, 1, 2])
+        assert 2 == self.sensor.vote_most_frequent_id([2, 2, 1])
+
+        # Even voting
+        assert 1 == self.sensor.vote_most_frequent_id([1, 1])
+        assert 1 == self.sensor.vote_most_frequent_id([1, 2])
+        assert 2 == self.sensor.vote_most_frequent_id([2, 1])
+
+        # Bad data
+        assert 1 == self.sensor.vote_most_frequent_id([1, None, 1])
+        assert 1 == self.sensor.vote_most_frequent_id([None, None, 1, None])
+        assert self.sensor.vote_most_frequent_id([None, None]) is None
+        assert self.sensor.vote_most_frequent_id([]) is None
+        assert self.sensor.vote_most_frequent_id(None) is None
+
+    def test_update_actor_id_association(self):
+        trailing_id_associations_count = 3
+        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
+        instantaneous_actor_id_association = {
+            0: 0,
+            1: 1,
+            2: 2
+        }
+
+        # Inject empty mapping into empty history
+        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
+        self.sensor.update_actor_id_association({})
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == []
+        assert self.sensor._SemanticLidarSensor__actor_id_association == {}
+
+        # Inject one mapping
+        current_mapping = self.sensor.update_actor_id_association(instantaneous_actor_id_association)
+        assert current_mapping == {0: 0, 1: 1, 2: 2}
+        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
+
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2]
+
+        # Accumulate mapping
+        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
+        current_mapping = self.sensor.update_actor_id_association({0: 0})
+        assert current_mapping == {0: 0}
+        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
+        current_mapping = self.sensor.update_actor_id_association({1: 1})
+        assert current_mapping == {0: 0, 1: 1}
+        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
+        current_mapping = self.sensor.update_actor_id_association({2: 2})
+        assert current_mapping == {0: 0, 1: 1, 2: 2}
+        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
+
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2]
+
+        # Inject empty mapping into existing history
+        current_mapping = self.sensor.update_actor_id_association({})
+        assert current_mapping == {0: 0, 1: 1, 2: 2}
+        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
+
+        # Inject same mapping (full)
+        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
+        current_mapping = self.sensor.update_actor_id_association(instantaneous_actor_id_association)
+        current_mapping = self.sensor.update_actor_id_association(instantaneous_actor_id_association)
+        current_mapping = self.sensor.update_actor_id_association(instantaneous_actor_id_association)
+        assert current_mapping == {0: 0, 1: 1, 2: 2}
+        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
+
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0, 0]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1, 1]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2, 2, 2]
+
+        # Inject different mapping (full)
+        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
+        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
+        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
+        current_mapping = self.sensor.update_actor_id_association({0: 2, 1: 0, 2: 1})
+        assert current_mapping == {0: 0, 1: 1, 2: 2}
+        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
+
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [2, 0, 0]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [0, 1, 1]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [1, 2, 2]
+
+        # Inject same mapping (partial)
+        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
+        current_mapping = self.sensor.update_actor_id_association(instantaneous_actor_id_association)
+        current_mapping = self.sensor.update_actor_id_association(instantaneous_actor_id_association)
+        current_mapping = self.sensor.update_actor_id_association({0: 0})
+        assert current_mapping == {0: 0, 1: 1, 2: 2}
+        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
+
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0, 0]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2, 2]
+
+        # Inject different mapping (partial)
+        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
+        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
+        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
+        current_mapping = self.sensor.update_actor_id_association({2: 1})
+        assert current_mapping == {0: 0, 1: 1, 2: 2}
+        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
+
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [1, 2, 2]
+
+        # Odd voting
+        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(3)
+        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
+        current_mapping = self.sensor.update_actor_id_association({2: 1})
+        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
+        assert current_mapping == {0: 0, 1: 1, 2: 2}
+        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
+
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2, 1, 2]
+
+        # Even voting - Previous incorrect - Newer information should be preferred
+        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(2)
+        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
+        current_mapping = self.sensor.update_actor_id_association({2: 1})
+        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
+        assert current_mapping == {0: 0, 1: 1, 2: 2}
+        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
+
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2, 1]
+
+        # Even voting - Current incorrect - Newer information should be preferred
+        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(2)
+        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
+        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
+        current_mapping = self.sensor.update_actor_id_association({2: 1})
+        assert current_mapping == {0: 0, 1: 1, 2: 1}
+        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
+
+        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
+        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [1, 2]
+
+    def test_update_hitpoint_ids_from_association(self):
+        hitpoints = {
+            0: "Point 0",
+            1: "Point 1",
+            2: "Point 2",
+            3: "Point 3",
+            4: "Point 4",
+            5: "Point 5"
+        }
+
+        # Same mapping
+        self.sensor._SemanticLidarSensor__actor_id_association = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+        updated_hitpoints = self.sensor.update_hitpoint_ids_from_association(hitpoints)
+        assert updated_hitpoints[0] == "Point 0"
+        assert updated_hitpoints[1] == "Point 1"
+        assert updated_hitpoints[2] == "Point 2"
+        assert updated_hitpoints[3] == "Point 3"
+        assert updated_hitpoints[4] == "Point 4"
+        assert updated_hitpoints[5] == "Point 5"
+
+        # Full new mapping
+        self.sensor._SemanticLidarSensor__actor_id_association = {0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 0}
+        updated_hitpoints = self.sensor.update_hitpoint_ids_from_association(hitpoints)
+        assert updated_hitpoints[1] == "Point 0"
+        assert updated_hitpoints[2] == "Point 1"
+        assert updated_hitpoints[3] == "Point 2"
+        assert updated_hitpoints[4] == "Point 3"
+        assert updated_hitpoints[5] == "Point 4"
+        assert updated_hitpoints[0] == "Point 5"
+
+        # Partial new mapping - Preserve unmapped ID's
+        self.sensor._SemanticLidarSensor__actor_id_association = {0: 10, 3: 100}
+        updated_hitpoints = self.sensor.update_hitpoint_ids_from_association(hitpoints)
+        assert updated_hitpoints[10] == "Point 0"
+        assert updated_hitpoints[1] == "Point 1"
+        assert updated_hitpoints[2] == "Point 2"
+        assert updated_hitpoints[100] == "Point 3"
+        assert updated_hitpoints[4] == "Point 4"
+        assert updated_hitpoints[5] == "Point 5"
+
+        # Conflicted mapping
+        self.sensor._SemanticLidarSensor__actor_id_association = {0: 10, 1: 10}
+        updated_hitpoints = self.sensor.update_hitpoint_ids_from_association(hitpoints)
+        assert updated_hitpoints[10] == "Point 1"
+        assert updated_hitpoints[2] == "Point 2"
+        assert updated_hitpoints[3] == "Point 3"
+        assert updated_hitpoints[4] == "Point 4"
+        assert updated_hitpoints[5] == "Point 5"
 
     def test_apply_occlusion(self):
         # Specify inputs
@@ -409,3 +862,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
                                                                              timestamp)
         assert "Bridge" == corrected_objects.object_type
         assert timestamp == corrected_objects.timestamp
+
+
+if __name__ == "__main__":
+    unittest.main()
