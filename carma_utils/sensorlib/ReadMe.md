@@ -8,7 +8,7 @@ The SimulatedSensor acts as a wrapper to the CARLA Semantic Lidar Sensor, captur
 
 Raw sensor observations from the CARLA sensor are composed to build a dataset representing the current objects in scene. 
 
-## Context
+## Contexts
 
 This new feature is provided to enable vulnerable road user detection using a LIDAR sensor in the context of a CARLA-driven simulation. The data is intended to feed into a CARMA V2X system for data fusion with other sensors and action by CARMA platform vehicles.
 
