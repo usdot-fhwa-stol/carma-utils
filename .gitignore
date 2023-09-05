@@ -1,8 +1,0 @@
-.idea/
-*build*/
-CMakeCache.txt
-CMakeFiles/
-.settings/
-.vscode/
-.cmake/
-
