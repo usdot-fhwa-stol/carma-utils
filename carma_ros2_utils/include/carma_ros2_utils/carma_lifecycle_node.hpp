@@ -364,18 +364,9 @@ namespace carma_ros2_utils
    *        does not reflect current implementation where error handling is only handled by transition states. 
    *        Current ROS2 Issue/PR: https://github.com/ros2/rclcpp/pull/1064
    * 
-   * \param e The exception to be handled
+   * \param e The exception to be handled. Defaults to runtime error, thrown in case error isn't specified.
    */
-    void handle_primary_state_exception(const std::exception &e);
-    
-    /**
-   * \brief Helper method to handle unknown exceptions which occurred in primary states.
-   *        This is needed as the life cycle diagram described here https://design.ros2.org/articles/node_lifecycle.html
-   *        does not reflect current implementation where error handling is only handled by transition states. 
-   *        Current ROS2 Issue/PR: https://github.com/ros2/rclcpp/pull/1064
-   * 
-   */
-    void handle_primary_state_exception();
+    void handle_primary_state_exception(const std::exception &e = std::runtime_error("Encountered Error"));
 
     /**
    * \brief Helper method to publish a system alert of type FATAL with the provided error string.
