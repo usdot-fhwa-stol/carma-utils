@@ -104,12 +104,12 @@ namespace carma_ros2_utils
    * NOTE: These methods are NOT meant to be used by extending classes. Instead the corresponding handle_<method> methods should be used 
    *       to ensure the full CARMALifecycleNode functionality is employed.
    */
-    carma_ros2_utils::CallbackReturn on_configure(const rclcpp_lifecycle::State &prev_state) override;
-    carma_ros2_utils::CallbackReturn on_activate(const rclcpp_lifecycle::State &prev_state) override;
-    carma_ros2_utils::CallbackReturn on_deactivate(const rclcpp_lifecycle::State &prev_state) override;
-    carma_ros2_utils::CallbackReturn on_cleanup(const rclcpp_lifecycle::State &prev_state) override;
-    carma_ros2_utils::CallbackReturn on_error(const rclcpp_lifecycle::State &prev_state) override;
-    carma_ros2_utils::CallbackReturn on_shutdown(const rclcpp_lifecycle::State &prev_state) override;
+    carma_ros2_utils::CallbackReturn on_configure(const rclcpp_lifecycle::State &prev_state) override final;
+    carma_ros2_utils::CallbackReturn on_activate(const rclcpp_lifecycle::State &prev_state) override final;
+    carma_ros2_utils::CallbackReturn on_deactivate(const rclcpp_lifecycle::State &prev_state) override final;
+    carma_ros2_utils::CallbackReturn on_cleanup(const rclcpp_lifecycle::State &prev_state) override final;
+    carma_ros2_utils::CallbackReturn on_error(const rclcpp_lifecycle::State &prev_state) override final;
+    carma_ros2_utils::CallbackReturn on_shutdown(const rclcpp_lifecycle::State &prev_state) override final;
 
     /**
    * \brief Callback triggered when transitioning from UNCONFIGURED to INACTIVE due to the configure signal.
