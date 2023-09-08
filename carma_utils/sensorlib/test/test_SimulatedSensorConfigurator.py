@@ -102,3 +102,7 @@ class TestSimulatedSensorConfigurator(unittest.TestCase):
                                                                                          self.carla_sensor_config)
         bp.set_attribute.assert_called_with("points_per_second", "10000")
         assert isinstance(bp, MagicMock)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -19,6 +19,14 @@ class SimulatedSensor:
     def compute_detected_objects(self):
         """
         Retrieve the sensor's latest perception of objects detected in the scene.
+        :return: List of DetectedObject objects as Python objects.
+        """
+        pass
+
+    @abstractmethod
+    def get_detected_objects_json(self):
+        """
+        Retrieve the sensor's latest perception of objects detected in the scene.
         :return: List of DetectedObject objects serialized in JSON form.
         """
         pass

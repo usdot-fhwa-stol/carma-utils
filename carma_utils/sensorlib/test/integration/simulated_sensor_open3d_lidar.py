@@ -190,9 +190,9 @@ def main(arg):
         lidar_transform = carla.Transform(carla.Location(x=-0.5, z=1.8) + user_offset)
 
         # Wrap the actor
-        sensor = SimulatedSensorConfigurator.build_simulated_sensor(world, lidar_transform, vehicle,
-                                                                    arg.simulated_sensor_config_filename,
-                                                                    arg.noise_model_config_filename)
+        sensor = SimulatedSensorConfigurator.register_simulated_semantic_lidar_sensor(world, lidar_transform, vehicle,
+                                                                                      arg.simulated_sensor_config_filename,
+                                                                                      arg.noise_model_config_filename)
 
         point_list = o3d.geometry.PointCloud()
         # if arg.semantic:
@@ -242,7 +242,6 @@ def main(arg):
         traffic_manager.set_synchronous_mode(False)
 
         vehicle.destroy()
-        lidar.destroy()
         vis.destroy_window()
 
 

@@ -51,3 +51,6 @@ class TestSimulatedSensorUtils(unittest.TestCase):
         self.assertEqual(json_str_list[0], expected_json_str)
         self.assertEqual(json_str_list[1], expected_json_str)
 
+
+if __name__ == "__main__":
+    unittest.main()
