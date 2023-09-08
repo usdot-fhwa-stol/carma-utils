@@ -52,9 +52,12 @@ namespace carma_ros2_utils
           {
             callback(std::move(m));
           }
-          catch (const std::exception &e)
+          catch(const std::exception &e)
           {
-            handle_primary_state_exception(e);
+            handle_primary_state_exception(e); 
+
+          } catch (...) {
+            handle_primary_state_exception();
           }
         },
         options, msg_mem_strat);
@@ -87,9 +90,12 @@ namespace carma_ros2_utils
       {
         callback();
       }
-      catch (const std::exception &e)
+      catch(const std::exception &e)
       {
-        handle_primary_state_exception(e);
+        handle_primary_state_exception(e); 
+
+      } catch (...) {
+        handle_primary_state_exception();
       }
     };
 
@@ -119,7 +125,11 @@ namespace carma_ros2_utils
           catch (const std::exception &e)
           {
             handle_primary_state_exception(e);
+
+          } catch (...) {
+            handle_primary_state_exception();
           }
+
         },
         group);
 
@@ -142,9 +152,12 @@ namespace carma_ros2_utils
           {
             callback(header, req, resp);
           }
-          catch (const std::exception &e)
+          catch(const std::exception &e)
           {
-            handle_primary_state_exception(e);
+            handle_primary_state_exception(e); 
+            
+          } catch (...) {
+            handle_primary_state_exception();
           }
         },
         qos_profile, group);
