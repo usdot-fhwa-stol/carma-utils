@@ -27,9 +27,7 @@ jobs:
     - name: Checkout dependencies
       run: |
         source "$INIT_ENV"
-        source "$ROS_2_ENV"
-        #git clone -b develop --depth 1 https://github.com/usdot-fhwa-stol/carma-msgs.git src/CARMAMsgs
-        ./src/${{ github.event.repository.name }}/docker/checkout.bash -r /opt/carma/
+        git clone -b develop --depth 1 https://github.com/usdot-fhwa-stol/carma-msgs.git src/CARMAMsgs
     - name: Build ROS1
       run: |
         source "$INIT_ENV"
