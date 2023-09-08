@@ -11,6 +11,15 @@ from collections import deque
 
 class HistoricalMapper:
 
+    # ------------------------------------------------------------------------------
+    # A class to manage a historical mapping of hitpoint_id (key) to queues of possible object_ids (values as a deque). 
+    #
+    # Attributes:
+    #    __queue_length (int): The maximum length of the possible object_ids (values as a deque) to consider with each key (hitpoint_id).
+    #    __trailing_dictionary (dict): A dictionary where keys are mapped to deque objects holding the historical values.
+    #
+    # ------------------------------------------------------------------------------
+
     def __init__(self, length):
         self.__queue_length = length
         self.__trailing_dictionary = dict()
