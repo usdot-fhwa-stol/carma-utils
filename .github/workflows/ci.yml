@@ -40,6 +40,9 @@ jobs:
         source "$INIT_ENV"
         sed -i '/colcon test/ s/$/ --parallel-workers 4 --packages-above $PACKAGES/' /home/carma/.ci-image/engineering_tools/code_coverage/make_with_coverage.bash
         make_with_coverage.bash -t -e /opt/carma/ -o ./coverage_reports/gcov   
+    - name: Backup ROS1 compile_commands.json
+      run: |
+        mv /opt/carma/build/compile_commands.json /opt/carma/compile_commands.ros1.json        
     - name: Cleanup before ROS 2 build
       # Clear the build and install folders before building ROS 2 
       run: |
@@ -59,6 +62,10 @@ jobs:
         source "$ROS_2_ENV"
         sed -i '/colcon test/ s/$/ --parallel-workers 4 --packages-above $PACKAGES/' /home/carma/.ci-image/engineering_tools/code_coverage/make_with_coverage.bash
         make_with_coverage.bash -t -e /opt/carma/ -o ./coverage_reports/gcov
+    - name: Combine ROS1 and ROS2 compile_commands.json files
+      run: |
+        mv /opt/carma/build/compile_commands.json /opt/carma/compile_commands.ros2.json
+        jq -s add /opt/carma/compile_commands.ros1.json /opt/carma/compile_commands.ros2.json > /opt/carma/build/compile_commands.json        
     - name: Run SonarScanner
       uses: usdot-fhwa-stol/actions/sonar-scanner@main
       with:
