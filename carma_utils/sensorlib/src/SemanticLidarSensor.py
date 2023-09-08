@@ -328,6 +328,8 @@ class SemanticLidarSensor(SimulatedSensor):
             return self.__actor_id_association
 
         # Prepend instantaneous association to trailing associations
+        # Possible enhancement issue: https://github.com/usdot-fhwa-stol/carma-platform/issues/2142
+        
         for hitpoint_id, obj_id in instantaneous_actor_id_association.items():
             self.__trailing_id_associations.push(hitpoint_id, obj_id)
 
