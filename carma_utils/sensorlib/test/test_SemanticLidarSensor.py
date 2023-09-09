@@ -715,7 +715,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         sensor_vertical_fov = np.deg2rad(60)
 
         rotation_frequency = 1
-        points_per_second = num_horizontal_points_per_scan * rotation_frequency
+        points_per_second = num_horizontal_points_per_scan * num_vertical_points_per_scan * rotation_frequency
 
         # Mock the carla sensor
         carla_sensor = MagicMock(points_per_second=points_per_second, rotation_frequency=rotation_frequency,
