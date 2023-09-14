@@ -2,6 +2,11 @@ import argparse
 import json
 import time
 
+import sched
+import time
+from xmlrpc.server import SimpleXMLRPCServer
+import threading
+
 import carla
 
 from src.SimulatedSensorConfigurator import SimulatedSensorConfigurator
@@ -37,6 +42,18 @@ if __name__ == "__main__":
         type=str,
         help="Noise model configuration as JSON dictionary. (default: \"\")")
 
+    arg_parser.add_argument(
+        "--xmlrpc-server-host",
+        default="localhost",
+        type=str,
+        help="XML-RPC server host. (default: \"localhost\")")
+
+    arg_parser.add_argument(
+        "--xmlrpc-server-port",
+        default=8000,
+        type=int,
+        help="XML-RPC server port. (default: 8000)")
+
     args = arg_parser.parse_args()
 
     # Get inputs
@@ -67,7 +84,13 @@ if __name__ == "__main__":
         sensor_transform,
         None)
 
-    # Compute detected objects continuously
-    while True:
-        simulated_lidar_sensor.compute_detected_objects()
-        time.sleep(detection_cycle_delay_seconds)
+    # Compute detected objects continuously using a separate thread
+    scheduler = sched.scheduler(time.time, time.sleep)
+    scheduler.enter(detection_cycle_delay_seconds, 1, simulated_lidar_sensor.compute_detected_objects)
+    scheduler_thread = threading.Thread(target=scheduler.run)
+
+    # Create an XML-RPC server
+    print("starting rpc server")
+    server = SimpleXMLRPCServer((args.xmlrpc_server_host, args.xmlrpc_server_port))
+    server.register_function(simulated_lidar_sensor.get_detected_objects_json, "periodic_function")
+    server.serve_forever()
