@@ -72,6 +72,7 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def compute_detected_objects(self):
+        print("compute_detected_objects()")
         """
         Main function used to query the currently-detected objects. Upon calling, the latest raw data cache is
         retrieved and sent through the processing pipeline to produce a list of DetectedObject objects.
