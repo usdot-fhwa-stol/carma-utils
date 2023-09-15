@@ -47,9 +47,7 @@ class TestSimulatedSensorUtils(unittest.TestCase):
 
         # Test list of objects containing numpy arrays
         json_str_list = SimulatedSensorUtils.serialize_to_json([test_obj, test_obj])
-        assert len(json_str_list) == 2
-        self.assertEqual(json_str_list[0], expected_json_str)
-        self.assertEqual(json_str_list[1], expected_json_str)
+        self.assertEqual(json_str_list, '["{\\"a\\": \\"Some string.\\", \\"b\\": [20.1, 30.0, 40.1], \\"c\\": 3, \\"d\\": [[1, 2, 3], [4, 5, 6]]}", "{\\"a\\": \\"Some string.\\", \\"b\\": [20.1, 30.0, 40.1], \\"c\\": 3, \\"d\\": [[1, 2, 3], [4, 5, 6]]}"]')
 
 
 if __name__ == "__main__":

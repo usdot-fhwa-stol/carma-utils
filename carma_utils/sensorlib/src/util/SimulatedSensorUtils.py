@@ -39,6 +39,7 @@ class SimulatedSensorUtils:
         :return: JSON string.
         """
         if isinstance(obj, list):
-            return [SimulatedSensorUtils.serialize_to_json(item) for item in obj]
+            data = [SimulatedSensorUtils.serialize_to_json(item) for item in obj]
+            return json.dumps(data)
         else:
             return json.dumps(obj.__dict__, cls=NumpyEncoder)
