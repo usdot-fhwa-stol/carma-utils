@@ -117,6 +117,7 @@ class SemanticLidarSensor(SimulatedSensor):
         return detected_objects
 
     def get_detected_objects_json(self):
+        """Returns the latest detected objects, formatted as a string contianing a list of JSON objects."""
         return SimulatedSensorUtils.serialize_to_json(self.__detected_objects)
 
     # ------------------------------------------------------------------------------

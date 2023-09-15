@@ -107,5 +107,5 @@ if __name__ == "__main__":
     # Create an XML-RPC server
     print("Starting sensorlib XML-RPC server.")
     server = SimpleXMLRPCServer((args.xmlrpc_server_host, args.xmlrpc_server_port))
-    server.register_function(simulated_lidar_sensor.get_detected_objects_json, "periodic_function")
+    server.register_function(simulated_lidar_sensor.get_detected_objects_json, "get_detected_objects_json")
     server.serve_forever()

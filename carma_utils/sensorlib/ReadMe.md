@@ -12,6 +12,14 @@ Raw sensor observations from the CARLA sensor are composed to build a dataset re
 
 This new feature is provided to enable vulnerable road user detection using a LIDAR sensor in the context of a CARLA-driven simulation. The data is intended to feed into a CARMA V2X system for data fusion with other sensors and action by CARMA platform vehicles.
 
+## Interface
+
+The XML-RPC interface consists of one function to retrieve the list of detected objects.
+
+After starting main.py, an RPC server is available with the `get_detected_objects_json()` function. This function takes no parameters and returns a string containing the serialized list of DetectedObjects, each containing metadata including id, position and type of object.
+
+Alternatively the API may be used to instantiate a SimulatedSensor which is assisted by calling the SimulatedSensorConfigurator, with parameters used to locate the running CARLA instance. Sample code is in main.py.
+
 ## Operation
 
 The SimulatedSensor manages a CarlaSensor, which is a light wrapper around the CARLA sensor reference.
