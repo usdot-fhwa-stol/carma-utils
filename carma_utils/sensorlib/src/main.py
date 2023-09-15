@@ -19,6 +19,10 @@ import carla
 from src.SimulatedSensorConfigurator import SimulatedSensorConfigurator
 from src.util.SimulatedSensorUtils import SimulatedSensorUtils
 
+def scheduled_compute():
+    scheduler.enter(detection_cycle_delay_seconds, 1, scheduled_compute)
+    simulated_lidar_sensor.compute_detected_objects()
+
 if __name__ == "__main__":
 
     # Parse arguments
@@ -83,33 +87,23 @@ if __name__ == "__main__":
         noise_model_config = json.loads(args.noise_model_config)
 
     # Build sensor
-    # simulated_lidar_sensor = SimulatedSensorConfigurator.register_simulated_semantic_lidar_sensor(
-    #     simulated_sensor_config,
-    #     carla_sensor_config,
-    #     noise_model_config,
-    #     infrastructure_id,
-    #     sensor_transform,
-    #     None)
-    class A:
-        def compute_detected_objects(self):
-            print("compute_detected_objects")
-        def get_detected_objects_json(self):
-            return ""
-    simulated_lidar_sensor = A()
+    simulated_lidar_sensor = SimulatedSensorConfigurator.register_simulated_semantic_lidar_sensor(
+        simulated_sensor_config,
+        carla_sensor_config,
+        noise_model_config,
+        infrastructure_id,
+        sensor_transform,
+        None)
 
     # Compute detected objects continuously using a separate thread
     scheduler = sched.scheduler(time.time, time.sleep)
-    detection_cycle_delay_seconds = 1
-    def scheduled_compute():
-        scheduler.enter(detection_cycle_delay_seconds, 1, scheduled_compute)
-        simulated_lidar_sensor.compute_detected_objects()
-
     scheduler.enter(detection_cycle_delay_seconds, 1, scheduled_compute)
     scheduler_thread = threading.Thread(target=scheduler.run)
+    print("Starting sensorlib compute.")
     scheduler_thread.start()
 
     # Create an XML-RPC server
-    print("starting rpc server")
+    print("Starting sensorlib XML-RPC server.")
     server = SimpleXMLRPCServer((args.xmlrpc_server_host, args.xmlrpc_server_port))
     server.register_function(simulated_lidar_sensor.get_detected_objects_json, "periodic_function")
     server.serve_forever()
