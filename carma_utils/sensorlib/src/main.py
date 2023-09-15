@@ -19,9 +19,11 @@ import carla
 from src.SimulatedSensorConfigurator import SimulatedSensorConfigurator
 from src.util.SimulatedSensorUtils import SimulatedSensorUtils
 
+
 def scheduled_compute():
     scheduler.enter(detection_cycle_delay_seconds, 1, scheduled_compute)
     simulated_lidar_sensor.compute_detected_objects()
+
 
 if __name__ == "__main__":
 
