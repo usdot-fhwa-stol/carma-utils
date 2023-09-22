@@ -85,8 +85,8 @@ def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_d
         simulated_sensor_config,
         carla_sensor_config,
         noise_model_config,
-        infrastructure_id,
         sensor_transform,
+        infrastructure_id,
         None)
 
     # Compute detected objects continuously using a separate thread
