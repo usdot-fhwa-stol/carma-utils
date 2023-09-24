@@ -6,24 +6,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
 # governing permissions and limitations under the License.
 
-
-import glob
-import os
-import sys
-
-try:
-    sys.path.append(glob.glob('~/carla/dist/carla-*%d.%d-%s.egg' % (
-        sys.version_info.major,
-        sys.version_info.minor,
-        'win-amd64' if os.name == 'nt' else 'linux-x86_64'))[0])
-except IndexError:
-    exit()
+from src.util.CarlaLoader import CarlaLoader
+CarlaLoader.load_carla_lib("0.9.14")
 import carla
-
-
-
-
-
 import numpy as np
 
 from src.SemanticLidarSensor import SemanticLidarSensor
@@ -48,11 +33,10 @@ class SimulatedSensorConfigurator:
 
     @staticmethod
     def register_simulated_semantic_lidar_sensor(simulated_sensor_config, carla_sensor_config, noise_model_config,
-                                                 carla_host, carla_port, sensor_transform, infrastructure_id=-1,
-                                                 parent_actor=None):
+                                                 carla_host, carla_port,
+                                                 sensor_transform, infrastructure_id=-1, parent_actor=None):
         """
         Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
-
         :param simulated_sensor_config: The configuration for the simulated sensor.
         :param carla_sensor_config: The configuration for the CARLA sensor.
         :param noise_model_config: The configuration for the noise model.
@@ -106,9 +90,8 @@ class SimulatedSensorConfigurator:
         """Initialize the CARLA connection, which only needs to be done once."""
 
         if SimulatedSensorConfigurator.__client is None:
-            SimulatedSensorConfigurator.__client = carla.Client(
-                carla_host,
-                carla_port)
+            SimulatedSensorConfigurator.__client = carla.Client("localhost", 2000)
+            # SimulatedSensorConfigurator.__client = carla.Client(carla_host, carla_port)
             SimulatedSensorConfigurator.__client.set_timeout(2.0)
             SimulatedSensorConfigurator.__carla_world = SimulatedSensorConfigurator.__client.get_world()
 

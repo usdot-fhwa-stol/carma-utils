@@ -15,10 +15,10 @@ import time
 from xmlrpc.server import SimpleXMLRPCServer
 import threading
 
-import carla
-
 from src.SimulatedSensorConfigurator import SimulatedSensorConfigurator
 from src.util.SimulatedSensorUtils import SimulatedSensorUtils
+
+import carla
 
 
 def scheduled_compute(scheduler, simulated_lidar_sensor, detection_cycle_delay_seconds):
@@ -52,12 +52,11 @@ def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_d
                             - If the value is a JSON dictionary, the dictionary is used directly.
                             - If passed as an empty string, default values are loaded from a configuration file.
     :param detection_cycle_delay_seconds: Delay in sensor computation loop (seconds).
-    :param carla_host: The CARLA host.
-    :param carla_port: The CARLA host port.
+    :param carla_host: CARLA host.
+    :param carla_port: CARLA host port.
     :param start_rpc_server: Starts an XML-RPC server if True.
     :param xmlrpc_server_host: Host name for XML-RPC server.
     :param xmlrpc_server_port: Port for XML-RPC server.
-
 
     :return: No return if RPC server is running as this blocks execution; The SimulatedLidarSensor object if RPC server
                 is not running.
@@ -89,8 +88,7 @@ def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_d
         simulated_sensor_config,
         carla_sensor_config,
         noise_model_config,
-        carla_host,
-        carla_port,
+        carla_host, carla_port,
         sensor_transform,
         infrastructure_id,
         None)
@@ -146,13 +144,13 @@ if __name__ == "__main__":
         "--carla-host",
         default="127.0.0.1",
         type=str,
-        help="CARLA host. (default: 127.0.0.1)")
+        help="CARLA host. (default: \"127.0.0.1\")")
 
     arg_parser.add_argument(
         "--carla-port",
         default="2000",
         type=str,
-        help="CARLA port. (default: 2000)")
+        help="CARLA host. (default: \"2000\")")
 
     arg_parser.add_argument(
         "--start-rpc-server",
