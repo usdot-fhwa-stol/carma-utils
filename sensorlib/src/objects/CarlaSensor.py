@@ -29,8 +29,8 @@ class CarlaSensorBuilder:
     def build_sensor(carla_sensor):
         return CarlaSensor(carla_sensor,
                            CarlaUtils.vector3d_to_numpy(carla_sensor.get_location()),
-                           carla_sensor.points_per_second,
-                           carla_sensor.rotation_frequency,
-                           np.deg2rad(carla_sensor.horizontal_fov),
-                           np.deg2rad(carla_sensor.upper_fov - carla_sensor.lower_fov),
-                           carla_sensor.channels)
+                           carla_sensor.attributes["points_per_second"],
+                           carla_sensor.attributes["rotation_frequency"],
+                           np.deg2rad(float(carla_sensor.attributes["horizontal_fov"])),
+                           np.deg2rad(float(carla_sensor.attributes["upper_fov"]) - float(carla_sensor.attributes["lower_fov"])),
+                           carla_sensor.attributes["channels"])

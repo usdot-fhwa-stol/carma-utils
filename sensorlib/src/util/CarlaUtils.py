@@ -67,7 +67,8 @@ class CarlaUtils:
         :param carla_actor: The carla.Actor to obtain data from.
         :return: List of numpy.array containing the bounding box points in the world frame.
         """
-        bounding_box_locations = carla_actor.get_world_vertices(carla_actor.get_transform())
+        bounding_box = carla_actor.bounding_box
+        bounding_box_locations = bounding_box.get_world_vertices(carla_actor.get_transform())
         return [CarlaUtils.vector3d_to_numpy(location) for location in bounding_box_locations]
 
     @staticmethod

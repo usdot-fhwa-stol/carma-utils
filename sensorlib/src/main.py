@@ -28,7 +28,8 @@ def scheduled_compute(scheduler, simulated_lidar_sensor, detection_cycle_delay_s
 
 def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_delay_seconds,
          carla_host, carla_port,
-         start_rpc_server, xmlrpc_server_host, xmlrpc_server_port):
+         start_rpc_server, xmlrpc_server_host, xmlrpc_server_port,
+         debug_mode=False):
     """
     Instantiate a SimulatedLidarSensor and start an XML-RPC server to provide detected objects.
 
@@ -91,7 +92,8 @@ def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_d
         carla_host, carla_port,
         sensor_transform,
         infrastructure_id,
-        None)
+        None,
+        debug_mode)
 
     # Compute detected objects continuously using a separate thread
     scheduler = sched.scheduler(time.time, time.sleep)
@@ -109,6 +111,7 @@ def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_d
         server.serve_forever()
     else:
         return simulated_lidar_sensor
+# TypeError: scheduled_compute() missing 3 required positional arguments: 'scheduler', 'simulated_lidar_sensor', and 'detection_cycle_delay_seconds'
 
 
 if __name__ == "__main__":
@@ -170,8 +173,15 @@ if __name__ == "__main__":
         type=int,
         help="XML-RPC server port. (default: 8000)")
 
+    arg_parser.add_argument(
+        "--debug",
+        default=False,
+        type=bool,
+        help="Enable debugging mode, which bypassing processing to produce only 10 detected objects using the truth state. (default: False)")
+
     args = arg_parser.parse_args()
 
     main(args.id, args.sensor_config, args.noise_model_config, args.detection_cycle_delay_seconds,
          args.carla_host, args.carla_port,
-         args.start_rpc_server, args.xmlrpc_server_host, args.xmlrpc_server_port)
+         args.start_rpc_server, args.xmlrpc_server_host, args.xmlrpc_server_port,
+         args.debug)

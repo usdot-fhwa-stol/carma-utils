@@ -26,7 +26,7 @@ class SensorDataCollector:
     New data scans are detected by a reset in the sensor read angle as reported by the simulator.
     """
 
-    def __init__(self, carla_world, carla_sensor):
+    def __init__(self, carla_world, carla_sensor, debug_mode=False):
         self.debug = True
         self.__carla_world = carla_world
         self.__carla_sensor = carla_sensor
@@ -39,7 +39,8 @@ class SensorDataCollector:
         self.__data = deque([{}, {}], maxlen=2)
 
         # Register callback to collect data
-        self.__carla_sensor.listen(self.__collect_sensor_data)
+        if not debug_mode:
+            self.__carla_sensor.listen(self.__collect_sensor_data)
 
     def get_carla_lidar_hitpoints(self):
         """

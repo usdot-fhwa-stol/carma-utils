@@ -32,7 +32,7 @@ class SemanticLidarSensor(SimulatedSensor):
     """
 
     def __init__(self, infrastructure_id, simulated_sensor_config, carla_sensor_config, carla_world, sensor,
-                 data_collector, noise_model):
+                 data_collector, noise_model, debug_mode=False):
         """
         Constructor.
 
@@ -67,6 +67,9 @@ class SemanticLidarSensor(SimulatedSensor):
         # Object cache
         self.__detected_objects = []
 
+        # Debug mode
+        self.__debug_mode = debug_mode
+
     # ------------------------------------------------------------------------------
     # Primary functions
     # ------------------------------------------------------------------------------
@@ -82,37 +85,42 @@ class SemanticLidarSensor(SimulatedSensor):
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
 
-        # Prefilter
-        detected_objects, object_ranges = self.prefilter(detected_objects)
+        if self.__debug_mode:
+            self.__detected_objects = detected_objects[0:10]
 
-        # Get LIDAR hitpoints with Actor ID associations
-        timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
+        else:
 
-        # Compute data needed for occlusion operation
-        actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
-        detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
+            # Prefilter
+            detected_objects, object_ranges = self.prefilter(detected_objects)
 
-        # Instantaneous geometry association
-        sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
-        downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
-        instantaneous_actor_id_association = self.compute_instantaneous_actor_id_association(downsampled_hitpoints,
-                                                                                             detected_objects)
+            # Get LIDAR hitpoints with Actor ID associations
+            timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
 
-        # Geometry re-association
-        self.update_actor_id_association(instantaneous_actor_id_association)
-        hitpoints = self.update_hitpoint_ids_from_association(hitpoints)
+            # Compute data needed for occlusion operation
+            actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
+            detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
 
-        # Apply occlusion
-        detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
-                                                detection_thresholds)
+            # Instantaneous geometry association
+            sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
+            downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
+            instantaneous_actor_id_association = self.compute_instantaneous_actor_id_association(downsampled_hitpoints,
+                                                                                                 detected_objects)
 
-        # Apply noise
-        detected_objects = self.apply_noise(detected_objects)
+            # Geometry re-association
+            self.update_actor_id_association(instantaneous_actor_id_association)
+            hitpoints = self.update_hitpoint_ids_from_association(hitpoints)
 
-        # Update object type, reference frame, and detection time
-        detected_objects = self.update_object_metadata(detected_objects, hitpoints, timestamp)
+            # Apply occlusion
+            detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
+                                                    detection_thresholds)
 
-        self.__detected_objects = detected_objects
+            # Apply noise
+            detected_objects = self.apply_noise(detected_objects)
+
+            # Update object type, reference frame, and detection time
+            detected_objects = self.update_object_metadata(detected_objects, hitpoints, timestamp)
+
+            self.__detected_objects = detected_objects
 
         return detected_objects
 

@@ -34,7 +34,8 @@ class SimulatedSensorConfigurator:
     @staticmethod
     def register_simulated_semantic_lidar_sensor(simulated_sensor_config, carla_sensor_config, noise_model_config,
                                                  carla_host, carla_port,
-                                                 sensor_transform, infrastructure_id=-1, parent_actor=None):
+                                                 sensor_transform, infrastructure_id=-1, parent_actor=None,
+                                                 debug_mode=False):
         """
         Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
         :param simulated_sensor_config: The configuration for the simulated sensor.
@@ -59,17 +60,20 @@ class SimulatedSensorConfigurator:
 
         # Build internal objects
         sensor = CarlaSensorBuilder.build_sensor(carla_sensor)
-        data_collector = SensorDataCollector(carla_world, carla_sensor)
+        data_collector = SensorDataCollector(carla_world, carla_sensor, debug_mode)
         noise_model = NoiseModelFactory.get_noise_model(noise_model_config["noise_model_name"], noise_model_config)
 
         # Determine the infrastructure ID
         if infrastructure_id is None or infrastructure_id < 0:
-            infrastructure_id = np.max(list(SimulatedSensorConfigurator.__infrastructure_sensors.keys())) + 1
+            if len(SimulatedSensorConfigurator.__infrastructure_sensors) == 0:
+                infrastructure_id = 0
+            else:
+                infrastructure_id = np.max(list(SimulatedSensorConfigurator.__infrastructure_sensors.keys())) + 1
 
         # Construct the SimulatedSensor
         simulated_sensor = SemanticLidarSensor(infrastructure_id, simulated_sensor_config, carla_sensor_config,
                                                carla_world, sensor,
-                                               data_collector, noise_model)
+                                               data_collector, noise_model, debug_mode)
 
         # Register the sensor for fast retrieval
         SimulatedSensorConfigurator.__infrastructure_sensors[infrastructure_id] = simulated_sensor
