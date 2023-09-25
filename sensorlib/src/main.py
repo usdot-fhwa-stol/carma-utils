@@ -12,6 +12,7 @@ import os
 
 import sched
 import time
+from dataclasses import dataclass
 from xmlrpc.server import SimpleXMLRPCServer
 import threading
 
@@ -29,7 +30,7 @@ def scheduled_compute(scheduler, simulated_lidar_sensor, detection_cycle_delay_s
 def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_delay_seconds,
          carla_host, carla_port,
          start_rpc_server, xmlrpc_server_host, xmlrpc_server_port,
-         debug_mode=False):
+         enable_processing=True):
     """
     Instantiate a SimulatedLidarSensor and start an XML-RPC server to provide detected objects.
 
@@ -93,7 +94,7 @@ def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_d
         sensor_transform,
         infrastructure_id,
         None,
-        debug_mode)
+        enable_processing)
 
     # Compute detected objects continuously using a separate thread
     scheduler = sched.scheduler(time.time, time.sleep)
@@ -111,7 +112,31 @@ def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_d
         server.serve_forever()
     else:
         return simulated_lidar_sensor
-# TypeError: scheduled_compute() missing 3 required positional arguments: 'scheduler', 'simulated_lidar_sensor', and 'detection_cycle_delay_seconds'
+
+
+def get_mock_detected_objects_json():
+    @dataclass(frozen=True)
+    class MockDetectedObject:
+        id: int
+        type: str
+        x: float
+        y: float
+        z: float
+
+    detected_objects = [
+        MockDetectedObject(id=0, type="Vehicle", x=0.0, y=0.0, z=0.0),
+        MockDetectedObject(id=1, type="Vehicle", x=1.0, y=1.0, z=1.0),
+        MockDetectedObject(id=2, type="Vehicle", x=2.0, y=2.0, z=2.0),
+        MockDetectedObject(id=3, type="Vehicle", x=3.0, y=3.0, z=3.0)
+    ]
+
+    return json.dumps(detected_objects)
+
+def main_mock_data(xmlrpc_server_host, xmlrpc_server_port):
+    print("Starting sensorlib XML-RPC server in mock mode.")
+    server = SimpleXMLRPCServer((xmlrpc_server_host, xmlrpc_server_port))
+    server.register_function(get_mock_detected_objects_json, "get_detected_objects_json")
+    server.serve_forever()
 
 
 if __name__ == "__main__":
@@ -174,14 +199,23 @@ if __name__ == "__main__":
         help="XML-RPC server port. (default: 8000)")
 
     arg_parser.add_argument(
-        "--debug",
+        "--enable-processing",
+        default=True,
+        type=bool,
+        help="Enable processing mode. Disable to bypass processing, producing only 10 detected objects using the truth state. (default: True)")
+
+    arg_parser.add_argument(
+        "--mock-data",
         default=False,
         type=bool,
-        help="Enable debugging mode, which bypassing processing to produce only 10 detected objects using the truth state. (default: False)")
+        help="Enable mock data generation, bypassing the need for a CARLA connection. (default: False)")
 
     args = arg_parser.parse_args()
 
-    main(args.id, args.sensor_config, args.noise_model_config, args.detection_cycle_delay_seconds,
-         args.carla_host, args.carla_port,
-         args.start_rpc_server, args.xmlrpc_server_host, args.xmlrpc_server_port,
-         args.debug)
+    if args.mock_data:
+        main_mock_data(args.xmlrpc_server_host, args.xmlrpc_server_port)
+    else:
+        main(args.id, args.sensor_config, args.noise_model_config, args.detection_cycle_delay_seconds,
+             args.carla_host, args.carla_port,
+             args.start_rpc_server, args.xmlrpc_server_host, args.xmlrpc_server_port,
+             args.enable_processing)

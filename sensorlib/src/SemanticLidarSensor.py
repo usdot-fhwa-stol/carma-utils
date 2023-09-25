@@ -32,7 +32,7 @@ class SemanticLidarSensor(SimulatedSensor):
     """
 
     def __init__(self, infrastructure_id, simulated_sensor_config, carla_sensor_config, carla_world, sensor,
-                 data_collector, noise_model, debug_mode=False):
+                 data_collector, noise_model, enable_processing=True):
         """
         Constructor.
 
@@ -68,7 +68,7 @@ class SemanticLidarSensor(SimulatedSensor):
         self.__detected_objects = []
 
         # Debug mode
-        self.__debug_mode = debug_mode
+        self.__enable_processing = enable_processing
 
     # ------------------------------------------------------------------------------
     # Primary functions
@@ -85,10 +85,7 @@ class SemanticLidarSensor(SimulatedSensor):
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
 
-        if self.__debug_mode:
-            self.__detected_objects = detected_objects[0:10]
-
-        else:
+        if self.__enable_processing:
 
             # Prefilter
             detected_objects, object_ranges = self.prefilter(detected_objects)
@@ -121,6 +118,9 @@ class SemanticLidarSensor(SimulatedSensor):
             detected_objects = self.update_object_metadata(detected_objects, hitpoints, timestamp)
 
             self.__detected_objects = detected_objects
+
+        else:
+            self.__detected_objects = detected_objects[0:10]
 
         return detected_objects
 
