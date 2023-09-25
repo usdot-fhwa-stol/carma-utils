@@ -1,7 +1,4 @@
 simulated_sensor:
-  carla_connection:
-    carla_host: 127.0.0.1
-    carla_port: 2000
   prefilter:
     allowed_semantic_tags:
       - Vehicles

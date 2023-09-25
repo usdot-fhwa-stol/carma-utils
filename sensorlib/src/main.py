@@ -15,10 +15,10 @@ import time
 from xmlrpc.server import SimpleXMLRPCServer
 import threading
 
-import carla
-
 from src.SimulatedSensorConfigurator import SimulatedSensorConfigurator
 from src.util.SimulatedSensorUtils import SimulatedSensorUtils
+
+import carla
 
 
 def scheduled_compute(scheduler, simulated_lidar_sensor, detection_cycle_delay_seconds):
@@ -26,8 +26,9 @@ def scheduled_compute(scheduler, simulated_lidar_sensor, detection_cycle_delay_s
     simulated_lidar_sensor.compute_detected_objects()
 
 
-def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_delay_seconds, start_rpc_server,
-         xmlrpc_server_host, xmlrpc_server_port):
+def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_delay_seconds,
+         carla_host, carla_port,
+         start_rpc_server, xmlrpc_server_host, xmlrpc_server_port):
     """
     Instantiate a SimulatedLidarSensor and start an XML-RPC server to provide detected objects.
 
@@ -51,6 +52,8 @@ def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_d
                             - If the value is a JSON dictionary, the dictionary is used directly.
                             - If passed as an empty string, default values are loaded from a configuration file.
     :param detection_cycle_delay_seconds: Delay in sensor computation loop (seconds).
+    :param carla_host: CARLA host.
+    :param carla_port: CARLA host port.
     :param start_rpc_server: Starts an XML-RPC server if True.
     :param xmlrpc_server_host: Host name for XML-RPC server.
     :param xmlrpc_server_port: Port for XML-RPC server.
@@ -85,6 +88,7 @@ def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_d
         simulated_sensor_config,
         carla_sensor_config,
         noise_model_config,
+        carla_host, carla_port,
         sensor_transform,
         infrastructure_id,
         None)
@@ -137,6 +141,18 @@ if __name__ == "__main__":
         help="Delay in continuous sensor processing loop in seconds. (default: 0.5)")
 
     arg_parser.add_argument(
+        "--carla-host",
+        default="127.0.0.1",
+        type=str,
+        help="CARLA host. (default: \"127.0.0.1\")")
+
+    arg_parser.add_argument(
+        "--carla-port",
+        default="2000",
+        type=str,
+        help="CARLA host. (default: \"2000\")")
+
+    arg_parser.add_argument(
         "--start-rpc-server",
         default=True,
         type=bool,
@@ -157,5 +173,5 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
 
     main(args.id, args.sensor_config, args.noise_model_config, args.detection_cycle_delay_seconds,
-         args.start_rpc_server,
-         args.xmlrpc_server_host, args.xmlrpc_server_port)
+         args.carla_host, args.carla_port,
+         args.start_rpc_server, args.xmlrpc_server_host, args.xmlrpc_server_port)
