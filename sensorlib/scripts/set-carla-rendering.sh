@@ -3,9 +3,6 @@
 #
 # Usage:
 #  ./set_rendering_option.sh  <rendering-level>
-#  ./set_rendering_option.sh 1
-#  ./set_rendering_option.sh 2
-#  ./set_rendering_option.sh 3
 #
 # Rendering level:
 #   0: Disable all rendering computations.
@@ -16,6 +13,8 @@
 # Reference
 # - [Rendering toggle](https://carla.readthedocs.io/en/latest/adv_rendering_options/#off-screen-mode)
 # - [Headless mode](https://carla.readthedocs.io/en/0.9.5/carla_headless/)
+# - [Tutorial](https://rocketloop.de/en/blog/carla-setup-remote-access/)
+# - [Additional tutorial](https://arijitray1993.github.io/CARLA_tutorial/)
 
 CARLA_ROOT=$HOME/carla
 
@@ -45,6 +44,7 @@ elif [ "$RENDERING_LEVEL" == "2" ]; then
 elif [ "$RENDERING_LEVEL" == "3" ]; then
 
   echo "Not implemented"
+  # OR ./CarlaUE4.sh -RenderOffscreen
 
   #  sudo nvidia-xconfig -a --use-display-device=None --virtual=1280x1024
   #  sudo nohup Xorg :7 &

@@ -18,7 +18,10 @@
 # Constants
 # ------------------------------------------------------------------------------
 
+VENV_ROOT=$HOME/.venv
+DEFAULT_VENV_NAME="carla"
 CARLA_ROOT=$HOME/carla
+
 
 
 
@@ -36,7 +39,6 @@ main() {
     mkvenv) mkvenv;;
     venv) venv;;
 
-    rl) set-rendering-level;;
     start) start-carla;;
 
     help) print_help;;
@@ -61,21 +63,39 @@ load-egg() {
 }
 
 mkvenv() {
+  mkdir $VENV_ROOT
+  VENV_NAME=$DEFAULT_VENV_NAME
+  echo "[-] Making Python virtual environment \"$VENV_NAME\""
+  python3 -m venv $VENV_ROOT/$VENV_NAME
+  echo "[-] Configuring virtual environment"
+  source $VENV_ROOT/$VENV_NAME/bin/activate
+  pip3 install --upgrade pip wheel
+  python3 -m pip install -r requirements.txt
+
+#  echo "[-] Installing CARLA dependencies"
+#  pip3 install --upgrade pip wheel
+#  pip3 install carla==0.9.5
+
+  deactivate
 }
 
 venv() {
-
+  VENV_NAME=$DEFAULT_VENV_NAME
   echo "[-] Activating Python virtual environment"
-  source env/bin/activate
-
+  source $VENV_ROOT/$VENV_NAME/bin/activate
 }
 
 set-rendering-level() {
-  set-carla-rendering.sh $1
+  echo "Not implemented"
 }
 
 start-carla() {
-  $CARLA_ROOT/CarlaUE4.sh
+  if [ -z "$1" ]; then
+    $CARLA_ROOT/CarlaUE4.sh
+  else
+    set-carla-rendering.sh $1
+  fi
+  #$CARLA_ROOT/CarlaUE4.sh -opengl -carla-server -carla-no-window
 #  $CARLA_ROOT/CarlaUE4.sh -carla-server -carla-no-graphics -opengl -ResX 1280 -ResY 720 -benchmark -fps 120
 }
 
