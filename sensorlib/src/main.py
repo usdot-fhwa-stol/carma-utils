@@ -115,13 +115,19 @@ def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_d
 
 
 def get_mock_detected_objects_json():
-    @dataclass(frozen=True)
     class MockDetectedObject:
-        id: int
-        type: str
-        x: float
-        y: float
-        z: float
+        def __init__(self,
+                     id,
+                     type,
+                     x,
+                     y,
+                     z):
+            self.id = id
+            self.type = type
+            self.x = x
+            self.y = y
+            self.z = z
+
 
     detected_objects = [
         MockDetectedObject(id=0, type="Vehicle", x=0.0, y=0.0, z=0.0),
@@ -130,7 +136,7 @@ def get_mock_detected_objects_json():
         MockDetectedObject(id=3, type="Vehicle", x=3.0, y=3.0, z=3.0)
     ]
 
-    return json.dumps(detected_objects)
+    return SimulatedSensorUtils.serialize_to_json(detected_objects)
 
 def main_mock_data(xmlrpc_server_host, xmlrpc_server_port):
     print("Starting sensorlib XML-RPC server in mock mode.")
