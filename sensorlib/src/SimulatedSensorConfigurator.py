@@ -6,8 +6,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
 # governing permissions and limitations under the License.
 
-from src.util.CarlaLoader import CarlaLoader
-CarlaLoader.load_carla_lib("0.9.14")
+# from src.util.CarlaLoader import CarlaLoader
+# CarlaLoader.load_carla_lib("0.9.14")
 import carla
 import numpy as np
 
