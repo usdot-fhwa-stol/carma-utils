@@ -10,7 +10,7 @@ import json
 
 import yaml
 
-from src.util.NumpyEncoder import NumpyEncoder
+from util.NumpyEncoder import NumpyEncoder
 
 
 class SimulatedSensorUtils:

@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 
 import carla
 
-from src.SimulatedSensorConfigurator import SimulatedSensorConfigurator
+from SimulatedSensorConfigurator import SimulatedSensorConfigurator
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 

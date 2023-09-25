@@ -6,15 +6,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
 # governing permissions and limitations under the License.
 
-# from src.util.CarlaLoader import CarlaLoader
+# from util.CarlaLoader import CarlaLoader
 # CarlaLoader.load_carla_lib("0.9.14")
 import carla
 import numpy as np
 
-from src.SemanticLidarSensor import SemanticLidarSensor
-from src.collector.SensorDataCollector import SensorDataCollector
-from src.noise_models.NoiseModelFactory import NoiseModelFactory
-from src.objects.CarlaSensor import CarlaSensorBuilder
+from SemanticLidarSensor import SemanticLidarSensor
+from collector.SensorDataCollector import SensorDataCollector
+from noise_models.NoiseModelFactory import NoiseModelFactory
+from objects.CarlaSensor import CarlaSensorBuilder
 
 
 class SimulatedSensorConfigurator:

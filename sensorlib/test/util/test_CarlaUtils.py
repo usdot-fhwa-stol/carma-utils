@@ -14,7 +14,7 @@ from unittest.mock import MagicMock
 
 from scipy.spatial.transform import Rotation
 
-from src.util.CarlaUtils import CarlaUtils
+from util.CarlaUtils import CarlaUtils
 
 
 class TestCarlaUtils(unittest.TestCase):

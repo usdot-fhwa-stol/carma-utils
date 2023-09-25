@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import MagicMock
 import numpy as np
 
-from src.noise_models.GaussianNoiseModel import GaussianNoiseModel
+from noise_models.GaussianNoiseModel import GaussianNoiseModel
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 

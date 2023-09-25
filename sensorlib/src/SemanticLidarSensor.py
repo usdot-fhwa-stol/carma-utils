@@ -12,12 +12,12 @@ from dataclasses import replace
 import numpy as np
 from scipy.spatial import distance
 
-from src.SimulatedSensor import SimulatedSensor
-from src.objects.DetectedObject import DetectedObjectBuilder
+from SimulatedSensor import SimulatedSensor
+from objects.DetectedObject import DetectedObjectBuilder
 
-from src.util.CarlaUtils import CarlaUtils
-from src.util.HistoricalMapper import HistoricalMapper
-from src.util.SimulatedSensorUtils import SimulatedSensorUtils
+from util.CarlaUtils import CarlaUtils
+from util.HistoricalMapper import HistoricalMapper
+from util.SimulatedSensorUtils import SimulatedSensorUtils
 
 
 class SemanticLidarSensor(SimulatedSensor):

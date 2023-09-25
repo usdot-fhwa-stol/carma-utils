@@ -16,8 +16,8 @@ from dataclasses import dataclass
 from xmlrpc.server import SimpleXMLRPCServer
 import threading
 
-from src.SimulatedSensorConfigurator import SimulatedSensorConfigurator
-from src.util.SimulatedSensorUtils import SimulatedSensorUtils
+from SimulatedSensorConfigurator import SimulatedSensorConfigurator
+from util.SimulatedSensorUtils import SimulatedSensorUtils
 
 import carla
 

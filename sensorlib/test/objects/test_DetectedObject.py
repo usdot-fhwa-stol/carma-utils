@@ -13,7 +13,7 @@ import carla
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from src.objects.DetectedObject import DetectedObjectBuilder
+from objects.DetectedObject import DetectedObjectBuilder
 
 
 class TestDetectedObject(unittest.TestCase):

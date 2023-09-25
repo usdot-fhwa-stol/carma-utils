@@ -9,7 +9,7 @@
 import unittest
 from collections import deque
 
-from src.util.HistoricalMapper import HistoricalMapper
+from util.HistoricalMapper import HistoricalMapper
 
 
 class TestHistoricalMapper(unittest.TestCase):

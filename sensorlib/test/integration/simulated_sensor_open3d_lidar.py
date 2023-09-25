@@ -27,9 +27,9 @@ import numpy as np
 from matplotlib import cm
 import open3d as o3d
 
-from src.SimulatedSensor import SimulatedSensor
-from src.SimulatedSensorConfigurator import SimulatedSensorConfigurator
-from src.util.SimulatedSensorUtils import SimulatedSensorUtils
+from SimulatedSensor import SimulatedSensor
+from SimulatedSensorConfigurator import SimulatedSensorConfigurator
+from util.SimulatedSensorUtils import SimulatedSensorUtils
 
 try:
     sys.path.append(glob.glob("../carla/dist/carla-*%d.%d-%s.egg" % (

@@ -8,7 +8,7 @@
 
 from collections import deque
 
-from src.util.CarlaUtils import CarlaUtils
+from util.CarlaUtils import CarlaUtils
 
 
 class SensorDataCollector:
