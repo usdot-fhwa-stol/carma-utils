@@ -54,8 +54,12 @@ def generate_log_levels_impl(config_file_path):
                 levels['default_level'] = log_level
                 continue
 
-            elif(len(package_parts) == 4): # This is a package log level descripter so get the package name
-                package = package_parts[3]
+            elif(len(package_parts) >= 4): # This is a package log level descripter so get the package name
+                package = ''
+                for part in package_parts[3:]:
+                    package += part
+                    package += '.'
+                package = package[:-1]
                 levels[ package ] = log_level
 
             else:
