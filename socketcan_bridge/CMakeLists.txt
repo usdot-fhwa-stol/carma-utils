@@ -116,6 +116,7 @@ install(
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   find_package(roslint REQUIRED)
+  find_package(Boost REQUIRED)
 
   roslint_cpp()
   #for use with catkin_make roslint_socketcan_bridge
