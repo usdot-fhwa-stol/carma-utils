@@ -42,4 +42,5 @@ class SimulatedSensorUtils:
             data = [SimulatedSensorUtils.serialize_to_json(item) for item in obj]
             return json.dumps(data)
         else:
+            # TODO Implement custom object serialization to avoid this.
             return json.dumps(obj.__dict__, cls=NumpyEncoder)

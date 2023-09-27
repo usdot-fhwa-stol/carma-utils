@@ -22,6 +22,42 @@ from util.SimulatedSensorUtils import SimulatedSensorUtils
 import carla
 
 
+# TODO One RPC function to create a sensor at a given location/orientation.
+# TODO One RPC function to retrieve all detected objects from the sensor.
+# TODO Separate RPC server starting from all actions to build and run and expose the sensor capabilities.
+# TODO Are configs consistent across sensors? If so only use one config.
+# TODO Clarify transform absolute/relative if attached to a parent
+# TODO Change noise model to toggle each noise model stage.
+# TODO Change noise model to only change a subset of the output objects.
+# TODO Turn noise model off with a different noise_model_name in the config.
+# TODO remove machinet.conf
+# TODO Remove debug parameters
+# TODO Change infrastructure ID to use sub-id (sensor ID)
+# TODO Sensor thread compute should be optional capability
+# TODO Sensor management is not properly exposed in the interface (multiple sensors in the RPC)
+# TODO Get_detected_objects has no ID parameter
+# TODO Clarify interfaces int he readme
+
+# TODO Get the xml rpc pr in place
+# TODO Make a library PR (separate)
+
+# TODO Expose configs to the RPC
+
+# TODO Separate the service main.py from the library
+
+# TODO Add a toggle to enable/disable the threading step
+# TODO Share carla client connection between registered sensors
+# TODO Move sensorlib sensor to be client to any RPC connection
+
+# TODO Return ID or instance from the creation call in both interfaces
+
+# TODO Make the service restartable by adding a search for existing sensors, and also add passive SimulatedSensor creation from existing CARLA sensor instance.
+
+# TODO carla.Client(  ensure using non hardcoded parameters  )
+
+
+
+
 def scheduled_compute(scheduler, simulated_lidar_sensor, detection_cycle_delay_seconds):
     scheduler.enter(detection_cycle_delay_seconds, 1, scheduled_compute)
     simulated_lidar_sensor.compute_detected_objects()
@@ -31,38 +67,6 @@ def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_d
          carla_host, carla_port,
          start_rpc_server, xmlrpc_server_host, xmlrpc_server_port,
          enable_processing=True):
-    """
-    Instantiate a SimulatedLidarSensor and start an XML-RPC server to provide detected objects.
-
-    The sensor compute loop, in which detected objects are identified, is run continuously in a separate thread with
-     a detection_cycle_delay_seconds loop delay.
-
-    Two starting modes are supported:
-
-        1. With start_rpc_server=True an RPC server exposes the `get_detected_objects_json()` function to retrieve
-             the list of currently detected objects as a JSON string, and blocks further execution.
-        2. Alternatively with start_rpc_server=False, the `get_detected_objects_json()` function may be called
-            programmatically on the returned sensor object.
-
-    :param infrastructure_id: Infrastructure ID to assign to the sensor. Negative value forces auto-assignment.
-    :param sensor_config: Sensor configuration as either a file name, JSON dictionary, or blank.
-                            - If the value is a valid .yaml file name, the file is loaded.
-                            - If the value is a JSON dictionary, the dictionary is used directly.
-                            - If passed as an empty string, default values are loaded from a configuration file.
-    :param noise_model_config: Noise model configuration as either a file name, JSON dictionary, or blank.
-                            - If the value is a valid .yaml file name, the file is loaded.
-                            - If the value is a JSON dictionary, the dictionary is used directly.
-                            - If passed as an empty string, default values are loaded from a configuration file.
-    :param detection_cycle_delay_seconds: Delay in sensor computation loop (seconds).
-    :param carla_host: CARLA host.
-    :param carla_port: CARLA host port.
-    :param start_rpc_server: Starts an XML-RPC server if True.
-    :param xmlrpc_server_host: Host name for XML-RPC server.
-    :param xmlrpc_server_port: Port for XML-RPC server.
-
-    :return: No return if RPC server is running as this blocks execution; The SimulatedLidarSensor object if RPC server
-                is not running.
-    """
     # Get inputs
     sensor_transform = carla.Transform(carla.Location(x=0.0, y=0.0, z=0.0),
                                        carla.Rotation(pitch=0.0, yaw=0.0, roll=0.0))
@@ -108,6 +112,7 @@ def main(infrastructure_id, sensor_config, noise_model_config, detection_cycle_d
     if start_rpc_server:
         print("Starting sensorlib XML-RPC server.")
         server = SimpleXMLRPCServer((xmlrpc_server_host, xmlrpc_server_port))
+        server.register_function(register_simulated_semantic_lidar_sensor, "register_simulated_semantic_lidar_sensor")
         server.register_function(simulated_lidar_sensor.get_detected_objects_json, "get_detected_objects_json")
         server.serve_forever()
     else:

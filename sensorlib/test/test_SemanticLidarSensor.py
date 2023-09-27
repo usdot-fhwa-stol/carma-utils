@@ -125,9 +125,9 @@ class TestSemanticLidarSensor(unittest.TestCase):
         with open("data/test_data_serialized_detected_objects.json", "r") as file:
             expected_serialized_data = json.load(file)
             assert serialized == expected_serialized_data
+        # TODO Remove
         # with open("data/test_data_serialized_detected_objects.json", "w") as file:
         #     json.dump(serialized, file)
-
 
     def test_get_scene_detected_objects(self):
         actors = [MagicMock()]
