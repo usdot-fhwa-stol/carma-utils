@@ -12,12 +12,11 @@ from dataclasses import replace
 import numpy as np
 from scipy.spatial import distance
 
-from SimulatedSensor import SimulatedSensor
 from objects.DetectedObject import DetectedObjectBuilder
+from sensor.SimulatedSensor import SimulatedSensor
 
 from util.CarlaUtils import CarlaUtils
 from util.HistoricalMapper import HistoricalMapper
-from util.SimulatedSensorUtils import SimulatedSensorUtils
 
 
 class SemanticLidarSensor(SimulatedSensor):
@@ -31,11 +30,13 @@ class SemanticLidarSensor(SimulatedSensor):
     https://carla.readthedocs.io/en/latest/python_api/#carla.Sensor.listen
     """
 
-    def __init__(self, infrastructure_id, simulated_sensor_config, carla_sensor_config, carla_world, sensor,
-                 data_collector, noise_model, enable_processing=True):
+    def __init__(self, infrastructure_id, sensor_id, simulated_sensor_config, carla_sensor_config, carla_world, sensor,
+                 data_collector, noise_model):
         """
         Constructor.
 
+        :param infrastructure_id: Infrastructure ID with which the sensor is associated.
+        :param sensor_id: Sensor ID.
         :param simulated_sensor_config: Configuration dictionary containing parameters specific to the wrapped sensor logic.
         :param carla_sensor_config: Parameters relevant to the CARLA sensor configuration.
         :param carla_world: Reference to the CARLA world object.
@@ -45,7 +46,7 @@ class SemanticLidarSensor(SimulatedSensor):
         """
 
         # Configuration
-        super().__init__(infrastructure_id)
+        super().__init__(infrastructure_id, sensor_id)
         self.__simulated_sensor_config = simulated_sensor_config
         self.__carla_sensor_config = carla_sensor_config
 
@@ -67,9 +68,6 @@ class SemanticLidarSensor(SimulatedSensor):
         # Object cache
         self.__detected_objects = []
 
-        # Debug mode
-        self.__enable_processing = enable_processing
-
     # ------------------------------------------------------------------------------
     # Primary functions
     # ------------------------------------------------------------------------------
@@ -85,48 +83,43 @@ class SemanticLidarSensor(SimulatedSensor):
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
 
-        if self.__enable_processing:
+        # Prefilter
+        detected_objects, object_ranges = self.prefilter(detected_objects)
 
-            # Prefilter
-            detected_objects, object_ranges = self.prefilter(detected_objects)
+        # Get LIDAR hitpoints with Actor ID associations
+        timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
 
-            # Get LIDAR hitpoints with Actor ID associations
-            timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
+        # Compute data needed for occlusion operation
+        actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
+        detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
 
-            # Compute data needed for occlusion operation
-            actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
-            detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
+        # Instantaneous geometry association
+        sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
+        downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
+        instantaneous_actor_id_association = self.compute_instantaneous_actor_id_association(downsampled_hitpoints,
+                                                                                             detected_objects)
 
-            # Instantaneous geometry association
-            sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
-            downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
-            instantaneous_actor_id_association = self.compute_instantaneous_actor_id_association(downsampled_hitpoints,
-                                                                                                 detected_objects)
+        # Geometry re-association
+        self.update_actor_id_association(instantaneous_actor_id_association)
+        hitpoints = self.update_hitpoint_ids_from_association(hitpoints)
 
-            # Geometry re-association
-            self.update_actor_id_association(instantaneous_actor_id_association)
-            hitpoints = self.update_hitpoint_ids_from_association(hitpoints)
+        # Apply occlusion
+        detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
+                                                detection_thresholds)
 
-            # Apply occlusion
-            detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
-                                                    detection_thresholds)
+        # Apply noise
+        detected_objects = self.apply_noise(detected_objects)
 
-            # Apply noise
-            detected_objects = self.apply_noise(detected_objects)
+        # Update object type, reference frame, and detection time
+        detected_objects = self.update_object_metadata(detected_objects, hitpoints, timestamp)
 
-            # Update object type, reference frame, and detection time
-            detected_objects = self.update_object_metadata(detected_objects, hitpoints, timestamp)
-
-            self.__detected_objects = detected_objects
-
-        else:
-            self.__detected_objects = detected_objects[0:10]
+        self.__detected_objects = detected_objects
 
         return detected_objects
 
-    def get_detected_objects_json(self):
-        """Returns the latest detected objects, formatted as a string contianing a list of JSON objects."""
-        return SimulatedSensorUtils.serialize_to_json(self.__detected_objects)
+    def get_detected_objects(self):
+        """Returns the latest detected objects."""
+        return self.__detected_objects
 
     # ------------------------------------------------------------------------------
     # CARLA Scene DetectedObject Retrieval
@@ -338,7 +331,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Prepend instantaneous association to trailing associations
         # Possible enhancement issue: https://github.com/usdot-fhwa-stol/carma-platform/issues/2142
-        
+
         for hitpoint_id, obj_id in instantaneous_actor_id_association.items():
             self.__trailing_id_associations.push(hitpoint_id, obj_id)
 
@@ -412,7 +405,8 @@ class SemanticLidarSensor(SimulatedSensor):
         :param vertical_fov: Vertical field of view in radians.
         :return: Expected number of hitpoints in a scan across the specified field of view.
         """
-        num_horizontal_points_per_scan = (self.__sensor.points_per_second / self.__sensor.rotation_frequency) / self.__sensor.number_of_channels
+        num_horizontal_points_per_scan = (
+                                                     self.__sensor.points_per_second / self.__sensor.rotation_frequency) / self.__sensor.number_of_channels
         horizontal_angular_resolution = self.__sensor.horizontal_fov / num_horizontal_points_per_scan
 
         num_vertical_points_per_scan = self.__sensor.number_of_channels

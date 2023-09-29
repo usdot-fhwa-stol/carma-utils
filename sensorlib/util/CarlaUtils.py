@@ -104,3 +104,45 @@ class CarlaUtils:
         :return: The tag ID.
         """
         return carla.CityObjectLabel.names.get(tag_name, 0)
+
+    @staticmethod
+    def get_transform(sensor_position, sensor_rotation):
+        """
+        Get a carla.Transform from a position and rotation.
+        :param sensor_position: Sensor position vector in CARLA world coordinates, represented as an array of floats.
+        :param sensor_rotation: Sensor rotation in degrees, represented as an array of floats.
+        :return: carla.Transform object.
+        """
+        position = CarlaUtils.get_location(sensor_position)
+        rotation = CarlaUtils.get_rotation(sensor_rotation)
+        return carla.Transform(position, rotation)
+
+    @staticmethod
+    def get_location(position_vector):
+        """
+        Get a carla.Location from a position vector.
+        :param position_vector: Position vector in CARLA world coordinates, represented as an array of floats.
+        :return: carla.Location object.
+        """
+        return carla.Location(x=position_vector[0], y=position_vector[1], z=position_vector[2])
+
+    @staticmethod
+    def get_rotation(rotation_vector):
+        """
+        Get a carla.Rotation from a rotation vector.
+        :param rotation_vector: Rotation vector in degrees, represented as an array of floats.
+        :return: carla.Rotation object.
+        """
+        return carla.Rotation(pitch=rotation_vector[0], yaw=rotation_vector[1], roll=rotation_vector[2])
+
+    @staticmethod
+    def get_actor(carla_world, actor_id):
+        """
+        Get a carla.Actor from an actor ID.
+        :param actor_id: The actor ID to look up.
+        :return: carla.Actor object.
+        """
+        if not isinstance(actor_id, int):
+            return None
+
+        return carla_world.get_actor(actor_id)

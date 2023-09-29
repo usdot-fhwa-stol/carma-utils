@@ -12,8 +12,9 @@ from abc import abstractmethod
 class SimulatedSensor:
     """Sensor wrapper to contain logic analyzing internal CARLA sensor."""
 
-    def __init__(self, infrastructure_id):
+    def __init__(self, infrastructure_id, sensor_id):
         self.infrastructure_id = infrastructure_id
+        self.sensor_id = sensor_id
 
     @abstractmethod
     def compute_detected_objects(self):
@@ -24,9 +25,9 @@ class SimulatedSensor:
         pass
 
     @abstractmethod
-    def get_detected_objects_json(self):
+    def get_detected_objects(self):
         """
         Retrieve the sensor's latest perception of objects detected in the scene.
-        :return: List of DetectedObject objects serialized in JSON form.
+        :return: List of DetectedObject objects.
         """
         pass
