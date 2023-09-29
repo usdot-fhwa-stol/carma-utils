@@ -11,7 +11,7 @@ import threading
 import time
 
 from util.CarlaLoader import CarlaLoader
-CarlaLoader.load_carla_lib("0.9.14")
+CarlaLoader.load_carla_lib("0.9.10")
 import carla
 
 from collector.SensorDataCollector import SensorDataCollector
@@ -33,9 +33,11 @@ class SensorAPI:
         :param carla_host: The CARLA host.
         :param carla_port: The CARLA host port.
         """
-        self.__client = carla.Client(carla_host, carla_port)
-        self.__client.set_timeout(2.0)
-        self.__carla_world = self.__client.get_world()
+        self.__client = None
+        self.__carla_world = None
+        # self.__client = carla.Client(str(carla_host), int(carla_port))
+        # self.__client.set_timeout(2.0)
+        # self.__carla_world = self.__client.get_world()
         self.__infrastructure_sensors = {}
 
     # ------------------------------------------------------------------------------
