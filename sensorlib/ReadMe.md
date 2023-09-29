@@ -1,32 +1,96 @@
 # CARLA Sensor Library
 
+
+
+
+## API
+
+The Python API provides programmatic access to the library functionality.
+
+### create_simulated_semantic_lidar_sensor
+
+#### Input Parameters
+
+
+| Parameter                     | Type    | Description                                                                         |
+|-------------------------------|---------|-------------------------------------------------------------------------------------|
+| simulated_sensor_config       | JSON    | The configuration for the simulated sensor.                                         |
+| carla_sensor_config           | JSON    | The configuration for the CARLA sensor.                                             |
+| noise_model_config            | JSON    | The configuration for the noise model.                                              |
+| detection_cycle_delay_seconds | int     | The delay between sensor detections.                                                |
+| infrastructure_id             | int     | The ID of the infrastructure.                                                       |
+| sensor_id                     | int     | The ID of the sensor.                                                               |
+| sensor_position               | float[] | Sensor position in CARLA world coordinates.                                         |
+| sensor_rotation               | float[] | Sensor rotation in degrees.                                                         |
+| parent_actor_id               | int     | ID of the parent actor to which the sensor is attached. Use -1 to leave unattached. |
+
+#### Return
+
+The registered SemanticLidarSensor object.
+
+
+
+
+
+### get_detected_objects
+
+Retrieves the detected objects from a sensor.
+
+
+#### Input Parameters
+
+| Parameter                     | Type    | Description                                                                         |
+|-------------------------------|---------|-------------------------------------------------------------------------------------|
+| infrastructure_id             | int     | The ID of the infrastructure.                                                       |
+| sensor_id                     | int     | The ID of the sensor.                                                               |
+
+#### Return
+
+The list of DetectedObjects detected by the sensor.
+
+
+
+
+
+
+
+
+
 ## Overview
 
-The sensor library provides a proxy sensor for the CARLA simulator, exposing additional features. 
+The sensor library provides a proxy sensor for the CARLA simulator, exposing additional features.
 
-The SimulatedSensor acts as a wrapper to the CARLA Semantic Lidar Sensor, capturing the data and performing post-processing to generate a list of detected objects upon request.
+The SimulatedSensor acts as a wrapper to the CARLA Semantic Lidar Sensor, capturing the data and performing
+post-processing to generate a list of detected objects upon request.
 
-Raw sensor observations from the CARLA sensor are composed to build a dataset representing the current objects in scene. 
+Raw sensor observations from the CARLA sensor are composed to build a dataset representing the current objects in scene.
 
 ## Context
 
-This new feature is provided to enable vulnerable road user detection using a LIDAR sensor in the context of a CARLA-driven simulation. The data is intended to feed into a CARMA V2X system for data fusion with other sensors and action by CARMA platform vehicles.
+This new feature is provided to enable vulnerable road user detection using a LIDAR sensor in the context of a
+CARLA-driven simulation. The data is intended to feed into a CARMA V2X system for data fusion with other sensors and
+action by CARMA platform vehicles.
 
 ## Interface
 
 The XML-RPC interface consists of one function to retrieve the list of detected objects.
 
-After starting main.py, an RPC server is available with the `get_detected_objects_json()` function. This function takes no parameters and returns a string containing the serialized list of DetectedObjects, each containing metadata including id, position and type of object.
+After starting main.py, an RPC server is available with the `get_detected_objects_json()` function. This function takes
+no parameters and returns a string containing the serialized list of DetectedObjects, each containing metadata including
+id, position and type of object.
 
-Alternatively the API may be used to instantiate a SimulatedSensor which is assisted by calling the SimulatedSensorConfigurator, with parameters used to locate the running CARLA instance. Sample code is in main.py.
+Alternatively the API may be used to instantiate a SimulatedSensor which is assisted by calling the
+SimulatedSensorConfigurator, with parameters used to locate the running CARLA instance. Sample code is in main.py.
 
 ## Operation
 
 The SimulatedSensor manages a CarlaSensor, which is a light wrapper around the CARLA sensor reference.
 
-High-speed LIDAR data is collected into a DataCollector class running in a separate context which self-populates via a callback.
+High-speed LIDAR data is collected into a DataCollector class running in a separate context which self-populates via a
+callback.
 
-The SimulatedSensor.compute_detected_objects() function presents the primary processing sequence performing the following stages:
+The SimulatedSensor.compute_detected_objects() function presents the primary processing sequence performing the
+following stages:
 
 1. Truth state retrieval.
 1. Pre-filter by distance from sensor, and allowed object types.
@@ -34,15 +98,19 @@ The SimulatedSensor.compute_detected_objects() function presents the primary pro
 1. Occlusion filtering.
 1. Application of a generic noise model to the results.
 
-Internal functions build a list of DetectedObjects, representing the detected vulnerable road users. Range and angular extent are collected in lookup structures which are passed between functions as needed.
+Internal functions build a list of DetectedObjects, representing the detected vulnerable road users. Range and angular
+extent are collected in lookup structures which are passed between functions as needed.
 
 ## Configuration
 
-Configurability is provided to the SimulatedSensor including parameters related to: Pre-filtering, occlusion, and the noise model. Configuration parameters are required in the SemanticLidarSensor constructor, and available to load from included configuration files.
+Configurability is provided to the SimulatedSensor including parameters related to: Pre-filtering, occlusion, and the
+noise model. Configuration parameters are required in the SemanticLidarSensor constructor, and available to load from
+included configuration files.
 
 ## Truth State Retrieval
 
-The CARLA World.get_actors() function exposes actors in the simulation. These are immediately transformed into DetectedObject instances.
+The CARLA World.get_actors() function exposes actors in the simulation. These are immediately transformed into
+DetectedObject instances.
 
 ## Pre-Filtering
 
@@ -50,18 +118,23 @@ Objects not of the permitted type are removed, along with objects outside of the
 
 ## LIDAR Hitpoint Retrieval
 
-Data are collected via the SensorDataCollector.__collect_sensor_data() function, which is registered as a callback in the CARLA sensor. Processing frames are collected into "active" and "previous" queue positions, are understood to consist of one full LIDAR sensor rotation. Data contains vertical scan elements.
+Data are collected via the SensorDataCollector.__collect_sensor_data() function, which is registered as a callback in
+the CARLA sensor. Processing frames are collected into "active" and "previous" queue positions, are understood to
+consist of one full LIDAR sensor rotation. Data contains vertical scan elements.
 
 ## Occlusion Filtering
 
 Objects which are occluded by other items in the scene are filtered out.
 
-Occlusion is determined from a fractional threshold pertaining to the number of LIDAR hitpoints detected divided by the number expected.
+Occlusion is determined from a fractional threshold pertaining to the number of LIDAR hitpoints detected divided by the
+number expected.
 
-To account for innacuracies in these calculations due to beam spreading at larger distances, a scaling factor is applied to the threshold. The nominal threshold and scaling parameters are configurable.
+To account for innacuracies in these calculations due to beam spreading at larger distances, a scaling factor is applied
+to the threshold. The nominal threshold and scaling parameters are configurable.
 
 ## Noise Model
 
-The noise model applies adjustments to the output data including positions, orientations, and whether the object has been detected.
+The noise model applies adjustments to the output data including positions, orientations, and whether the object has
+been detected.
 
 The noise model interface is extensible and can support additional models in the future.
