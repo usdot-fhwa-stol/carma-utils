@@ -7,6 +7,7 @@
 # governing permissions and limitations under the License.
 
 import argparse
+import threading
 
 from xmlrpc.server import SimpleXMLRPCServer
 
@@ -19,7 +20,7 @@ class SensorDataService:
     def __init__(self):
         self.__api = None
 
-    def main(self, carla_host, carla_port, xmlrpc_server_host, xmlrpc_server_port):
+    def start_xml_rpc_server(self, carla_host, carla_port, xmlrpc_server_host, xmlrpc_server_port, bocking=True):
         # Instantiate a SensorAPI
         self.__api = SensorAPI(carla_host, carla_port)
 
@@ -31,7 +32,18 @@ class SensorDataService:
                                  "create_simulated_semantic_lidar_sensor")
         server.register_function(self.__get_simulated_sensor, "get_simulated_sensor")
         server.register_function(self.__get_detected_objects, "get_detected_objects")
-        server.serve_forever()
+
+        if bocking:
+            server.serve_forever()
+        else:
+            rpc_server_thread = threading.Thread(target=server.serve_forever)
+            rpc_server_thread.start()
+            return True
+
+
+
+
+
 
     def __create_simulated_semantic_lidar_sensor(self, sensor_config_file, noise_model_config_file,
                                                  detection_cycle_delay_seconds,
@@ -104,4 +116,4 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
     sensor_data_service = SensorDataService()
-    sensor_data_service.main(args.carla_host, args.carla_port, args.xmlrpc_server_host, args.xmlrpc_server_port)
+    sensor_data_service.start_xml_rpc_server(args.carla_host, args.carla_port, args.xmlrpc_server_host, args.xmlrpc_server_port, True)

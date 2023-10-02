@@ -25,7 +25,7 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
     def apply_position_noise(self, object_list):
 
-        if not self.__config["stage"]["position_noise"]:
+        if not self.__config["stages"]["position_noise"]:
             return object_list
 
         # Apply position noise to the object_list
@@ -38,7 +38,7 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
     def apply_orientation_noise(self, object_list):
 
-        if not self.__config["stage"]["orientation_noise"]:
+        if not self.__config["stages"]["orientation_noise"]:
             return object_list
 
         # Apply orientation noise to the object_list
@@ -51,7 +51,7 @@ class GaussianNoiseModel(AbstractNoiseModel):
         return object_list
 
     def apply_type_noise(self, object_list):
-        if not self.__config["stage"]["type_noise"]:
+        if not self.__config["stages"]["type_noise"]:
             return object_list
 
         # Apply type noise to the object_list
@@ -62,6 +62,6 @@ class GaussianNoiseModel(AbstractNoiseModel):
                 for obj in object_list]
 
     def apply_list_inclusion_noise(self, object_list):
-        if not self.__config["stage"]["list_inclusion_noise"]:
+        if not self.__config["stages"]["list_inclusion_noise"]:
             return object_list
         return object_list[0:np.random.randint(0, len(object_list) + 1)]

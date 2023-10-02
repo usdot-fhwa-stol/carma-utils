@@ -27,19 +27,11 @@ import numpy as np
 from matplotlib import cm
 import open3d as o3d
 
-from SimulatedSensor import SimulatedSensor
-from SimulatedSensorConfigurator import SimulatedSensorConfigurator
-from util.SimulatedSensorUtils import SimulatedSensorUtils
-
-try:
-    sys.path.append(glob.glob("../carla/dist/carla-*%d.%d-%s.egg" % (
-        sys.version_info.major,
-        sys.version_info.minor,
-        "win-amd64" if os.name == "nt" else "linux-x86_64"))[0])
-except IndexError:
-    pass
-
+# from util.CarlaLoader import CarlaLoader
+# CarlaLoader.load_carla_lib("0.9.10")
 import carla
+
+from SensorAPI import SensorAPI
 
 VIRIDIS = np.array(cm.get_cmap("plasma").colors)
 VID_RANGE = np.linspace(0.0, 1.0, VIRIDIS.shape[0])
@@ -190,7 +182,8 @@ def main(arg):
         lidar_transform = carla.Transform(carla.Location(x=-0.5, z=1.8) + user_offset)
 
         # Wrap the actor
-        sensor = SimulatedSensorConfigurator.register_simulated_semantic_lidar_sensor(world, lidar_transform, vehicle,
+        sensor = SensorAPI()
+        .register_simulated_semantic_lidar_sensor(world, lidar_transform, vehicle,
                                                                                       arg.simulated_sensor_config_filename,
                                                                                       arg.noise_model_config_filename)
 
@@ -225,7 +218,10 @@ def main(arg):
             vis.update_renderer()
 
             if frame % 120 == 0:
-                detected_objects = sensor.compute_detected_objects__simple()
+                detected_objects = sensor.get_detected_objects()
+                print(f"Detected objects: {len(detected_objects)} objects")
+                for detected_object in detected_objects:
+                        print(f"ID: {detected_objects.get_id()}")
 
             # # This can fix Open3D jittering issues:
             time.sleep(0.005)

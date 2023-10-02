@@ -83,6 +83,10 @@ class SemanticLidarSensor(SimulatedSensor):
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
 
+        return detected_objects
+
+    def x(self, detected_objects):
+
         # Prefilter
         detected_objects, object_ranges = self.prefilter(detected_objects)
 

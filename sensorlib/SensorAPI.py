@@ -114,9 +114,9 @@ class SensorAPI:
     # Helper Functions
     # ------------------------------------------------------------------------------
 
-    def __schedule_next_compute(self, scheduler, simulated_lidar_sensor, detection_cycle_delay_seconds):
-        scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute)
-        simulated_lidar_sensor.compute_detected_objects()
+    def __schedule_next_compute(self, scheduler, simulated_sensor, detection_cycle_delay_seconds):
+        scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute, (scheduler, simulated_sensor, detection_cycle_delay_seconds))
+        simulated_sensor.compute_detected_objects()
 
     def __generate_lidar_bp(self, blueprint_library, carla_sensor_config):
         """Build the CARLA blueprint necessary for CARLA sensor construction."""

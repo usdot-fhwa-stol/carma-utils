@@ -83,7 +83,7 @@ class SensorDataCollector:
 
         # Extract geometric hitpoints and group them by actor ID
         # The resulting dictionary maps actor ID to a list of hitpoints
-        for r in raw_sensor_data.raw_data:
+        for r in raw_sensor_data:
             point = CarlaUtils.vector3d_to_numpy(r.point)
             if r.object_idx not in grouped_data:
                 grouped_data[r.object_idx] = [point]
