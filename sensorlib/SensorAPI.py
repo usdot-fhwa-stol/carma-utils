@@ -26,17 +26,48 @@ class SensorAPI:
     Interface to build a SimulatedSensor.
     """
 
-    def __init__(self, carla_host, carla_port):
+    def __init__(self):
+        self.__client = None
+        self.__carla_world = None
+        self.__infrastructure_sensors = {}
+
+    @staticmethod
+    def build_from_host_spec(carla_host, carla_port):
         """
         Build an API instance.
-        
+
         :param carla_host: The CARLA host.
         :param carla_port: The CARLA host port.
+        :return: A SensorAPI instance.
         """
-        self.__client = carla.Client(str(carla_host), int(carla_port))
-        self.__client.set_timeout(2.0)
-        self.__carla_world = self.__client.get_world()
-        self.__infrastructure_sensors = {}
+        client = carla.Client(str(carla_host), int(carla_port))
+        return SensorAPI.build_from_client(client)
+
+    @staticmethod
+    def build_from_client(carla_client):
+        """
+        Build an API instance.
+
+        :param carla_client: The CARLA client.
+        :return: A SensorAPI instance.
+        """
+        api = SensorAPI()
+        api.__client = carla_client
+        api.__client.set_timeout(2.0)
+        api.__carla_world = api.__client.get_world()
+        return api
+
+    @staticmethod
+    def build_from_world(carla_world):
+        """
+        Build an API instance.
+
+        :param carla_world: The CARLA world.
+        :return: A SensorAPI instance.
+        """
+        api = SensorAPI()
+        api.__carla_world = carla_world
+        return api
 
     # ------------------------------------------------------------------------------
     # SimulatedSensor Management Interface
@@ -115,7 +146,8 @@ class SensorAPI:
     # ------------------------------------------------------------------------------
 
     def __schedule_next_compute(self, scheduler, simulated_sensor, detection_cycle_delay_seconds):
-        scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute, (scheduler, simulated_sensor, detection_cycle_delay_seconds))
+        scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,
+                        (scheduler, simulated_sensor, detection_cycle_delay_seconds))
         simulated_sensor.compute_detected_objects()
 
     def __generate_lidar_bp(self, blueprint_library, carla_sensor_config):

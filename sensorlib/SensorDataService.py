@@ -17,13 +17,10 @@ from util.SimulatedSensorUtils import SimulatedSensorUtils
 
 class SensorDataService:
 
-    def __init__(self):
-        self.__api = None
+    def __init__(self, sensor_api):
+        self.__api = sensor_api
 
-    def start_xml_rpc_server(self, carla_host, carla_port, xmlrpc_server_host, xmlrpc_server_port, bocking=True):
-        # Instantiate a SensorAPI
-        self.__api = SensorAPI(carla_host, carla_port)
-
+    def start_xml_rpc_server(self, xmlrpc_server_host, xmlrpc_server_port, bocking=True):
         # Create an XML-RPC server
         print("Starting sensorlib XML-RPC server.")
         server = SimpleXMLRPCServer((xmlrpc_server_host, xmlrpc_server_port))
@@ -33,6 +30,7 @@ class SensorDataService:
         server.register_function(self.__get_simulated_sensor, "get_simulated_sensor")
         server.register_function(self.__get_detected_objects, "get_detected_objects")
 
+        # Start, with blocking option
         if bocking:
             server.serve_forever()
         else:
@@ -40,17 +38,12 @@ class SensorDataService:
             rpc_server_thread.start()
             return True
 
-
-
-
-
-
     def __create_simulated_semantic_lidar_sensor(self, sensor_config_file, noise_model_config_file,
                                                  detection_cycle_delay_seconds,
                                                  infrastructure_id, sensor_id,
                                                  sensor_position, sensor_rotation, parent_actor_id):
         print(
-            f"__create_simulated_semantic_lidar_sensor {sensor_config_file} {noise_model_config_file} {detection_cycle_delay_seconds} {infrastructure_id} {sensor_id} {sensor_position} {sensor_rotation} {parent_actor_id}")
+            f"Creating a SemanticLidarSensor: {sensor_config_file} {noise_model_config_file} {detection_cycle_delay_seconds} {infrastructure_id} {sensor_id} {sensor_position} {sensor_rotation} {parent_actor_id}")
 
         sensor_config = SimulatedSensorUtils.load_config_from_file(sensor_config_file)
         noise_model_config = SimulatedSensorUtils.load_config_from_file(noise_model_config_file)
@@ -65,12 +58,12 @@ class SensorDataService:
         return str(simulated_sensor.get_id())
 
     def __get_simulated_sensor(self, infrastructure_id, sensor_id):
-        print(f"get_simulated_sensor {infrastructure_id} {sensor_id}")
+        print(f"Retrieving sensor: {infrastructure_id} {sensor_id}")
         sensor = self.__api.get_simulated_sensor(infrastructure_id, sensor_id)
         return str(sensor.get_id())
 
     def __get_detected_objects(self, infrastructure_id, sensor_id):
-        print(f"get_detected_objects {infrastructure_id} {sensor_id}")
+        print(f"Getting detected objects: {infrastructure_id} {sensor_id}")
         detected_objects = self.__api.get_detected_objects(infrastructure_id, sensor_id)
         return SimulatedSensorUtils.serialize_to_json(detected_objects)
 
@@ -115,5 +108,6 @@ if __name__ == "__main__":
         help="XML-RPC server port. (default: 8000)")
 
     args = arg_parser.parse_args()
-    sensor_data_service = SensorDataService()
-    sensor_data_service.start_xml_rpc_server(args.carla_host, args.carla_port, args.xmlrpc_server_host, args.xmlrpc_server_port, True)
+    sensor_api = SensorAPI.build_from_host_spec(args.carla_host, args.carla_port)
+    sensor_data_service = SensorDataService(sensor_api)
+    sensor_data_service.start_xml_rpc_server(args.xmlrpc_server_host, args.xmlrpc_server_port, True)
