@@ -24,6 +24,10 @@ class GaussianNoiseModel(AbstractNoiseModel):
         self.__rng = np.random.default_rng()
 
     def apply_position_noise(self, object_list):
+
+        if not self.__config["stage"]["position_noise"]:
+            return object_list
+
         # Apply position noise to the object_list
         noise_mean = 0.0
         noise_std = self.__position_std
@@ -33,6 +37,10 @@ class GaussianNoiseModel(AbstractNoiseModel):
         return object_list
 
     def apply_orientation_noise(self, object_list):
+
+        if not self.__config["stage"]["orientation_noise"]:
+            return object_list
+
         # Apply orientation noise to the object_list
         noise_mean = 0.0
         noise_std = self.__orientation_std
@@ -43,6 +51,9 @@ class GaussianNoiseModel(AbstractNoiseModel):
         return object_list
 
     def apply_type_noise(self, object_list):
+        if not self.__config["stage"]["type_noise"]:
+            return object_list
+
         # Apply type noise to the object_list
         return [replace(obj,
                         object_type=CarlaUtils.get_semantic_tag_name(
@@ -51,4 +62,6 @@ class GaussianNoiseModel(AbstractNoiseModel):
                 for obj in object_list]
 
     def apply_list_inclusion_noise(self, object_list):
+        if not self.__config["stage"]["list_inclusion_noise"]:
+            return object_list
         return object_list[0:np.random.randint(0, len(object_list) + 1)]

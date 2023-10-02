@@ -1,4 +1,9 @@
 noise_model_name: GaussianNoiseModel
+stages:
+    position_noise: True
+    orientation_noise: True
+    type_noise: True
+    list_inclusion_noise: True
 std_deviations:
     position: [0.8, 0.8, 0.8]
     orientation: [0.1, 0.1, 0.1]
