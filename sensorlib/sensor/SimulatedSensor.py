@@ -13,8 +13,14 @@ class SimulatedSensor:
     """Sensor wrapper to contain logic analyzing internal CARLA sensor."""
 
     def __init__(self, infrastructure_id, sensor_id):
-        self.infrastructure_id = infrastructure_id
-        self.sensor_id = sensor_id
+        self._infrastructure_id = infrastructure_id
+        self._sensor_id = sensor_id
+
+    def get_infrastructure_id(self):
+        return self._infrastructure_id
+
+    def get_id(self):
+        return self._sensor_id
 
     @abstractmethod
     def compute_detected_objects(self):

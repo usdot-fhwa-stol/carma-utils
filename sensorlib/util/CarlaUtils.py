@@ -142,7 +142,7 @@ class CarlaUtils:
         :param actor_id: The actor ID to look up.
         :return: carla.Actor object.
         """
-        if not isinstance(actor_id, int):
+        if not isinstance(actor_id, int) or actor_id < 0:
             return None
 
         return carla_world.get_actor(actor_id)

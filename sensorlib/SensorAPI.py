@@ -10,8 +10,8 @@ import sched
 import threading
 import time
 
-from util.CarlaLoader import CarlaLoader
-CarlaLoader.load_carla_lib("0.9.10")
+# from util.CarlaLoader import CarlaLoader
+# CarlaLoader.load_carla_lib("0.9.10")
 import carla
 
 from collector.SensorDataCollector import SensorDataCollector
@@ -33,11 +33,9 @@ class SensorAPI:
         :param carla_host: The CARLA host.
         :param carla_port: The CARLA host port.
         """
-        self.__client = None
-        self.__carla_world = None
-        # self.__client = carla.Client(str(carla_host), int(carla_port))
-        # self.__client.set_timeout(2.0)
-        # self.__carla_world = self.__client.get_world()
+        self.__client = carla.Client(str(carla_host), int(carla_port))
+        self.__client.set_timeout(2.0)
+        self.__carla_world = self.__client.get_world()
         self.__infrastructure_sensors = {}
 
     # ------------------------------------------------------------------------------
@@ -47,7 +45,7 @@ class SensorAPI:
     def create_simulated_semantic_lidar_sensor(self, simulated_sensor_config, carla_sensor_config, noise_model_config,
                                                detection_cycle_delay_seconds,
                                                infrastructure_id, sensor_id,
-                                               sensor_position, sensor_rotation, parent_actor_id=None):
+                                               sensor_position, sensor_rotation, parent_actor_id=-1):
         """
         Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
         :param simulated_sensor_config: The configuration for the simulated sensor.
@@ -103,6 +101,9 @@ class SensorAPI:
         scheduler_thread.start()
 
         return simulated_sensor
+
+    def get_simulated_sensor(self, infrastructure_id, sensor_id):
+        return self.__infrastructure_sensors.get((infrastructure_id, sensor_id))
 
     def get_detected_objects(self, infrastructure_id, sensor_id):
         """Get the detected objects from a specific sensor."""

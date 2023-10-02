@@ -7,15 +7,11 @@
 # governing permissions and limitations under the License.
 
 import argparse
-import json
-import os
 
 from xmlrpc.server import SimpleXMLRPCServer
 
 from SensorAPI import SensorAPI
 from util.SimulatedSensorUtils import SimulatedSensorUtils
-
-import carla
 
 
 class SensorDataService:
@@ -33,6 +29,7 @@ class SensorDataService:
         server.register_introspection_functions()
         server.register_function(self.__create_simulated_semantic_lidar_sensor,
                                  "create_simulated_semantic_lidar_sensor")
+        server.register_function(self.__get_simulated_sensor, "get_simulated_sensor")
         server.register_function(self.__get_detected_objects, "get_detected_objects")
         server.serve_forever()
 
@@ -40,24 +37,30 @@ class SensorDataService:
                                                  detection_cycle_delay_seconds,
                                                  infrastructure_id, sensor_id,
                                                  sensor_position, sensor_rotation, parent_actor_id):
-        print(f"__create_simulated_semantic_lidar_sensor {sensor_config_file} {noise_model_config_file} {detection_cycle_delay_seconds} {infrastructure_id} {sensor_id} {sensor_position} {sensor_rotation} {parent_actor_id}")
-        return "__create_simulated_semantic_lidar_sensor"
+        print(
+            f"__create_simulated_semantic_lidar_sensor {sensor_config_file} {noise_model_config_file} {detection_cycle_delay_seconds} {infrastructure_id} {sensor_id} {sensor_position} {sensor_rotation} {parent_actor_id}")
 
-        # sensor_config = SimulatedSensorUtils.load_config_from_file(sensor_config_file)
-        # noise_model_config = SimulatedSensorUtils.load_config_from_file(noise_model_config_file)
-        #
-        # simulated_sensor = self.__api.create_simulated_semantic_lidar_sensor(sensor_config["simulated_sensor"],
-        #                                                               sensor_config["lidar_sensor"], noise_model_config,
-        #                                                               detection_cycle_delay_seconds,
-        #                                                               infrastructure_id, sensor_id,
-        #                                                               sensor_position, sensor_rotation, parent_actor_id)
-        # return simulated_sensor.get_id()
+        sensor_config = SimulatedSensorUtils.load_config_from_file(sensor_config_file)
+        noise_model_config = SimulatedSensorUtils.load_config_from_file(noise_model_config_file)
+
+        simulated_sensor = self.__api.create_simulated_semantic_lidar_sensor(sensor_config["simulated_sensor"],
+                                                                             sensor_config["lidar_sensor"],
+                                                                             noise_model_config,
+                                                                             detection_cycle_delay_seconds,
+                                                                             infrastructure_id, sensor_id,
+                                                                             sensor_position, sensor_rotation,
+                                                                             parent_actor_id)
+        return str(simulated_sensor.get_id())
+
+    def __get_simulated_sensor(self, infrastructure_id, sensor_id):
+        print(f"get_simulated_sensor {infrastructure_id} {sensor_id}")
+        sensor = self.__api.get_simulated_sensor(infrastructure_id, sensor_id)
+        return str(sensor.get_id())
 
     def __get_detected_objects(self, infrastructure_id, sensor_id):
         print(f"get_detected_objects {infrastructure_id} {sensor_id}")
-        # detected_objects = self.__api.get_detected_objects(infrastructure_id, sensor_id)
-        # return SimulatedSensorUtils.serialize_to_json(detected_objects)
-        return "test"
+        detected_objects = self.__api.get_detected_objects(infrastructure_id, sensor_id)
+        return SimulatedSensorUtils.serialize_to_json(detected_objects)
 
 
 if __name__ == "__main__":

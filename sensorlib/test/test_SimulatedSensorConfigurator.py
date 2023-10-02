@@ -61,7 +61,7 @@ class TestSimulatedSensorConfigurator(unittest.TestCase):
                                                                                       parent_actor)
 
         # Validate sensor fields have been correctly constructed
-        assert sensor.infrastructure_id == infrastructure_id
+        assert sensor._infrastructure_id == infrastructure_id
         assert sensor._SemanticLidarSensor__simulated_sensor_config == simulated_sensor_config
         assert sensor._SemanticLidarSensor__carla_sensor_config == carla_sensor_config
         assert sensor._SemanticLidarSensor__carla_world == carla_world
@@ -72,7 +72,7 @@ class TestSimulatedSensorConfigurator(unittest.TestCase):
 
         # Also validate retrieval through registration
         registered_sensor = SimulatedSensorConfigurator.get_simulated_sensor(infrastructure_id)
-        assert sensor.infrastructure_id == registered_sensor.infrastructure_id
+        assert sensor._infrastructure_id == registered_sensor._infrastructure_id
 
     def test_get_simulated_sensor(self):
         # Assert empty registry upon initialization

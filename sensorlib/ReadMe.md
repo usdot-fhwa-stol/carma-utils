@@ -1,10 +1,5 @@
 # CARLA Sensor Library
 
-
-
-
-## API
-
 The Python API provides programmatic access to the library functionality.
 
 ### create_simulated_semantic_lidar_sensor
@@ -28,7 +23,17 @@ The Python API provides programmatic access to the library functionality.
 
 The registered SemanticLidarSensor object.
 
+## get_simulated_sensor
 
+### Input Parameters
+
+**_infrastructure_id_** The ID of the infrastructure.
+
+**_sensor_id_** The ID of the sensor.
+
+#### Return
+
+The registered sensor object.
 
 
 
