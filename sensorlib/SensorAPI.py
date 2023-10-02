@@ -10,8 +10,6 @@ import sched
 import threading
 import time
 
-# from util.CarlaLoader import CarlaLoader
-# CarlaLoader.load_carla_lib("0.9.10")
 import carla
 
 from collector.SensorDataCollector import SensorDataCollector
@@ -134,6 +132,7 @@ class SensorAPI:
         return simulated_sensor
 
     def get_simulated_sensor(self, infrastructure_id, sensor_id):
+        """Get a specific simulated sensor."""
         return self.__infrastructure_sensors.get((infrastructure_id, sensor_id))
 
     def get_detected_objects(self, infrastructure_id, sensor_id):
@@ -146,6 +145,7 @@ class SensorAPI:
     # ------------------------------------------------------------------------------
 
     def __schedule_next_compute(self, scheduler, simulated_sensor, detection_cycle_delay_seconds):
+        """Schedule the next compute cycle."""
         scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,
                         (scheduler, simulated_sensor, detection_cycle_delay_seconds))
         simulated_sensor.compute_detected_objects()
