@@ -1,64 +1,5 @@
 # CARLA Sensor Library
 
-The Python API provides programmatic access to the library functionality.
-
-### create_simulated_semantic_lidar_sensor
-
-#### Input Parameters
-
-
-| Parameter                     | Type    | Description                                                                         |
-|-------------------------------|---------|-------------------------------------------------------------------------------------|
-| simulated_sensor_config       | JSON    | The configuration for the simulated sensor.                                         |
-| carla_sensor_config           | JSON    | The configuration for the CARLA sensor.                                             |
-| noise_model_config            | JSON    | The configuration for the noise model.                                              |
-| detection_cycle_delay_seconds | int     | The delay between sensor detections.                                                |
-| infrastructure_id             | int     | The ID of the infrastructure.                                                       |
-| sensor_id                     | int     | The ID of the sensor.                                                               |
-| sensor_position               | float[] | Sensor position in CARLA world coordinates.                                         |
-| sensor_rotation               | float[] | Sensor rotation in degrees.                                                         |
-| parent_actor_id               | int     | ID of the parent actor to which the sensor is attached. Use -1 to leave unattached. |
-
-#### Return
-
-The registered SemanticLidarSensor object.
-
-## get_simulated_sensor
-
-### Input Parameters
-
-**_infrastructure_id_** The ID of the infrastructure.
-
-**_sensor_id_** The ID of the sensor.
-
-#### Return
-
-The registered sensor object.
-
-
-
-### get_detected_objects
-
-Retrieves the detected objects from a sensor.
-
-
-#### Input Parameters
-
-| Parameter                     | Type    | Description                                                                         |
-|-------------------------------|---------|-------------------------------------------------------------------------------------|
-| infrastructure_id             | int     | The ID of the infrastructure.                                                       |
-| sensor_id                     | int     | The ID of the sensor.                                                               |
-
-#### Return
-
-The list of DetectedObjects detected by the sensor.
-
-
-
-
-
-
-
 
 
 ## Overview
@@ -69,6 +10,18 @@ The SimulatedSensor acts as a wrapper to the CARLA Semantic Lidar Sensor, captur
 post-processing to generate a list of detected objects upon request.
 
 Raw sensor observations from the CARLA sensor are composed to build a dataset representing the current objects in scene.
+
+## Service
+
+The Sensor Data Service exposes the sensing capability through an RPC service. See the [Sensor Data Service Documentation](SensorDataService.md) for details.
+
+## API
+
+For internal data access from Python code, refer to the [Sensor API Documentation](SensorAPI.md).
+
+
+
+
 
 ## Context
 

@@ -2,6 +2,7 @@
 
 The CARLA Sensor Library Service provides an XML-RPC service exposing sensor creation and management capability, and interfacing with the simulated sensor algorithm to retrieve objects which are detected in the scene.
 
+
 ## Launching
 
 The service is started by running the Python main function as follows:
