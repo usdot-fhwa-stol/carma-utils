@@ -181,6 +181,7 @@ def main(arg):
 
         # Build the sensor
         api = SensorAPI.build_from_world(world)
+
         infrastructure_id = 3
         sensor_id = 7
         detection_cycle_delay_seconds = 0.5
@@ -190,6 +191,7 @@ def main(arg):
         noise_model_config = SimulatedSensorUtils.load_config_from_file(arg.noise_model_config_filename)
         user_offset = carla.Location(arg.x, arg.y, arg.z)
         lidar_transform = carla.Transform(carla.Location(x=-0.5, z=1.8) + user_offset)
+
         sensor = api.create_simulated_semantic_lidar_sensor(simulated_sensor_config, carla_sensor_config, noise_model_config,
                                                             detection_cycle_delay_seconds,
                                                             infrastructure_id, sensor_id,

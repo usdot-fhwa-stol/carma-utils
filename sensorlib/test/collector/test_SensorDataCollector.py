@@ -99,7 +99,3 @@ class TestSensorDataCollector(unittest.TestCase):
         # Call __is_same_data_collection with a sensor_rotation_angle less than prev_angle
         result = self.sensor_data_collector._SensorDataCollector__is_same_data_collection(-1.0)
         self.assertFalse(result)
-
-
-if __name__ == "__main__":
-    unittest.main()

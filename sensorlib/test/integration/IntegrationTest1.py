@@ -8,7 +8,7 @@
 
 import carla
 
-
+# TODO Keep or remove this file?
 def main(arg):
     try:
         client = carla.Client(arg.host, arg.port)

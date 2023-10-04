@@ -80,14 +80,13 @@ class SensorAPI:
         :param simulated_sensor_config: The configuration for the simulated sensor.
         :param carla_sensor_config: The configuration for the CARLA sensor.
         :param noise_model_config: The configuration for the noise model.
-
         :param detection_cycle_delay_seconds: The delay between sensor detections.
         :param infrastructure_id: The ID of the infrastructure.
         :param sensor_id: The ID of the sensor.
         :param sensor_position: Sensor position in CARLA world coordinates.
         :param sensor_rotation: Sensor rotation in degrees.
         :param parent_actor_id: ID of the parent actor to which the sensor is attached (optional).
-        :return: A registered SemanticLidarSensor.
+        :return: A registered SimulatedSensor.
         """
 
         # Parameter checks
@@ -132,11 +131,24 @@ class SensorAPI:
         return simulated_sensor
 
     def get_simulated_sensor(self, infrastructure_id, sensor_id):
-        """Get a specific simulated sensor."""
+        """
+        Get a specific simulated sensor.
+
+        :param infrastructure_id: The ID of the infrastructure.
+        :param sensor_id: The ID of the sensor.
+        :return: The SimulatedSensor or None if not found.
+        """
         return self.__infrastructure_sensors.get((infrastructure_id, sensor_id))
 
     def get_detected_objects(self, infrastructure_id, sensor_id):
-        """Get the detected objects from a specific sensor."""
+        """
+        Get the detected objects from a specific sensor. The DetectedObject's are those found by the sensor in the most
+        recent call to SimulatedSensor.compute_detected_objects().
+
+        :param infrastructure_id: The ID of the infrastructure.
+        :param sensor_id: The ID of the sensor.
+        :return: List of DetectedObject's discovered by the associated sensor.
+        """
         simulated_sensor = self.__infrastructure_sensors.get((infrastructure_id, sensor_id))
         return simulated_sensor.get_detected_objects()
 
