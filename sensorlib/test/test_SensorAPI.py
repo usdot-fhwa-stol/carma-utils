@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 import carla
 
 from SimulatedSensorConfigurator import SimulatedSensorConfigurator
-from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
+from t.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestSimulatedSensorConfigurator(unittest.TestCase):

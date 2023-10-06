@@ -13,7 +13,7 @@ import numpy as np
 from scipy.spatial import distance
 
 from objects.DetectedObject import DetectedObjectBuilder
-from sensor.SimulatedSensor import SimulatedSensor
+from src.SimulatedSensor import SimulatedSensor
 
 from util.CarlaUtils import CarlaUtils
 from util.HistoricalMapper import HistoricalMapper

@@ -1,7 +1,7 @@
 # CARLA Sensor Library Service
 
-The CARLA Sensor Library Service provides an XML-RPC service exposing sensor creation and management capability, and interfacing with the simulated sensor algorithm to retrieve objects which are detected in the scene.
-
+The CARLA Sensor Library Service provides an XML-RPC service exposing sensor creation and management capability, and
+interfacing with the simulated sensor algorithm to retrieve objects which are detected in the scene.
 
 ## Launching
 
@@ -29,14 +29,6 @@ optional arguments:
                         XML-RPC server host. (default: "localhost")
   --xmlrpc-server-port XMLRPC_SERVER_PORT
                         XML-RPC server port. (default: 8000)
-
-
-
-
-
-
-
-
 ```
 
 ### create_simulated_semantic_lidar_sensor
@@ -61,17 +53,17 @@ Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
 
 Integer sensor ID for the registered SemanticLidarSensor, confirming successful registration.
 
-
 ### get_detected_objects
 
 Retrieves the detected objects from a sensor.
 
 #### Input Parameters
 
-| Parameter                     | Type    | Description                                                                         |
-|-------------------------------|---------|-------------------------------------------------------------------------------------|
-| infrastructure_id             | int     | The ID of the infrastructure.                                                       |
-| sensor_id                     | int     | The ID of the sensor.                                                               |
+| Parameter         | Type | Description                   |
+|-------------------|------|-------------------------------|
+| infrastructure_id | int  | The ID of the infrastructure. |
+| sensor_id         | int  | The ID of the sensor.         |
+| x                 | y    | z                             | 
 
 #### Return
 

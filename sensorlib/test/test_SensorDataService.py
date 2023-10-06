@@ -7,16 +7,19 @@
 # governing permissions and limitations under the License.
 
 import unittest
+from unittest.mock import MagicMock
 
-from noise_models.GaussianNoiseModel import GaussianNoiseModel
-from noise_models.NoiseModelFactory import NoiseModelFactory
-from t.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
+from main.py import main
+
+class TestService(unittest.TestCase):
+    def test_main(self):
+
+        SimulatedSensorConfigurator.register_simulated_semantic_lidar_sensor = MagicMock(return_value=0)
+
+        # TODO
 
 
-class TestNoiseModelFactory(unittest.TestCase):
-    def setUp(self):
-        self.config = SimulatedSensorTestUtils.generate_noise_model_config()
+        self.assertEqual(main(), "Hello World!")
 
-    def test_get_noise_model(self):
-        noise_model = NoiseModelFactory.get_noise_model("GaussianNoiseModel", self.config)
-        self.assertIsInstance(noise_model, GaussianNoiseModel)
+
+

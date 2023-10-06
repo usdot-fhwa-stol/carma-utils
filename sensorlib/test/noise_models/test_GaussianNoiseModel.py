@@ -11,12 +11,13 @@ from unittest.mock import MagicMock
 import numpy as np
 
 from noise_models.GaussianNoiseModel import GaussianNoiseModel
-from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
+from t.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestGaussianNoiseModel(unittest.TestCase):
     def setUp(self):
         self.config = SimulatedSensorTestUtils.generate_noise_model_config()
+
 
     def test_apply_position_noise(self):
         object_list = [MagicMock(position=np.array([1.0, 2.0, 3.0])), MagicMock(position=np.array([4.0, 5.0, 6.0]))]
@@ -77,7 +78,3 @@ class TestGaussianNoiseModel(unittest.TestCase):
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0], object_list[0])
         self.assertEqual(result[1], object_list[1])
-
-
-if __name__ == "__main__":
-    unittest.main()
