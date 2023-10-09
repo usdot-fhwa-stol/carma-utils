@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 
 
 class TestService(unittest.TestCase):
-    def test_main(self):
+    def test-start_xml_rpc_server(self):
 
         SimulatedSensorConfigurator.register_simulated_semantic_lidar_sensor = MagicMock(return_value=0)
 
@@ -19,6 +19,26 @@ class TestService(unittest.TestCase):
 
 
         self.assertEqual(main(), "Hello World!")
+
+    def test_create_simulated_semantic_lidar_sensor(self):
+        assert False
+
+    def test_get_simulated_sensor(self):
+        assert False
+
+    def test_get_detected_objects(self):
+        assert False
+        detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
+        detected_objects = [replace(obj, carla_actor=None) for obj in detected_objects]
+        self.sensor._SemanticLidarSensor__detected_objects = detected_objects
+        serialized = self.sensor.get_detected_objects_json()
+        with open("data/test_data_serialized_detected_objects.json", "r") as file:
+            expected_serialized_data = json.load(file)
+            assert serialized == expected_serialized_data
+        # TODO Remove
+        # with open("data/test_data_serialized_detected_objects.json", "w") as file:
+        #     json.dump(serialized, file)
+
 
 
 

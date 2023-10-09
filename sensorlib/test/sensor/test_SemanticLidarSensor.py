@@ -11,13 +11,14 @@ from dataclasses import replace
 from unittest.mock import MagicMock
 
 import carla
-import json
 import numpy as np
 
 from src.collector.SensorDataCollector import SensorDataCollector
 from src.noise_models.GaussianNoiseModel import GaussianNoiseModel
 from src.objects.CarlaSensor import CarlaSensorBuilder
 from src.sensor.SemanticLidarSensor import SemanticLidarSensor
+from src.util.HistoricalMapper import HistoricalMapper
+from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestSemanticLidarSensor(unittest.TestCase):
@@ -30,6 +31,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
         # Configs
         self.infrastructure_id = 123
+        self.sensor_id = 4
         self.simulated_sensor_config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
         self.carla_sensor_config = SimulatedSensorTestUtils.generate_lidar_sensor_config()
         self.noise_model_config = SimulatedSensorTestUtils.generate_noise_model_config()
@@ -38,9 +40,15 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.carla_world = MagicMock()
         self.data_collector = SensorDataCollector(self.carla_world, self.raw_carla_sensor)
         self.noise_model = GaussianNoiseModel(self.noise_model_config)
-        self.sensor = SemanticLidarSensor(self.infrastructure_id, self.simulated_sensor_config,
+        self.sensor = SemanticLidarSensor(self.infrastructure_id, self.sensor_id, self.simulated_sensor_config,
                                           self.carla_sensor_config, self.carla_world,
                                           self.carla_sensor, self.data_collector, self.noise_model)
+
+    def test_get_infrastructure_id(self):
+        assert self.sensor.get_infrastructure_id() == self.infrastructure_id
+
+    def test_get_id(self):
+        assert self.sensor.get_id() == self.sensor_id
 
     def test_compute_detected_objects(self):
         # Generate test data
@@ -113,17 +121,17 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.assertEqual(result, detected_objects)
         self.assertEqual(self.sensor._SemanticLidarSensor__detected_objects, detected_objects)
 
-    def test_get_detected_objects_json(self):
-        detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
-        detected_objects = [replace(obj, carla_actor=None) for obj in detected_objects]
+        # Ensure cache is populated
+        self.assertEqual(self.sensor.get_detected_objects(), detected_objects)
+
+    def test_get_detected_objects(self):
+        detected_objects = [MagicMock(id=3), MagicMock(id=4)]
         self.sensor._SemanticLidarSensor__detected_objects = detected_objects
-        serialized = self.sensor.get_detected_objects_json()
-        with open("data/test_data_serialized_detected_objects.json", "r") as file:
-            expected_serialized_data = json.load(file)
-            assert serialized == expected_serialized_data
-        # TODO Remove
-        # with open("data/test_data_serialized_detected_objects.json", "w") as file:
-        #     json.dump(serialized, file)
+        assert detected_objects == self.sensor.get_detected_objects()
+
+
+
+
 
     def test_get_scene_detected_objects(self):
         actors = [MagicMock()]
