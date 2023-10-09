@@ -11,8 +11,7 @@ from unittest.mock import MagicMock
 
 import carla
 
-from SimulatedSensorConfigurator import SimulatedSensorConfigurator
-from t.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
+from config.test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestSimulatedSensorConfigurator(unittest.TestCase):
@@ -102,7 +101,3 @@ class TestSimulatedSensorConfigurator(unittest.TestCase):
                                                                                          self.carla_sensor_config)
         bp.set_attribute.assert_called_with("points_per_second", "10000")
         assert isinstance(bp, MagicMock)
-
-
-if __name__ == "__main__":
-    unittest.main()

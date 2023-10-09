@@ -13,6 +13,7 @@ import numpy as np
 
 from util.CarlaUtils import CarlaUtils
 
+
 @dataclass(frozen=True)
 class CarlaSensor:
     """Wrapper class for the carla.Sensor."""

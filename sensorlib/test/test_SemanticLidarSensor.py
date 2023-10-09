@@ -14,14 +14,11 @@ import carla
 import json
 import numpy as np
 
+from config.test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 from collector.SensorDataCollector import SensorDataCollector
 from noise_models.GaussianNoiseModel import GaussianNoiseModel
 from objects.CarlaSensor import CarlaSensorBuilder
-from objects.DetectedObject import DetectedObjectBuilder
-from src.SemanticLidarSensor import SemanticLidarSensor
-from util.CarlaUtils import CarlaUtils
-from util.HistoricalMapper import HistoricalMapper
-from t.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
+from sensor.SemanticLidarSensor import SemanticLidarSensor
 
 
 class TestSemanticLidarSensor(unittest.TestCase):

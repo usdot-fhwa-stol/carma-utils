@@ -12,8 +12,6 @@ from unittest.mock import MagicMock
 
 import carla
 
-from objects.CarlaSensor import CarlaSensorBuilder
-from objects.DetectedObject import DetectedObject, DetectedObjectBuilder
 
 
 class SimulatedSensorTestUtils:
