@@ -14,11 +14,10 @@ import carla
 import json
 import numpy as np
 
-from config.test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
-from collector.SensorDataCollector import SensorDataCollector
-from noise_models.GaussianNoiseModel import GaussianNoiseModel
-from objects.CarlaSensor import CarlaSensorBuilder
-from sensor.SemanticLidarSensor import SemanticLidarSensor
+from src.collector.SensorDataCollector import SensorDataCollector
+from src.noise_models.GaussianNoiseModel import GaussianNoiseModel
+from src.objects.CarlaSensor import CarlaSensorBuilder
+from src.sensor.SemanticLidarSensor import SemanticLidarSensor
 
 
 class TestSemanticLidarSensor(unittest.TestCase):
@@ -862,7 +861,3 @@ class TestSemanticLidarSensor(unittest.TestCase):
                                                                              timestamp)
         assert "Bridge" == corrected_objects.object_type
         assert timestamp == corrected_objects.timestamp
-
-
-if __name__ == "__main__":
-    unittest.main()

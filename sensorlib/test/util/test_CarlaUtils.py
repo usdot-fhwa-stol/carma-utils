@@ -14,7 +14,7 @@ from unittest.mock import MagicMock
 
 from scipy.spatial.transform import Rotation
 
-from util.CarlaUtils import CarlaUtils
+from src.util.CarlaUtils import CarlaUtils
 
 
 class TestCarlaUtils(unittest.TestCase):
@@ -115,7 +115,3 @@ class TestCarlaUtils(unittest.TestCase):
         assert CarlaUtils.get_semantic_tag_id("Vehicles") == 10
         assert CarlaUtils.get_semantic_tag_id("Walls") == 11
         assert CarlaUtils.get_semantic_tag_id("Water") == 21
-
-
-if __name__ == "__main__":
-    unittest.main()

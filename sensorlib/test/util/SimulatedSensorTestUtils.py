@@ -12,6 +12,7 @@ from unittest.mock import MagicMock
 
 import carla
 
+from src.objects.DetectedObject import DetectedObjectBuilder
 
 
 class SimulatedSensorTestUtils:
@@ -57,6 +58,12 @@ class SimulatedSensorTestUtils:
             "std_deviations": {
                 "position": [0.8, 0.8, 0.8],
                 "orientation": [0.1, 0.1, 0.1],
+            },
+            "stages": {
+                "position_noise": True,
+                "orientation_noise": True,
+                "type_noise": True,
+                "list_inclusion_noise": True
             },
             "type_noise": {
                 "allowed_semantic_tags": [

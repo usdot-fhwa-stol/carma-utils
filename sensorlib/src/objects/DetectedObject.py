@@ -7,12 +7,12 @@
 # governing permissions and limitations under the License.
 
 from dataclasses import dataclass
-from typing import Tuple, List
+from typing import List
 
 import carla
 import numpy as np
 
-from util.CarlaUtils import CarlaUtils
+from src.util.CarlaUtils import CarlaUtils
 
 
 @dataclass(frozen=True)

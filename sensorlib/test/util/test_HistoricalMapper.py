@@ -9,7 +9,7 @@
 import unittest
 from collections import deque
 
-from util.HistoricalMapper import HistoricalMapper
+from src.util.HistoricalMapper import HistoricalMapper
 
 
 class TestHistoricalMapper(unittest.TestCase):
@@ -224,7 +224,3 @@ class TestHistoricalMapper(unittest.TestCase):
         assert list(q0) == ["0-2", "0-1", "0-0"]
         assert list(q1) == ["1-2", "1-1"]
         assert list(q2) == ["2-2"]
-
-
-if __name__ == "__main__":
-    unittest.main()

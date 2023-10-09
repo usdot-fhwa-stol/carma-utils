@@ -13,7 +13,7 @@ import carla
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from objects.DetectedObject import DetectedObjectBuilder
+from src.objects.DetectedObject import DetectedObjectBuilder
 
 
 class TestDetectedObject(unittest.TestCase):
@@ -22,10 +22,11 @@ class TestDetectedObject(unittest.TestCase):
         self.carla_actor = MagicMock()
         self.carla_actor.id = 1
         self.carla_actor.semantic_tags = [int(carla.CityObjectLabel.Vehicles)]
-        self.carla_actor.get_world_vertices = MagicMock(return_value=[carla.Location(1.0, 2.0, 3.0),
-                                                                      carla.Location(4.0, 5.0, 6.0),
-                                                                      carla.Location(7.0, 8.0, 9.0),
-                                                                      carla.Location(10.0, 11.0, 12.0)])
+        self.carla_actor.bounding_box = MagicMock(
+            get_world_vertices=MagicMock(return_value=[carla.Location(1.0, 2.0, 3.0),
+                                                       carla.Location(4.0, 5.0, 6.0),
+                                                       carla.Location(7.0, 8.0, 9.0),
+                                                       carla.Location(10.0, 11.0, 12.0)]))
         self.carla_actor.get_transform = MagicMock(return_value=MagicMock(rotation=carla.Rotation(30.0, 90.0, 45.0)))
         self.carla_actor.get_location = MagicMock(return_value=carla.Location(1.0, 2.0, 3.0))
         self.carla_actor.get_velocity = MagicMock(return_value=carla.Vector3D(4.0, 5.0, 6.0))
@@ -61,7 +62,3 @@ class TestDetectedObject(unittest.TestCase):
         assert (detected_object.position_covariance == np.zeros((3, 3))).all()
         assert (detected_object.velocity_covariance == np.zeros((3, 3))).all()
         assert detected_object.confidence == 1.0
-
-
-if __name__ == "__main__":
-    unittest.main()

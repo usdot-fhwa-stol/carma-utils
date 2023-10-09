@@ -11,7 +11,7 @@ from dataclasses import dataclass
 import carla
 import numpy as np
 
-from util.CarlaUtils import CarlaUtils
+from src.util.CarlaUtils import CarlaUtils
 
 
 @dataclass(frozen=True)
@@ -25,6 +25,7 @@ class CarlaSensor:
     vertical_fov: float
     number_of_channels: int
 
+
 class CarlaSensorBuilder:
     @staticmethod
     def build_sensor(carla_sensor):
@@ -33,5 +34,6 @@ class CarlaSensorBuilder:
                            carla_sensor.attributes["points_per_second"],
                            carla_sensor.attributes["rotation_frequency"],
                            np.deg2rad(float(carla_sensor.attributes["horizontal_fov"])),
-                           np.deg2rad(float(carla_sensor.attributes["upper_fov"]) - float(carla_sensor.attributes["lower_fov"])),
+                           np.deg2rad(float(carla_sensor.attributes["upper_fov"]) - float(
+                               carla_sensor.attributes["lower_fov"])),
                            carla_sensor.attributes["channels"])

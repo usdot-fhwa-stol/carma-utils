@@ -6,6 +6,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
 # governing permissions and limitations under the License.
 
+from src.noise_models.GaussianNoiseModel import GaussianNoiseModel
+
+
 class NoiseModelFactory:
     """Factory to generate noise models of various types."""
 
@@ -18,7 +21,6 @@ class NoiseModelFactory:
         :return: The noise model instance.
         """
         if noise_model_name == "GaussianNoiseModel":
-            from noise_models.GaussianNoiseModel import GaussianNoiseModel
             return GaussianNoiseModel(noise_model_config)
         else:
             raise NotImplementedError("Noise model type {} not implemented.".format(noise_model_name))

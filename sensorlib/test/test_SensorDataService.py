@@ -9,7 +9,6 @@
 import unittest
 from unittest.mock import MagicMock
 
-from main.py import main
 
 class TestService(unittest.TestCase):
     def test_main(self):
