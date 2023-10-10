@@ -10,6 +10,9 @@ import sched
 import threading
 import time
 
+from util.CarlaLoader import CarlaLoader
+CarlaLoader.load_carla_lib("0.9.10")
+
 import carla
 
 from src.collector.SensorDataCollector import SensorDataCollector
