@@ -16,7 +16,9 @@ import numpy as np
 from src.collector.SensorDataCollector import SensorDataCollector
 from src.noise_models.GaussianNoiseModel import GaussianNoiseModel
 from src.objects.CarlaSensor import CarlaSensorBuilder
+from src.objects.DetectedObject import DetectedObjectBuilder
 from src.sensor.SemanticLidarSensor import SemanticLidarSensor
+from src.util.CarlaUtils import CarlaUtils
 from src.util.HistoricalMapper import HistoricalMapper
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
@@ -129,19 +131,18 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor._SemanticLidarSensor__detected_objects = detected_objects
         assert detected_objects == self.sensor.get_detected_objects()
 
-
-
-
-
     def test_get_scene_detected_objects(self):
-        actors = [MagicMock()]
-        self.sensor._SemanticLidarSensor__carla_world.get_actors = MagicMock(return_value=actors)
+        actors = [MagicMock(id=0), MagicMock(id=1)]
         detected_object = MagicMock(id=0)
+        self.carla_world.get_actors = MagicMock(return_value=actors)
         old_fcn = DetectedObjectBuilder.build_detected_object
         DetectedObjectBuilder.build_detected_object = MagicMock(return_value=detected_object)
-        DetectedObjectBuilder.build_detected_object.isCalledWith(actors[0], ["Pedestrians", "Vehicles"])
+        result = self.sensor.get_scene_detected_objects()
+        self.assertEqual(len(result), len(actors))
+        for i in range(len(result)):
+            self.assertEqual(result[i].id, 0)
 
-        # Undo the mock to avoid side effects which cause other tests to fail
+        # Restore old function
         DetectedObjectBuilder.build_detected_object = old_fcn
 
     def test_prefilter(self):

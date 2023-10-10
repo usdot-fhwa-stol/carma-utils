@@ -7,11 +7,10 @@
 # governing permissions and limitations under the License.
 
 import unittest
+from unittest.mock import MagicMock
 
 import carla
 import numpy as np
-from unittest.mock import MagicMock
-
 from scipy.spatial.transform import Rotation
 
 from src.util.CarlaUtils import CarlaUtils
@@ -51,10 +50,11 @@ class TestCarlaUtils(unittest.TestCase):
         assert np.allclose(result, rotation_matrix.as_matrix())
 
     def test_get_actor_bounding_box_points(self):
-        carla_actor = MagicMock(get_world_vertices=MagicMock(return_value=[carla.Location(1.0, 2.0, 3.0),
-                                                                           carla.Location(4.0, 5.0, 6.0),
-                                                                           carla.Location(7.0, 8.0, 9.0),
-                                                                           carla.Location(10.0, 11.0, 12.0)]))
+        carla_actor = MagicMock(
+            bounding_box=MagicMock(get_world_vertices=MagicMock(return_value=[carla.Location(1.0, 2.0, 3.0),
+                                                                              carla.Location(4.0, 5.0, 6.0),
+                                                                              carla.Location(7.0, 8.0, 9.0),
+                                                                              carla.Location(10.0, 11.0, 12.0)])))
         result = CarlaUtils.get_actor_bounding_box_points(carla_actor)
         assert (result[0] == np.array([1.0, 2.0, 3.0])).all()
         assert (result[1] == np.array([4.0, 5.0, 6.0])).all()
@@ -76,7 +76,6 @@ class TestCarlaUtils(unittest.TestCase):
         carla_actor = MagicMock(semantic_tags=[9])
         result = CarlaUtils.determine_object_type(carla_actor, ["Pedestrians", "Vehicles"])
         self.assertEqual(result, "NONE")
-
 
     def test_get_semantic_tag_name(self):
         assert CarlaUtils.get_semantic_tag_name(0) == "NONE"

@@ -113,14 +113,14 @@ class CarlaUtils:
         :param sensor_rotation: Sensor rotation in degrees, represented as an array of floats.
         :return: carla.Transform object.
         """
-        if isinstance(sensor_position, list) and len(sensor_position) >= 3:
+        if (isinstance(sensor_position, list) or isinstance(sensor_position, np.ndarray)) and len(sensor_position) >= 3:
             position = CarlaUtils.get_location(sensor_position)
         elif isinstance(sensor_position, carla.Location):
             position = sensor_position
         else:
             raise ValueError("sensor_position must be a list of floats or a carla.Location object.")
 
-        if isinstance(sensor_rotation, list) and len(sensor_rotation) >= 3:
+        if (isinstance(sensor_rotation, list) or isinstance(sensor_position, np.ndarray)) and len(sensor_rotation) >= 3:
             rotation = CarlaUtils.get_rotation(sensor_rotation)
         elif isinstance(sensor_rotation, carla.Rotation):
             rotation = sensor_rotation

@@ -12,11 +12,11 @@ import time
 
 import carla
 
-from collector.SensorDataCollector import SensorDataCollector
-from noise_models.NoiseModelFactory import NoiseModelFactory
-from objects.CarlaSensor import CarlaSensorBuilder
-from sensor.SemanticLidarSensor import SemanticLidarSensor
-from util.CarlaUtils import CarlaUtils
+from src.collector.SensorDataCollector import SensorDataCollector
+from src.noise_models.NoiseModelFactory import NoiseModelFactory
+from src.objects.CarlaSensor import CarlaSensorBuilder
+from src.sensor.SemanticLidarSensor import SemanticLidarSensor
+from src.util.CarlaUtils import CarlaUtils
 
 
 class SensorAPI:

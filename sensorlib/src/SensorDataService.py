@@ -11,9 +11,8 @@ import threading
 
 from xmlrpc.server import SimpleXMLRPCServer
 
-from SensorAPI import SensorAPI
-from util.SimulatedSensorUtils import SimulatedSensorUtils
-
+from src.SensorAPI import SensorAPI
+from src.util.SimulatedSensorUtils import SimulatedSensorUtils
 
 class SensorDataService:
 
@@ -31,7 +30,7 @@ class SensorDataService:
         :param xmlrpc_server_host: The server host.
         :param xmlrpc_server_port: The server port.
         :param blocking: Toggles server starting on main thread. If False the server will be started on a new thread, and control will be returned to the caller.
-        :return: True if the server was started on a new thread. Nothing is returned if the server was started on the main thread.
+        :return: Thread object the server was started on, or blocked if the server was started on the main thread.
         """
 
         # Create an XML-RPC server
@@ -49,7 +48,7 @@ class SensorDataService:
         else:
             rpc_server_thread = threading.Thread(target=server.serve_forever)
             rpc_server_thread.start()
-            return True
+            return rpc_server_thread
 
     def __create_simulated_semantic_lidar_sensor(self, sensor_config_file, noise_model_config_file,
                                                  detection_cycle_delay_seconds,
