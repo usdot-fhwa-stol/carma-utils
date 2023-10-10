@@ -2,6 +2,14 @@
 
 The sensorlib data service instantiates an XML-RPC server providing the sensorlib capabilities.
 
+Prior to starting the service, set the following environment variables to define the CARLA version being utilized:
+
+| Environment Variable | Description                                                                                                       |
+| -------------------- |-------------------------------------------------------------------------------------------------------------------|
+| LOAD_CARLA_EGG       | Set to True to load the CARLA Python API from an egg file. Leave blank to use a pip-managed CARLA client library. |
+| CARLA_VERSION        | The CARLA version to load (ex: "0.0.14").                                                                         |
+| CARLA_EGG_DIR        | (optional) Hint directory for searching for the CARLA egg file.                                                   |
+
 To launch the service using the command line, run the `SensorDataService.py` file using the Python interpreter and enter
 any desired arguments.
 

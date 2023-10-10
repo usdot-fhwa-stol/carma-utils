@@ -2,7 +2,18 @@
 
 The sensorlib library interface provides programmatic access to the library functionality. The primary means of
 accessing features is through a SensorAPI object, which may be constructed from any piece of information sufficient to
-establish a Carla connection:
+establish a Carla connection.
+
+First ensure the following environment variables are set which define the CARLA version being utilized:
+
+| Environment Variable | Description                                                                                                       |
+| -------------------- |-------------------------------------------------------------------------------------------------------------------|
+| LOAD_CARLA_EGG       | Set to True to load the CARLA Python API from an egg file. Leave blank to use a pip-managed CARLA client library. |
+| CARLA_VERSION        | The CARLA version to load (ex: "0.0.14").                                                                         |
+| CARLA_EGG_DIR        | (optional) Hint directory for searching for the CARLA egg file.                                                   |
+
+
+Nex, build the API object.
 
 ```
 api = SensorAPI.build_from_host_spec(carla_host, carla_port)

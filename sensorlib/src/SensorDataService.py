@@ -84,7 +84,7 @@ if __name__ == "__main__":
         "--carla-host",
         default="127.0.0.1",
         type=str,
-        help="CARLA host. (default: \"127.0.0.1\")")
+        help="CARLA host. (default: \"localhost\")")
 
     arg_parser.add_argument(
         "--carla-port",
