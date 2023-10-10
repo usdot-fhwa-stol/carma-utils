@@ -10,7 +10,7 @@ import sched
 import threading
 import time
 
-from util.CarlaLoader import CarlaLoader
+from src.util.CarlaLoader import CarlaLoader
 CarlaLoader.load_carla_lib()
 import carla
 

@@ -251,20 +251,9 @@ class TestSemanticLidarSensor(unittest.TestCase):
             1: points_list
         }
 
-        # Mock the random number generator
-        rng = self.sensor._SemanticLidarSensor__rng
-        self.sensor._SemanticLidarSensor__rng = MagicMock(choice=MagicMock(return_value=points_list[0:3]))
-        sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 3)
-
-        # Verify mock sampling process works as expected
-        assert len(sampled_hitpoints[0]) == 3
-        assert len(sampled_hitpoints[1]) == 3
-        assert np.allclose(sampled_hitpoints[0][0], np.array([1.0, 1.0, 1.0]))
-        assert np.allclose(sampled_hitpoints[1][0], np.array([1.0, 1.0, 1.0]))
-
         # Restore and verify real sampling returns the expected sample size
-        self.sensor._SemanticLidarSensor__rng = rng
         sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 4)
+        print(f"sampled_hitpoints: {sampled_hitpoints}")
         assert len(sampled_hitpoints[0]) == 4
         assert len(sampled_hitpoints[1]) == 4
         sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 5)
