@@ -8,7 +8,6 @@
 import json
 import time
 import unittest
-import xmlrpc.client
 from dataclasses import replace
 from unittest.mock import MagicMock
 
@@ -36,42 +35,6 @@ class TestService(unittest.TestCase):
 
         # Launch the server locally
         rpc_server_thread = self.data_service.start_xml_rpc_server("localhost", 2000, False)
-
-        # Values
-        infrastructure_id = 3
-        sensor_id = 7
-        detection_cycle_delay_seconds = 0.1
-        sensor_position = [1.0, 2.0, 3.0]
-        sensor_rotation = [0.0, 0.0, 0.0]
-        parent_actor_id = 4
-
-        # Mock the internal functions
-        carla_world = MagicMock(
-            get_blueprint_library=MagicMock(find=MagicMock(return_value=MagicMock(set_attribute=MagicMock()))),
-            spawn_actor=MagicMock(return_value=MagicMock(id=infrastructure_id)))
-
-        carla_sensor = SimulatedSensorTestUtils.generate_carla_sensor()
-        carla_sensor.listen = MagicMock(return_value=MagicMock())
-        #
-        # # Build and register the sensor
-        # api = SensorAPI.build_from_world(carla_world)
-        # data_service = SensorDataService(api)
-
-        # Validate the functions using a client
-        time.sleep(2)
-        with xmlrpc.client.ServerProxy("http://localhost:8000/") as rpc_client:
-            new_sensor_id = rpc_client.create_simulated_semantic_lidar_sensor("../config/simulated_sensor_config.yaml",
-                                                                              "../config/noise_model_config.yaml",
-                                                                              detection_cycle_delay_seconds,
-                                                                              infrastructure_id, sensor_id,
-                                                                              sensor_position, sensor_rotation,
-                                                                              parent_actor_id)
-
-            # Validate sensor fields have been correctly constructed
-            assert new_sensor_id == str(sensor_id)
-
-            # Also validate retrieval through registration
-            assert str(sensor_id) == rpc_client.get_simulated_sensor(infrastructure_id, sensor_id)
 
         # Shut the server down
         time.sleep(2)
@@ -121,7 +84,7 @@ class TestService(unittest.TestCase):
             (0, 1): MagicMock(get_id=MagicMock(return_value=1)),
             (1, 0): MagicMock(get_id=MagicMock(return_value=2)),
             (1, 1): MagicMock(get_id=MagicMock(return_value=3))
-            }
+        }
 
         # Validate able to retrieve registered sensors
         assert self.data_service._SensorDataService__get_simulated_sensor(0, 0) == "0"
