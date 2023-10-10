@@ -13,6 +13,7 @@ import sys
 
 class CarlaLoader:
     # Constants
+    LOAD_CARLA_EGG = os.environ.get("LOAD_CARLA_EGG")
     CARLA_VERSION = os.environ.get("CARLA_VERSION")
     HOME = os.environ.get("HOME")
     CARLA_EGG_DIR = os.environ.get("CARLA_EGG_DIR")
@@ -20,7 +21,10 @@ class CarlaLoader:
 
     @staticmethod
     def load_carla_lib(carla_version=None):
-        if carla_version is None and CarlaLoader.CARLA_VERSION is None:
+        if CarlaLoader.LOAD_CARLA_EGG is None:
+            print("\nLOAD_CARLA_EGG not set, skipping CarlaLoader.")
+            return
+        elif carla_version is None and CarlaLoader.CARLA_VERSION is None:
             print("\nCARLA VERSION NOT SET. EXITING.")
             sys.exit()
         elif carla_version is None:
