@@ -1,6 +1,6 @@
-# Sensorlib Data Service
+# Carla CDA Sim Adapter
 
-The sensorlib data service instantiates an XML-RPC server providing the sensorlib capabilities.
+The Carla CDA Sim Adapter instantiates an XML-RPC server providing the sensorlib capabilities.
 
 Prior to starting the service, set the following environment variables to define the CARLA version being utilized:
 
@@ -10,11 +10,11 @@ Prior to starting the service, set the following environment variables to define
 | CARLA_VERSION        | The CARLA version to load (ex: "0.0.14").                                                                         |
 | CARLA_EGG_DIR        | (optional) Hint directory for searching for the CARLA egg file.                                                   |
 
-To launch the service using the command line, run the `SensorDataService.py` file using the Python interpreter and enter
+To launch the service using the command line, run the `CarlaCDASimAdapter.py` file using the Python interpreter and enter
 any desired arguments.
 
 ```
-python3 SensorDataService.py  --carla-host 192.168.100.10
+python3 CarlaCDASimAdapter.py  --carla-host 192.168.100.10
 ```
 
 At this point, an XML-RPC service is started which provides remote access to register sensors and retrieve detection
@@ -56,7 +56,7 @@ underlying data.
 The service may be started at command line and by passing command-line arguments. Available arguments are:
 
 ```
-usage: SensorDataService.py [-h] [--carla-host CARLA_HOST] [--carla-port CARLA_PORT]
+usage: CarlaCDASimAdapter.py [-h] [--carla-host CARLA_HOST] [--carla-port CARLA_PORT]
                             [--xmlrpc-server-host XMLRPC_SERVER_HOST] [--xmlrpc-server-port XMLRPC_SERVER_PORT]
 
 optional arguments:
@@ -104,29 +104,29 @@ The following are the exposed RPC functions:
      |      :param sensor_id: The ID of the sensor.
      |      :return: List of DetectedObject's discovered by the associated sensor, in serialized JSON form. Each entry contains metadata including object id, position and type.
 
-# SensorDataService Class
+# CarlaCDASimAdapter Class
 
 ## Description
 
-Provides a programmatic interface to launch the XML-RPC service. To launch, build a SensorAPI object and pass into the
-constructor of a SensorDataService. Then call start_xml_rpc_server(), setting the `blocking` parameter to easily block
+Provides a programmatic interface to launch the XML-RPC service. To launch, build a CarlaCDASimAPI object and pass into the
+constructor of a CarlaCDASimAdapter. Then call start_xml_rpc_server(), setting the `blocking` parameter to easily block
 or start the server on a separate thread.
 
 ````
-api = SensorAPI.build_from_host_spec(carla_host, carla_port)
-sensor_data_service = SensorDataService(api)
+api = CarlaCDASimAPI.build_from_host_spec(carla_host, carla_port)
+sensor_data_service = CarlaCDASimAdapter(api)
 sensor_data_service.start_xml_rpc_server(args.xmlrpc_server_host, args.xmlrpc_server_port, False)
 ````
 
 ## Interface
 
-    class SensorDataService
-     |  SensorDataService(sensor_api)
+    class CarlaCDASimAdapter
+     |  CarlaCDASimAdapter(sensor_api)
      |  
      |  Methods defined here:
      |  
      |  __init__(self, sensor_api)
-     |      SensorDataService constructor.
+     |      CarlaCDASimAdapter constructor.
      |      :param sensor_api: The API object exposing CARLA connection.
      |  
      |  start_xml_rpc_server(self, xmlrpc_server_host, xmlrpc_server_port, blocking=True)
@@ -138,4 +138,4 @@ sensor_data_service.start_xml_rpc_server(args.xmlrpc_server_host, args.xmlrpc_se
 
 # File
 
-    SensorDataService.py
+    CarlaCDASimAdapter.py

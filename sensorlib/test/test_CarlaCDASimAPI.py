@@ -13,38 +13,38 @@ from unittest.mock import MagicMock
 import carla
 import numpy as np
 
-from src.SensorAPI import SensorAPI
+from src.CarlaCDASimAPI import CarlaCDASimAPI
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
-class TestSimulatedSensorConfigurator(unittest.TestCase):
+class TestCarlaCDASimAPI(unittest.TestCase):
     def setUp(self):
         # Mock the CARLA objects
         self.carla_world = MagicMock()
         self.carla_client = MagicMock(get_world=MagicMock(return_value=self.carla_world))
-        self.api = SensorAPI.build_from_client(self.carla_client)
+        self.api = CarlaCDASimAPI.build_from_client(self.carla_client)
 
         # Configurations
         self.carla_sensor_config = SimulatedSensorTestUtils.generate_lidar_sensor_config()
 
     def test_build_from_host_spec(self):
         carla.Client = MagicMock(return_value=self.carla_client)
-        api = SensorAPI.build_from_host_spec("localhost", 2000)
-        assert api._SensorAPI__client == self.carla_client
-        assert api._SensorAPI__carla_world == self.carla_world
-        assert api._SensorAPI__infrastructure_sensors == {}
+        api = CarlaCDASimAPI.build_from_host_spec("localhost", 2000)
+        assert api._CarlaCDASimAPI__client == self.carla_client
+        assert api._CarlaCDASimAPI__carla_world == self.carla_world
+        assert api._CarlaCDASimAPI__infrastructure_sensors == {}
 
     def test_build_from_client(self):
-        api = SensorAPI.build_from_client(self.carla_client)
-        assert api._SensorAPI__client == self.carla_client
-        assert api._SensorAPI__carla_world == self.carla_world
-        assert api._SensorAPI__infrastructure_sensors == {}
+        api = CarlaCDASimAPI.build_from_client(self.carla_client)
+        assert api._CarlaCDASimAPI__client == self.carla_client
+        assert api._CarlaCDASimAPI__carla_world == self.carla_world
+        assert api._CarlaCDASimAPI__infrastructure_sensors == {}
 
     def test_build_from_world(self):
-        api = SensorAPI.build_from_world(self.carla_world)
-        assert api._SensorAPI__client == None
-        assert api._SensorAPI__carla_world == self.carla_world
-        assert api._SensorAPI__infrastructure_sensors == {}
+        api = CarlaCDASimAPI.build_from_world(self.carla_world)
+        assert api._CarlaCDASimAPI__client == None
+        assert api._CarlaCDASimAPI__carla_world == self.carla_world
+        assert api._CarlaCDASimAPI__infrastructure_sensors == {}
 
     def test_create_simulated_semantic_lidar_sensor(self):
         # Values
@@ -67,7 +67,7 @@ class TestSimulatedSensorConfigurator(unittest.TestCase):
         carla_sensor.listen = MagicMock(return_value=MagicMock())
 
         # Build and register the sensor
-        api = SensorAPI.build_from_world(carla_world)
+        api = CarlaCDASimAPI.build_from_world(carla_world)
         sensor = api.create_simulated_semantic_lidar_sensor(simulated_sensor_config, carla_sensor_config,
                                                             noise_model_config,
                                                             detection_cycle_delay_seconds,
@@ -91,7 +91,7 @@ class TestSimulatedSensorConfigurator(unittest.TestCase):
 
     def test_get_simulated_sensor(self):
         # Mock out registered sensors
-        self.api._SensorAPI__infrastructure_sensors = {(0, 0): MagicMock(id=0),
+        self.api._CarlaCDASimAPI__infrastructure_sensors = {(0, 0): MagicMock(id=0),
                                                        (0, 1): MagicMock(id=1),
                                                        (1, 0): MagicMock(id=2),
                                                        (1, 1): MagicMock(id=3)
@@ -106,7 +106,7 @@ class TestSimulatedSensorConfigurator(unittest.TestCase):
     def test_get_detected_objects(self):
         # Register a sensor
         detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
-        self.api._SensorAPI__infrastructure_sensors = {
+        self.api._CarlaCDASimAPI__infrastructure_sensors = {
             (0, 0): MagicMock(id=0, get_detected_objects=MagicMock(return_value=detected_objects))}
 
         # Call
@@ -120,12 +120,12 @@ class TestSimulatedSensorConfigurator(unittest.TestCase):
         scheduler.enter = MagicMock(return_value=MagicMock())
         simulated_sensor = MagicMock()
         detection_cycle_delay_seconds = 0.1
-        self.api._SensorAPI__schedule_next_compute(scheduler, simulated_sensor, detection_cycle_delay_seconds)
-        scheduler.enter.assert_called_with(detection_cycle_delay_seconds, 1, self.api._SensorAPI__schedule_next_compute,
+        self.api._CarlaCDASimAPI__schedule_next_compute(scheduler, simulated_sensor, detection_cycle_delay_seconds)
+        scheduler.enter.assert_called_with(detection_cycle_delay_seconds, 1, self.api._CarlaCDASimAPI__schedule_next_compute,
                                            (scheduler, simulated_sensor, detection_cycle_delay_seconds))
 
     def test_generate_lidar_bp(self):
         blueprint_library = MagicMock(find=MagicMock(return_value=MagicMock(set_attribute=MagicMock())))
-        bp = self.api._SensorAPI__generate_lidar_bp(blueprint_library, self.carla_sensor_config)
+        bp = self.api._CarlaCDASimAPI__generate_lidar_bp(blueprint_library, self.carla_sensor_config)
         bp.set_attribute.assert_called_with("points_per_second", "10000")
         assert isinstance(bp, MagicMock)

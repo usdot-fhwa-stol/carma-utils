@@ -21,7 +21,7 @@ from src.sensor.SemanticLidarSensor import SemanticLidarSensor
 from src.util.CarlaUtils import CarlaUtils
 
 
-class SensorAPI:
+class CarlaCDASimAPI:
     """
     Interface to build a SimulatedSensor.
     """
@@ -38,10 +38,10 @@ class SensorAPI:
 
         :param carla_host: The CARLA host.
         :param carla_port: The CARLA host port.
-        :return: A SensorAPI instance.
+        :return: A CarlaCDASimAPI instance.
         """
         client = carla.Client(str(carla_host), int(carla_port))
-        return SensorAPI.build_from_client(client)
+        return CarlaCDASimAPI.build_from_client(client)
 
     @staticmethod
     def build_from_client(carla_client):
@@ -49,9 +49,9 @@ class SensorAPI:
         Build an API instance.
 
         :param carla_client: The CARLA client.
-        :return: A SensorAPI instance.
+        :return: A CarlaCDASimAPI instance.
         """
-        api = SensorAPI()
+        api = CarlaCDASimAPI()
         api.__client = carla_client
         api.__client.set_timeout(2.0)
         api.__carla_world = api.__client.get_world()
@@ -63,9 +63,9 @@ class SensorAPI:
         Build an API instance.
 
         :param carla_world: The CARLA world.
-        :return: A SensorAPI instance.
+        :return: A CarlaCDASimAPI instance.
         """
-        api = SensorAPI()
+        api = CarlaCDASimAPI()
         api.__carla_world = carla_world
         return api
 

@@ -1,7 +1,7 @@
-# Sensorlib Library Interface
+# Carla CDA Sim API
 
-The sensorlib library interface provides programmatic access to the library functionality. The primary means of
-accessing features is through a SensorAPI object, which may be constructed from any piece of information sufficient to
+The Carla CDA Sim API provides programmatic access to the library functionality. The primary means of
+accessing features is through a CarlaCDASimAPI object, which may be constructed from any piece of information sufficient to
 establish a Carla connection.
 
 First ensure the following environment variables are set which define the CARLA version being utilized:
@@ -16,15 +16,15 @@ First ensure the following environment variables are set which define the CARLA 
 Nex, build the API object.
 
 ```
-api = SensorAPI.build_from_host_spec(carla_host, carla_port)
+api = CarlaCDASimAPI.build_from_host_spec(carla_host, carla_port)
 
 # or...
 
-api = SensorAPI.build_from_client(carla_client)
+api = CarlaCDASimAPI.build_from_client(carla_client)
 
 # or...
 
-api = SensorAPI.build_from_world(carla_world)
+api = CarlaCDASimAPI.build_from_world(carla_world)
 ```
 
 The API object may then be used to indirectly build and manage sensors, and request output data. Sensors are located by
@@ -35,7 +35,7 @@ associated with infrastructure item 3.
 The following sample loads configurations and constructs a sensor.
 
 ```
-api = SensorAPI.build_from_world(world)
+api = CarlaCDASimAPI.build_from_world(world)
 
 infrastructure_id = 3
 sensor_id = 7
@@ -74,11 +74,11 @@ sensor = api.get_simulated_sensor(3, 0)
 detected_objects = sensor.get_detected_objects()
 ```
 
-The SensorAPI class provides the sensor registry and management interface, while the SimulatedLidarSensor contains the
+The CarlaCDASimAPI class provides the sensor registry and management interface, while the SimulatedLidarSensor contains the
 direct sensor interface. Note that SimulatedLidarSensor is an extension of the SimulatedSensor base class, paving the
 way for future sensors to be developed.
 
-# SensorAPI Class
+# CarlaCDASimAPI Class
 
 ## Description
 
@@ -87,7 +87,7 @@ CARLA connection.
 
 ## Interface
 
-    class SensorAPI(builtins.object)
+    class CarlaCDASimAPI(builtins.object)
      |  Interface to build a SimulatedSensor.
      |  
      |  Methods defined here:
@@ -127,24 +127,24 @@ CARLA connection.
      |      Build an API instance.
      |      
      |      :param carla_client: The CARLA client.
-     |      :return: A SensorAPI instance.
+     |      :return: A CarlaCDASimAPI instance.
      |  
      |  build_from_host_spec(carla_host, carla_port)
      |      Build an API instance.
      |      
      |      :param carla_host: The CARLA host.
      |      :param carla_port: The CARLA host port.
-     |      :return: A SensorAPI instance.
+     |      :return: A CarlaCDASimAPI instance.
      |  
      |  build_from_world(carla_world)
      |      Build an API instance.
      |      
      |      :param carla_world: The CARLA world.
-     |      :return: A SensorAPI instance.
+     |      :return: A CarlaCDASimAPI instance.
 
 ## File
 
-    SensorAPI.py
+    CarlaCDASimAPI.py
 
 # SemanticLidarSensor Class
 
@@ -156,7 +156,7 @@ A call to `compute_detected_objects()` forces computation of the processing pipe
 DetectedObject's. These are immediately returned, and available subsequently through the `get_detected_objects()`
 function.
 
-Proper construction and thread initialization is handled by the SensorAPI, which is the recommended sensor building
+Proper construction and thread initialization is handled by the CarlaCDASimAPI, which is the recommended sensor building
 interface. If constructed directly, `compute_detected_objects()` must be configured to be called repeatedly at the
 desired detection computation cadence. Note that this is a blocking function.
 

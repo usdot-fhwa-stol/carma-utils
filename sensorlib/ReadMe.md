@@ -9,19 +9,21 @@ CARLA-driven simulation. The data is intended to feed into a CARMA V2X system fo
 action by CARMA platform vehicles.
 
 The SimulatedSensor acts as a wrapper to the CARLA Semantic Lidar Sensor, capturing the data and performing
-post-processing to generate a list of detected objects upon request.
+post-processing to generate a list of detected objects upon request. The primary reason for processing data from CARLA
+is to ensure noise is applied to the output signal, and customization is possible for occlusion and any other procedures
+in the future. The native CARLA sensor does not provide signal noise, misdetection simulation, or customization.
 
 Raw sensor observations from the CARLA sensor are analyzed to build a dataset representing the current objects in scene.
 
-## Service Layer
+## Carla CDA Sim Adapter
 
-The Sensor Data Service exposes the sensing capability through an RPC service. See
-the [Sensorlib Data Service Documentation](doc/SensorlibDataService.md) for details.
+The Carla CDA Sim Adapter exposes the sensing capability through an RPC service. See
+the [Carla CDA Sim Adapter Documentation](doc/CarlaCDASimAdapter.md) for details.
 
-## Library API
+## Carla CDA Sim API
 
 For internal data access from Python code, refer to
-the [Sensorlib Library Interface Documentation](doc/SensorlibLibraryInterface.md).
+the [Carla CDA Sim API Documentation](doc/CarlaCDASimAPI.md).
 
 ## Operation
 

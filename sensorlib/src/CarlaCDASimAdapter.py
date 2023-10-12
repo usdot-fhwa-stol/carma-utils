@@ -11,14 +11,14 @@ import threading
 
 from xmlrpc.server import SimpleXMLRPCServer
 
-from src.SensorAPI import SensorAPI
+from src.CarlaCDASimAPI import CarlaCDASimAPI
 from src.util.SimulatedSensorUtils import SimulatedSensorUtils
 
-class SensorDataService:
+class CarlaCDASimAdapter:
 
     def __init__(self, sensor_api):
         """
-        SensorDataService constructor.
+        CarlaCDASimAdapter constructor.
         :param sensor_api: The API object exposing CARLA connection.
         """
         self.__api = sensor_api
@@ -105,6 +105,6 @@ if __name__ == "__main__":
         help="XML-RPC server port. (default: 8000)")
 
     args = arg_parser.parse_args()
-    sensor_api = SensorAPI.build_from_host_spec(args.carla_host, args.carla_port)
-    sensor_data_service = SensorDataService(sensor_api)
+    sensor_api = CarlaCDASimAPI.build_from_host_spec(args.carla_host, args.carla_port)
+    sensor_data_service = CarlaCDASimAdapter(sensor_api)
     sensor_data_service.start_xml_rpc_server(args.xmlrpc_server_host, args.xmlrpc_server_port, True)

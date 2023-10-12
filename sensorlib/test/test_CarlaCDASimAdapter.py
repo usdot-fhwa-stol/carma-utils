@@ -13,20 +13,20 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
-from src.SensorAPI import SensorAPI
-from src.SensorDataService import SensorDataService
+from src.CarlaCDASimAPI import CarlaCDASimAPI
+from src.CarlaCDASimAdapter import CarlaCDASimAdapter
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
-class TestService(unittest.TestCase):
+class TestCarlaCDASimAdapter(unittest.TestCase):
 
     def setUp(self):
 
         # Mock the CARLA objects
         self.carla_world = MagicMock()
         self.carla_client = MagicMock(get_world=MagicMock(return_value=self.carla_world))
-        self.api = SensorAPI.build_from_client(self.carla_client)
-        self.data_service = SensorDataService(self.api)
+        self.api = CarlaCDASimAPI.build_from_client(self.carla_client)
+        self.data_service = CarlaCDASimAdapter(self.api)
 
         # Configurations
         self.carla_sensor_config = SimulatedSensorTestUtils.generate_lidar_sensor_config()
@@ -62,9 +62,9 @@ class TestService(unittest.TestCase):
         carla_sensor.listen = MagicMock(return_value=MagicMock())
 
         # Build and register the sensor
-        api = SensorAPI.build_from_world(carla_world)
-        data_service = SensorDataService(api)
-        new_sensor_id = data_service._SensorDataService__create_simulated_semantic_lidar_sensor(
+        api = CarlaCDASimAPI.build_from_world(carla_world)
+        data_service = CarlaCDASimAdapter(api)
+        new_sensor_id = data_service._CarlaCDASimAdapter__create_simulated_semantic_lidar_sensor(
             "../config/simulated_sensor_config.yaml", "../config/noise_model_config.yaml",
             detection_cycle_delay_seconds,
             infrastructure_id, sensor_id,
@@ -74,12 +74,12 @@ class TestService(unittest.TestCase):
         assert new_sensor_id == str(sensor_id)
 
         # Also validate retrieval through registration
-        assert str(sensor_id) == data_service._SensorDataService__get_simulated_sensor(infrastructure_id, sensor_id)
+        assert str(sensor_id) == data_service._CarlaCDASimAdapter__get_simulated_sensor(infrastructure_id, sensor_id)
 
     def test_get_simulated_sensor(self):
 
         # Mock out registered sensors
-        self.data_service._SensorDataService__api._SensorAPI__infrastructure_sensors = {
+        self.data_service._CarlaCDASimAdapter__api._CarlaCDASimAPI__infrastructure_sensors = {
             (0, 0): MagicMock(get_id=MagicMock(return_value=0)),
             (0, 1): MagicMock(get_id=MagicMock(return_value=1)),
             (1, 0): MagicMock(get_id=MagicMock(return_value=2)),
@@ -87,17 +87,17 @@ class TestService(unittest.TestCase):
         }
 
         # Validate able to retrieve registered sensors
-        assert self.data_service._SensorDataService__get_simulated_sensor(0, 0) == "0"
-        assert self.data_service._SensorDataService__get_simulated_sensor(0, 1) == "1"
-        assert self.data_service._SensorDataService__get_simulated_sensor(1, 0) == "2"
-        assert self.data_service._SensorDataService__get_simulated_sensor(1, 1) == "3"
+        assert self.data_service._CarlaCDASimAdapter__get_simulated_sensor(0, 0) == "0"
+        assert self.data_service._CarlaCDASimAdapter__get_simulated_sensor(0, 1) == "1"
+        assert self.data_service._CarlaCDASimAdapter__get_simulated_sensor(1, 0) == "2"
+        assert self.data_service._CarlaCDASimAdapter__get_simulated_sensor(1, 1) == "3"
 
     def test_get_detected_objects(self):
         detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
         detected_objects = [replace(obj, carla_actor=None) for obj in detected_objects]
         sensor = MagicMock(get_detected_objects=MagicMock(return_value=detected_objects))
-        self.data_service._SensorDataService__api._SensorAPI__infrastructure_sensors = {(0, 0): sensor}
-        serialized = self.data_service._SensorDataService__get_detected_objects(0, 0)
+        self.data_service._CarlaCDASimAdapter__api._CarlaCDASimAPI__infrastructure_sensors = {(0, 0): sensor}
+        serialized = self.data_service._CarlaCDASimAdapter__get_detected_objects(0, 0)
 
         with open("data/test_data_serialized_detected_objects.json", "r") as file:
             expected_serialized_data = json.load(file)

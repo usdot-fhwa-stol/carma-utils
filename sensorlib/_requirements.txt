@@ -1,6 +1,5 @@
 appdirs==1.4.4
 brotlipy==0.7.0
-carla==0.9.14
 certifi
 cffi
 charset-normalizer
