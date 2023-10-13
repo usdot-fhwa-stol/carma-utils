@@ -1,0 +1,23 @@
+simulated_sensor:
+  prefilter:
+    allowed_semantic_tags:
+      - Vehicles
+      - Pedestrians
+    max_distance_meters: 100
+  detection_threshold_scaling_formula:
+    nominal_hitpoint_detection_ratio_threshold: 0.6
+    hitpoint_detection_ratio_threshold_per_meter_change_rate: -0.0033
+    adjustable_threshold_scaling_parameters:
+      dropoff_rate: 0.01
+  geometry_reassociation:
+    sample_count: 3
+    geometry_association_max_distance_threshold: 2.0
+    trailing_id_associations_count: 2
+  use_sensor_centric_frame: True
+lidar_sensor:
+  lower_fov: -80.0
+  upper_fov: 30.0
+  channels: 32
+  range: 100.0
+  rotation_period: 0.1
+  points_per_second: 10000
