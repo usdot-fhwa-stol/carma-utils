@@ -4,9 +4,9 @@
 
 The sensor library provides a proxy sensor for the CARLA simulator, exposing additional features.
 
-This new feature is provided to enable vulnerable road user detection using a LIDAR sensor in the context of a
-CARLA-driven simulation. The data is intended to feed into a CARMA V2X system for data fusion with other sensors and
-action by CARMA platform vehicles.
+This new feature is provided to enable object detection for CDASim deployment using CARLA's existing sensor and object
+representation. The data will be feed to the CARMA-Platform via the CARLA CARMA Integration tool, and to CDASim to
+expose the data to other integrated simulators or software systems under test.
 
 The SimulatedSensor acts as a wrapper to the CARLA Semantic Lidar Sensor, capturing the data and performing
 post-processing to generate a list of detected objects upon request. The primary reason for processing data from CARLA
@@ -14,6 +14,8 @@ is to ensure noise is applied to the output signal, and customization is possibl
 in the future. The native CARLA sensor does not provide signal noise, misdetection simulation, or customization.
 
 Raw sensor observations from the CARLA sensor are analyzed to build a dataset representing the current objects in scene.
+
+_Note: CARLA version 0.9.10 contains an internal bug that causes object misidentification. A bug fix has been added to the current sensor._
 
 ## Carla CDA Sim Adapter
 
