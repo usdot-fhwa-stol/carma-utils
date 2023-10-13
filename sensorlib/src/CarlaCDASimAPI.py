@@ -10,15 +10,16 @@ import sched
 import threading
 import time
 
-from src.util.CarlaLoader import CarlaLoader
+from util.CarlaLoader import CarlaLoader
 CarlaLoader.load_carla_lib()
 import carla
+import random
 
-from src.collector.SensorDataCollector import SensorDataCollector
-from src.noise_models.NoiseModelFactory import NoiseModelFactory
-from src.objects.CarlaSensor import CarlaSensorBuilder
-from src.sensor.SemanticLidarSensor import SemanticLidarSensor
-from src.util.CarlaUtils import CarlaUtils
+from collector.SensorDataCollector import SensorDataCollector
+from noise_models.NoiseModelFactory import NoiseModelFactory
+from objects.CarlaSensor import CarlaSensorBuilder
+from sensor.SemanticLidarSensor import SemanticLidarSensor
+from util.CarlaUtils import CarlaUtils
 
 
 class CarlaCDASimAPI:
@@ -108,6 +109,16 @@ class CarlaCDASimAPI:
         parent_actor = CarlaUtils.get_actor(self.__carla_world, parent_actor_id)
         carla_sensor = self.__carla_world.spawn_actor(sensor_bp, sensor_transform, attach_to=parent_actor)
 
+
+        dummy_veh_spawn = carla.Transform(
+            carla.Location(x=-83.979, y=333.332, z=10.253),
+            carla.Rotation(yaw=0.0)
+        )
+        
+        dummy_veh_bp = random.choice(blueprint_library.filter('vehicle.*'))
+        dummy_vehicle = self.__carla_world.spawn_actor(dummy_veh_bp, dummy_veh_spawn)
+        print("Created a dummy vehicle with id: " + str(dummy_vehicle.id))
+        
         # Build internal objects
         sensor = CarlaSensorBuilder.build_sensor(carla_sensor)
         data_collector = SensorDataCollector(self.__carla_world, carla_sensor)

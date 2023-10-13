@@ -8,7 +8,7 @@
 
 from collections import deque
 
-from src.util.CarlaUtils import CarlaUtils
+from util.CarlaUtils import CarlaUtils
 
 
 class SensorDataCollector:
@@ -56,9 +56,10 @@ class SensorDataCollector:
         updated data. Data is collected and added to the active collection. Collections are rotated when current
         collection is complete, as determined by sensor rotation angle.
 
-        :param raw_sensor_data: Raw carla.SensorData from the CARLA sensor.
+        :param raw_sensor_data: Raw carla.SensorData from the CARLA sensor. TODO????
         :return: None
         """
+        #print("<<<< sensor data type?: " + str(type(raw_sensor_data)))
 
         # Update the timestamp (in integer seconds)
         self.__timestamp = int(raw_sensor_data.timestamp)
@@ -70,11 +71,19 @@ class SensorDataCollector:
             self.__data.appendleft({})
 
         # Add data to the current collection
-        self.__collect_raw_point_data(self.__data[0], raw_sensor_data.raw_data)
+        #print("<<<<<<<<<<<<< Detected size" + str(len(raw_sensor_data.raw_data)))
+        if (len(raw_sensor_data.raw_data) == 0):
+            return None
+        #else:
+        #    for detection in raw_sensor_data:
+        #        #print("idx: " + str(detection.object_idx) + ", and tag id: " + str(detection.object_tag))
+
+
+        self.__collect_raw_point_data(self.__data[0], raw_sensor_data)
 
     def __collect_raw_point_data(self, grouped_data, raw_sensor_data):
         """
-        Collect the raw hitpoint data from the measurement.
+        Collect the raw hit point data from the measurement.
 
         :param grouped_data: Current active collection being appended to.
         :param raw_sensor_data: Measurement from CARLA, carla.SemanticLidarMeasurement.
@@ -83,12 +92,12 @@ class SensorDataCollector:
 
         # Extract geometric hitpoints and group them by actor ID
         # The resulting dictionary maps actor ID to a list of hitpoints
-        for r in raw_sensor_data:
-            point = CarlaUtils.vector3d_to_numpy(r.point)
-            if r.object_idx not in grouped_data:
-                grouped_data[r.object_idx] = [point]
+        for detection in raw_sensor_data:
+            point = CarlaUtils.vector3d_to_numpy(detection.point)
+            if detection.object_idx not in grouped_data:
+                grouped_data[detection.object_idx] = [point]
             else:
-                grouped_data[r.object_idx].append(point)
+                grouped_data[detection.object_idx].append(point)
 
     def __is_same_data_collection(self, sensor_rotation_angle):
         """

@@ -10,8 +10,8 @@ from dataclasses import replace
 
 import numpy as np
 
-from src.noise_models.AbstractNoiseModel import AbstractNoiseModel
-from src.util.CarlaUtils import CarlaUtils
+from noise_models.AbstractNoiseModel import AbstractNoiseModel
+from util.CarlaUtils import CarlaUtils
 
 
 class GaussianNoiseModel(AbstractNoiseModel):
@@ -33,7 +33,10 @@ class GaussianNoiseModel(AbstractNoiseModel):
         noise_std = self.__position_std
         for obj in object_list:
             noise = np.random.normal(noise_mean, noise_std, size=3)
-            obj.position += noise
+            obj.position[0] += noise[0]
+            obj.position[1] += noise[1]
+            obj.position[2] += noise[2]
+
         return object_list
 
     def apply_orientation_noise(self, object_list):
@@ -46,7 +49,9 @@ class GaussianNoiseModel(AbstractNoiseModel):
         noise_std = self.__orientation_std
         for obj in object_list:
             noise = np.random.normal(noise_mean, noise_std, size=3)
-            obj.rotation += noise
+            obj.rotation[0] += noise[0]
+            obj.rotation[1] += noise[1]
+            obj.rotation[2] += noise[2]
 
         return object_list
 
