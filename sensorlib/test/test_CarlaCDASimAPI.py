@@ -18,6 +18,12 @@ from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestCarlaCDASimAPI(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        from src.util.CarlaLoader import CarlaLoader
+        CarlaLoader.load_carla_lib()
+        import carla
+
     def setUp(self):
         # Mock the CARLA objects
         self.carla_world = MagicMock()

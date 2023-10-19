@@ -27,7 +27,7 @@ public class Main {
         int sensorID = 7;
         List<Double> location = Arrays.asList(1.0, 2.0, 3.0);
         List<Double> rotation = Arrays.asList(0.0, 0.0, 0.0);
-        params = new Object[]{"../config/simulated_sensor_config.yaml", "../config/noise_model_config.yaml", 0.5, infrastructureID, sensorID, location, rotation, -1};
+        params = new Object[]{"config/simulated_sensor_config.yaml", "config/noise_model_config.yaml", 0.5, infrastructureID, sensorID, location, rotation, -1};
 
         System.out.println();
 
