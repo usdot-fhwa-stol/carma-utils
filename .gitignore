@@ -5,6 +5,7 @@ CMakeFiles/
 .settings/
 .vscode/
 .cmake/
+target/
 
 # Covers Python
 # Reference: https://github.com/github/gitignore/blob/main/Python.gitignore
