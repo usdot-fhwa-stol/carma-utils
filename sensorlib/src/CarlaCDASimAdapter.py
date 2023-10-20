@@ -15,10 +15,12 @@ from CarlaCDASimAPI import CarlaCDASimAPI
 from util.SimulatedSensorUtils import SimulatedSensorUtils
 
 class CarlaCDASimAdapter:
-
-    sensor_config
-    noise_model_config
-    detection_cycle_delay_seconds
+    # Holds Sensor configuration object
+    sensor_config = None
+    # Holds noise model configuration objst
+    noise_model_config = None
+    # Holds detection cycle delay seconds
+    detection_cycle_delay_seconds = None
     def __init__(self, sensor_api):
         """
         CarlaCDASimAdapter constructor.
@@ -44,9 +46,9 @@ class CarlaCDASimAdapter:
                                  "create_simulated_semantic_lidar_sensor")
         server.register_function(self.__get_simulated_sensor, "get_simulated_sensor")
         server.register_function(self.__get_detected_objects, "get_detected_objects")
-        this.sensor_config = SimulatedSensorUtils.load_config_from_file(sensor_config_file)
-        this.noise_model_config = SimulatedSensorUtils.load_config_from_file(noise_model_config_file)
-        this.detection_cycle_delay_seconds = detection_cycle_delay_seconds
+        self.sensor_config = SimulatedSensorUtils.load_config_from_file(sensor_config_file)
+        self.noise_model_config = SimulatedSensorUtils.load_config_from_file(noise_model_config_file)
+        self.detection_cycle_delay_seconds = detection_cycle_delay_seconds
 
         # Start, with blocking option
         if blocking:
@@ -61,10 +63,10 @@ class CarlaCDASimAdapter:
                                                  sensor_position, sensor_rotation):
 
 
-        simulated_sensor = self.__api.create_simulated_semantic_lidar_sensor(this.sensor_config["simulated_sensor"],
-                                                                             this.sensor_config["lidar_sensor"],
-                                                                             this.noise_model_config,
-                                                                             this.detection_cycle_delay_seconds,
+        simulated_sensor = self.__api.create_simulated_semantic_lidar_sensor(self.sensor_config["simulated_sensor"],
+                                                                             self.sensor_config["lidar_sensor"],
+                                                                             self.noise_model_config,
+                                                                             self.detection_cycle_delay_seconds,
                                                                              infrastructure_id, sensor_id,
                                                                              sensor_position, sensor_rotation)
         return str(simulated_sensor.get_id())
@@ -125,4 +127,4 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
     sensor_api = CarlaCDASimAPI.build_from_host_spec(args.carla_host, args.carla_port)
     sensor_data_service = CarlaCDASimAdapter(sensor_api)
-    sensor_data_service.start_xml_rpc_server(args.xmlrpc_server_host, args.xmlrpc_server_port, args.sensor_config_file, args.noise_model_config_file, detection_cycle_delay_seconds, True)
+    sensor_data_service.start_xml_rpc_server(args.xmlrpc_server_host, args.xmlrpc_server_port, args.sensor_config_file, args.noise_model_config_file, args.detection_cycle_delay_seconds, True)

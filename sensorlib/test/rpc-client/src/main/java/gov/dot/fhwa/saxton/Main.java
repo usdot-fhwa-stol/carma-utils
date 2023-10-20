@@ -25,13 +25,11 @@ public class Main {
         client.setConfig(config);
 
         // Specify sensor parameters
-        int infrastructureID = 0;
+        int infrastructureID = 1;
         int sensorID = 7;
         List<Double> location = Arrays.asList(-83.979, 333.332, 10.253);
         List<Double> rotation = Arrays.asList(0.0, 0.0, 0.0);
-        params = new Object[]{"config/simulated_sensor_config.yaml", "config/noise_model_config.yaml", 0.5, infrastructureID, sensorID, location, rotation, -1};
-
-        System.out.println();
+        params = new Object[]{ infrastructureID, sensorID, location, rotation};
 
         // Create sensor
         execute("create_simulated_semantic_lidar_sensor", params);
@@ -56,7 +54,13 @@ public class Main {
 
     static void execute(String functionName, Object[] p) throws XmlRpcException {
         System.out.println("Executing " + functionName + "():");
-        String result = (String) client.execute(functionName, p);
-        System.out.println(result);
+        try{
+            String result = (String) client.execute(functionName, p);
+            System.out.println(result);
+
+        }
+        catch(XmlRpcException e) {
+            e.printStackTrace(System.out);
+        }
     }
 }
