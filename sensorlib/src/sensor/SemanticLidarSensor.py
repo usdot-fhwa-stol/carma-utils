@@ -154,8 +154,6 @@ class SemanticLidarSensor(SimulatedSensor):
         # Filter by detected_object type Actor.type_id and Actor.semantic_tags are available for determining type;
         # semantic_tags effectively specifies the type of detected_object Possible types are listed in the CARLA
         # documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
-        #for obj in detected_objects:
-        #    print("Detected object type: " + str(type(obj)))
 
         detected_objects = list(
             filter(lambda obj: obj is not None, detected_objects))
