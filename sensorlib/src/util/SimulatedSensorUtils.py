@@ -36,8 +36,6 @@ class DetectedObjectEncoder(json.JSONEncoder):
                 'carla_actor': str(obj.carla_actor)
             }
             
-            print("Serialized: !")
-            #print(dict_return)
             # Convert DetectedObject attributes to dictionary for serialization.
             # np.ndarray objects are converted to lists using the tolist() method.
             return dict_return
@@ -73,17 +71,9 @@ class SimulatedSensorUtils:
         :return: JSON string.
         """
 
-        print("called here! in resalizatioin")
-        print("Type: " + str(type(obj)))
-
-        #if (obj is None):
-        #    return ""
-        #print("There is no bounding_box attribute, must be not Vehicles or Pedestrian, returning...")
         if isinstance(obj, numpy.ndarray):
-            print("numpy")
             return obj.tolist()
         elif isinstance(obj, list):
-            print("list")
             data = [SimulatedSensorUtils.serialize_to_json(item) for item in obj]
             return json.dumps(data)
         else:

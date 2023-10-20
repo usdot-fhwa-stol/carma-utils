@@ -109,16 +109,6 @@ class CarlaCDASimAPI:
         parent_actor = CarlaUtils.get_actor(self.__carla_world, parent_actor_id)
         carla_sensor = self.__carla_world.spawn_actor(sensor_bp, sensor_transform, attach_to=parent_actor)
 
-
-        dummy_veh_spawn = carla.Transform(
-            carla.Location(x=-83.979, y=333.332, z=10.253),
-            carla.Rotation(yaw=0.0)
-        )
-        
-        dummy_veh_bp = random.choice(blueprint_library.filter('vehicle.*'))
-        dummy_vehicle = self.__carla_world.spawn_actor(dummy_veh_bp, dummy_veh_spawn)
-        print("Created a dummy vehicle with id: " + str(dummy_vehicle.id))
-        
         # Build internal objects
         sensor = CarlaSensorBuilder.build_sensor(carla_sensor)
         data_collector = SensorDataCollector(self.__carla_world, carla_sensor)

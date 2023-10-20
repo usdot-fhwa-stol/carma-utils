@@ -82,12 +82,8 @@ class SemanticLidarSensor(SimulatedSensor):
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
 
-        print(">>>>>>> 1 Got here and maybe have some objects: " + str(len(detected_objects)))
-
         # Prefilter
         detected_objects, object_ranges = self.prefilter(detected_objects)
-
-        print(">>>>>>> 2 Got here and maybe have some objects: " + str(len(detected_objects)))
 
         # Get LIDAR hitpoints with Actor ID associations
         timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
@@ -107,11 +103,10 @@ class SemanticLidarSensor(SimulatedSensor):
         hitpoints = self.update_hitpoint_ids_from_association(hitpoints)
 
         # Apply occlusion TODO!
+        # https://usdot-carma.atlassian.net/browse/CDAR-435
         #detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
         #                                        detection_thresholds)
         
-        print(">>>>>>> 3 Got here and maybe have some objects: " + str(len(detected_objects)))
-
         # Apply noise
         detected_objects = self.apply_noise(detected_objects)
 
@@ -119,8 +114,6 @@ class SemanticLidarSensor(SimulatedSensor):
         detected_objects = self.update_object_metadata(detected_objects, hitpoints, timestamp)
 
         self.__detected_objects = detected_objects
-
-        print(">>>>>>> 4 Got here and maybe have some objects: " + str(len(self.__detected_objects)))
 
         return detected_objects
 
@@ -161,15 +154,12 @@ class SemanticLidarSensor(SimulatedSensor):
         # Filter by detected_object type Actor.type_id and Actor.semantic_tags are available for determining type;
         # semantic_tags effectively specifies the type of detected_object Possible types are listed in the CARLA
         # documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
-        print("Detected total objects of size: " + str(len(detected_objects)))
         #for obj in detected_objects:
         #    print("Detected object type: " + str(type(obj)))
 
         detected_objects = list(
             filter(lambda obj: obj is not None, detected_objects))
-        
-        print("After filtering errors size: " + str(len(detected_objects)))
-        
+                
         detected_objects = list(
             filter(lambda obj: obj.object_type in self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"],
                    detected_objects))

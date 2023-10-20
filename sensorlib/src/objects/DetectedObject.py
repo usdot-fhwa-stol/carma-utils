@@ -36,7 +36,7 @@ class DetectedObjectBuilder:
     @staticmethod
     def build_detected_object(carla_actor, allowed_semantic_tags):
         object_type = CarlaUtils.determine_object_type(carla_actor, allowed_semantic_tags)
-        #print("In builder: detected object type: " + object_type)
+
         if (object_type == "NONE"):
             return None
         
@@ -45,7 +45,6 @@ class DetectedObjectBuilder:
         if (bounding_box == None):
             return None
         
-        print("Able to return some object here with id: " + str(carla_actor.id))
         return DetectedObject(
             carla_actor,
             carla_actor.id,

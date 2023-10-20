@@ -50,36 +50,31 @@ class SensorDataCollector:
         """
         return self.__timestamp, self.__data[1]
 
-    def __collect_sensor_data(self, raw_sensor_data):
+    def __collect_sensor_data(self, semantic_sensor_data):
         """
         Primary function, registered as the callback for the CARLA sensor. This function is called whenever CARLA has
         updated data. Data is collected and added to the active collection. Collections are rotated when current
         collection is complete, as determined by sensor rotation angle.
 
-        :param raw_sensor_data: Raw carla.SensorData from the CARLA sensor. TODO????
+        :param semantic_sensor_data: Measurement from CARLA, carla.SemanticLidarMeasurement.
         :return: None
         """
-        #print("<<<< sensor data type?: " + str(type(raw_sensor_data)))
+        #print("<<<< sensor data type?: " + str(type(semantic_sensor_data)))
 
         # Update the timestamp (in integer seconds)
-        self.__timestamp = int(raw_sensor_data.timestamp)
+        self.__timestamp = int(semantic_sensor_data.timestamp)
 
         # Check if this data collection belongs to the same data collection run as the previous time step
-        sensor_rotation_angle = raw_sensor_data.horizontal_angle
+        sensor_rotation_angle = semantic_sensor_data.horizontal_angle
         if not self.__is_same_data_collection(sensor_rotation_angle):
             # Finalize current collection and append a new collection
             self.__data.appendleft({})
 
         # Add data to the current collection
-        #print("<<<<<<<<<<<<< Detected size" + str(len(raw_sensor_data.raw_data)))
-        if (len(raw_sensor_data.raw_data) == 0):
+        if (len(semantic_sensor_data.raw_data) == 0):
             return None
-        #else:
-        #    for detection in raw_sensor_data:
-        #        #print("idx: " + str(detection.object_idx) + ", and tag id: " + str(detection.object_tag))
-
-
-        self.__collect_raw_point_data(self.__data[0], raw_sensor_data)
+        
+        self.__collect_raw_point_data(self.__data[0], semantic_sensor_data)
 
     def __collect_raw_point_data(self, grouped_data, raw_sensor_data):
         """
