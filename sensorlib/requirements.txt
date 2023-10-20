@@ -1,3 +1,4 @@
 numpy
 PyYAML
-scipy==1.10.1
+scipy
+dataclasses

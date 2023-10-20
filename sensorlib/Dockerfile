@@ -1,19 +1,15 @@
-FROM python:3.8.10
-
+FROM ubuntu:focal
 WORKDIR /home/CarlaCDASimAdapter/
-
-COPY ./src /home/CarlaCDASimAdapter/
+COPY ./src/ /home/CarlaCDASimAdapter/src
 COPY requirements.txt /home/CarlaCDASimAdapter/
-RUN pip install --upgrade pip
+COPY ./config/ /home/CarlaCDASimAdapter/config
 ## Install Dependencies
 RUN apt-get update
-RUN apt-get install -y gfortran wget
-RUN wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.10.tar.gz 
-RUN tar -xf CARLA_0.9.10.tar.gz
+RUN apt-get install -y gfortran wget python3 python3-pip libtiff5 libjpeg-dev libpng16-16
+RUN wget https://github.com/usdot-fhwa-stol/carma-carla-integration/raw/develop/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg
 ENV LOAD_CARLA_EGG=True
 ENV CARLA_VERSION=0.9.10
-ENV CARLA_EGG_DIR="/home/CarlaCDASimAdapter/CARLA_0.9.10/PythonAPI/carla"
-RUN pip install -r requirements.txt
-WORKDIR /home/CarlaCDASimAdapter/src/
-
-CMD [ "python", "CarlaCDASimAdapter.py --carla-host 127.0.0.1" ]
+ENV CARLA_EGG_DIR="/home/CarlaCDASimAdapter/"
+RUN pip3 install -r requirements.txt
+WORKDIR /home/CarlaCDASimAdapter/
+CMD [ "python3", "/home/CarlaCDASimAdapter/src/CarlaCDASimAdapter.py", "--carla-host", "127.0.0.1" ]
