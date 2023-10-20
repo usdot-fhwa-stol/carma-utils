@@ -9,10 +9,38 @@
 import json
 
 import yaml
+import numpy
+from util.NumpyEncoder import NumpyEncoder
+from objects.DetectedObject import DetectedObject
 
-from src.util.NumpyEncoder import NumpyEncoder
+class DetectedObjectEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, DetectedObject):
 
-
+            dict_return = {
+                'id': obj.id,
+                'object_type': obj.object_type,
+                'timestamp': obj.timestamp,
+                'bounding_box_in_world_coordinate_frame': [array.tolist() for array in obj.bounding_box_in_world_coordinate_frame],
+                'position': obj.position.tolist(),
+                'velocity': obj.velocity.tolist(),
+                'rotation': obj.rotation.tolist(),
+                'angular_velocity': obj.angular_velocity.tolist(),
+                'position_covariance': obj.position_covariance.tolist(),
+                'velocity_covariance': obj.velocity_covariance.tolist(),
+                'confidence': obj.confidence,
+                'carla_actor': str(obj.carla_actor)
+            }
+            
+            # Convert DetectedObject attributes to dictionary for serialization.
+            # np.ndarray objects are converted to lists using the tolist() method.
+            return dict_return
+        # Handle numpy.ndarray objects
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        # Fallback to the base class default method for other types.
+        return super(DetectedObjectEncoder, self).default(obj)
+    
 class SimulatedSensorUtils:
     """
     Generic utilities.
@@ -38,8 +66,11 @@ class SimulatedSensorUtils:
         :param obj: Object to serialize.
         :return: JSON string.
         """
-        if isinstance(obj, list):
+
+        if isinstance(obj, numpy.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, list):
             data = [SimulatedSensorUtils.serialize_to_json(item) for item in obj]
             return json.dumps(data)
         else:
-            return json.dumps(obj.__dict__, cls=NumpyEncoder)
+            return json.dumps(obj, cls=DetectedObjectEncoder)

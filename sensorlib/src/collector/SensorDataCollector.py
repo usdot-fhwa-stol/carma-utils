@@ -8,7 +8,7 @@
 
 from collections import deque
 
-from src.util.CarlaUtils import CarlaUtils
+from util.CarlaUtils import CarlaUtils
 
 
 class SensorDataCollector:
@@ -50,31 +50,34 @@ class SensorDataCollector:
         """
         return self.__timestamp, self.__data[1]
 
-    def __collect_sensor_data(self, raw_sensor_data):
+    def __collect_sensor_data(self, semantic_sensor_data):
         """
         Primary function, registered as the callback for the CARLA sensor. This function is called whenever CARLA has
         updated data. Data is collected and added to the active collection. Collections are rotated when current
         collection is complete, as determined by sensor rotation angle.
 
-        :param raw_sensor_data: Raw carla.SensorData from the CARLA sensor.
+        :param semantic_sensor_data: Measurement from CARLA, carla.SemanticLidarMeasurement.
         :return: None
         """
 
         # Update the timestamp (in integer seconds)
-        self.__timestamp = int(raw_sensor_data.timestamp)
+        self.__timestamp = int(semantic_sensor_data.timestamp)
 
         # Check if this data collection belongs to the same data collection run as the previous time step
-        sensor_rotation_angle = raw_sensor_data.horizontal_angle
+        sensor_rotation_angle = semantic_sensor_data.horizontal_angle
         if not self.__is_same_data_collection(sensor_rotation_angle):
             # Finalize current collection and append a new collection
             self.__data.appendleft({})
 
         # Add data to the current collection
-        self.__collect_raw_point_data(self.__data[0], raw_sensor_data.raw_data)
+        if (len(semantic_sensor_data.raw_data) == 0):
+            return None
+        
+        self.__collect_raw_point_data(self.__data[0], semantic_sensor_data)
 
     def __collect_raw_point_data(self, grouped_data, raw_sensor_data):
         """
-        Collect the raw hitpoint data from the measurement.
+        Collect the raw hit point data from the measurement.
 
         :param grouped_data: Current active collection being appended to.
         :param raw_sensor_data: Measurement from CARLA, carla.SemanticLidarMeasurement.
@@ -83,12 +86,12 @@ class SensorDataCollector:
 
         # Extract geometric hitpoints and group them by actor ID
         # The resulting dictionary maps actor ID to a list of hitpoints
-        for r in raw_sensor_data:
-            point = CarlaUtils.vector3d_to_numpy(r.point)
-            if r.object_idx not in grouped_data:
-                grouped_data[r.object_idx] = [point]
+        for detection in raw_sensor_data:
+            point = CarlaUtils.vector3d_to_numpy(detection.point)
+            if detection.object_idx not in grouped_data:
+                grouped_data[detection.object_idx] = [point]
             else:
-                grouped_data[r.object_idx].append(point)
+                grouped_data[detection.object_idx].append(point)
 
     def __is_same_data_collection(self, sensor_rotation_angle):
         """

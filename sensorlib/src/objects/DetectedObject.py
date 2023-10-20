@@ -12,7 +12,7 @@ from typing import List
 import carla
 import numpy as np
 
-from src.util.CarlaUtils import CarlaUtils
+from util.CarlaUtils import CarlaUtils
 
 
 @dataclass(frozen=True)
@@ -35,12 +35,22 @@ class DetectedObject:
 class DetectedObjectBuilder:
     @staticmethod
     def build_detected_object(carla_actor, allowed_semantic_tags):
+        object_type = CarlaUtils.determine_object_type(carla_actor, allowed_semantic_tags)
+
+        if (object_type == "NONE"):
+            return None
+        
+        bounding_box = CarlaUtils.get_actor_bounding_box_points(carla_actor)
+
+        if (bounding_box == None):
+            return None
+        
         return DetectedObject(
             carla_actor,
             carla_actor.id,
-            CarlaUtils.determine_object_type(carla_actor, allowed_semantic_tags),
+            object_type,
             0,
-            CarlaUtils.get_actor_bounding_box_points(carla_actor),
+            bounding_box,
             CarlaUtils.vector3d_to_numpy(carla_actor.get_location()),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_velocity()),
             CarlaUtils.get_actor_rotation_matrix(carla_actor),

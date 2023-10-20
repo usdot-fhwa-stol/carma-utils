@@ -58,7 +58,7 @@ class CarlaUtils:
         rotation_angles_deg = np.array([carla_rotation.roll, carla_rotation.pitch, carla_rotation.yaw])
         rotation_angles = np.deg2rad(rotation_angles_deg)
         rotation_matrix = Rotation.from_euler('xyz', rotation_angles)
-        return rotation_matrix.as_matrix()
+        return rotation_matrix.as_dcm()
 
     @staticmethod
     def get_actor_bounding_box_points(carla_actor):
@@ -67,7 +67,12 @@ class CarlaUtils:
         :param carla_actor: The carla.Actor to obtain data from.
         :return: List of numpy.array containing the bounding box points in the world frame.
         """
-        bounding_box = carla_actor.bounding_box
+        
+        try:
+            bounding_box = carla_actor.bounding_box
+        except AttributeError:
+            raise AttributeError("There is no bounding_box attribute, in 0.9.10 only Pedestrian and Vehicles have this attribute, please check the input...")
+
         bounding_box_locations = bounding_box.get_world_vertices(carla_actor.get_transform())
         return [CarlaUtils.vector3d_to_numpy(location) for location in bounding_box_locations]
 
@@ -79,8 +84,9 @@ class CarlaUtils:
         :param allowed_semantic_tags: List of semantic tags which are allowed to be detected by the sensor.
         :return: The object type, or NONE if not in the allowed list.
         """
-
+        
         # Set intersection, except order matters
+        
         for tag in carla_actor.semantic_tags:
             tag_name = CarlaUtils.get_semantic_tag_name(tag)
             if tag_name in allowed_semantic_tags:

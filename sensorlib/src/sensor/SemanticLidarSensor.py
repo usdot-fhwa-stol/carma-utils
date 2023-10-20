@@ -12,10 +12,10 @@ from dataclasses import replace
 import numpy as np
 from scipy.spatial import distance
 
-from src.objects.DetectedObject import DetectedObjectBuilder
-from src.sensor.SimulatedSensor import SimulatedSensor
-from src.util.CarlaUtils import CarlaUtils
-from src.util.HistoricalMapper import HistoricalMapper
+from objects.DetectedObject import DetectedObjectBuilder
+from sensor.SimulatedSensor import SimulatedSensor
+from util.CarlaUtils import CarlaUtils
+from util.HistoricalMapper import HistoricalMapper
 
 
 class SemanticLidarSensor(SimulatedSensor):
@@ -102,10 +102,11 @@ class SemanticLidarSensor(SimulatedSensor):
         self.update_actor_id_association(instantaneous_actor_id_association)
         hitpoints = self.update_hitpoint_ids_from_association(hitpoints)
 
-        # Apply occlusion
-        detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
-                                                detection_thresholds)
-
+        # Apply occlusion TODO!
+        # https://usdot-carma.atlassian.net/browse/CDAR-435
+        #detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
+        #                                        detection_thresholds)
+        
         # Apply noise
         detected_objects = self.apply_noise(detected_objects)
 
@@ -153,6 +154,10 @@ class SemanticLidarSensor(SimulatedSensor):
         # Filter by detected_object type Actor.type_id and Actor.semantic_tags are available for determining type;
         # semantic_tags effectively specifies the type of detected_object Possible types are listed in the CARLA
         # documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
+
+        detected_objects = list(
+            filter(lambda obj: obj is not None, detected_objects))
+                
         detected_objects = list(
             filter(lambda obj: obj.object_type in self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"],
                    detected_objects))

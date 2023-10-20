@@ -11,8 +11,8 @@ import threading
 
 from xmlrpc.server import SimpleXMLRPCServer
 
-from src.CarlaCDASimAPI import CarlaCDASimAPI
-from src.util.SimulatedSensorUtils import SimulatedSensorUtils
+from CarlaCDASimAPI import CarlaCDASimAPI
+from util.SimulatedSensorUtils import SimulatedSensorUtils
 
 class CarlaCDASimAdapter:
 
@@ -72,7 +72,8 @@ class CarlaCDASimAdapter:
 
     def __get_detected_objects(self, infrastructure_id, sensor_id):
         detected_objects = self.__api.get_detected_objects(infrastructure_id, sensor_id)
-        return SimulatedSensorUtils.serialize_to_json(detected_objects)
+        return_json = str(SimulatedSensorUtils.serialize_to_json(detected_objects))
+        return return_json
 
 
 if __name__ == "__main__":
