@@ -59,7 +59,6 @@ class SensorDataCollector:
         :param semantic_sensor_data: Measurement from CARLA, carla.SemanticLidarMeasurement.
         :return: None
         """
-        #print("<<<< sensor data type?: " + str(type(semantic_sensor_data)))
 
         # Update the timestamp (in integer seconds)
         self.__timestamp = int(semantic_sensor_data.timestamp)
