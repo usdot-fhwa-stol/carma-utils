@@ -16,8 +16,6 @@ from objects.DetectedObject import DetectedObject
 class DetectedObjectEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, DetectedObject):
-            print("DetectedObjecDetected!")
-
 
             dict_return = {
                 'id': obj.id,
@@ -31,8 +29,6 @@ class DetectedObjectEncoder(json.JSONEncoder):
                 'position_covariance': obj.position_covariance.tolist(),
                 'velocity_covariance': obj.velocity_covariance.tolist(),
                 'confidence': obj.confidence,
-                # For 'carla_actor', you might need a custom serialization 
-                # method if it isn't directly serializable.
                 'carla_actor': str(obj.carla_actor)
             }
             
