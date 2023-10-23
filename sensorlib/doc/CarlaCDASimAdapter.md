@@ -69,24 +69,25 @@ optional arguments:
                         XML-RPC server host. (default: "localhost")
   --xmlrpc-server-port XMLRPC_SERVER_PORT
                         XML-RPC server port. (default: 8000)
+  --sensor-config-file
+                        Configuration file used for sensor creation.(*default :"../config/simulated_sensor_config.yaml")
+  --noise-model-config-file
+                        Configuration file used for setting up noise model for sensors(*default :"../config/noise_model_config.yaml")
+  --detection-cycle-delay-seconds
+                        Time interval in seconds between detection reporting. (default: 0.5)
 ```
 
 # XML-RPC Interface
 
 The following are the exposed RPC functions:
 
-     |  create_simulated_semantic_lidar_sensor(self, simulated_sensor_config, carla_sensor_config, noise_model_config, detection_cycle_delay_seconds, infrastructure_id, sensor_id, sensor_position, sensor_rotation, parent_actor_id=-1)
+     |  create_simulated_semantic_lidar_sensor(self, infrastructure_id, sensor_id, sensor_position, sensor_rotation)
      |      Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
      |      
-     |      :param simulated_sensor_config: The configuration for the simulated sensor.
-     |      :param carla_sensor_config: The configuration for the CARLA sensor.
-     |      :param noise_model_config: The configuration for the noise model.
-     |      :param detection_cycle_delay_seconds: The delay between sensor detections.
      |      :param infrastructure_id: The ID of the infrastructure.
      |      :param sensor_id: The ID of the sensor.
      |      :param sensor_position: Sensor position in CARLA world coordinates.
      |      :param sensor_rotation: Sensor rotation in degrees.
-     |      :param parent_actor_id: ID of the parent actor to which the sensor is attached (optional).
      |      :return: ID of the registered SimulatedSensor.
      |  
      |  get_simulated_sensor(self, infrastructure_id, sensor_id)
