@@ -4,11 +4,11 @@ The Carla CDA Sim Adapter instantiates an XML-RPC server providing the sensorlib
 
 Prior to starting the service, set the following environment variables to define the CARLA version being utilized:
 
-| Environment Variable | Description                                                                                                       |
-| -------------------- |-------------------------------------------------------------------------------------------------------------------|
-| LOAD_CARLA_EGG       | Set to True to load the CARLA Python API from an egg file. Leave blank to use a pip-managed CARLA client library. |
-| CARLA_VERSION        | The CARLA version to load (ex: "0.0.14").                                                                         |
-| CARLA_EGG_DIR        | (optional) Hint directory for searching for the CARLA egg file.                                                   |
+| Environment Variable | Description                                                                                                                       |
+|----------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| LOAD_CARLA_EGG       | Set to True or leave blank to load the CARLA Python API from a .egg file. Set to False to use a pip-managed CARLA client library. |
+| CARLA_VERSION        | The CARLA version to load (ex: "0.0.14"). If left blank, the first .egg file found will be used by default.                       |
+| CARLA_EGG_DIR        | Directory searched for the CARLA .egg file. If left blank, $HOME/carla is used.                                                   |
 
 To launch the service using the command line, run the `CarlaCDASimAdapter.py` file using the Python interpreter and enter
 any desired arguments.
