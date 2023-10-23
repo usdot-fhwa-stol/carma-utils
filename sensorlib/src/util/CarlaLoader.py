@@ -69,7 +69,7 @@ class CarlaLoader:
         try:
             carla_egg_name = "carla-" + carla_version + "*" + str(sys.version_info.major) + "*-" + str(
                 "win-amd64" if os.name == "nt" else "linux-x86_64") + ".egg"
-            print("Looking for CARLA egg: " + carla_egg_name)
+            print("CARLA egg search string: " + carla_egg_name)
             carla_egg_locations = CarlaLoader.__find_file(carla_egg_name, carla_egg_dir)
             print("Found carla egg(s): " + str(carla_egg_locations))
 
