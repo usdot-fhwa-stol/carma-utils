@@ -127,11 +127,13 @@ class SemanticLidarSensor(SimulatedSensor):
     def get_scene_detected_objects(self):
         """
         Retrieve the current objects in scene. This collection is considered the "truth state" as it contains the set
-        of objects in the world, as well as their positions, orientations, and variosu other state data.
+        of objects in the world, as well as their positions, orientations, and various other state data.
 
         :return: DetectedObject wrappers objects referring to the actors.
         """
         actors = self.__carla_world.get_actors()
+        for actor in actors:
+            print(f"for loop actor {actor}")
         return [DetectedObjectBuilder.build_detected_object(actor,
                                                             self.__simulated_sensor_config["prefilter"][
                                                                 "allowed_semantic_tags"])

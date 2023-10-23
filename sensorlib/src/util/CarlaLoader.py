@@ -91,3 +91,6 @@ class CarlaLoader:
                 if fnmatch.fnmatch(name, pattern):
                     result.append(os.path.join(root, name))
         return result
+
+# Load the CARLA library
+CarlaLoader.load_carla_lib()

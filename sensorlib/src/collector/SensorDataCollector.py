@@ -70,7 +70,7 @@ class SensorDataCollector:
             self.__data.appendleft({})
 
         # Add data to the current collection
-        self.__collect_raw_point_data(self.__data[0], raw_sensor_data.raw_data)
+        self.__collect_raw_point_data(self.__data[0], raw_sensor_data)
 
     def __collect_raw_point_data(self, grouped_data, raw_sensor_data):
         """

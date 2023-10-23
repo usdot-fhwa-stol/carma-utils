@@ -81,6 +81,8 @@ class CarlaUtils:
         """
 
         # Set intersection, except order matters
+        print(f"carla_actor {carla_actor}")
+        print(f"carla_actor.semantic_tags {carla_actor.semantic_tags}")
         for tag in carla_actor.semantic_tags:
             tag_name = CarlaUtils.get_semantic_tag_name(tag)
             if tag_name in allowed_semantic_tags:

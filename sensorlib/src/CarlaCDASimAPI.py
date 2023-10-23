@@ -11,7 +11,6 @@ import threading
 import time
 
 from src.util.CarlaLoader import CarlaLoader
-CarlaLoader.load_carla_lib()
 import carla
 
 from src.collector.SensorDataCollector import SensorDataCollector

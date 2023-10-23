@@ -1,7 +1,5 @@
 
 from src.util.CarlaLoader import CarlaLoader
-CarlaLoader.load_carla_lib()
-
 import carla
 import time
 
