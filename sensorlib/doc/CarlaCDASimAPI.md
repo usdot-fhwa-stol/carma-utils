@@ -1,17 +1,16 @@
 # Carla CDA Sim API
 
-The Carla CDA Sim API provides programmatic access to the library functionality. The primary means of
-accessing features is through a CarlaCDASimAPI object, which may be constructed from any piece of information sufficient to
-establish a Carla connection.
+The Carla CDA Sim API provides programmatic access to the library functionality. The primary means of accessing features
+is through a CarlaCDASimAPI object, which may be constructed from any piece of information sufficient to establish a
+Carla connection.
 
 First ensure the following environment variables are set which define the CARLA version being utilized:
 
-| Environment Variable | Description                                                                                                       |
-| -------------------- |-------------------------------------------------------------------------------------------------------------------|
-| LOAD_CARLA_EGG       | Set to True to load the CARLA Python API from an egg file. Leave blank to use a pip-managed CARLA client library. |
-| CARLA_VERSION        | The CARLA version to load (ex: "0.0.14").                                                                         |
-| CARLA_EGG_DIR        | (optional) Hint directory for searching for the CARLA egg file.                                                   |
-
+| Environment Variable | Description                                                                                                                       |
+|----------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| LOAD_CARLA_EGG       | Set to True or leave blank to load the CARLA Python API from a .egg file. Set to False to use a pip-managed CARLA client library. |
+| CARLA_VERSION        | The CARLA version to load (ex: "0.0.14"). If left blank, the first .egg file found will be used by default.                       |
+| CARLA_EGG_DIR        | Directory searched for the CARLA .egg file. If left blank, $HOME/carla is used.                                                   |
 
 Nex, build the API object.
 
@@ -74,7 +73,8 @@ sensor = api.get_simulated_sensor(3, 0)
 detected_objects = sensor.get_detected_objects()
 ```
 
-The CarlaCDASimAPI class provides the sensor registry and management interface, while the SimulatedLidarSensor contains the
+The CarlaCDASimAPI class provides the sensor registry and management interface, while the SimulatedLidarSensor contains
+the
 direct sensor interface. Note that SimulatedLidarSensor is an extension of the SimulatedSensor base class, paving the
 way for future sensors to be developed.
 

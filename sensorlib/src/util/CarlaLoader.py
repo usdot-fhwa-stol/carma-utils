@@ -17,48 +17,53 @@ class CarlaLoader:
     DEFAULT_CARLA_EGG_DIR = os.path.join(HOME, "carla")
 
     @staticmethod
-    def load_carla_lib(carla_version=None):
-        # Constants
+    def load_carla_lib():
+
+        # Get environment variables
         LOAD_CARLA_EGG = os.environ.get("LOAD_CARLA_EGG")
         CARLA_VERSION = os.environ.get("CARLA_VERSION")
         CARLA_EGG_DIR = os.environ.get("CARLA_EGG_DIR")
 
-        # Set defaults
-        load_carla_egg = True
-        carla_version = ""
-        carla_egg_dir = CarlaLoader.DEFAULT_CARLA_EGG_DIR
+        # Load the .egg by default (if unset), or explicitly true
+        if LOAD_CARLA_EGG is None or LOAD_CARLA_EGG == "" or bool(LOAD_CARLA_EGG):
+            load_carla_egg = True
+        else:
+            load_carla_egg = False
 
-        load_carla_egg = True
+        # Get carla version
+        if CARLA_VERSION is None or CARLA_VERSION == "":
+            carla_version = ""
+        else:
+            carla_version = CARLA_VERSION
 
-        if CarlaLoader.LOAD_CARLA_EGG is not None and CarlaLoader.CARLA_VERSION.capitalize() != "TRUE":
-            print("\nLOAD_CARLA_EGG not set, skipping CarlaLoader.")
-            return
-        elif carla_version is None and CarlaLoader.CARLA_VERSION is None:
-            print("\nCARLA VERSION NOT SET. EXITING.")
-            sys.exit()
-        elif carla_version is None:
-            carla_version = CarlaLoader.CARLA_VERSION
-
-
-
-
-
-        if CarlaLoader.CARLA_EGG_DIR is None:
-            print(f"\nCARLA_EGG_DIR not set, using default {CarlaLoader.DEFAULT_CARLA_EGG_DIR}")
+        # Get carla egg dir
+        if CARLA_EGG_DIR is None or CARLA_EGG_DIR == "":
             carla_egg_dir = CarlaLoader.DEFAULT_CARLA_EGG_DIR
         else:
-            carla_egg_dir = CarlaLoader.CARLA_EGG_DIR
+            carla_egg_dir = CARLA_EGG_DIR
 
+        # Abort .egg loading
+        if not load_carla_egg:
+            print("\nLOAD_CARLA_EGG set to False, skipping .egg loading.")
+            return
 
+        # Log the requested CARLA_VERSION
+        print(f"\nSearching for CARLA_VERSION \"{carla_version}\"")
 
+        # Log the requested CARLA_EGG_DIR
+        if CARLA_EGG_DIR is None:
+            print(
+                f"\nCARLA_EGG_DIR not set. Searching directory DEFAULT_CARLA_EGG_DIR \"{CarlaLoader.DEFAULT_CARLA_EGG_DIR}\"")
+        else:
+            print(f"\nSearching directory CARLA_EGG_DIR \"{carla_egg_dir}\"")
 
-
-
-        carla_egg_file = CarlaLoader.__find_carla_egg(carla_egg_dir, carla_version)
+        # Search for the .egg file and load it
+        carla_egg_file = CarlaLoader.__find_carla_egg(carla_version, carla_egg_dir)
+        print(f"\nLoading CARLA egg file: \"{carla_egg_file}\"")
         sys.path.append(carla_egg_file)
 
     @staticmethod
-    def __find_carla_egg(carla_egg_dir, carla_version):
+    def __find_carla_egg(carla_version, carla_egg_dir):
 
         # Search for the CARLA python .egg file
         try:
