@@ -8,10 +8,13 @@
 import json
 import time
 import unittest
+import sys
 from dataclasses import replace
 from unittest.mock import MagicMock
 
 import numpy as np
+sys.path.append('../')
+
 
 from src.CarlaCDASimAPI import CarlaCDASimAPI
 from src.CarlaCDASimAdapter import CarlaCDASimAdapter
@@ -34,7 +37,7 @@ class TestCarlaCDASimAdapter(unittest.TestCase):
     def test_start_xml_rpc_server(self):
 
         # Launch the server locally
-        rpc_server_thread = self.data_service.start_xml_rpc_server("localhost", 2000, False)
+        rpc_server_thread = self.data_service.start_xml_rpc_server("localhost", 2000, "../config/simulated_sensor_config.yaml", "../config/noise_model_config.yaml", 0.5, False)
 
         # Shut the server down
         time.sleep(2)
@@ -64,11 +67,11 @@ class TestCarlaCDASimAdapter(unittest.TestCase):
         # Build and register the sensor
         api = CarlaCDASimAPI.build_from_world(carla_world)
         data_service = CarlaCDASimAdapter(api)
+        rpc_server_thread = self.data_service.start_xml_rpc_server("localhost", 2000, "../config/simulated_sensor_config.yaml", "../config/noise_model_config.yaml", 0.5, False)
+
         new_sensor_id = data_service._CarlaCDASimAdapter__create_simulated_semantic_lidar_sensor(
-            "../config/simulated_sensor_config.yaml", "../config/noise_model_config.yaml",
-            detection_cycle_delay_seconds,
             infrastructure_id, sensor_id,
-            sensor_position, sensor_rotation, parent_actor_id)
+            sensor_position, sensor_rotation)
 
         # Validate sensor fields have been correctly constructed
         assert new_sensor_id == str(sensor_id)

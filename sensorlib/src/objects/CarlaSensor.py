@@ -11,7 +11,7 @@ from dataclasses import dataclass
 import carla
 import numpy as np
 
-from util.CarlaUtils import CarlaUtils
+from src.util.CarlaUtils import CarlaUtils
 
 
 @dataclass(frozen=True)

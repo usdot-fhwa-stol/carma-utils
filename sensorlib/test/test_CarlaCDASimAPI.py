@@ -13,6 +13,7 @@ from unittest.mock import MagicMock
 import carla
 import numpy as np
 
+sys.path.append('../')
 from src.CarlaCDASimAPI import CarlaCDASimAPI
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 

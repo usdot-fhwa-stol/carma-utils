@@ -10,16 +10,17 @@ import sched
 import threading
 import time
 
-from util.CarlaLoader import CarlaLoader
+from src.util.CarlaLoader import CarlaLoader
 CarlaLoader.load_carla_lib()
 import carla
-import random
+import sys
+sys.path.append('../')
 
-from collector.SensorDataCollector import SensorDataCollector
-from noise_models.NoiseModelFactory import NoiseModelFactory
-from objects.CarlaSensor import CarlaSensorBuilder
-from sensor.SemanticLidarSensor import SemanticLidarSensor
-from util.CarlaUtils import CarlaUtils
+from src.collector.SensorDataCollector import SensorDataCollector
+from src.noise_models.NoiseModelFactory import NoiseModelFactory
+from src.objects.CarlaSensor import CarlaSensorBuilder
+from src.sensor.SemanticLidarSensor import SemanticLidarSensor
+from src.util.CarlaUtils import CarlaUtils
 
 
 class CarlaCDASimAPI:
