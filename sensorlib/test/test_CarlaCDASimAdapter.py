@@ -8,10 +8,13 @@
 import json
 import time
 import unittest
+import sys
 from dataclasses import replace
 from unittest.mock import MagicMock
 
 import numpy as np
+sys.path.append('../')
+
 
 from src.CarlaCDASimAPI import CarlaCDASimAPI
 from src.CarlaCDASimAdapter import CarlaCDASimAdapter

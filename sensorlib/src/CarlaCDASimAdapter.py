@@ -10,9 +10,10 @@ import argparse
 import threading
 
 from xmlrpc.server import SimpleXMLRPCServer
-
-from CarlaCDASimAPI import CarlaCDASimAPI
-from util.SimulatedSensorUtils import SimulatedSensorUtils
+import sys
+sys.path.append('../')
+from src.CarlaCDASimAPI import CarlaCDASimAPI
+from src.util.SimulatedSensorUtils import SimulatedSensorUtils
 
 class CarlaCDASimAdapter:
     # Holds Sensor configuration object
