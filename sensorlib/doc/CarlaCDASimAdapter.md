@@ -10,7 +10,8 @@ Prior to starting the service, set the following environment variables to define
 | CARLA_VERSION        | The CARLA version to load (ex: "0.0.14"). If left blank, the first .egg file found will be used by default.                       |
 | CARLA_EGG_DIR        | Directory searched for the CARLA .egg file. If left blank, $HOME/carla is used.                                                   |
 
-To launch the service using the command line, run the `CarlaCDASimAdapter.py` file using the Python interpreter and enter
+To launch the service using the command line, run the `CarlaCDASimAdapter.py` file using the Python interpreter and
+enter
 any desired arguments.
 
 ```
@@ -50,6 +51,20 @@ public static void main(String[] args) throws XmlRpcException, MalformedURLExcep
 
 These functions return string ID's and in the case of `get_detected_objects()`, a serialized JSON representation of the
 underlying data.
+
+# Running in a Container
+
+The service may also be built and run as a Docker container. The build command should be run in the sensorlib directory:
+
+```
+docker build -t sensorlib-xml-rpc:latest .
+```
+
+And the image may be run with the appropriate networking option:
+
+```
+docker run --network host sensorlib-xml-rpc:latest
+```
 
 # Service Interface
 
@@ -109,7 +124,8 @@ The following are the exposed RPC functions:
 
 ## Description
 
-Provides a programmatic interface to launch the XML-RPC service. To launch, build a CarlaCDASimAPI object and pass into the
+Provides a programmatic interface to launch the XML-RPC service. To launch, build a CarlaCDASimAPI object and pass into
+the
 constructor of a CarlaCDASimAdapter. Then call start_xml_rpc_server(), setting the `blocking` parameter to easily block
 or start the server on a separate thread.
 

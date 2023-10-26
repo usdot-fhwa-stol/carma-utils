@@ -8,9 +8,9 @@
 
 import json
 
+import numpy as np
 import yaml
 import numpy
-from util.NumpyEncoder import NumpyEncoder
 from objects.DetectedObject import DetectedObject
 
 class DetectedObjectEncoder(json.JSONEncoder):
