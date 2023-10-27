@@ -13,13 +13,13 @@ from unittest.mock import MagicMock
 import carla
 import numpy as np
 
-from src.collector.SensorDataCollector import SensorDataCollector
-from src.noise_models.GaussianNoiseModel import GaussianNoiseModel
-from src.objects.CarlaSensor import CarlaSensorBuilder
-from src.objects.DetectedObject import DetectedObjectBuilder
-from src.sensor.SemanticLidarSensor import SemanticLidarSensor
-from src.util.CarlaUtils import CarlaUtils
-from src.util.HistoricalMapper import HistoricalMapper
+from collector.SensorDataCollector import SensorDataCollector
+from noise_models.GaussianNoiseModel import GaussianNoiseModel
+from objects.CarlaSensor import CarlaSensorBuilder
+from objects.DetectedObject import DetectedObjectBuilder
+from sensor.SemanticLidarSensor import SemanticLidarSensor
+from util.CarlaUtils import CarlaUtils
+from util.HistoricalMapper import HistoricalMapper
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
