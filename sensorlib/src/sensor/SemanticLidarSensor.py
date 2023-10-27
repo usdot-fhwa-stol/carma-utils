@@ -18,6 +18,8 @@ from src.util.CarlaUtils import CarlaUtils
 from src.util.HistoricalMapper import HistoricalMapper
 
 
+
+
 class SemanticLidarSensor(SimulatedSensor):
     """
     Wrapper for the CARLA Semantic Lidar Sensor, with additional post-processing logic to compute a list of
@@ -286,6 +288,9 @@ class SemanticLidarSensor(SimulatedSensor):
 
         The threshold prevents association between a point and object which are very far apart.
         """
+        #check if there are no objects around
+        if not scene_objects:
+            return None
         object_positions = [obj.position for obj in scene_objects]
         distances_list = distance.cdist([hitpoint], object_positions)
         if len(distances_list) <= 0 or len(distances_list[0]) <= 0:
