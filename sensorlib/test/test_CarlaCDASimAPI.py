@@ -13,14 +13,14 @@ from unittest.mock import MagicMock
 import carla
 import numpy as np
 
-from src.CarlaCDASimAPI import CarlaCDASimAPI
+from CarlaCDASimAPI import CarlaCDASimAPI
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestCarlaCDASimAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        from src.util.CarlaLoader import CarlaLoader
+        from util.CarlaLoader import CarlaLoader
         import carla
 
     def setUp(self):
@@ -93,6 +93,58 @@ class TestCarlaCDASimAPI(unittest.TestCase):
         # Also validate retrieval through registration
         registered_sensor = api.get_simulated_sensor(infrastructure_id, sensor_id)
         assert sensor._infrastructure_id == registered_sensor._infrastructure_id
+
+
+
+
+
+    def test_link_to_existing_sensor(self):
+        # Values
+        infrastructure_id = 3
+        sensor_id = 7
+        simulated_sensor_config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
+        carla_sensor_config = SimulatedSensorTestUtils.generate_lidar_sensor_config()
+        noise_model_config = SimulatedSensorTestUtils.generate_noise_model_config()
+        detection_cycle_delay_seconds = 0.1
+        sensor_position = np.array([1.0, 2.0, 3.0])
+        sensor_rotation = np.array([0.0, 0.0, 0.0])
+        parent_actor_id = 4
+
+        # Mock the internal functions
+        carla_world = MagicMock(
+            get_blueprint_library=MagicMock(find=MagicMock(return_value=MagicMock(set_attribute=MagicMock()))),
+            spawn_actor=MagicMock(return_value=MagicMock(id=infrastructure_id)))
+
+        carla_sensor = SimulatedSensorTestUtils.generate_carla_sensor()
+        carla_sensor.listen = MagicMock(return_value=MagicMock())
+
+        # Build and register the sensor
+        api = CarlaCDASimAPI.build_from_world(carla_world)
+        sensor = api.create_simulated_semantic_lidar_sensor(simulated_sensor_config, carla_sensor_config,
+                                                            noise_model_config,
+                                                            detection_cycle_delay_seconds,
+                                                            infrastructure_id, sensor_id,
+                                                            sensor_position, sensor_rotation, parent_actor_id)
+
+        # Validate sensor fields have been correctly constructed
+        assert sensor._infrastructure_id == infrastructure_id
+        assert sensor._sensor_id == sensor_id
+        assert sensor._SemanticLidarSensor__simulated_sensor_config == simulated_sensor_config
+        assert sensor._SemanticLidarSensor__carla_sensor_config == carla_sensor_config
+        assert sensor._SemanticLidarSensor__carla_world == carla_world
+        assert sensor._SemanticLidarSensor__sensor is not None
+        assert sensor._SemanticLidarSensor__data_collector is not None
+        assert sensor._SemanticLidarSensor__noise_model is not None
+        assert sensor._SemanticLidarSensor__detected_objects == []
+
+        # Also validate retrieval through registration
+        registered_sensor = api.get_simulated_sensor(infrastructure_id, sensor_id)
+        assert sensor._infrastructure_id == registered_sensor._infrastructure_id
+
+
+
+
+
 
     def test_get_simulated_sensor(self):
         # Mock out registered sensors

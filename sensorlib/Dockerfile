@@ -15,7 +15,7 @@ RUN pip3 install -r requirements.txt
 
 
 # Install sensorlib
-COPY src/ /home/CarlaCDASimAdapter/src
+COPY package/ /home/CarlaCDASimAdapter/src
 COPY ./config/ /home/CarlaCDASimAdapter/config
 
 # Set environment variables
@@ -28,9 +28,9 @@ ENV CARLA_EGG_DIR="/home/CarlaCDASimAdapter/"
 COPY PythonAPI /home/CarlaCDASimAdapter/PythonAPI
 #COPY carla-0.9.10-py3.7-linux-x86_64.egg /home/CarlaCDASimAdapter/
 
-
+# TODO Inject environment variables here
 
 
 # Start sensorlib XML-RPC server
-CMD [ "python3", "/home/CarlaCDASimAdapter/src/CarlaCDASimAdapter.py", "--carla-host", "127.0.0.1", "--xmlrpc-server-host", "127.0.0.1",  "--sensor-config-file", "config/simulated_sensor_config.yaml", "--noise-model-config-file", "config/noise_model_config.yaml" ]
+CMD [ "python3", "/home/CarlaCDASimAdapter/src/CarlaCDASimAdapter.py", "--carla-host", "${CARLA_HOST}", "--xmlrpc-server-host", "127.0.0.1",  "--sensor-config-file", "config/simulated_sensor_config.yaml", "--noise-model-config-file", "config/noise_model_config.yaml" ]
 #CMD [ "python3", "/home/CarlaCDASimAdapter/src/CarlaCDASimAdapter.py", "--carla-host", "127.0.0.1", "--xmlrpc-server-host", "127.0.0.1",  "--sensor-config-file", "config/simulated_sensor_config.yaml", "--noise-model-config-file", "config/noise_model_config.yaml" ]

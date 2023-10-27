@@ -6,13 +6,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
 # governing permissions and limitations under the License.
 
-from src.util.CarlaLoader import CarlaLoader
+from util.CarlaLoader import CarlaLoader
 import carla
 
 import time
 
-from src.CarlaCDASimAPI import CarlaCDASimAPI
-from src.util.SimulatedSensorUtils import SimulatedSensorUtils
+from CarlaCDASimAPI import CarlaCDASimAPI
+from util.SimulatedSensorUtils import SimulatedSensorUtils
 
 # Build the connection objects
 api = CarlaCDASimAPI.build_from_host_spec("localhost", 2000)
