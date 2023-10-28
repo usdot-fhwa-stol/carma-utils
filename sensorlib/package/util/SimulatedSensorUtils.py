@@ -71,6 +71,7 @@ class SimulatedSensorUtils:
             return obj.tolist()
         elif isinstance(obj, list):
             data = [SimulatedSensorUtils.serialize_to_json(item) for item in obj]
-            return json.dumps(data)
+            # return json.dumps(data)
+            return "[" + str.join(",", data) + "]"
         else:
             return json.dumps(obj, cls=DetectedObjectEncoder)

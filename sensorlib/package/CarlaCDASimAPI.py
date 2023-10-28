@@ -23,7 +23,7 @@ from util.CarlaUtils import CarlaUtils
 
 class CarlaCDASimAPI:
     """
-    Interface to build a SimulatedSensor.
+    Interface to build and manage SimulatedSensor's.
     """
 
     def __init__(self):
@@ -76,7 +76,7 @@ class CarlaCDASimAPI:
     def create_simulated_semantic_lidar_sensor(self, simulated_sensor_config, carla_sensor_config, noise_model_config,
                                                detection_cycle_delay_seconds,
                                                infrastructure_id, sensor_id,
-                                               sensor_position, sensor_rotation, parent_actor_id=-1):
+                                               sensor_position, sensor_rotation):
         """
         Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
         :param simulated_sensor_config: The configuration for the simulated sensor.
@@ -87,7 +87,6 @@ class CarlaCDASimAPI:
         :param sensor_id: The ID of the sensor.
         :param sensor_position: Sensor position in CARLA world coordinates.
         :param sensor_rotation: Sensor rotation in degrees.
-        :param parent_actor_id: ID of the parent actor to which the sensor is attached (optional).
         :return: A registered SimulatedSensor.
         """
 
@@ -105,7 +104,7 @@ class CarlaCDASimAPI:
         # Retrieve the CARLA sensor
         blueprint_library = self.__carla_world.get_blueprint_library()
         sensor_bp = self.__generate_lidar_bp(blueprint_library, carla_sensor_config)
-        parent_actor = CarlaUtils.get_actor(self.__carla_world, parent_actor_id)
+        parent_actor = CarlaUtils.get_actor(self.__carla_world)
         carla_sensor = self.__carla_world.spawn_actor(sensor_bp, sensor_transform, attach_to=parent_actor)
 
         # Build internal objects

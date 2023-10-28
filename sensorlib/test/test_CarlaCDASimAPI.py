@@ -61,7 +61,6 @@ class TestCarlaCDASimAPI(unittest.TestCase):
         detection_cycle_delay_seconds = 0.1
         sensor_position = np.array([1.0, 2.0, 3.0])
         sensor_rotation = np.array([0.0, 0.0, 0.0])
-        parent_actor_id = 4
 
         # Mock the internal functions
         carla_world = MagicMock(
@@ -77,7 +76,7 @@ class TestCarlaCDASimAPI(unittest.TestCase):
                                                             noise_model_config,
                                                             detection_cycle_delay_seconds,
                                                             infrastructure_id, sensor_id,
-                                                            sensor_position, sensor_rotation, parent_actor_id)
+                                                            sensor_position, sensor_rotation)
 
         # Validate sensor fields have been correctly constructed
         assert sensor._infrastructure_id == infrastructure_id
@@ -108,7 +107,6 @@ class TestCarlaCDASimAPI(unittest.TestCase):
         detection_cycle_delay_seconds = 0.1
         sensor_position = np.array([1.0, 2.0, 3.0])
         sensor_rotation = np.array([0.0, 0.0, 0.0])
-        parent_actor_id = 4
 
         # Mock the internal functions
         carla_world = MagicMock(
@@ -124,7 +122,7 @@ class TestCarlaCDASimAPI(unittest.TestCase):
                                                             noise_model_config,
                                                             detection_cycle_delay_seconds,
                                                             infrastructure_id, sensor_id,
-                                                            sensor_position, sensor_rotation, parent_actor_id)
+                                                            sensor_position, sensor_rotation)
 
         # Validate sensor fields have been correctly constructed
         assert sensor._infrastructure_id == infrastructure_id

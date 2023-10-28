@@ -51,7 +51,6 @@ class TestCarlaCDASimAdapter(unittest.TestCase):
         detection_cycle_delay_seconds = 0.1
         sensor_position = np.array([1.0, 2.0, 3.0])
         sensor_rotation = np.array([0.0, 0.0, 0.0])
-        parent_actor_id = 4
 
         # Mock the internal functions
         carla_world = MagicMock(
