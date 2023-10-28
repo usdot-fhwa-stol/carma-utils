@@ -14,4 +14,6 @@ TOOD Fix unit test running sequence to enable robust running
 TODO ~ Simplify detected object serialization
 TODO Implement CarlaLoader tests
 
+TODO Fix prefilter for close objects
+
 TODO Refactor to use carla.ActorAttribute instead of semantic tag??

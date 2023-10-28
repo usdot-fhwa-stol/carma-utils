@@ -12,10 +12,10 @@ from dataclasses import replace
 import numpy as np
 from scipy.spatial import distance
 
-from objects.DetectedObject import DetectedObjectBuilder
-from sensor.SimulatedSensor import SimulatedSensor
-from util.CarlaUtils import CarlaUtils
-from util.HistoricalMapper import HistoricalMapper
+from objects.detected_object import DetectedObjectBuilder
+from sensor.simulated_sensor import SimulatedSensor
+from util.carla_utils import CarlaUtils
+from util.historical_mapper import HistoricalMapper
 
 
 class SemanticLidarSensor(SimulatedSensor):
@@ -104,9 +104,9 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Apply occlusion TODO!
         # https://usdot-carma.atlassian.net/browse/CDAR-435
-        #detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
-        #                                        detection_thresholds)
-        
+        detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
+                                               detection_thresholds)
+
         # Apply noise
         detected_objects = self.apply_noise(detected_objects)
 

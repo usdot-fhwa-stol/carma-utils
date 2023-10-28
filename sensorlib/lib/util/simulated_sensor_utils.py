@@ -11,8 +11,9 @@ import json
 import numpy as np
 import yaml
 import numpy
-from objects.DetectedObject import DetectedObject
 import os
+
+from objects.detected_object import DetectedObject
 
 
 class DetectedObjectEncoder(json.JSONEncoder):

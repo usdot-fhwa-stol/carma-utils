@@ -11,9 +11,9 @@ import threading
 
 from xmlrpc.server import SimpleXMLRPCServer
 
-from CarlaCDASimAPI import CarlaCDASimAPI
-from server.CarlaCDASimServer import CarlaCDASimServer
-from util.SimulatedSensorUtils import SimulatedSensorUtils
+from carla_cda_sim_api import CarlaCDASimAPI
+from server.carla_cda_sim_server import CarlaCDASimServer
+from util.simulated_sensor_utils import SimulatedSensorUtils
 
 
 class CarlaCDASimAdapter:

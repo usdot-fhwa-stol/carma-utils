@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from util.SimulatedSensorUtils import SimulatedSensorUtils
+from util.simulated_sensor_utils import SimulatedSensorUtils
 
 
 class CarlaCDASimServer:
