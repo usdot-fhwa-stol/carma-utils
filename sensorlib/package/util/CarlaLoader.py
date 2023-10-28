@@ -12,6 +12,9 @@ import sys
 
 
 class CarlaLoader:
+
+    is_carla_lib_loaded = False
+
     # Constants
     HOME = os.environ.get("HOME")
     DEFAULT_CARLA_EGG_DIR = os.path.join(HOME, "carla")
@@ -19,13 +22,16 @@ class CarlaLoader:
     @staticmethod
     def load_carla_lib():
 
+        if CarlaLoader.is_carla_lib_loaded:
+            return
+
         # Get environment variables
         LOAD_CARLA_EGG = os.environ.get("LOAD_CARLA_EGG")
         CARLA_VERSION = os.environ.get("CARLA_VERSION")
         CARLA_EGG_DIR = os.environ.get("CARLA_EGG_DIR")
 
         # Load the .egg by default (if unset), or explicitly true
-        if LOAD_CARLA_EGG is None or LOAD_CARLA_EGG == "" or bool(LOAD_CARLA_EGG):
+        if LOAD_CARLA_EGG is None or LOAD_CARLA_EGG == "" or LOAD_CARLA_EGG.lower() == "true":
             load_carla_egg = True
         else:
             load_carla_egg = False
@@ -61,6 +67,9 @@ class CarlaLoader:
         carla_egg_file = CarlaLoader.__find_carla_egg(carla_version, carla_egg_dir)
         print(f"\nLoading CARLA egg file: \"{carla_egg_file}\"")
         sys.path.append(carla_egg_file)
+
+        # Only need to load once
+        CarlaLoader.is_carla_lib_loaded = True
 
     @staticmethod
     def __find_carla_egg(carla_version, carla_egg_dir):

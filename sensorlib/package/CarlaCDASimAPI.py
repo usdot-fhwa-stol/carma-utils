@@ -12,7 +12,6 @@ import time
 
 from util.CarlaLoader import CarlaLoader
 import carla
-import random
 
 from collector.SensorDataCollector import SensorDataCollector
 from noise_models.NoiseModelFactory import NoiseModelFactory

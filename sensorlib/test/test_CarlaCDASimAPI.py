@@ -20,8 +20,7 @@ from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 class TestCarlaCDASimAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        from util.CarlaLoader import CarlaLoader
-        import carla
+        pass
 
     def setUp(self):
         # Mock the CARLA objects
@@ -98,6 +97,7 @@ class TestCarlaCDASimAPI(unittest.TestCase):
 
 
     def test_link_to_existing_sensor(self):
+        # TODO
         # Values
         infrastructure_id = 3
         sensor_id = 7

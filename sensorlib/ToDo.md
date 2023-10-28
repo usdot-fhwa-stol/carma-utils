@@ -12,5 +12,6 @@ TODO Develop integration tests
 TODO Find existing sensor in CARLA by looking up by actor ID, and expose SemanticLidarSensor actor ID, so access can be transferred between contexts 
 TOOD Fix unit test running sequence to enable robust running
 TODO ~ Simplify detected object serialization
+TODO Implement CarlaLoader tests
 
 TODO Refactor to use carla.ActorAttribute instead of semantic tag??
