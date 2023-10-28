@@ -13,8 +13,8 @@ from unittest.mock import MagicMock
 import carla
 import numpy as np
 
+from SimulatedSensorTestUtils import SimulatedSensorTestUtils
 from CarlaCDASimAPI import CarlaCDASimAPI
-from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestCarlaCDASimAPI(unittest.TestCase):

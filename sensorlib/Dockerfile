@@ -15,7 +15,7 @@ RUN pip3 install -r requirements.txt
 
 
 # Install sensorlib
-COPY package/ /home/CarlaCDASimAdapter/src
+COPY lib/ /home/CarlaCDASimAdapter/src
 COPY ./config/ /home/CarlaCDASimAdapter/config
 
 # Set environment variables

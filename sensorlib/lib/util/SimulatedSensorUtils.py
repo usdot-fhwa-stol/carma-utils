@@ -12,6 +12,8 @@ import numpy as np
 import yaml
 import numpy
 from objects.DetectedObject import DetectedObject
+import os
+
 
 class DetectedObjectEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -21,7 +23,8 @@ class DetectedObjectEncoder(json.JSONEncoder):
                 'id': obj.id,
                 'object_type': obj.object_type,
                 'timestamp': obj.timestamp,
-                'bounding_box_in_world_coordinate_frame': [array.tolist() for array in obj.bounding_box_in_world_coordinate_frame],
+                'bounding_box_in_world_coordinate_frame': [array.tolist() for array in
+                                                           obj.bounding_box_in_world_coordinate_frame],
                 'position': obj.position.tolist(),
                 'velocity': obj.velocity.tolist(),
                 'rotation': obj.rotation.tolist(),
@@ -31,7 +34,7 @@ class DetectedObjectEncoder(json.JSONEncoder):
                 'confidence': obj.confidence,
                 'carla_actor': str(obj.carla_actor)
             }
-            
+
             # Convert DetectedObject attributes to dictionary for serialization.
             # np.ndarray objects are converted to lists using the tolist() method.
             return dict_return
@@ -40,7 +43,8 @@ class DetectedObjectEncoder(json.JSONEncoder):
             return obj.tolist()
         # Fallback to the base class default method for other types.
         return super(DetectedObjectEncoder, self).default(obj)
-    
+
+
 class SimulatedSensorUtils:
     """
     Generic utilities.
@@ -75,3 +79,19 @@ class SimulatedSensorUtils:
             return "[" + str.join(",", data) + "]"
         else:
             return json.dumps(obj, cls=DetectedObjectEncoder)
+
+    @staticmethod
+    def get_pwd():
+        return os.path.dirname(os.path.abspath(__file__))
+
+    @staticmethod
+    def get_root_dir():
+        return os.path.join(SimulatedSensorUtils.get_pwd(), "../../")
+
+    @staticmethod
+    def get_root_path(filename):
+        if filename.startswith("/"):
+            return filename
+        else:
+            root_dir = SimulatedSensorUtils.get_root_dir()
+            return os.path.join(root_dir, filename)

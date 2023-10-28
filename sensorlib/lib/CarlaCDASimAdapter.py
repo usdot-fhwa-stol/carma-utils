@@ -28,9 +28,13 @@ class CarlaCDASimAdapter:
         :param sensor_api: The API object exposing CARLA connection.
         """
 
+        # Get full file paths
+        sensor_config_full_path = SimulatedSensorUtils.get_root_path(sensor_config_file)
+        noise_model_config_full_path = SimulatedSensorUtils.get_root_path(noise_model_config_file)
+
         # Load default configurations
-        sensor_config = SimulatedSensorUtils.load_config_from_file(sensor_config_file)
-        noise_model_config = SimulatedSensorUtils.load_config_from_file(noise_model_config_file)
+        sensor_config = SimulatedSensorUtils.load_config_from_file(sensor_config_full_path)
+        noise_model_config = SimulatedSensorUtils.load_config_from_file(noise_model_config_full_path)
 
         # Build the server object
         self.__sim_server = CarlaCDASimServer(sensor_api, sensor_config, noise_model_config,
@@ -54,7 +58,8 @@ class CarlaCDASimAdapter:
         # Register the configuration accessors
         server.register_function(self.__sim_server.set_sensor_configuration, "set_sensor_configuration")
         server.register_function(self.__sim_server.set_noise_model_configuration, "set_noise_model_configuration")
-        server.register_function(self.__sim_server.set_detection_cycle_delay_seconds, "set_detection_cycle_delay_seconds")
+        server.register_function(self.__sim_server.set_detection_cycle_delay_seconds,
+                                 "set_detection_cycle_delay_seconds")
 
         # Register sensor creation functions
         server.register_function(self.__sim_server.create_simulated_semantic_lidar_sensor,
@@ -77,8 +82,7 @@ class CarlaCDASimAdapter:
 if __name__ == "__main__":
 
     # Parse arguments
-    arg_parser = argparse.ArgumentParser(
-        description=__doc__)
+    arg_parser = argparse.ArgumentParser(description=__doc__)
 
     arg_parser.add_argument(
         "--carla-host",

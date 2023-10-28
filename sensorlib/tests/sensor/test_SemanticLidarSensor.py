@@ -20,7 +20,7 @@ from objects.DetectedObject import DetectedObjectBuilder
 from sensor.SemanticLidarSensor import SemanticLidarSensor
 from util.CarlaUtils import CarlaUtils
 from util.HistoricalMapper import HistoricalMapper
-from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
+from tests.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestSemanticLidarSensor(unittest.TestCase):

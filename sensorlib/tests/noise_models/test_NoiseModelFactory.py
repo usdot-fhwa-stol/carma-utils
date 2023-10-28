@@ -10,7 +10,7 @@ import unittest
 
 from noise_models.GaussianNoiseModel import GaussianNoiseModel
 from noise_models.NoiseModelFactory import NoiseModelFactory
-from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
+from tests.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
 class TestNoiseModelFactory(unittest.TestCase):
