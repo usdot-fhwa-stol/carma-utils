@@ -84,6 +84,10 @@ class SemanticLidarSensor(SimulatedSensor):
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
 
+        #check if there's is object in range
+        if not detected_objects:
+            return None
+
         # Prefilter
         detected_objects, object_ranges = self.prefilter(detected_objects)
 
@@ -288,9 +292,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         The threshold prevents association between a point and object which are very far apart.
         """
-        #check if there are no objects around
-        if not scene_objects:
-            return None
+
         object_positions = [obj.position for obj in scene_objects]
         distances_list = distance.cdist([hitpoint], object_positions)
         if len(distances_list) <= 0 or len(distances_list[0]) <= 0:
