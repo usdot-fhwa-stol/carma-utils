@@ -58,7 +58,7 @@ class CarlaUtils:
         rotation_angles_deg = np.array([carla_rotation.roll, carla_rotation.pitch, carla_rotation.yaw])
         rotation_angles = np.deg2rad(rotation_angles_deg)
         rotation_matrix = Rotation.from_euler('xyz', rotation_angles)
-        return rotation_matrix.as_dcm()
+        return rotation_matrix.as_matrix()
 
     @staticmethod
     def get_actor_bounding_box_points(carla_actor):
@@ -84,14 +84,17 @@ class CarlaUtils:
         :param allowed_semantic_tags: List of semantic tags which are allowed to be detected by the sensor.
         :return: The object type, or NONE if not in the allowed list.
         """
-        
-        # Set intersection, except order matters
-        
-        for tag in carla_actor.semantic_tags:
-            tag_name = CarlaUtils.get_semantic_tag_name(tag)
-            if tag_name in allowed_semantic_tags:
-                return tag_name
-        return "NONE"
+                
+        #using type_id instead of semantic_tags
+        #issue with semantic_tags in version 0.9.10:https://github.com/carla-simulator/carla/issues/2161
+        temp_id_list =  carla_actor.type_id.split(".")
+        temp_id = temp_id_list[0] 
+        if temp_id == "vehicle":
+            return "Vehicles"
+        elif temp_id == "walker":
+            return "Pedestrians"
+        else:
+            return "NONE"
 
     @staticmethod
     def get_semantic_tag_name(tag_id):

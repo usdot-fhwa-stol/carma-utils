@@ -18,6 +18,8 @@ from src.util.CarlaUtils import CarlaUtils
 from src.util.HistoricalMapper import HistoricalMapper
 
 
+
+
 class SemanticLidarSensor(SimulatedSensor):
     """
     Wrapper for the CARLA Semantic Lidar Sensor, with additional post-processing logic to compute a list of
@@ -82,8 +84,16 @@ class SemanticLidarSensor(SimulatedSensor):
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
 
+        #check if there's object in range
+        if not detected_objects:
+            return None
+
         # Prefilter
         detected_objects, object_ranges = self.prefilter(detected_objects)
+
+        #check if there's object in range
+        if not detected_objects:
+            return None
 
         # Get LIDAR hitpoints with Actor ID associations
         timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
@@ -286,6 +296,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         The threshold prevents association between a point and object which are very far apart.
         """
+
         object_positions = [obj.position for obj in scene_objects]
         distances_list = distance.cdist([hitpoint], object_positions)
         if len(distances_list) <= 0 or len(distances_list[0]) <= 0:
