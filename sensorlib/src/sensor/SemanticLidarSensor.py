@@ -84,12 +84,16 @@ class SemanticLidarSensor(SimulatedSensor):
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
 
-        #check if there's is object in range
+        #check if there's object in range
         if not detected_objects:
             return None
 
         # Prefilter
         detected_objects, object_ranges = self.prefilter(detected_objects)
+
+        #check if there's object in range
+        if not detected_objects:
+            return None
 
         # Get LIDAR hitpoints with Actor ID associations
         timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()

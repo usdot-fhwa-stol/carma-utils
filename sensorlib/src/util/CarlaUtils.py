@@ -84,9 +84,9 @@ class CarlaUtils:
         :param allowed_semantic_tags: List of semantic tags which are allowed to be detected by the sensor.
         :return: The object type, or NONE if not in the allowed list.
         """
-        
-        # Set intersection, except order matters
-        
+                
+        #using type_id instead of semantic_tags
+        #issue with semantic_tags in version 0.9.10:https://github.com/carla-simulator/carla/issues/2161
         temp_id_list =  carla_actor.type_id.split(".")
         temp_id = temp_id_list[0] 
         if temp_id == "vehicle":
