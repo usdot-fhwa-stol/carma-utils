@@ -93,7 +93,7 @@ TODO
 Assuming the virtual environment resides in <repository-root>/venv, launch an integration test with the following command:
 
 ```
-venv/bin/python3 -m tests.<integration-test-module-name>
+venv/bin/python3 -m tests.integration.<integration-test-module-name>
 ```
 
 Tests cannot be launched using this approach from inside the tests directory. The working directory must be the repository root.

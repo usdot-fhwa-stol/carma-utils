@@ -8,10 +8,6 @@ from carla_cda_sim_api import CarlaCDASimAPI
 
 class SensorlibIntegrationTestRunner(unittest.TestCase):
 
-    def __init__(self, *args, **kwargs):
-        self.carla_world = None
-        self.api = None
-
     def setUp(self):
         carla_host = os.getenv('CARLA_HOST', 'localhost')
         carla_port = os.getenv('CARLA_PORT', '2000')
