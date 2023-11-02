@@ -12,6 +12,7 @@ from typing import List
 import carla
 import numpy as np
 
+from util.carla_utils import CarlaUtils
 
 
 @dataclass(frozen=True)

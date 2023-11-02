@@ -10,6 +10,8 @@ from dataclasses import replace
 
 import numpy as np
 
+from noise_models.abstract_noise_model import AbstractNoiseModel
+from util.carla_utils import CarlaUtils
 
 
 class GaussianNoiseModel(AbstractNoiseModel):

@@ -67,11 +67,22 @@ class SemanticLidarSensor(SimulatedSensor):
         # Object cache
         self.__detected_objects = []
 
+
+    # ------------------------------------------------------------------------------
+    # Accessors
+    # ------------------------------------------------------------------------------
+
+    def get_sensor(self):
+        return self.__sensor
+
     # ------------------------------------------------------------------------------
     # Primary functions
     # ------------------------------------------------------------------------------
 
     def compute_detected_objects(self):
+        return self.get_scene_detected_objects()
+
+    def compute_detected_objects_full(self):
         """
         Main function used to query the currently-detected objects. Upon calling, the latest raw data cache is
         retrieved and sent through the processing pipeline to produce a list of DetectedObject objects.

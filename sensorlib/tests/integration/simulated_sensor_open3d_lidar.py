@@ -194,6 +194,7 @@ def main(arg):
                                                             detection_cycle_delay_seconds,
                                                             infrastructure_id, sensor_id,
                                                             sensor_position, sensor_rotation)
+        carla_sensor = sensor.get_sensor().carla_sensor
 
         # Start up an XML-RPC server to enable remote access to the sensor
         sensor_data_service = CarlaCDASimAdapter(api)
@@ -214,9 +215,9 @@ def main(arg):
         # Wrap the actor ?
         point_list = o3d.geometry.PointCloud()
         if arg.semantic:
-            lidar.listen(lambda data: semantic_lidar_callback(data, point_list))
+            carla_sensor.listen(lambda data: semantic_lidar_callback(data, point_list))
         else:
-            lidar.listen(lambda data: lidar_callback(data, point_list))
+            carla_sensor.listen(lambda data: lidar_callback(data, point_list))
 
         vis = o3d.visualization.Visualizer()
         vis.create_window(
