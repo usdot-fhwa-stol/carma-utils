@@ -10,7 +10,7 @@ class SensorlibIntegrationTestRunner(unittest.TestCase):
 
     def setUp(self):
         carla_host = os.getenv('CARLA_HOST', 'localhost')
-        carla_port = os.getenv('CARLA_PORT', '2000')
+        carla_port = int(os.getenv('CARLA_PORT', '2000'))
         self.carla_world = self.get_carla_connection(carla_host, carla_port)
         self.set_map(self.carla_world, "Town04")
         self.setup_scenario(self.carla_world)
