@@ -146,17 +146,10 @@ class SemanticLidarSensor(SimulatedSensor):
         :return: DetectedObject wrappers objects referring to the actors.
         """
         actors = self.__carla_world.get_actors()
-        for actor in actors:
-            a = actors.find(actor.id)
-            print(a.get_attribute("role_name"))
-
-        return None
-
-
-        # return [DetectedObjectBuilder.build_detected_object(actor,
-        #                                                     self.__simulated_sensor_config["prefilter"][
-        #                                                         "allowed_semantic_tags"])
-        #         for actor in actors]
+        return [DetectedObjectBuilder.build_detected_object(actor,
+                                                            self.__simulated_sensor_config["prefilter"][
+                                                                "allowed_semantic_tags"])
+                for actor in actors]
 
     # ------------------------------------------------------------------------------
     # Prefilter

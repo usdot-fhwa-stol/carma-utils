@@ -67,11 +67,12 @@ class CarlaUtils:
         :param carla_actor: The carla.Actor to obtain data from.
         :return: List of numpy.array containing the bounding box points in the world frame.
         """
-        
+
         try:
             bounding_box = carla_actor.bounding_box
         except AttributeError:
-            raise AttributeError("There is no bounding_box attribute, in 0.9.10 only Pedestrian and Vehicles have this attribute, please check the input...")
+            raise AttributeError(
+                "There is no bounding_box attribute, in 0.9.10 only Pedestrian and Vehicles have this attribute, please check the input...")
 
         bounding_box_locations = bounding_box.get_world_vertices(carla_actor.get_transform())
         return [CarlaUtils.vector3d_to_numpy(location) for location in bounding_box_locations]
@@ -84,16 +85,14 @@ class CarlaUtils:
         :param allowed_semantic_tags: List of semantic tags which are allowed to be detected by the sensor.
         :return: The object type, or NONE if not in the allowed list.
         """
-        
-        # Set intersection, except order matters
-        print("type of carla_actor.semantic_tags: ", type(carla_actor.semantic_tags))
-        print("carla_actor.semantic_tags: ", carla_actor.semantic_tags)
-        print("size of carla_actor.semantic_tags: ", len(carla_actor.semantic_tags))
-        for tag in carla_actor.semantic_tags:
-            tag_name = CarlaUtils.get_semantic_tag_name(tag)
-            if tag_name in allowed_semantic_tags:
-                return tag_name
-        return "NONE"
+
+        # TODO: Unable to determine object type: Not compliant with CARLA API, unable to retrive type via semantic tags or role_name attribute. Reason is object type retrieved via iteration, and through carla.World.get_actors().find() call, is carla.libcarla.Actor - not carla.Actor. No clear path to identify the object type as needed.
+        return allowed_semantic_tags[0]
+        # for tag in carla_actor.semantic_tags:
+        #     tag_name = CarlaUtils.get_semantic_tag_name(tag)
+        #     if tag_name in allowed_semantic_tags:
+        #         return tag_name
+        # return "NONE"
 
     @staticmethod
     def get_semantic_tag_name(tag_id):
