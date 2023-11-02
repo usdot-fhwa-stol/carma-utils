@@ -29,9 +29,9 @@ import open3d as o3d
 
 import carla
 
-from SensorAPI import SensorAPI
-from SensorDataService import SensorDataService
-from util.SimulatedSensorUtils import SimulatedSensorUtils
+from carla_cda_sim_api import CarlaCDASimAPI
+from carla_cda_sim_adapter import CarlaCDASimAdapter
+from util.simulated_sensor_utils import SimulatedSensorUtils
 
 VIRIDIS = np.array(cm.get_cmap("plasma").colors)
 VID_RANGE = np.linspace(0.0, 1.0, VIRIDIS.shape[0])
@@ -176,36 +176,47 @@ def main(arg):
         vehicle = world.spawn_actor(vehicle_bp, vehicle_transform)
         vehicle.set_autopilot(arg.no_autopilot)
 
-
         # Build the sensor
-        api = SensorAPI.build_from_world(world)
+        api = CarlaCDASimAPI.build_from_world(world)
 
         infrastructure_id = 3
         sensor_id = 7
         detection_cycle_delay_seconds = 0.5
-        sensor_config  =  SimulatedSensorUtils.load_config_from_file(arg.sensor_config_filename)
+        sensor_config = SimulatedSensorUtils.load_config_from_file(arg.sensor_config_filename)
         simulated_sensor_config = sensor_config["simulated_sensor"]
         carla_sensor_config = sensor_config["lidar_sensor"]
         noise_model_config = SimulatedSensorUtils.load_config_from_file(arg.noise_model_config_filename)
         user_offset = carla.Location(arg.x, arg.y, arg.z)
-        lidar_transform = carla.Transform(carla.Location(x=-0.5, z=1.8) + user_offset)
+        sensor_position = carla.Location(x=-0.5, z=1.8) + user_offset
+        sensor_rotation = carla.Rotation()
 
         sensor = api.create_simulated_semantic_lidar_sensor(simulated_sensor_config, carla_sensor_config, noise_model_config,
                                                             detection_cycle_delay_seconds,
                                                             infrastructure_id, sensor_id,
-                                                            lidar_transform.location, lidar_transform.rotation, vehicle.id)
+                                                            sensor_position, sensor_rotation)
 
         # Start up an XML-RPC server to enable remote access to the sensor
-        sensor_data_service = SensorDataService(api)
+        sensor_data_service = CarlaCDASimAdapter(api)
         sensor_data_service.start_xml_rpc_server(args.xmlrpc_server_host, args.xmlrpc_server_port, False)
-        print("started")
+        print("Started sensorlib XML-RPC server.")
+
+
+
+        # Legacy code
+        # lidar_bp = generate_lidar_bp(arg, world, blueprint_library, delta)
+        # user_offset = carla.Location(arg.x, arg.y, arg.z)
+        # lidar_transform = carla.Transform(carla.Location(x=-0.5, z=1.8) + user_offset)
+        # lidar = world.spawn_actor(lidar_bp, lidar_transform, attach_to=vehicle)
+
+
+
 
         # Wrap the actor ?
         point_list = o3d.geometry.PointCloud()
-        # if arg.semantic:
-        #     lidar.listen(lambda data: semantic_lidar_callback(data, point_list))
-        # else:
-        #     lidar.listen(lambda data: lidar_callback(data, point_list))
+        if arg.semantic:
+            lidar.listen(lambda data: semantic_lidar_callback(data, point_list))
+        else:
+            lidar.listen(lambda data: lidar_callback(data, point_list))
 
         vis = o3d.visualization.Visualizer()
         vis.create_window(
@@ -235,7 +246,7 @@ def main(arg):
                 detected_objects = sensor.get_detected_objects()
                 print(f"Detected objects: {len(detected_objects)} objects")
                 for detected_object in detected_objects:
-                        print(f"ID: {detected_objects.get_id()}")
+                    print(f"ID: {detected_objects.get_id()}")
 
             # # This can fix Open3D jittering issues:
             time.sleep(0.005)
@@ -339,12 +350,12 @@ if __name__ == "__main__":
         help="offset in the sensor position in the Z-axis in meters (default: 0.0)")
     argparser.add_argument(
         "--sensor-config-filename",
-        default="../../config/simulated_sensor_config.yaml",
+        default="config/simulated_sensor_config.yaml",
         type=str,
         help="Configuration filename for the simulated sensor.")
     argparser.add_argument(
         "--noise-model-config-filename",
-        default="../../config/noise_model_config.yaml",
+        default="config/noise_model_config.yaml",
         type=str,
         help="Configuration filename for the simulated sensor noise model.")
     argparser.add_argument(

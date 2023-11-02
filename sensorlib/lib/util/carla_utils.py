@@ -123,6 +123,8 @@ class CarlaUtils:
             position = CarlaUtils.get_location(sensor_position)
         elif isinstance(sensor_position, carla.Location):
             position = sensor_position
+        elif isinstance(sensor_position, carla.libcarla.Vector3D):
+            position = carla.Location(x=sensor_position.x, y=sensor_position.y, z=sensor_position.z)
         else:
             raise ValueError("sensor_position must be a list of floats or a carla.Location object.")
 

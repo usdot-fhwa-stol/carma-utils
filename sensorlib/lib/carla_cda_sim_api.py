@@ -103,8 +103,7 @@ class CarlaCDASimAPI:
         # Retrieve the CARLA sensor
         blueprint_library = self.__carla_world.get_blueprint_library()
         sensor_bp = self.__generate_lidar_bp(blueprint_library, carla_sensor_config)
-        parent_actor = CarlaUtils.get_actor(self.__carla_world)
-        carla_sensor = self.__carla_world.spawn_actor(sensor_bp, sensor_transform, attach_to=parent_actor)
+        carla_sensor = self.__carla_world.spawn_actor(sensor_bp, sensor_transform)
 
         # Build internal objects
         sensor = CarlaSensorBuilder.build_sensor(carla_sensor)
