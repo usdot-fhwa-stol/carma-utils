@@ -84,6 +84,22 @@ been detected.
 
 The noise model interface is extensible and can support additional models in the future.
 
+## Running Unit Tests
+
+TODO
+
+## Running Integration Tests
+
+Assuming the virtual environment resides in <repository-root>/venv, launch an integration test with the following command:
+
+```
+venv/bin/python3 -m tests.<integration-test-module-name>
+```
+
+Tests cannot be launched using this approach from inside the tests directory. The working directory must be the repository root.
+
+TODO
+
 ## About
 
 Developed by the [CARMA Program](https://highways.dot.gov/research/operations/CARMA) at the Federal

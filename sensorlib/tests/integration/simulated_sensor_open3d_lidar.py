@@ -27,8 +27,6 @@ import numpy as np
 from matplotlib import cm
 import open3d as o3d
 
-# from util.CarlaLoader import CarlaLoader
-# CarlaLoader.load_carla_lib("0.9.10")
 import carla
 
 from SensorAPI import SensorAPI

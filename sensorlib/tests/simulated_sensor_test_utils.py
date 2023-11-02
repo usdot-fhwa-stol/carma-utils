@@ -12,7 +12,6 @@ from unittest.mock import MagicMock
 
 import imports
 
-from util.CarlaLoader import CarlaLoader
 import carla
 
 from objects.DetectedObject import DetectedObjectBuilder

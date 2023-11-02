@@ -2,7 +2,6 @@ import os
 import unittest
 from abc import abstractmethod
 
-from util.carla_loader import CarlaLoader
 import carla
 from carla_cda_sim_api import CarlaCDASimAPI
 
