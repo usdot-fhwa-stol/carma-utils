@@ -80,7 +80,9 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def compute_detected_objects(self):
-        return self.get_scene_detected_objects()
+        detected_objects = self.get_scene_detected_objects()
+        self.__detected_objects = detected_objects
+        return detected_objects
 
     def compute_detected_objects_full(self):
         """
@@ -145,11 +147,16 @@ class SemanticLidarSensor(SimulatedSensor):
         """
         actors = self.__carla_world.get_actors()
         for actor in actors:
-            print(f"for loop actor {actor}")
-        return [DetectedObjectBuilder.build_detected_object(actor,
-                                                            self.__simulated_sensor_config["prefilter"][
-                                                                "allowed_semantic_tags"])
-                for actor in actors]
+            a = actors.find(actor.id)
+            print(a.get_attribute("role_name"))
+
+        return None
+
+
+        # return [DetectedObjectBuilder.build_detected_object(actor,
+        #                                                     self.__simulated_sensor_config["prefilter"][
+        #                                                         "allowed_semantic_tags"])
+        #         for actor in actors]
 
     # ------------------------------------------------------------------------------
     # Prefilter

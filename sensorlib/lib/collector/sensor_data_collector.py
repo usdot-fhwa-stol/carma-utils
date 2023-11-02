@@ -39,7 +39,8 @@ class SensorDataCollector:
         self.__data = deque([{}, {}], maxlen=2)
 
         # Register callback to collect data
-        self.__carla_sensor.listen(self.__collect_sensor_data)
+        # TODO disabling for testing
+        # self.__carla_sensor.listen(self.__collect_sensor_data)
 
     def get_carla_lidar_hitpoints(self):
         """
