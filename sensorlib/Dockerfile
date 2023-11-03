@@ -1,36 +1,55 @@
-FROM ubuntu:focal
+# Copyright (C) 2023 LEIDOS.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+FROM usdotfhwastoldev/carma-base:develop
 
-WORKDIR /home/CarlaCDASimAdapter/
+LABEL Description="Dockerised CARMA-CARLA integration"
 
-# Install Dependencies
-RUN apt-get update
-RUN apt-get install -y gfortran wget python3 python3-pip libtiff5 libjpeg-dev libpng16-16
-#RUN wget https://github.com/usdot-fhwa-stol/carma-carla-integration/raw/develop/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg
+ARG CARMA_VERSION="develop"
+ARG VERSION
+ARG VCS_REF
+ARG BUILD_DATE
 
-# Install Python dependencies
-WORKDIR /home/CarlaCDASimAdapter/
-COPY requirements.txt /home/CarlaCDASimAdapter/
-RUN pip3 install -r requirements.txt
+LABEL org.label-schema.schema-version="1.0"
+LABEL org.label-schema.name="carma-carla-integration"
+LABEL org.label-schema.description="XIL carma-carla-integration for evaluation and testing of the CARMA Platform"
+LABEL org.label-schema.vendor="Leidos"
+LABEL org.label-schema.version=${VERSION}
+LABEL org.label-schema.url="https://highways.dot.gov/research/research-programs/operations/CARMA"
+LABEL org.label-schema.vcs-url="https://github.com/usdot-fhwa-stol/carma-simulation/"
+LABEL org.label-schema.vcs-ref=${VCS_REF}
+LABEL org.label-schema.build-date=${BUILD_DATE}
+
+USER root
+RUN apt-get update && apt-get install -y sudo
+
+USER carma
+WORKDIR /home/carma
+COPY PythonAPI ./PythonAPI
+COPY requirements.txt ./requirements.txt
 
 
 
-# Install sensorlib
-COPY lib/ /home/CarlaCDASimAdapter/src
-COPY ./config/ /home/CarlaCDASimAdapter/config
 
-# Set environment variables
+
+RUN pip3 install -r /home/carma/requirements.txt
+COPY /lib ./lib
+COPY /tests ./tests
+
 ENV LOAD_CARLA_EGG=True
 ENV CARLA_VERSION=0.9.10
-ENV CARLA_EGG_DIR="/home/CarlaCDASimAdapter/"
+ENV CARLA_EGG_DIR=/home/carma/PythonAPI/carla/dist
+ENV CARLA_HOST=127.0.0.1
 
-
-# Install .egg file
-COPY PythonAPI /home/CarlaCDASimAdapter/PythonAPI
-#COPY carla-0.9.10-py3.7-linux-x86_64.egg /home/CarlaCDASimAdapter/
-
-# TODO Inject environment variables here
-
-
-# Start sensorlib XML-RPC server
-CMD [ "python3", "/home/CarlaCDASimAdapter/src/CarlaCDASimAdapter.py", "--carla-host", "${CARLA_HOST}", "--xmlrpc-server-host", "127.0.0.1",  "--sensor-config-file", "config/simulated_sensor_config.yaml", "--noise-model-config-file", "config/noise_model_config.yaml" ]
-#CMD [ "python3", "/home/CarlaCDASimAdapter/src/CarlaCDASimAdapter.py", "--carla-host", "127.0.0.1", "--xmlrpc-server-host", "127.0.0.1",  "--sensor-config-file", "config/simulated_sensor_config.yaml", "--noise-model-config-file", "config/noise_model_config.yaml" ]
+CMD [ "python3", "/home/carma/tests/integration/simulated_sensor_open3d_lidar.py" ]
+#CMD [ "python3", "/home/CarlaCDASimAdapter/lib/carla_cda_sim_adapter.py", "--carla-host", "${CARLA_HOST}", "--xmlrpc-server-host", "127.0.0.1",  "--sensor-config-file", "config/simulated_sensor_config.yaml", "--noise-model-config-file", "config/noise_model_config.yaml" ]
