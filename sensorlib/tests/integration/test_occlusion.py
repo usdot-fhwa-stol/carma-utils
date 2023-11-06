@@ -20,15 +20,22 @@ from tests.integration.sensorlib_integration_test_runner import SensorlibIntegra
 class TestOcclusion(SensorlibIntegrationTestRunner):
 
     def setup_scenario(self):
-        self.create_vehicle([0.0, 0.0, 0.0])
-        self.create_lidar_sensor([0.0, 0.0, 0.0])
-        self.create_object([10.0, 0.0, 0.0])
-        self.create_object([20.0, 0.0, 0.0])
+
+        # vehicle_position = self.carla_world.get_map().get_spawn_points()[1].location
+        # print(vehicle_position)
+        vehicle_position = carla.Location(65.516594, 7.808423, 0.275307)
+        # vehicle_position = carla.Location(75.516594, 7.808423, 0.275307)
+        # vehicle_position = carla.Location(95.516594, 7.808423, 0.275307)
+
+        self.create_vehicle(vehicle_position)
+        self.create_lidar_sensor(vehicle_position)
+        self.create_object(vehicle_position + carla.Location(10.0, 0.0, 0.0))
+        self.create_object(vehicle_position + carla.Location(20.0, 0.0, 0.0))
 
     def create_vehicle(self, position):
         blueprint_library = self.carla_world.get_blueprint_library()
         vehicle_bp = blueprint_library.filter("model3")[0]
-        vehicle_transform = random.choice(self.carla_world.get_map().get_spawn_points())
+        vehicle_transform = carla.Transform(position)
         vehicle = self.carla_world.spawn_actor(vehicle_bp, vehicle_transform)
 
     def create_lidar_sensor(self, position):
@@ -39,8 +46,7 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
         simulated_sensor_config = sensor_config["simulated_sensor"]
         carla_sensor_config = sensor_config["lidar_sensor"]
         noise_model_config = SimulatedSensorUtils.load_config_from_file("config/noise_model_config.yaml")
-        user_offset = carla.Location(position[0], position[1], position[2])
-        lidar_transform = carla.Transform(carla.Location(x=-0.5, z=1.8) + user_offset)
+        lidar_transform = carla.Transform(position)
 
         sensor = self.api.create_simulated_semantic_lidar_sensor(simulated_sensor_config, carla_sensor_config,
                                                             noise_model_config,
@@ -49,7 +55,11 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
                                                             lidar_transform.location, lidar_transform.rotation)
 
     def create_object(self, position):
-        pass
+        blueprint_library = self.carla_world.get_blueprint_library()
+        vehicle_bp = blueprint_library.filter("model3")[0]
+        vehicle_transform = carla.Transform(position)
+        vehicle = self.carla_world.spawn_actor(vehicle_bp, vehicle_transform)
+
 
     def test_occlusion(self):
         self.assertTrue(True)
