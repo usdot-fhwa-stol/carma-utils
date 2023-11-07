@@ -43,7 +43,7 @@ COPY requirements.txt ./requirements.txt
 
 
 RUN pip3 install -r /home/carma/requirements.txt
-COPY /lib ./lib
+COPY / ./lib
 COPY /tests ./tests
 
 ENV LOAD_CARLA_EGG=True

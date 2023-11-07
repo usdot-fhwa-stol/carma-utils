@@ -12,23 +12,28 @@ from abc import abstractmethod
 
 import carla
 
-from lib.carla_cda_sim_api import CarlaCDASimAPI
+from sensorlib.carla_cda_sim_api import CarlaCDASimAPI
 
 
 class SensorlibIntegrationTestRunner(unittest.TestCase):
 
     def setUp(self):
+        # Connect to CARLA
         carla_host = os.getenv('CARLA_HOST', 'localhost')
         carla_port = int(os.getenv('CARLA_PORT', '2000'))
         self.carla_world = self.get_carla_connection(carla_host, carla_port)
-        #self.set_map(self.carla_world, "Town01")
         self.api = self.build_api_object(self.carla_world)
+
+        # Remove previous integration test artifacts
+        self.delete_simulation_objects()
+
+        # Set up the new scenario
+        # self.set_map(self.carla_world, "Town01")
         self.setup_scenario()
 
     def get_carla_connection(self, carla_host, carla_port):
         client = carla.Client(carla_host, carla_port)
         return client.get_world()
-
 
     def set_map(self, carla_client, map_name):
         # TODO

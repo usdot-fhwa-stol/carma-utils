@@ -13,59 +13,35 @@ from time import sleep
 
 import carla
 
-from lib.util.simulated_sensor_utils import SimulatedSensorUtils
+from sensorlib.util.simulated_sensor_utils import SimulatedSensorUtils
+from tests.integration.integration_test_utilities import IntegrationTestUtilities
 from tests.integration.sensorlib_integration_test_runner import SensorlibIntegrationTestRunner
 
 
 class TestOcclusion(SensorlibIntegrationTestRunner):
 
-    def setup_scenario(self):
+    def test_non_occluded(self):
 
         # vehicle_position = self.carla_world.get_map().get_spawn_points()[1].location
         # print(vehicle_position)
         vehicle_position = carla.Location(65.516594, 7.808423, 0.275307)
-        # vehicle_position = carla.Location(75.516594, 7.808423, 0.275307)
-        # vehicle_position = carla.Location(95.516594, 7.808423, 0.275307)
+        self.infrastructure_id = 3
+        self.sensor_id = 7
 
-        self.create_vehicle(vehicle_position)
-        self.create_lidar_sensor(vehicle_position)
-        self.create_object(vehicle_position + carla.Location(10.0, 0.0, 0.0))
-        self.create_object(vehicle_position + carla.Location(20.0, 0.0, 0.0))
-
-    def create_vehicle(self, position):
-        blueprint_library = self.carla_world.get_blueprint_library()
-        vehicle_bp = blueprint_library.filter("model3")[0]
-        vehicle_transform = carla.Transform(position)
-        vehicle = self.carla_world.spawn_actor(vehicle_bp, vehicle_transform)
-
-    def create_lidar_sensor(self, position):
-        infrastructure_id = 3
-        sensor_id = 7
-        detection_cycle_delay_seconds = 0.5
-        sensor_config = SimulatedSensorUtils.load_config_from_file("config/simulated_sensor_config.yaml")
-        simulated_sensor_config = sensor_config["simulated_sensor"]
-        carla_sensor_config = sensor_config["lidar_sensor"]
-        noise_model_config = SimulatedSensorUtils.load_config_from_file("config/noise_model_config.yaml")
-        lidar_transform = carla.Transform(position)
-
-        sensor = self.api.create_simulated_semantic_lidar_sensor(simulated_sensor_config, carla_sensor_config,
-                                                            noise_model_config,
-                                                            detection_cycle_delay_seconds,
-                                                            infrastructure_id, sensor_id,
-                                                            lidar_transform.location, lidar_transform.rotation)
-
-    def create_object(self, position):
-        blueprint_library = self.carla_world.get_blueprint_library()
-        vehicle_bp = blueprint_library.filter("model3")[0]
-        vehicle_transform = carla.Transform(position)
-        vehicle = self.carla_world.spawn_actor(vehicle_bp, vehicle_transform)
+        IntegrationTestUtilities.create_vehicle(self.carla_world, vehicle_position)
+        IntegrationTestUtilities.create_lidar_sensor(self.api, 0, 0, vehicle_position)
+        IntegrationTestUtilities.create_object(self.carla_world, vehicle_position + carla.Location(10.0, -4.0, 0.0))
+        IntegrationTestUtilities.create_object(self.carla_world, vehicle_position + carla.Location(20.0, 0.0, 0.0))
 
 
-    def test_occlusion(self):
+
+
+    def test_occluded(self):
         self.assertTrue(True)
-        # sleep(1)
-        # detected_objects = self.api.get_detected_objects()
-        # self.assertTrue(len(detected_objects) > 0)
+        sleep(1)
+        detected_objects = self.api.get_detected_objects(self.infrastructure_id, self.sensor_id)
+        print(detected_objects)
+        self.assertTrue(len(detected_objects) > 0)
         # self.assertTrue(len(detected_objects) == 1)
 
 
