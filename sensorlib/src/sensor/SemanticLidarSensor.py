@@ -249,11 +249,25 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def sample_hitpoints(self, hitpoints, sample_size):
-        """Randomly sample points inside each object's set of LIDAR hitpoints. This is done to reduce size of the
-        data being sent through the distance computation."""
-        return dict(
-            [(obj_id, self.__rng.choice(object_hitpoints, sample_size, replace=False)) for obj_id, object_hitpoints in
-             hitpoints.items()])
+        """Down sample each object's hitpoint list
+
+        Randomly sample points inside each object's set of LIDAR
+        hitpoints. This is done to reduce size of the data being sent
+        through the distance computation. If the hitpoint population of
+        a specific object is less than the sample size, the whole
+        hitpoint population will be used (i.e., the object's list of
+        hitpoints will remain unchanged).
+
+        :param hitpoints: lidar points associated with each object
+        :param sample_size: maximum size of the object's new hitpoint list
+        :return: downsampled hitpoints
+        """
+        return {
+            # The choice() function will raise an error if we try to
+            # sample more than the population
+            id_: self.__rng.choice(points, min(len(points), sample_size), replace=False)
+            for id_, points in hitpoints.items()
+        }
 
     # ------------------------------------------------------------------------------
     # Geometry Re-Association: Instantaneous Association
