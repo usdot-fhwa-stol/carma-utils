@@ -86,14 +86,16 @@ class SemanticLidarSensor(SimulatedSensor):
 
         #check if there's object in range
         if not detected_objects:
-            return None
+            self.__detected_objects.clear()
+            return []
 
         # Prefilter
         detected_objects, object_ranges = self.prefilter(detected_objects)
 
         #check if there's object in range
         if not detected_objects:
-            return None
+            self.__detected_objects.clear()
+            return []
 
         # Get LIDAR hitpoints with Actor ID associations
         timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
