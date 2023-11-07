@@ -10,8 +10,8 @@ import json
 
 import yaml
 import numpy
-from src.util.NumpyEncoder import NumpyEncoder
-from src.objects.DetectedObject import DetectedObject
+from util.NumpyEncoder import NumpyEncoder
+from objects.DetectedObject import DetectedObject
 
 class DetectedObjectEncoder(json.JSONEncoder):
     def default(self, obj):
