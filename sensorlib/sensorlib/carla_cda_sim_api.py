@@ -77,7 +77,8 @@ class CarlaCDASimAPI:
                                                detection_cycle_delay_seconds,
                                                infrastructure_id, sensor_id,
                                                sensor_position, sensor_rotation,
-                                               parent_id=None):
+                                               parent_id=None,
+                                               custom_callback=None):
         """
         Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
         :param simulated_sensor_config: The configuration for the simulated sensor.
@@ -114,11 +115,22 @@ class CarlaCDASimAPI:
         # Fix for CARLA not updating position immediately
         sleep(0.2)
         carla_sensor.set_location(sensor_position)
+        carla_sensor.set_location(sensor_position)
+        carla_sensor.set_location(sensor_position)
+        carla_sensor.set_location(sensor_position)
+        carla_sensor.set_location(sensor_position)
+        carla_sensor.set_location(sensor_position)
+        carla_sensor.set_location(sensor_position)
+        carla_sensor.set_location(sensor_position)
+        carla_sensor.set_location(sensor_position)
+        carla_sensor.set_location(sensor_position)
+        carla_sensor.set_location(sensor_position)
+        carla_sensor.set_location(sensor_position)
         print(f"api setting sensor_position {sensor_position} result {carla_sensor.get_location()}")
 
         # Build internal objects
         sensor = CarlaSensorBuilder.build_sensor(carla_sensor)
-        data_collector = SensorDataCollector(self.__carla_world, carla_sensor)
+        data_collector = SensorDataCollector(self.__carla_world, carla_sensor, custom_callback)
         noise_model = NoiseModelFactory.get_noise_model(noise_model_config["noise_model_name"], noise_model_config)
 
         # Construct the SimulatedSensor

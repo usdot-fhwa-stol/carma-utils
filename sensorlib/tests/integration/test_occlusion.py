@@ -37,8 +37,6 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
 
         # Build sensor, including display callback
         sensor_position = vehicle_position + carla.Location(0.0, 0.0, 0.5)
-        print(f"Test sensor_position {sensor_position}")
-        print(f"Test primary_vehicle location {vehicle_position} {primary_vehicle.get_location()}")
         point_list = o3d.geometry.PointCloud()
         sensor = IntegrationTestUtilities.create_lidar_sensor(self.api,
                                                               infrastructure_id, sensor_id,
@@ -49,7 +47,7 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
         # Start windows
         sensor_config = SimulatedSensorUtils.load_config_from_file("config/simulated_sensor_config.yaml")
         carla_sensor_config = sensor_config["lidar_sensor"]
-        self.launch_display_windows(sensor, sensor_position, carla_sensor_config)
+        self.launch_display_windows(sensor, sensor_position, carla_sensor_config, point_list)
 
         # Wait
         sleep(1)

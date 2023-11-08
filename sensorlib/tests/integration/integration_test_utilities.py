@@ -27,7 +27,7 @@ class IntegrationTestUtilities:
         return carla_world.spawn_actor(vehicle_bp, vehicle_transform)
 
     @staticmethod
-    def create_lidar_sensor(api, infrastructure_id, sensor_id, position, parent_id):
+    def create_lidar_sensor(api, infrastructure_id, sensor_id, position, parent_id, custom_callback=None):
         detection_cycle_delay_seconds = 0.5
         sensor_config = SimulatedSensorUtils.load_config_from_file("config/simulated_sensor_config.yaml")
         simulated_sensor_config = sensor_config["simulated_sensor"]
@@ -40,4 +40,5 @@ class IntegrationTestUtilities:
                                                           detection_cycle_delay_seconds,
                                                           infrastructure_id, sensor_id,
                                                           lidar_transform.location, lidar_transform.rotation,
-                                                          parent_id)
+                                                          parent_id,
+                                                          custom_callback)

@@ -67,23 +67,7 @@ class SensorlibIntegrationTestRunner(unittest.TestCase):
     def build_api_object(carla_world):
         return CarlaCDASimAPI.build_from_world(carla_world)
 
-    def launch_display_windows(self, sensor, sensor_position, carla_sensor_config):
-
-        # Construct a duplicate sensor to enable second callback registration
-        # lidar_bp = self.generate_lidar_bp(carla_sensor_config)
-        # lidar_transform = carla.Transform(sensor_position)
-        # parent = None
-        # if sensor.get_parent_id() is not None:
-        #     parent = self.carla_world.get_actor(sensor.get_parent_id())
-        # silent_carla_sensor = self.carla_world.spawn_actor(lidar_bp, lidar_transform, parent)
-        # time.sleep(0.2)
-        # silent_carla_sensor.set_location(sensor_position)
-        # print(f"test lidar_transform construction {lidar_transform}")
-        # print(f"launch_display_windows setting sensor_position {sensor_position} result {silent_carla_sensor.get_location()}")
-
-        # Register callback for display
-        # point_list = o3d.geometry.PointCloud()
-        # silent_carla_sensor.listen(lambda data: self.semantic_lidar_callback(data, point_list))
+    def launch_display_windows(self, sensor, sensor_position, carla_sensor_config, point_list):
 
         # Enable LIDAR visualization window
         vis = o3d.visualization.Visualizer()
@@ -118,18 +102,6 @@ class SensorlibIntegrationTestRunner(unittest.TestCase):
             time.sleep(0.005)
             self.carla_world.tick()
             frame += 1
-
-    def generate_lidar_bp(self, carla_sensor_config):
-        blueprint_library = self.carla_world.get_blueprint_library()
-        lidar_bp = blueprint_library.find("sensor.lidar.ray_cast_semantic")
-        lidar_bp.set_attribute("upper_fov", str(carla_sensor_config["upper_fov"]))
-        lidar_bp.set_attribute("lower_fov", str(carla_sensor_config["lower_fov"]))
-        lidar_bp.set_attribute("channels", str(carla_sensor_config["channels"]))
-        lidar_bp.set_attribute("range", str(carla_sensor_config["range"]))
-        lidar_bp.set_attribute("rotation_frequency", str(1.0 / carla_sensor_config["rotation_period"]))
-        lidar_bp.set_attribute("points_per_second", str(carla_sensor_config["points_per_second"]))
-        return lidar_bp
-
 
     def add_open3d_axis(self, vis):
         """Add a small 3D axis on Open3D Visualizer"""
