@@ -89,16 +89,16 @@ class SensorDataCollector:
         :return: None
         """
 
-        # Extract geometric hitpoints and group them by actor ID
-        # The resulting dictionary maps actor ID to a list of hitpoints
+        # Extract geometric hitpoints and group them by type_id
+        # The resulting dictionary maps actor type_id to a list of hitpoints
         for detection in raw_sensor_data:
             point = CarlaUtils.vector3d_to_numpy(detection.point)
-            print(f"detection {detection}")
-            if detection.object_idx not in grouped_data:
-                print(f"Data collector inserting new point object_idx {detection.object_idx}")
-                grouped_data[detection.object_idx] = [point]
+            # print(f"detection {detection}")
+            if detection.type_id not in grouped_data:
+                # print(f"Data collector inserting new point type_id {detection.type_id}")
+                grouped_data[detection.type_id] = [point]
             else:
-                grouped_data[detection.object_idx].append(point)
+                grouped_data[detection.type_id].append(point)
 
     def __is_same_data_collection(self, sensor_rotation_angle):
         """

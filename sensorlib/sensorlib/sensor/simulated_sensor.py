@@ -12,15 +12,31 @@ from abc import abstractmethod
 class SimulatedSensor:
     """Sensor wrapper to contain logic analyzing internal CARLA sensor."""
 
-    def __init__(self, infrastructure_id, sensor_id):
-        self._infrastructure_id = infrastructure_id
-        self._sensor_id = sensor_id
+    def __init__(self, infrastructure_id, sensor_id, sensor, parent_id):
+        self.__infrastructure_id = infrastructure_id
+        self.__sensor_id = sensor_id
+        self.__sensor = sensor
+        self.__parent_id = parent_id
+
+    # ------------------------------------------------------------------------------
+    # Accessors
+    # ------------------------------------------------------------------------------
+
+    def get_sensor(self):
+        return self.__sensor
+
+    def get_parent_id(self):
+        return self.__parent_id
 
     def get_infrastructure_id(self):
-        return self._infrastructure_id
+        return self.__infrastructure_id
 
     def get_id(self):
-        return self._sensor_id
+        return self.__sensor_id
+
+    # ------------------------------------------------------------------------------
+    # Primary functions
+    # ------------------------------------------------------------------------------
 
     @abstractmethod
     def compute_detected_objects(self):

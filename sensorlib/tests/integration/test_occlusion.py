@@ -33,6 +33,8 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
                                                                   vehicle_position + primary_vehicle_offset)
         middle_object = IntegrationTestUtilities.create_object(self.carla_world,
                                                                vehicle_position + middle_object_offset)
+
+        TODO Make pedestrian
         far_object = IntegrationTestUtilities.create_object(self.carla_world,
                                                             vehicle_position + far_object_offset)
 

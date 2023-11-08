@@ -45,7 +45,7 @@ class SemanticLidarSensor(SimulatedSensor):
         """
 
         # Configuration
-        super().__init__(infrastructure_id, sensor_id)
+        super().__init__(infrastructure_id, sensor_id, sensor, parent_id)
         self.__simulated_sensor_config = simulated_sensor_config
         self.__carla_sensor_config = carla_sensor_config
 
@@ -53,10 +53,8 @@ class SemanticLidarSensor(SimulatedSensor):
         self.__carla_world = carla_world
 
         # Internal objects
-        self.__sensor = sensor
         self.__data_collector = data_collector
         self.__noise_model = noise_model
-        self.__parent_id = parent_id
 
         # Structures to store reassociation information
         self.__actor_id_association = {}
@@ -67,16 +65,6 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Object cache
         self.__detected_objects = []
-
-    # ------------------------------------------------------------------------------
-    # Accessors
-    # ------------------------------------------------------------------------------
-
-    def get_sensor(self):
-        return self.__sensor
-
-    def get_parent_id(self):
-        return self.__parent_id
 
     # ------------------------------------------------------------------------------
     # Primary functions
@@ -104,9 +92,8 @@ class SemanticLidarSensor(SimulatedSensor):
         detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
 
         # Instantaneous geometry association
-        # sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
-        downsampled_hitpoints = hitpoints
-        # downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
+        sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
+        downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
         instantaneous_actor_id_association = self.compute_instantaneous_actor_id_association(downsampled_hitpoints,
                                                                                              detected_objects)
 
@@ -114,8 +101,7 @@ class SemanticLidarSensor(SimulatedSensor):
         self.update_actor_id_association(instantaneous_actor_id_association)
         hitpoints = self.update_hitpoint_ids_from_association(hitpoints)
 
-        # Apply occlusion TODO!
-        # https://usdot-carma.atlassian.net/browse/CDAR-435
+        # Apply occlusion
         detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
                                                 detection_thresholds)
 
@@ -257,6 +243,7 @@ class SemanticLidarSensor(SimulatedSensor):
     def sample_hitpoints(self, hitpoints, sample_size):
         """Randomly sample points inside each object's set of LIDAR hitpoints. This is done to reduce size of the
         data being sent through the distance computation."""
+
         return dict(
             [(obj_id, self.__rng.choice(object_hitpoints, sample_size, replace=False)) for obj_id, object_hitpoints in
              hitpoints.items()])
