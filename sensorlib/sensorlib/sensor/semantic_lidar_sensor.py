@@ -76,6 +76,9 @@ class SemanticLidarSensor(SimulatedSensor):
     def get_sensor(self):
         return self.__sensor
 
+    def get_parent_id(self):
+        return self.__parent_id
+
     # ------------------------------------------------------------------------------
     # Primary functions
     # ------------------------------------------------------------------------------

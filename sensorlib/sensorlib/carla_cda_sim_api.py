@@ -116,9 +116,6 @@ class CarlaCDASimAPI:
 
         # Build internal objects
         sensor = CarlaSensorBuilder.build_sensor(carla_sensor)
-        print(f"sensor_transform {sensor_transform}")
-        print(f"carla_sensor.get_location() {carla_sensor.get_location()}")
-        print(f"sensor position: {sensor.position}  {sensor_position}")
         data_collector = SensorDataCollector(self.__carla_world, carla_sensor)
         noise_model = NoiseModelFactory.get_noise_model(noise_model_config["noise_model_name"], noise_model_config)
 

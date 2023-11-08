@@ -9,6 +9,10 @@
 import os
 import unittest
 from abc import abstractmethod
+import numpy as np
+import open3d as o3d
+import time
+from datetime import datetime
 
 import carla
 
@@ -17,6 +21,31 @@ from tests.integration.integration_test_utilities import IntegrationTestUtilitie
 
 
 class SensorlibIntegrationTestRunner(unittest.TestCase):
+    LABEL_COLORS = np.array([
+        (255, 255, 255),  # None
+        (70, 70, 70),  # Building
+        (100, 40, 40),  # Fences
+        (55, 90, 80),  # Other
+        (220, 20, 60),  # Pedestrian
+        (153, 153, 153),  # Pole
+        (157, 234, 50),  # RoadLines
+        (128, 64, 128),  # Road
+        (244, 35, 232),  # Sidewalk
+        (107, 142, 35),  # Vegetation
+        (0, 0, 142),  # Vehicle
+        (102, 102, 156),  # Wall
+        (220, 220, 0),  # TrafficSign
+        (70, 130, 180),  # Sky
+        (81, 0, 81),  # Ground
+        (150, 100, 100),  # Bridge
+        (230, 150, 140),  # RailTrack
+        (180, 165, 180),  # GuardRail
+        (250, 170, 30),  # TrafficLight
+        (110, 190, 160),  # Static
+        (170, 120, 50),  # Dynamic
+        (45, 60, 150),  # Water
+        (145, 170, 100),  # Terrain
+    ]) / 255.0  # normalize each channel [0-1] since is what Open3D uses
 
     def setUp(self):
         # Connect to CARLA
@@ -36,3 +65,107 @@ class SensorlibIntegrationTestRunner(unittest.TestCase):
     @staticmethod
     def build_api_object(carla_world):
         return CarlaCDASimAPI.build_from_world(carla_world)
+
+    def launch_display_windows(self, sensor, carla_sensor_config):
+
+        # Construct a duplicate sensor to enable second callback registration
+        lidar_bp = self.generate_lidar_bp(carla_sensor_config)
+        lidar_transform = sensor.get_sensor().carla_sensor.get_transform()
+        parent = None
+        if sensor.get_parent_id() is not None:
+            parent = self.carla_world.get_actor(sensor.get_parent_id())
+        silent_carla_sensor = self.carla_world.spawn_actor(lidar_bp, lidar_transform, attach_to=parent)
+
+        # Register callback for display
+        point_list = o3d.geometry.PointCloud()
+        silent_carla_sensor.listen(lambda data: self.semantic_lidar_callback(data, point_list))
+
+        # Enable LIDAR visualization window
+        vis = o3d.visualization.Visualizer()
+        vis.create_window(
+            window_name="Carla Lidar",
+            width=960,
+            height=540,
+            left=480,
+            top=270)
+        vis.get_render_option().background_color = [0.05, 0.05, 0.05]
+        vis.get_render_option().point_size = 1
+        vis.get_render_option().show_coordinate_frame = True
+
+        self.add_open3d_axis(vis)
+
+        frame = 0
+        while True:
+            if frame == 2:
+                vis.add_geometry(point_list)
+            vis.update_geometry(point_list)
+
+            vis.poll_events()
+            vis.update_renderer()
+
+            if frame % 120 == 0:
+                detected_objects = sensor.get_detected_objects()
+                print(f"Detected objects: {len(detected_objects)} objects")
+                for detected_object in detected_objects:
+                    print(f"ID: {detected_objects.get_id()}")
+
+            # This can fix Open3D jittering issues:
+            time.sleep(0.005)
+            self.carla_world.tick()
+            frame += 1
+
+    def generate_lidar_bp(self, carla_sensor_config):
+        blueprint_library = self.carla_world.get_blueprint_library()
+        lidar_bp = blueprint_library.find("sensor.lidar.ray_cast_semantic")
+        lidar_bp.set_attribute("upper_fov", str(carla_sensor_config["upper_fov"]))
+        lidar_bp.set_attribute("lower_fov", str(carla_sensor_config["lower_fov"]))
+        lidar_bp.set_attribute("channels", str(carla_sensor_config["channels"]))
+        lidar_bp.set_attribute("range", str(carla_sensor_config["range"]))
+        lidar_bp.set_attribute("rotation_frequency", str(1.0 / carla_sensor_config["rotation_period"]))
+        lidar_bp.set_attribute("points_per_second", str(carla_sensor_config["points_per_second"]))
+        return lidar_bp
+
+
+    def add_open3d_axis(self, vis):
+        """Add a small 3D axis on Open3D Visualizer"""
+        axis = o3d.geometry.LineSet()
+        axis.points = o3d.utility.Vector3dVector(np.array([
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [0.0, 0.0, 1.0]]))
+        axis.lines = o3d.utility.Vector2iVector(np.array([
+            [0, 1],
+            [0, 2],
+            [0, 3]]))
+        axis.colors = o3d.utility.Vector3dVector(np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [0.0, 0.0, 1.0]]))
+        vis.add_geometry(axis)
+
+
+    def semantic_lidar_callback(self, point_cloud, point_list):
+        """Prepares a point cloud with semantic segmentation
+        colors ready to be consumed by Open3D"""
+        data = np.frombuffer(point_cloud.raw_data, dtype=np.dtype([
+            ("x", np.float32), ("y", np.float32), ("z", np.float32),
+            ("CosAngle", np.float32), ("ObjIdx", np.uint32), ("ObjTag", np.uint32)]))
+
+        # We"re negating the y to correclty visualize a world that matches
+        # what we see in Unreal since Open3D uses a right-handed coordinate system
+        points = np.array([data["x"], -data["y"], data["z"]]).T
+
+        # # An example of adding some noise to our data if needed:
+        # points += np.random.uniform(-0.05, 0.05, size=points.shape)
+
+        # Colorize the pointcloud based on the CityScapes color palette
+        labels = np.array(data["ObjTag"])
+        int_color = SensorlibIntegrationTestRunner.LABEL_COLORS[labels]
+
+        # # In case you want to make the color intensity depending
+        # # of the incident ray angle, you can use:
+        # int_color *= np.array(data["CosAngle"])[:, None]
+
+        point_list.points = o3d.utility.Vector3dVector(points)
+        point_list.colors = o3d.utility.Vector3dVector(int_color)

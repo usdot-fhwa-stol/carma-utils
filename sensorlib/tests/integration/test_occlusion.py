@@ -21,28 +21,45 @@ from tests.integration.sensorlib_integration_test_runner import SensorlibIntegra
 
 class TestOcclusion(SensorlibIntegrationTestRunner):
 
-    def test_non_occluded(self):
+    def setup_occlusion_test(self, infrastructure_id, sensor_id,
+                             primary_vehicle_offset, middle_object_offset, far_object_offset):
+
         # Build vehicles
         vehicle_position = self.carla_world.get_map().get_spawn_points()[1].location
-        # print(vehicle_position)
-        # vehicle_position = carla.Location(65.516594, 7.808423, 0.275307)
 
-        primary_vehicle = IntegrationTestUtilities.create_vehicle(self.carla_world, vehicle_position)
-        middle_vehicle = IntegrationTestUtilities.create_object(self.carla_world,
-                                                                vehicle_position + carla.Location(9.0, -4.0, 0.0))
-        far_vehicle = IntegrationTestUtilities.create_object(self.carla_world,
-                                                             vehicle_position + carla.Location(40.0, 0.0, 0.0))
+        primary_vehicle = IntegrationTestUtilities.create_vehicle(self.carla_world,
+                                                                  vehicle_position + primary_vehicle_offset)
+        middle_object = IntegrationTestUtilities.create_object(self.carla_world,
+                                                               vehicle_position + middle_object_offset)
+        far_object = IntegrationTestUtilities.create_object(self.carla_world,
+                                                            vehicle_position + far_object_offset)
 
         # Build sensor
-        infrastructure_id = 0
-        sensor_id = 0
-        IntegrationTestUtilities.create_lidar_sensor(self.api,
-                                                     infrastructure_id, sensor_id,
-                                                     vehicle_position + carla.Location(0.0, 0.0, 0.5),
-                                                     primary_vehicle.id)
+        sensor = IntegrationTestUtilities.create_lidar_sensor(self.api,
+                                                              infrastructure_id, sensor_id,
+                                                              vehicle_position + carla.Location(0.0, 0.0, 0.5),
+                                                              primary_vehicle.id)
+
+        # Start windows
+        sensor_config = SimulatedSensorUtils.load_config_from_file("config/simulated_sensor_config.yaml")
+        carla_sensor_config = sensor_config["lidar_sensor"]
+        self.launch_display_windows(sensor, carla_sensor_config)
 
         # Wait
         sleep(1)
+
+        return primary_vehicle, middle_object, far_object
+
+    def test_non_occluded(self):
+
+        infrastructure_id = 0
+        sensor_id = 0
+
+        primary_vehicle, middle_object, far_object = self.setup_occlusion_test(
+            infrastructure_id, sensor_id,
+            carla.Location(0.0, 0.0, 0.0),
+            carla.Location(9.0, -4.0, 0.0),
+            carla.Location(40.0, 0.0, 0.0))
 
         # Get detected objects removing the primary vehicle from consideration
         detected_objects = self.api.get_detected_objects(infrastructure_id, sensor_id)
@@ -56,25 +73,15 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
         self.assertTrue(len(detected_objects) == 2)
 
     def test_occluded(self):
-        # Build vehicles
-        vehicle_position = self.carla_world.get_map().get_spawn_points()[1].location
 
-        primary_vehicle = IntegrationTestUtilities.create_vehicle(self.carla_world, vehicle_position)
-        middle_vehicle = IntegrationTestUtilities.create_object(self.carla_world,
-                                                                vehicle_position + carla.Location(9.0, 0.0, 0.0))
-        far_vehicle = IntegrationTestUtilities.create_object(self.carla_world,
-                                                             vehicle_position + carla.Location(40.0, 0.0, 0.0))
-
-        # Build sensor
         infrastructure_id = 0
         sensor_id = 0
-        IntegrationTestUtilities.create_lidar_sensor(self.api,
-                                                     infrastructure_id, sensor_id,
-                                                     vehicle_position + carla.Location(0.0, 0.0, 0.5),
-                                                     primary_vehicle.id)
 
-        # Wait
-        sleep(1)
+        primary_vehicle, middle_object, far_object = self.setup_occlusion_test(
+            infrastructure_id, sensor_id,
+            carla.Location(0.0, 0.0, 0.0),
+            carla.Location(9.0, 0.0, 0.0),
+            carla.Location(40.0, 0.0, 0.0))
 
         # Get detected objects removing the primary vehicle from consideration
         detected_objects = self.api.get_detected_objects(infrastructure_id, sensor_id)
