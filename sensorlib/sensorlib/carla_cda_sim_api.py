@@ -132,12 +132,13 @@ class CarlaCDASimAPI:
         # Register the sensor
         self.__infrastructure_sensors[(infrastructure_id, sensor_id)] = simulated_sensor
 
+        sleep(0.5)
+
         # Start compute thread
         scheduler = sched.scheduler(time.time, time.sleep)
         scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,
                         (scheduler, simulated_sensor, detection_cycle_delay_seconds))
         scheduler_thread = threading.Thread(target=scheduler.run)
-        sleep(0.5)
         print("*********************************")
         print("** Starting sensorlib compute. **")
         print("*********************************")

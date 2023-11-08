@@ -102,8 +102,9 @@ class SemanticLidarSensor(SimulatedSensor):
         detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
 
         # Instantaneous geometry association
-        sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
-        downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
+        # sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
+        downsampled_hitpoints = hitpoints
+        # downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
         instantaneous_actor_id_association = self.compute_instantaneous_actor_id_association(downsampled_hitpoints,
                                                                                              detected_objects)
 

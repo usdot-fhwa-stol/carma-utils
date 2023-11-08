@@ -39,8 +39,7 @@ class SensorDataCollector:
         self.__data = deque([{}, {}], maxlen=2)
 
         # Register callback to collect data
-        # TODO disabling for testing
-        # self.__carla_sensor.listen(self.__collect_sensor_data)
+        self.__carla_sensor.listen(self.__collect_sensor_data)
 
     def get_carla_lidar_hitpoints(self):
         """
@@ -89,7 +88,9 @@ class SensorDataCollector:
         # The resulting dictionary maps actor ID to a list of hitpoints
         for detection in raw_sensor_data:
             point = CarlaUtils.vector3d_to_numpy(detection.point)
+            print(f"detection {detection}")
             if detection.object_idx not in grouped_data:
+                # print(f"Data collector inserting new point object_idx {detection.object_idx}")
                 grouped_data[detection.object_idx] = [point]
             else:
                 grouped_data[detection.object_idx].append(point)
