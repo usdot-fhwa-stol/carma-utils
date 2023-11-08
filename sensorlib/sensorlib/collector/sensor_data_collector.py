@@ -77,7 +77,8 @@ class SensorDataCollector:
         self.__collect_raw_point_data(self.__data[0], semantic_sensor_data)
 
         # Execute any custom callback
-        return self.__custom_callback(semantic_sensor_data)
+        if self.__custom_callback is not None:
+            return self.__custom_callback(semantic_sensor_data)
 
     def __collect_raw_point_data(self, grouped_data, raw_sensor_data):
         """

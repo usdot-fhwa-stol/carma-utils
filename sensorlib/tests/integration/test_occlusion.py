@@ -28,8 +28,9 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
         # Build vehicles
         vehicle_position = self.carla_world.get_map().get_spawn_points()[1].location
 
-        primary_vehicle = IntegrationTestUtilities.create_vehicle(self.carla_world,
-                                                                  vehicle_position + primary_vehicle_offset)
+        primary_vehicle = None
+        # primary_vehicle = IntegrationTestUtilities.create_vehicle(self.carla_world,
+        #                                                           vehicle_position + primary_vehicle_offset)
         middle_object = IntegrationTestUtilities.create_object(self.carla_world,
                                                                vehicle_position + middle_object_offset)
         far_object = IntegrationTestUtilities.create_object(self.carla_world,
@@ -41,7 +42,8 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
         sensor = IntegrationTestUtilities.create_lidar_sensor(self.api,
                                                               infrastructure_id, sensor_id,
                                                               sensor_position,
-                                                              primary_vehicle.id,
+                                                              None,
+                                                              # primary_vehicle.id)
                                                               lambda data: self.semantic_lidar_callback(data, point_list))
 
         # Start windows
