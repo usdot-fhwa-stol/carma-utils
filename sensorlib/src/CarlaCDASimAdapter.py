@@ -11,8 +11,6 @@ import threading
 
 from xmlrpc.server import SimpleXMLRPCServer
 import sys
-sys.path.append('../')
-sys.path.append('./')
 from CarlaCDASimAPI import CarlaCDASimAPI
 from util.SimulatedSensorUtils import SimulatedSensorUtils
 

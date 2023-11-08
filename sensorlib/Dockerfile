@@ -11,10 +11,7 @@ ENV CARLA_VERSION=0.9.10
 ENV CARLA_EGG_DIR="/home/CarlaCDASimAdapter/"
 
 WORKDIR /home/CarlaCDASimAdapter/
-COPY ./requirements.txt /home/CarlaCDASimAdapter/
-RUN pip3 install -r requirements.txt
+RUN pip3 install numpy PyYAML scipy dataclasses
 
 COPY ./src/ /home/CarlaCDASimAdapter/src
 COPY ./config/ /home/CarlaCDASimAdapter/config
-
-CMD [ "python3", "/home/CarlaCDASimAdapter/src/CarlaCDASimAdapter.py", "--carla-host", "172.2.0.2", "--xmlrpc-server-host", "127.0.0.1",  "--sensor-config-file", "../config/simulated_sensor_config.yaml", "--noise-model-config-file", "../config/noise_model_config.yaml" ]
