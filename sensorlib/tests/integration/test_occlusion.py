@@ -10,6 +10,7 @@ import os
 import unittest
 import random
 from time import sleep
+import open3d as o3d
 
 from sensorlib.util.carla_loader import CarlaLoader
 import carla
@@ -34,14 +35,16 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
         far_object = IntegrationTestUtilities.create_object(self.carla_world,
                                                             vehicle_position + far_object_offset)
 
-        # Build sensor
+        # Build sensor, including display callback
         sensor_position = vehicle_position + carla.Location(0.0, 0.0, 0.5)
         print(f"Test sensor_position {sensor_position}")
         print(f"Test primary_vehicle location {vehicle_position} {primary_vehicle.get_location()}")
+        point_list = o3d.geometry.PointCloud()
         sensor = IntegrationTestUtilities.create_lidar_sensor(self.api,
                                                               infrastructure_id, sensor_id,
                                                               sensor_position,
-                                                              primary_vehicle.id)
+                                                              primary_vehicle.id,
+                                                              lambda data: self.semantic_lidar_callback(data, point_list))
 
         # Start windows
         sensor_config = SimulatedSensorUtils.load_config_from_file("config/simulated_sensor_config.yaml")

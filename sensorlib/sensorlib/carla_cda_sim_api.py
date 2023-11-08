@@ -109,6 +109,7 @@ class CarlaCDASimAPI:
         if parent_id is not None:
             parent = self.__carla_world.get_actor(parent_id)
         carla_sensor = self.__carla_world.spawn_actor(sensor_bp, sensor_transform, parent)
+        print(f"api sensor_transform construction {sensor_transform}")
 
         # Fix for CARLA not updating position immediately
         sleep(0.2)
