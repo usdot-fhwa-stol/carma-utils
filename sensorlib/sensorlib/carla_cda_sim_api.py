@@ -113,6 +113,7 @@ class CarlaCDASimAPI:
         # Fix for CARLA not updating position immediately
         sleep(0.2)
         carla_sensor.set_location(sensor_position)
+        print(f"api setting sensor_position {sensor_position} result {carla_sensor.get_location()}")
 
         # Build internal objects
         sensor = CarlaSensorBuilder.build_sensor(carla_sensor)

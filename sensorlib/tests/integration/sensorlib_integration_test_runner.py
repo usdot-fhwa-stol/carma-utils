@@ -18,6 +18,7 @@ import carla
 
 from sensorlib.carla_cda_sim_api import CarlaCDASimAPI
 from tests.integration.integration_test_utilities import IntegrationTestUtilities
+from util.carla_utils import CarlaUtils
 
 
 class SensorlibIntegrationTestRunner(unittest.TestCase):
@@ -66,15 +67,18 @@ class SensorlibIntegrationTestRunner(unittest.TestCase):
     def build_api_object(carla_world):
         return CarlaCDASimAPI.build_from_world(carla_world)
 
-    def launch_display_windows(self, sensor, carla_sensor_config):
+    def launch_display_windows(self, sensor, sensor_position, carla_sensor_config):
 
         # Construct a duplicate sensor to enable second callback registration
         lidar_bp = self.generate_lidar_bp(carla_sensor_config)
-        lidar_transform = sensor.get_sensor().carla_sensor.get_transform()
+        lidar_transform = carla.Transform(sensor_position)
         parent = None
         if sensor.get_parent_id() is not None:
             parent = self.carla_world.get_actor(sensor.get_parent_id())
         silent_carla_sensor = self.carla_world.spawn_actor(lidar_bp, lidar_transform, attach_to=parent)
+        time.sleep(0.2)
+        silent_carla_sensor.set_location(sensor_position)
+        print(f"launch_display_windows setting sensor_position {sensor_position} result {silent_carla_sensor.get_location()}")
 
         # Register callback for display
         point_list = o3d.geometry.PointCloud()
