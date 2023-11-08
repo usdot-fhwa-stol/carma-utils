@@ -24,7 +24,7 @@ class SimulatedSensorTestUtils:
     def generate_simulated_sensor_config():
         return {
             "prefilter": {
-                "allowed_type_id": ["Vehicles", "Pedestrians"],
+                "allowed_type_id_list": ["vehicles.*", "pedestrian.*"],
                 "max_distance_meters": 42
             },
             "detection_threshold_scaling_formula": {
@@ -69,23 +69,8 @@ class SimulatedSensorTestUtils:
             },
             "type_noise": {
                 "allowed_type_id": [
-                    "Buildings",
-                    "Fences",
-                    "Ground",
-                    "GuardRail",
-                    "Pedestrians",
-                    "Poles",
-                    "RoadLines",
-                    "Roads",
-                    "Sidewalks",
-                    "Sky",
-                    "Terrain",
-                    "TrafficLight",
-                    "TrafficSigns",
-                    "Vegetation",
-                    "Vehicles",
-                    "Walls",
-                    "Water"
+                    "vehicle",
+                    "pedestrian"
                 ]
             }
         }
@@ -139,16 +124,16 @@ class SimulatedSensorTestUtils:
         # Construct the DetectedObject
         simulated_sensor_config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
         detected_object = DetectedObjectBuilder.build_detected_object(carla_actor, simulated_sensor_config["prefilter"][
-            "allowed_type_id"])
+            "allowed_type_id_list"])
 
         # Construct additional DetectedObject by adjustment
         return [
-            replace(detected_object, id=0, object_type="Vehicles"),
-            replace(detected_object, id=1, object_type="Pedestrians"),
-            replace(detected_object, id=2, object_type="Pedestrians"),
-            replace(detected_object, id=3, object_type="Pedestrians"),
-            replace(detected_object, id=4, object_type="Vehicles"),
-            replace(detected_object, id=5, object_type="Vehicles")
+            replace(detected_object, id=0, object_type="vehicle"),
+            replace(detected_object, id=1, object_type="pedestrian"),
+            replace(detected_object, id=2, object_type="pedestrian"),
+            replace(detected_object, id=3, object_type="pedestrian"),
+            replace(detected_object, id=4, object_type="vehicle"),
+            replace(detected_object, id=5, object_type="vehicle")
         ]
 
     @staticmethod

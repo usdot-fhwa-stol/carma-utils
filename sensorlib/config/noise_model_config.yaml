@@ -8,5 +8,5 @@ std_deviations:
     position: [0.8, 0.8, 0.8]
     orientation: [0.1, 0.1, 0.1]
 type_noise:
-    allowed_type_id:
-        - vehicle.*
+    allowed_type_id_list:
+        - vehicle

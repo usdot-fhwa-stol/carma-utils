@@ -34,12 +34,12 @@ class DetectedObject:
 
 class DetectedObjectBuilder:
     @staticmethod
-    def build_detected_object(carla_actor, allowed_type_id):
-        object_type = CarlaUtils.determine_object_type(carla_actor, allowed_type_id)
+    def build_detected_object(carla_actor, allowed_type_id_list):
+        object_type = CarlaUtils.determine_object_type(carla_actor, allowed_type_id_list)
 
-        if (object_type == "NONE"):
+        if (object_type == "None"):
             return None
-        
+
         bounding_box = CarlaUtils.get_actor_bounding_box_points(carla_actor)
 
         if (bounding_box == None):

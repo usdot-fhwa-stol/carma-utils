@@ -8,6 +8,7 @@
 
 import carla
 import numpy as np
+import re
 from scipy.spatial.transform import Rotation
 
 
@@ -75,17 +76,26 @@ class CarlaUtils:
         return [CarlaUtils.vector3d_to_numpy(location) for location in bounding_box_locations]
 
     @staticmethod
-    def determine_object_type(carla_actor, allowed_type_id):
+    def determine_object_type(carla_actor, allowed_type_id_list):
         """
-        Check for identification as one of the accepted types, and mark unidentified otherwise.
+        Check for identification as one of the accepted types, and mark unidentified otherwise. Needed
+         to avoid immediate query to bounding box.
         :param carla_actor: The carla.Actor to obtain data from.
-        :param allowed_type_id: List of semantic tags which are allowed to be detected by the sensor.
+        :param allowed_type_id_list: List of semantic tags which are allowed to be detected by the sensor.
         :return: The object type, or NONE if not in the allowed list.
         """
-        # print(f"carla_actor.type_id = {carla_actor.type_id}")
-        if carla_actor.type_id in allowed_type_id:
+        if CarlaUtils.is_allowed_type(carla_actor.type_id, allowed_type_id_list):
             return carla_actor.type_id
-        return "None"
+        else:
+            return "None"
+
+    @staticmethod
+    def is_allowed_type(type_id, allowed_type_id_list):
+        for allowed_type_id in allowed_type_id_list:
+            if re.match(allowed_type_id, type_id):
+                return True
+
+        return False
 
     @staticmethod
     def get_transform(sensor_position, sensor_rotation):

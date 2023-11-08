@@ -1,6 +1,6 @@
 simulated_sensor:
   prefilter:
-    allowed_type_id:
+    allowed_type_id_list:
       - vehicle.*
     max_distance_meters: 30
   detection_threshold_scaling_formula:

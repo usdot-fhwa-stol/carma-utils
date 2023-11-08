@@ -68,7 +68,6 @@ class SemanticLidarSensor(SimulatedSensor):
         # Object cache
         self.__detected_objects = []
 
-
     # ------------------------------------------------------------------------------
     # Accessors
     # ------------------------------------------------------------------------------
@@ -118,7 +117,7 @@ class SemanticLidarSensor(SimulatedSensor):
         # Apply occlusion TODO!
         # https://usdot-carma.atlassian.net/browse/CDAR-435
         detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
-                                               detection_thresholds)
+                                                detection_thresholds)
 
         # Apply noise
         detected_objects = self.apply_noise(detected_objects)
@@ -146,10 +145,9 @@ class SemanticLidarSensor(SimulatedSensor):
         :return: DetectedObject wrappers objects referring to the actors.
         """
         actors = self.__carla_world.get_actors()
-        scene_objects = [DetectedObjectBuilder.build_detected_object(actor,
-                                                            self.__simulated_sensor_config["prefilter"][
-                                                                "allowed_type_id"])
-                for actor in actors]
+        allowed_type_id_list = self.__simulated_sensor_config["prefilter"]["allowed_type_id_list"]
+        scene_objects = [DetectedObjectBuilder.build_detected_object(actor, allowed_type_id_list)
+                         for actor in actors]
 
         # Remove invalid objects
         scene_objects = filter(lambda obj: obj is not None, scene_objects)
@@ -177,8 +175,8 @@ class SemanticLidarSensor(SimulatedSensor):
         # documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
 
         detected_objects = list(
-            filter(lambda obj: obj.object_type in self.__simulated_sensor_config["prefilter"]["allowed_type_id"],
-                   detected_objects))
+            filter(lambda obj: CarlaUtils.is_allowed_type(obj.object_type, self.__simulated_sensor_config["prefilter"][
+                "allowed_type_id_list"])))
 
         # Compute ranges
         object_ranges = dict(
@@ -428,7 +426,7 @@ class SemanticLidarSensor(SimulatedSensor):
         :return: Expected number of hitpoints in a scan across the specified field of view.
         """
         num_horizontal_points_per_scan = (
-                                                     self.__sensor.points_per_second / self.__sensor.rotation_frequency) / self.__sensor.number_of_channels
+                                                 self.__sensor.points_per_second / self.__sensor.rotation_frequency) / self.__sensor.number_of_channels
         horizontal_angular_resolution = self.__sensor.horizontal_fov / num_horizontal_points_per_scan
 
         num_vertical_points_per_scan = self.__sensor.number_of_channels
