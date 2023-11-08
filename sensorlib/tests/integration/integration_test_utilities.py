@@ -1,3 +1,4 @@
+from sensorlib.util.carla_loader import CarlaLoader
 import carla
 from util.simulated_sensor_utils import SimulatedSensorUtils
 
@@ -26,7 +27,7 @@ class IntegrationTestUtilities:
         return carla_world.spawn_actor(vehicle_bp, vehicle_transform)
 
     @staticmethod
-    def create_lidar_sensor(api, infrastructure_id, sensor_id, position):
+    def create_lidar_sensor(api, infrastructure_id, sensor_id, position, parent_id):
         detection_cycle_delay_seconds = 0.5
         sensor_config = SimulatedSensorUtils.load_config_from_file("config/simulated_sensor_config.yaml")
         simulated_sensor_config = sensor_config["simulated_sensor"]
@@ -38,4 +39,5 @@ class IntegrationTestUtilities:
                                                           noise_model_config,
                                                           detection_cycle_delay_seconds,
                                                           infrastructure_id, sensor_id,
-                                                          lidar_transform.location, lidar_transform.rotation)
+                                                          lidar_transform.location, lidar_transform.rotation,
+                                                          parent_id)

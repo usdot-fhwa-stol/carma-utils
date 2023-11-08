@@ -39,13 +39,14 @@ class CarlaCDASimServer:
     # Sensor Creation
     # ------------------------------------------------------------------------------
 
-    def create_simulated_semantic_lidar_sensor(self, infrastructure_id, sensor_id, sensor_position, sensor_rotation):
+    def create_simulated_semantic_lidar_sensor(self, infrastructure_id, sensor_id, sensor_position, sensor_rotation, parent_id=None):
         simulated_sensor = self.__api.create_simulated_semantic_lidar_sensor(self.__sensor_config["simulated_sensor"],
                                                                              self.__sensor_config["lidar_sensor"],
                                                                              self.__noise_model_config,
                                                                              self.__detection_cycle_delay_seconds,
                                                                              infrastructure_id, sensor_id,
-                                                                             sensor_position, sensor_rotation)
+                                                                             sensor_position, sensor_rotation,
+                                                                             parent_id)
         return str(simulated_sensor.get_id())
 
     # ------------------------------------------------------------------------------

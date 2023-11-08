@@ -30,7 +30,7 @@ class SemanticLidarSensor(SimulatedSensor):
     """
 
     def __init__(self, infrastructure_id, sensor_id, simulated_sensor_config, carla_sensor_config, carla_world, sensor,
-                 data_collector, noise_model):
+                 data_collector, noise_model, parent_id):
         """
         Constructor.
 
@@ -56,6 +56,7 @@ class SemanticLidarSensor(SimulatedSensor):
         self.__sensor = sensor
         self.__data_collector = data_collector
         self.__noise_model = noise_model
+        self.__parent_id = parent_id
 
         # Structures to store reassociation information
         self.__actor_id_association = {}
@@ -80,11 +81,6 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def compute_detected_objects(self):
-        detected_objects = self.get_scene_detected_objects()
-        self.__detected_objects = detected_objects
-        return detected_objects
-
-    def compute_detected_objects_full(self):
         """
         Main function used to query the currently-detected objects. Upon calling, the latest raw data cache is
         retrieved and sent through the processing pipeline to produce a list of DetectedObject objects.
@@ -146,10 +142,18 @@ class SemanticLidarSensor(SimulatedSensor):
         :return: DetectedObject wrappers objects referring to the actors.
         """
         actors = self.__carla_world.get_actors()
-        return [DetectedObjectBuilder.build_detected_object(actor,
+        scene_objects = [DetectedObjectBuilder.build_detected_object(actor,
                                                             self.__simulated_sensor_config["prefilter"][
                                                                 "allowed_semantic_tags"])
                 for actor in actors]
+
+        # Remove invalid objects
+        scene_objects = filter(lambda obj: obj is not None, scene_objects)
+
+        # Remove sensor's parent object if detected (LIDAR sensor detecting car to which it is attached)
+        scene_objects = filter(lambda obj: obj.id != self.__parent_id, scene_objects)
+
+        return scene_objects
 
     # ------------------------------------------------------------------------------
     # Prefilter
@@ -168,9 +172,6 @@ class SemanticLidarSensor(SimulatedSensor):
         # semantic_tags effectively specifies the type of detected_object Possible types are listed in the CARLA
         # documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
 
-        detected_objects = list(
-            filter(lambda obj: obj is not None, detected_objects))
-                
         detected_objects = list(
             filter(lambda obj: obj.object_type in self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"],
                    detected_objects))

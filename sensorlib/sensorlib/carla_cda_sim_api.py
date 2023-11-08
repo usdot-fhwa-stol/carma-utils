@@ -9,6 +9,7 @@
 import sched
 import threading
 import time
+from time import sleep
 
 from util.carla_loader import CarlaLoader
 import carla
@@ -75,7 +76,8 @@ class CarlaCDASimAPI:
     def create_simulated_semantic_lidar_sensor(self, simulated_sensor_config, carla_sensor_config, noise_model_config,
                                                detection_cycle_delay_seconds,
                                                infrastructure_id, sensor_id,
-                                               sensor_position, sensor_rotation):
+                                               sensor_position, sensor_rotation,
+                                               parent_id=None):
         """
         Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
         :param simulated_sensor_config: The configuration for the simulated sensor.
@@ -103,10 +105,20 @@ class CarlaCDASimAPI:
         # Retrieve the CARLA sensor
         blueprint_library = self.__carla_world.get_blueprint_library()
         sensor_bp = self.__generate_lidar_bp(blueprint_library, carla_sensor_config)
-        carla_sensor = self.__carla_world.spawn_actor(sensor_bp, sensor_transform)
+        parent = None
+        if parent_id is not None:
+            parent = self.__carla_world.get_actor(parent_id)
+        carla_sensor = self.__carla_world.spawn_actor(sensor_bp, sensor_transform, parent)
+
+        # Fix for CARLA not updating position immediately
+        sleep(0.2)
+        carla_sensor.set_location(sensor_position)
 
         # Build internal objects
         sensor = CarlaSensorBuilder.build_sensor(carla_sensor)
+        print(f"sensor_transform {sensor_transform}")
+        print(f"carla_sensor.get_location() {carla_sensor.get_location()}")
+        print(f"sensor position: {sensor.position}  {sensor_position}")
         data_collector = SensorDataCollector(self.__carla_world, carla_sensor)
         noise_model = NoiseModelFactory.get_noise_model(noise_model_config["noise_model_name"], noise_model_config)
 
@@ -114,7 +126,8 @@ class CarlaCDASimAPI:
         simulated_sensor = SemanticLidarSensor(infrastructure_id, sensor_id, simulated_sensor_config,
                                                carla_sensor_config,
                                                self.__carla_world, sensor,
-                                               data_collector, noise_model)
+                                               data_collector, noise_model,
+                                               parent_id)
 
         # Register the sensor
         self.__infrastructure_sensors[(infrastructure_id, sensor_id)] = simulated_sensor
@@ -124,7 +137,10 @@ class CarlaCDASimAPI:
         scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,
                         (scheduler, simulated_sensor, detection_cycle_delay_seconds))
         scheduler_thread = threading.Thread(target=scheduler.run)
-        print("Starting sensorlib compute.")
+        sleep(0.5)
+        print("*********************************")
+        print("** Starting sensorlib compute. **")
+        print("*********************************")
         scheduler_thread.start()
 
         return simulated_sensor

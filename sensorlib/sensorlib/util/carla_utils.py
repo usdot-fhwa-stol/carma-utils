@@ -16,9 +16,6 @@ class CarlaUtils:
     Generic CARLA utility functions.
     """
 
-    # CARLA semantic tag lookup table
-    CarlaCityObjectLabelLookup = dict([(id, name) for name, id in carla.CityObjectLabel.names.items()])
-
     @staticmethod
     def vector3d_to_numpy(vec):
         """
@@ -85,32 +82,10 @@ class CarlaUtils:
         :param allowed_semantic_tags: List of semantic tags which are allowed to be detected by the sensor.
         :return: The object type, or NONE if not in the allowed list.
         """
-
-        # TODO: Unable to determine object type: Not compliant with CARLA API, unable to retrive type via semantic tags or role_name attribute. Reason is object type retrieved via iteration, and through carla.World.get_actors().find() call, is carla.libcarla.Actor - not carla.Actor. No clear path to identify the object type as needed.
-        return allowed_semantic_tags[0]
-        # for tag in carla_actor.semantic_tags:
-        #     tag_name = CarlaUtils.get_semantic_tag_name(tag)
-        #     if tag_name in allowed_semantic_tags:
-        #         return tag_name
-        # return "NONE"
-
-    @staticmethod
-    def get_semantic_tag_name(tag_id):
-        """
-        Get the semantic tag name for a given tag ID.
-        :param tag_id: The integer tag ID to look up.
-        :return: The tag name.
-        """
-        return CarlaUtils.CarlaCityObjectLabelLookup.get(tag_id, "NONE")
-
-    @staticmethod
-    def get_semantic_tag_id(tag_name):
-        """
-        Get the integer semantic tag ID for a given tag name.
-        :param tag_name: The string tag name to look up.
-        :return: The tag ID.
-        """
-        return carla.CityObjectLabel.names.get(tag_name, 0)
+        # print(f"carla_actor.type_id = {carla_actor.type_id}")
+        if carla_actor.type_id in allowed_semantic_tags:
+            return carla_actor.type_id
+        return "None"
 
     @staticmethod
     def get_transform(sensor_position, sensor_rotation):
