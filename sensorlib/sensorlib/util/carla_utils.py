@@ -75,15 +75,15 @@ class CarlaUtils:
         return [CarlaUtils.vector3d_to_numpy(location) for location in bounding_box_locations]
 
     @staticmethod
-    def determine_object_type(carla_actor, allowed_semantic_tags):
+    def determine_object_type(carla_actor, allowed_type_id):
         """
         Check for identification as one of the accepted types, and mark unidentified otherwise.
         :param carla_actor: The carla.Actor to obtain data from.
-        :param allowed_semantic_tags: List of semantic tags which are allowed to be detected by the sensor.
+        :param allowed_type_id: List of semantic tags which are allowed to be detected by the sensor.
         :return: The object type, or NONE if not in the allowed list.
         """
         # print(f"carla_actor.type_id = {carla_actor.type_id}")
-        if carla_actor.type_id in allowed_semantic_tags:
+        if carla_actor.type_id in allowed_type_id:
             return carla_actor.type_id
         return "None"
 

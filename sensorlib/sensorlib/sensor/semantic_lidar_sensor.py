@@ -148,7 +148,7 @@ class SemanticLidarSensor(SimulatedSensor):
         actors = self.__carla_world.get_actors()
         scene_objects = [DetectedObjectBuilder.build_detected_object(actor,
                                                             self.__simulated_sensor_config["prefilter"][
-                                                                "allowed_semantic_tags"])
+                                                                "allowed_type_id"])
                 for actor in actors]
 
         # Remove invalid objects
@@ -177,7 +177,7 @@ class SemanticLidarSensor(SimulatedSensor):
         # documentation: https://carla.readthedocs.io/en/0.9.10/ref_sensors/#semantic-segmentation-camera
 
         detected_objects = list(
-            filter(lambda obj: obj.object_type in self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"],
+            filter(lambda obj: obj.object_type in self.__simulated_sensor_config["prefilter"]["allowed_type_id"],
                    detected_objects))
 
         # Compute ranges

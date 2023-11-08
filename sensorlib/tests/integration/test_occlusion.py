@@ -28,9 +28,9 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
         # Build vehicles
         vehicle_position = self.carla_world.get_map().get_spawn_points()[1].location
 
-        primary_vehicle = None
-        # primary_vehicle = IntegrationTestUtilities.create_vehicle(self.carla_world,
-        #                                                           vehicle_position + primary_vehicle_offset)
+        # primary_vehicle = None
+        primary_vehicle = IntegrationTestUtilities.create_vehicle(self.carla_world,
+                                                                  vehicle_position + primary_vehicle_offset)
         middle_object = IntegrationTestUtilities.create_object(self.carla_world,
                                                                vehicle_position + middle_object_offset)
         far_object = IntegrationTestUtilities.create_object(self.carla_world,
@@ -50,6 +50,11 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
         sensor_config = SimulatedSensorUtils.load_config_from_file("config/simulated_sensor_config.yaml")
         carla_sensor_config = sensor_config["lidar_sensor"]
         self.launch_display_windows(sensor, sensor_position, carla_sensor_config, point_list)
+
+        #TODO Rework associatoin logic to filter by type, then group solely on geometric proximity. Maybe
+        # best to use octree.
+
+        # TODO Implement geometry solution to bypass LIDAR sensor? Loses visible operation with LIDAR.
 
         # Wait
         sleep(1)

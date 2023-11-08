@@ -24,7 +24,7 @@ class SimulatedSensorTestUtils:
     def generate_simulated_sensor_config():
         return {
             "prefilter": {
-                "allowed_semantic_tags": ["Vehicles", "Pedestrians"],
+                "allowed_type_id": ["Vehicles", "Pedestrians"],
                 "max_distance_meters": 42
             },
             "detection_threshold_scaling_formula": {
@@ -68,7 +68,7 @@ class SimulatedSensorTestUtils:
                 "list_inclusion_noise": True
             },
             "type_noise": {
-                "allowed_semantic_tags": [
+                "allowed_type_id": [
                     "Buildings",
                     "Fences",
                     "Ground",
@@ -139,7 +139,7 @@ class SimulatedSensorTestUtils:
         # Construct the DetectedObject
         simulated_sensor_config = SimulatedSensorTestUtils.generate_simulated_sensor_config()
         detected_object = DetectedObjectBuilder.build_detected_object(carla_actor, simulated_sensor_config["prefilter"][
-            "allowed_semantic_tags"])
+            "allowed_type_id"])
 
         # Construct additional DetectedObject by adjustment
         return [
