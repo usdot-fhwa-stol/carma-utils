@@ -1,4 +1,5 @@
-from sensorlib.util.carla_loader import CarlaLoader
+import re
+
 import carla
 from util.simulated_sensor_utils import SimulatedSensorUtils
 
@@ -8,17 +9,18 @@ class IntegrationTestUtilities:
     @staticmethod
     def delete_simulation_objects(carla_world):
         actors = carla_world.get_actors()
-        actors = actors.filter("vehicle*")
-        for actor in actors:
-            actor.destroy()
+        for blueprint_name in ["vehicle.*", ".*pedestrian.*", ".*sensor.*"]:
+            filtered_actors = list(filter(lambda actor: re.match(blueprint_name, actor.type_id) is not None, actors))
+            for actor in filtered_actors:
+                actor.destroy()
 
     @staticmethod
-    def set_spectator_position(self, position, pitch, roll, yaw):
+    def set_spectator_position(carla_world, position, pitch, roll, yaw):
         transform = carla.Transform(position)
         transform.rotation.pitch = pitch
-        transform.rotation.pitch = roll
-        transform.rotation.pitch = yaw
-        spectator = carla.get_actors().find("spectator")
+        transform.rotation.roll = roll
+        transform.rotation.yaw = yaw
+        spectator = carla_world.get_spectator()
         spectator.set_transform(transform)
 
     @staticmethod

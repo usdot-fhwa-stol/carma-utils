@@ -112,19 +112,8 @@ class CarlaCDASimAPI:
         carla_sensor = self.__carla_world.spawn_actor(sensor_bp, sensor_transform, parent)
         print(f"api sensor_transform construction {sensor_transform}")
 
-        # Fix for CARLA not updating position immediately
+        # Delay for CARLA not updating position immediately
         sleep(0.2)
-        carla_sensor.set_location(sensor_position)
-        carla_sensor.set_location(sensor_position)
-        carla_sensor.set_location(sensor_position)
-        carla_sensor.set_location(sensor_position)
-        carla_sensor.set_location(sensor_position)
-        carla_sensor.set_location(sensor_position)
-        carla_sensor.set_location(sensor_position)
-        carla_sensor.set_location(sensor_position)
-        carla_sensor.set_location(sensor_position)
-        carla_sensor.set_location(sensor_position)
-        carla_sensor.set_location(sensor_position)
         carla_sensor.set_location(sensor_position)
         print(f"api setting sensor_position {sensor_position} result {carla_sensor.get_location()}")
 
@@ -143,7 +132,8 @@ class CarlaCDASimAPI:
         # Register the sensor
         self.__infrastructure_sensors[(infrastructure_id, sensor_id)] = simulated_sensor
 
-        sleep(0.5)
+        # Allow data collector time to populate
+        sleep(0.8)
 
         # Start compute thread
         scheduler = sched.scheduler(time.time, time.sleep)

@@ -92,7 +92,7 @@ class CarlaUtils:
     @staticmethod
     def is_allowed_type(type_id, allowed_type_id_list):
         for allowed_type_id in allowed_type_id_list:
-            if re.match(allowed_type_id, type_id):
+            if re.match(allowed_type_id, type_id) is not None:
                 return True
 
         return False

@@ -2,7 +2,8 @@ simulated_sensor:
   prefilter:
     allowed_type_id_list:
       - vehicle.*
-    max_distance_meters: 30
+      - .*pedestrian.*
+    max_distance_meters: 1000
   detection_threshold_scaling_formula:
     nominal_hitpoint_detection_ratio_threshold: 0.6
     hitpoint_detection_ratio_threshold_per_meter_change_rate: -0.0033
@@ -14,9 +15,9 @@ simulated_sensor:
     trailing_id_associations_count: 2
   use_sensor_centric_frame: True
 lidar_sensor:
-  lower_fov: -80.0
-  upper_fov: 30.0
-  channels: 512
+  lower_fov: -10.0
+  upper_fov: 15.0
+  channels: 64
   range: 100.0
-  rotation_period: 0.01
-  points_per_second: 1000000
+  rotation_period: 0.02
+  points_per_second: 100000

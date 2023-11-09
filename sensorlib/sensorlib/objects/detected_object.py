@@ -37,7 +37,7 @@ class DetectedObjectBuilder:
     def build_detected_object(carla_actor, allowed_type_id_list):
         object_type = CarlaUtils.determine_object_type(carla_actor, allowed_type_id_list)
 
-        if (object_type == "None"):
+        if object_type == "None":
             return None
 
         bounding_box = CarlaUtils.get_actor_bounding_box_points(carla_actor)

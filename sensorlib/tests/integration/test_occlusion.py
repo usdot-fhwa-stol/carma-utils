@@ -28,20 +28,17 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
 
         # Orient the spectator
         primary_vehicle_position = self.carla_world.get_map().get_spawn_points()[1].location
-        IntegrationTestUtilities.set_spectator_position(primary_vehicle_position + carla.Location(10.0, -40.0, 20.0),
-                                                        0.0, 0.0, 0.0)
+        IntegrationTestUtilities.set_spectator_position(self.carla_world, primary_vehicle_position + carla.Location(10.0, 40.0, 20.0),
+                                                        -10.0, 0.0, -90.0)
 
         # Build vehicles
-        primary_vehicle = IntegrationTestUtilities.create_vehicle(self.carla_world,
-                                                                  primary_vehicle_position + primary_vehicle_offset)
+        # primary_vehicle = IntegrationTestUtilities.create_vehicle(self.carla_world,
+        #                                                           primary_vehicle_position + primary_vehicle_offset)
         middle_object = IntegrationTestUtilities.create_vehicle(self.carla_world,
                                                                primary_vehicle_position + middle_object_offset)
 
         far_object = IntegrationTestUtilities.create_pedestrian(self.carla_world,
                                                             primary_vehicle_position + far_object_offset)
-
-
-
 
         # Build sensor, including display callback
         sensor_position = primary_vehicle_position + carla.Location(0.0, 0.0, 0.5)
@@ -58,15 +55,11 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
         carla_sensor_config = sensor_config["lidar_sensor"]
         self.launch_display_windows(sensor, sensor_position, carla_sensor_config, point_list)
 
-        #TODO Rework associatoin logic to filter by type, then group solely on geometric proximity. Maybe
-        # best to use octree.
-
-        # TODO Implement geometry solution to bypass LIDAR sensor? Loses visible operation with LIDAR.
-
         # Wait
         sleep(1)
 
-        return primary_vehicle, middle_object, far_object
+        return middle_object, far_object
+        # return primary_vehicle, middle_object, far_object
 
     def test_non_occluded(self):
 

@@ -99,7 +99,7 @@ class SensorlibIntegrationTestRunner(unittest.TestCase):
                     print(f"ID: {detected_objects.get_id()}")
 
             # This can fix Open3D jittering issues:
-            time.sleep(0.005)
+            time.sleep(0.002)  # 0.05
             self.carla_world.tick()
             frame += 1
 

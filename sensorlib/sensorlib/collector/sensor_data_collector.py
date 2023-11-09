@@ -42,6 +42,9 @@ class SensorDataCollector:
         # Register callback to collect data
         self.__carla_sensor.listen(self.__collect_sensor_data)
 
+        # self.custom_callback_frame_count = 0
+        # self.custom_callback_frame_limit = 10
+
     def get_carla_lidar_hitpoints(self):
         """
         Prior collection is always complete.
@@ -79,6 +82,10 @@ class SensorDataCollector:
         # Execute any custom callback
         if self.__custom_callback is not None:
             return self.__custom_callback(semantic_sensor_data)
+            # self.custom_callback_frame_count += 1
+            # if self.custom_callback_frame_count >= self.custom_callback_frame_limit:
+            #     self.custom_callback_frame_count = 0
+            #     return self.__custom_callback(semantic_sensor_data)
 
     def __collect_raw_point_data(self, grouped_data, raw_sensor_data):
         """
@@ -89,16 +96,16 @@ class SensorDataCollector:
         :return: None
         """
 
-        # Extract geometric hitpoints and group them by type_id
-        # The resulting dictionary maps actor type_id to a list of hitpoints
+        # Extract geometric hitpoints and group them by object_tag
+        # The resulting dictionary maps actor object_tag to a list of hitpoints
         for detection in raw_sensor_data:
             point = CarlaUtils.vector3d_to_numpy(detection.point)
             # print(f"detection {detection}")
-            if detection.type_id not in grouped_data:
-                # print(f"Data collector inserting new point type_id {detection.type_id}")
-                grouped_data[detection.type_id] = [point]
+            if detection.object_tag not in grouped_data:
+                # print(f"Data collector inserting new point object_tag {detection.object_tag}")
+                grouped_data[detection.object_tag] = [point]
             else:
-                grouped_data[detection.type_id].append(point)
+                grouped_data[detection.object_tag].append(point)
 
     def __is_same_data_collection(self, sensor_rotation_angle):
         """
