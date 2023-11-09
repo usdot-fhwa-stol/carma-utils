@@ -43,7 +43,7 @@ class SemanticLidarSensor(SimulatedSensor):
         :param carla_world: Reference to the CARLA world object.
         :param sensor: CarlaSensor object wrapping the CARLA sensor actor.
         :param data_collector: DataCollector object handling collection and caching of raw sensor data from the CARLA simulation.
-        :param noise_model: Noise model available to be used for nosie application to the output data.
+        :param noise_model: Noise model available to be used for noise application to the output data.
         """
 
         # Configuration
@@ -118,7 +118,7 @@ class SemanticLidarSensor(SimulatedSensor):
         # https://usdot-carma.atlassian.net/browse/CDAR-435
         #detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
         #                                        detection_thresholds)
-        
+
         # Apply noise
         detected_objects = self.apply_noise(detected_objects)
 
@@ -140,7 +140,7 @@ class SemanticLidarSensor(SimulatedSensor):
     def get_scene_detected_objects(self):
         """
         Retrieve the current objects in scene. This collection is considered the "truth state" as it contains the set
-        of objects in the world, as well as their positions, orientations, and variosu other state data.
+        of objects in the world, as well as their positions, orientations, and various other state data.
 
         :return: DetectedObject wrappers objects referring to the actors.
         """
@@ -169,7 +169,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         detected_objects = list(
             filter(lambda obj: obj is not None, detected_objects))
-                
+
         detected_objects = list(
             filter(lambda obj: obj.object_type in self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"],
                    detected_objects))
@@ -251,11 +251,25 @@ class SemanticLidarSensor(SimulatedSensor):
     # ------------------------------------------------------------------------------
 
     def sample_hitpoints(self, hitpoints, sample_size):
-        """Randomly sample points inside each object's set of LIDAR hitpoints. This is done to reduce size of the
-        data being sent through the distance computation."""
-        return dict(
-            [(obj_id, self.__rng.choice(object_hitpoints, sample_size, replace=False)) for obj_id, object_hitpoints in
-             hitpoints.items()])
+        """Down sample each object's hitpoint list
+
+        Randomly sample points inside each object's set of LIDAR
+        hitpoints. This is done to reduce size of the data being sent
+        through the distance computation. If the hitpoint population of
+        a specific object is less than the sample size, the whole
+        hitpoint population will be used (i.e., the object's list of
+        hitpoints will remain unchanged).
+
+        :param hitpoints: lidar points associated with each object
+        :param sample_size: maximum size of the object's new hitpoint list
+        :return: downsampled hitpoints
+        """
+        return {
+            # The choice() function will raise an error if we try to
+            # sample more than the population
+            id_: self.__rng.choice(points, min(len(points), sample_size), replace=False)
+            for id_, points in hitpoints.items()
+        }
 
     # ------------------------------------------------------------------------------
     # Geometry Re-Association: Instantaneous Association
@@ -417,7 +431,7 @@ class SemanticLidarSensor(SimulatedSensor):
         """
         Compute the expected number of hitpoints for the given field of view. This result is heavily determined by
         the CARLA sensor configuration.
-        
+
         :param horizontal_fov: Horizontal field of view in radians.
         :param vertical_fov: Vertical field of view in radians.
         :return: Expected number of hitpoints in a scan across the specified field of view.
