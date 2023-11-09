@@ -43,7 +43,7 @@ class SemanticLidarSensor(SimulatedSensor):
         :param carla_world: Reference to the CARLA world object.
         :param sensor: CarlaSensor object wrapping the CARLA sensor actor.
         :param data_collector: DataCollector object handling collection and caching of raw sensor data from the CARLA simulation.
-        :param noise_model: Noise model available to be used for nosie application to the output data.
+        :param noise_model: Noise model available to be used for noise application to the output data.
         """
 
         # Configuration
@@ -116,7 +116,7 @@ class SemanticLidarSensor(SimulatedSensor):
         # https://usdot-carma.atlassian.net/browse/CDAR-435
         #detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
         #                                        detection_thresholds)
-        
+
         # Apply noise
         detected_objects = self.apply_noise(detected_objects)
 
@@ -138,7 +138,7 @@ class SemanticLidarSensor(SimulatedSensor):
     def get_scene_detected_objects(self):
         """
         Retrieve the current objects in scene. This collection is considered the "truth state" as it contains the set
-        of objects in the world, as well as their positions, orientations, and variosu other state data.
+        of objects in the world, as well as their positions, orientations, and various other state data.
 
         :return: DetectedObject wrappers objects referring to the actors.
         """
@@ -167,14 +167,16 @@ class SemanticLidarSensor(SimulatedSensor):
 
         detected_objects = list(
             filter(lambda obj: obj is not None, detected_objects))
-                
+
         detected_objects = list(
             filter(lambda obj: obj.object_type in self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"],
                    detected_objects))
 
         # Compute ranges
+        sensor_location = self.__sensor.carla_sensor.get_location()
+        sensor_location_np = np.array([sensor_location.x, sensor_location.y, sensor_location.z])
         object_ranges = dict(
-            [(obj.id, np.linalg.norm(obj.position - self.__sensor.position)) for obj in detected_objects])
+            [(obj.id, np.linalg.norm(obj.position - sensor_location_np)) for obj in detected_objects])
 
         # Filter by radius
         detected_objects = list(
@@ -216,12 +218,14 @@ class SemanticLidarSensor(SimulatedSensor):
 
     def compute_horizontal_angular_offset(self, vec):
         """Compute horizontal angle of a vector in relation to the sensor, as measured from the x axis."""
-        p = vec - self.__sensor.position  # Position vector relative to sensor
+        sensor_location = self.__sensor.carla_sensor.get_location()
+        p = vec - np.array([sensor_location.x, sensor_location.y, sensor_location.z])  # Position vector relative to sensor
         return np.arctan2(p[1], p[0])
 
     def compute_vertical_angular_offset(self, vec):
         """Compute the vertical angle of a vector in relation to the sensor, as measured from the x-y plane."""
-        p = vec - self.__sensor.position
+        sensor_location = self.__sensor.carla_sensor.get_location()
+        p = vec - np.array([sensor_location.x, sensor_location.y, sensor_location.z])
         return np.arcsin(p[2] / np.linalg.norm(p))
 
     def compute_adjusted_detection_thresholds(self, detected_objects, object_ranges):
@@ -415,7 +419,7 @@ class SemanticLidarSensor(SimulatedSensor):
         """
         Compute the expected number of hitpoints for the given field of view. This result is heavily determined by
         the CARLA sensor configuration.
-        
+
         :param horizontal_fov: Horizontal field of view in radians.
         :param vertical_fov: Vertical field of view in radians.
         :return: Expected number of hitpoints in a scan across the specified field of view.
@@ -485,7 +489,8 @@ class SemanticLidarSensor(SimulatedSensor):
         # If enabled, convert coordinates to sensor-centric frame
         new_position = obj.position
         if self.__simulated_sensor_config["use_sensor_centric_frame"]:
-            new_position = np.subtract(obj.position, self.__sensor.position)
+            sensor_location = self.__sensor.carla_sensor.get_location()
+            new_position = np.subtract(obj.position, np.array([sensor_location.x, sensor_location.y, sensor_location.z]))
 
         return replace(obj,
                        object_type=new_object_type,
