@@ -10,17 +10,17 @@ import sched
 import threading
 import time
 
-from src.util.CarlaLoader import CarlaLoader
+from util.CarlaLoader import CarlaLoader
 CarlaLoader.load_carla_lib()
 import carla
 import sys
 sys.path.append('../')
 
-from src.collector.SensorDataCollector import SensorDataCollector
-from src.noise_models.NoiseModelFactory import NoiseModelFactory
-from src.objects.CarlaSensor import CarlaSensorBuilder
-from src.sensor.SemanticLidarSensor import SemanticLidarSensor
-from src.util.CarlaUtils import CarlaUtils
+from collector.SensorDataCollector import SensorDataCollector
+from noise_models.NoiseModelFactory import NoiseModelFactory
+from objects.CarlaSensor import CarlaSensorBuilder
+from sensor.SemanticLidarSensor import SemanticLidarSensor
+from util.CarlaUtils import CarlaUtils
 
 
 class CarlaCDASimAPI:
@@ -35,6 +35,7 @@ class CarlaCDASimAPI:
 
     @staticmethod
     def build_from_host_spec(carla_host, carla_port):
+        print(f"connecting to carla {carla_host}:{carla_port}")
         """
         Build an API instance.
 

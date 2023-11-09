@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
-from src.collector.SensorDataCollector import SensorDataCollector
+from collector.SensorDataCollector import SensorDataCollector
 
 
 class TestSensorDataCollector(unittest.TestCase):

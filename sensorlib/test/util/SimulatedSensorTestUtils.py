@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 
 import carla
 
-from src.objects.DetectedObject import DetectedObjectBuilder
+from objects.DetectedObject import DetectedObjectBuilder
 
 
 class SimulatedSensorTestUtils:

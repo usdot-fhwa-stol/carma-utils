@@ -12,10 +12,10 @@ from dataclasses import replace
 import numpy as np
 from scipy.spatial import distance
 
-from src.objects.DetectedObject import DetectedObjectBuilder
-from src.sensor.SimulatedSensor import SimulatedSensor
-from src.util.CarlaUtils import CarlaUtils
-from src.util.HistoricalMapper import HistoricalMapper
+from objects.DetectedObject import DetectedObjectBuilder
+from sensor.SimulatedSensor import SimulatedSensor
+from util.CarlaUtils import CarlaUtils
+from util.HistoricalMapper import HistoricalMapper
 
 
 

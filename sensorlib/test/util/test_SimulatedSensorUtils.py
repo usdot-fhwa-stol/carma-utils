@@ -12,7 +12,7 @@ import unittest
 import numpy as np
 import yaml
 
-from src.util.SimulatedSensorUtils import SimulatedSensorUtils
+from util.SimulatedSensorUtils import SimulatedSensorUtils
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 

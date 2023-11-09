@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 import carla
 import numpy as np
 
-from src.objects.CarlaSensor import CarlaSensorBuilder
+from objects.CarlaSensor import CarlaSensorBuilder
 
 
 class TestCarlaSensor(unittest.TestCase):

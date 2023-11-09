@@ -12,8 +12,8 @@ import threading
 from xmlrpc.server import SimpleXMLRPCServer
 import sys
 sys.path.append('../')
-from src.CarlaCDASimAPI import CarlaCDASimAPI
-from src.util.SimulatedSensorUtils import SimulatedSensorUtils
+from CarlaCDASimAPI import CarlaCDASimAPI
+from util.SimulatedSensorUtils import SimulatedSensorUtils
 
 class CarlaCDASimAdapter:
     # Holds Sensor configuration object
@@ -112,12 +112,12 @@ if __name__ == "__main__":
         help="XML-RPC server port. (default: 8000)")
     arg_parser.add_argument(
         "--sensor-config-file",
-        default="../config/simulated_sensor_config.yaml",
+        default="./config/simulated_sensor_config.yaml",
         type=str,
         help="Path to sensor configuration file. (default: ../config/simulated_sensor_config.yaml)")
     arg_parser.add_argument(
         "--noise-model-config-file",
-        default="../config/noise_model_config.yaml",
+        default="./config/noise_model_config.yaml",
         type=str,
         help="Path to noise mode configuration file. (default: ../config/noise_model_config.yaml)")
     arg_parser.add_argument(
