@@ -70,9 +70,9 @@ optional arguments:
   --xmlrpc-server-port XMLRPC_SERVER_PORT
                         XML-RPC server port. (default: 8000)
   --sensor-config-file
-                        Configuration file used for sensor creation.(*default :"../config/simulated_sensor_config.yaml")
+                        Configuration file used for sensor creation.(*default :"./config/simulated_sensor_config.yaml")
   --noise-model-config-file
-                        Configuration file used for setting up noise model for sensors(*default :"../config/noise_model_config.yaml")
+                        Configuration file used for setting up noise model for sensors(*default :"./config/noise_model_config.yaml")
   --detection-cycle-delay-seconds
                         Time interval in seconds between detection reporting. (default: 0.5)
 ```
