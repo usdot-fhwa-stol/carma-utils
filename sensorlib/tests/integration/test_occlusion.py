@@ -25,21 +25,26 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
     def setup_occlusion_test(self, infrastructure_id, sensor_id,
                              primary_vehicle_offset, middle_object_offset, far_object_offset):
 
+
+        # Orient the spectator
+        primary_vehicle_position = self.carla_world.get_map().get_spawn_points()[1].location
+        IntegrationTestUtilities.set_spectator_position(primary_vehicle_position + carla.Location(10.0, -40.0, 20.0),
+                                                        0.0, 0.0, 0.0)
+
         # Build vehicles
-        vehicle_position = self.carla_world.get_map().get_spawn_points()[1].location
-
-        # primary_vehicle = None
         primary_vehicle = IntegrationTestUtilities.create_vehicle(self.carla_world,
-                                                                  vehicle_position + primary_vehicle_offset)
-        middle_object = IntegrationTestUtilities.create_object(self.carla_world,
-                                                               vehicle_position + middle_object_offset)
+                                                                  primary_vehicle_position + primary_vehicle_offset)
+        middle_object = IntegrationTestUtilities.create_vehicle(self.carla_world,
+                                                               primary_vehicle_position + middle_object_offset)
 
-        TODO Make pedestrian
-        far_object = IntegrationTestUtilities.create_object(self.carla_world,
-                                                            vehicle_position + far_object_offset)
+        far_object = IntegrationTestUtilities.create_pedestrian(self.carla_world,
+                                                            primary_vehicle_position + far_object_offset)
+
+
+
 
         # Build sensor, including display callback
-        sensor_position = vehicle_position + carla.Location(0.0, 0.0, 0.5)
+        sensor_position = primary_vehicle_position + carla.Location(0.0, 0.0, 0.5)
         point_list = o3d.geometry.PointCloud()
         sensor = IntegrationTestUtilities.create_lidar_sensor(self.api,
                                                               infrastructure_id, sensor_id,

@@ -13,18 +13,27 @@ class IntegrationTestUtilities:
             actor.destroy()
 
     @staticmethod
-    def create_vehicle(carla_world, position):
-        blueprint_library = carla_world.get_blueprint_library()
-        vehicle_bp = blueprint_library.filter("model3")[0]
-        vehicle_transform = carla.Transform(position)
-        return carla_world.spawn_actor(vehicle_bp, vehicle_transform)
+    def set_spectator_position(self, position, pitch, roll, yaw):
+        transform = carla.Transform(position)
+        transform.rotation.pitch = pitch
+        transform.rotation.pitch = roll
+        transform.rotation.pitch = yaw
+        spectator = carla.get_actors().find("spectator")
+        spectator.set_transform(transform)
 
     @staticmethod
-    def create_object(carla_world, position):
+    def create_vehicle(carla_world, position):
         blueprint_library = carla_world.get_blueprint_library()
-        vehicle_bp = blueprint_library.filter("model3")[0]
-        vehicle_transform = carla.Transform(position)
-        return carla_world.spawn_actor(vehicle_bp, vehicle_transform)
+        bp = blueprint_library.filter("model3")[0]
+        transform = carla.Transform(position)
+        return carla_world.spawn_actor(bp, transform)
+
+    @staticmethod
+    def create_pedestrian(carla_world, position):
+        blueprint_library = carla_world.get_blueprint_library()
+        pedestrian_bp = blueprint_library.filter('*walker.pedestrian*')[0]
+        transform = carla.Transform(position)
+        return carla_world.spawn_actor(pedestrian_bp, transform)
 
     @staticmethod
     def create_lidar_sensor(api, infrastructure_id, sensor_id, position, parent_id=None, custom_callback=None):
