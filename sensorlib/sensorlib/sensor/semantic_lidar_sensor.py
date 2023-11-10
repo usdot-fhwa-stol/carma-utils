@@ -12,6 +12,8 @@ from dataclasses import replace
 import numpy as np
 from scipy.spatial import distance
 
+import carla
+
 from objects.detected_object import DetectedObjectBuilder
 from sensor.simulated_sensor import SimulatedSensor
 from util.historical_mapper import HistoricalMapper
@@ -67,6 +69,8 @@ class SemanticLidarSensor(SimulatedSensor):
         # Object cache
         self.__detected_objects = []
 
+        self.debugging_data_file = open("distances.csv", "w")
+
     # ------------------------------------------------------------------------------
     # Primary functions
     # ------------------------------------------------------------------------------
@@ -89,6 +93,7 @@ class SemanticLidarSensor(SimulatedSensor):
         timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
 
         # Compute data needed for occlusion operation
+        has_rotated = self.__data_collector.has_rotated
         actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
 
         # Instantaneous geometry association
@@ -98,21 +103,22 @@ class SemanticLidarSensor(SimulatedSensor):
                                                                                              detected_objects)
 
         # TODO Debugging
-        instantaneous_actor_id_association = {
-            11: detected_objects[0].id,
-            4: detected_objects[1].id
-        }
-
+        # instantaneous_actor_id_association = {
+        #     11: detected_objects[0].id,
+        #     4: detected_objects[1].id
+        # }
 
         # Geometry re-association
         self.update_actor_id_association(instantaneous_actor_id_association)
         # hitpoints = self.update_hitpoint_ids_from_association(hitpoints)
 
         # TODO Debugging
-        old_hitpoints = hitpoints
-        hitpoints = {detected_objects[0].id: old_hitpoints[11]}
-        if 4 in old_hitpoints:
-            hitpoints[detected_objects[1].id] = old_hitpoints[4]
+        # old_hitpoints = hitpoints
+        # hitpoints = {detected_objects[0].id: old_hitpoints[11]}
+        # self.__carla_world.debug.draw_point(hitpoints[detected_objects[0].id][0], size=3, color=carla.Color(0, 0, 255),
+        #                                     life_time=100000)
+        # if 4 in old_hitpoints:
+        #     hitpoints[detected_objects[1].id] = old_hitpoints[4]
 
         # Apply occlusion
         print(f"Before {len(detected_objects)}")
@@ -270,6 +276,13 @@ class SemanticLidarSensor(SimulatedSensor):
              hit_id, hitpoint_list in
              hitpoints.items()])
 
+
+
+
+
+
+
+
         # Vote within each dictionary key
         id_association = [(hit_id, self.vote_most_frequent_id(object_id_list)) for hit_id, object_id_list in
                           direct_nearest_neighbors.items()]
@@ -277,7 +290,8 @@ class SemanticLidarSensor(SimulatedSensor):
         # Filter unassociated hitpoints
         return dict(filter(lambda x: x[1] is not None, id_association))
 
-    def compute_closest_object_id_list(self, hitpoint_list, scene_objects, object_positions, geometry_association_max_distance_threshold):
+    def compute_closest_object_id_list(self, hitpoint_list, scene_objects, object_positions,
+                                       geometry_association_max_distance_threshold):
         """Get the closest objects to each hitpoint."""
         return [self.compute_closest_object_id(hitpoint, scene_objects, object_positions,
                                                geometry_association_max_distance_threshold) for
@@ -294,7 +308,7 @@ class SemanticLidarSensor(SimulatedSensor):
         if len(distances_list) <= 0 or len(distances_list[0]) <= 0:
             return None
         distances = distances_list[0]
-        # print(f"distances {distances}")
+        # self.debugging_data_file.write(f"distances {distances_list}\n")
         closest_index = np.argmin(distances)
 
         # May result from bad or empty data
@@ -414,12 +428,11 @@ class SemanticLidarSensor(SimulatedSensor):
         :param vertical_fov: Vertical field of view in radians.
         :return: Expected number of hitpoints in a scan across the specified field of view.
         """
-        num_horizontal_points_per_scan = ((float(self._sensor.points_per_second) / float(self._sensor.rotation_frequency))
-                                          / float(self._sensor.number_of_channels))
-        horizontal_angular_resolution = float(self._sensor.horizontal_fov) / num_horizontal_points_per_scan
+        num_horizontal_points_per_scan = (self._sensor.points_per_second / self._sensor.rotation_frequency) / self._sensor.number_of_channels
+        horizontal_angular_resolution = self._sensor.horizontal_fov / num_horizontal_points_per_scan
 
-        num_vertical_points_per_scan = float(self._sensor.number_of_channels)
-        vertical_angular_resolution = float(self._sensor.vertical_fov) / num_vertical_points_per_scan
+        num_vertical_points_per_scan = self._sensor.number_of_channels
+        vertical_angular_resolution = self._sensor.vertical_fov / num_vertical_points_per_scan
 
         return (horizontal_fov / horizontal_angular_resolution) * (vertical_fov / vertical_angular_resolution)
 

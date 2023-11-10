@@ -45,6 +45,9 @@ class SensorDataCollector:
         # self.custom_callback_frame_count = 0
         # self.custom_callback_frame_limit = 10
 
+        self.debugging_data_file = open("detections.csv", "w")
+        self.has_rotated=False
+
     def get_carla_lidar_hitpoints(self):
         """
         Prior collection is always complete.
@@ -70,6 +73,7 @@ class SensorDataCollector:
         # Check if this data collection belongs to the same data collection run as the previous time step
         sensor_rotation_angle = semantic_sensor_data.horizontal_angle
         if not self.__is_same_data_collection(sensor_rotation_angle):
+            self.has_rotated=True
             # Finalize current collection and append a new collection
             self.__data.appendleft({})
 
@@ -100,10 +104,11 @@ class SensorDataCollector:
         # The resulting dictionary maps actor object_tag to a list of hitpoints
         for detection in raw_sensor_data:
             point = CarlaUtils.vector3d_to_numpy(detection.point)
-            # print(f"detection {detection}")
+            # self.debugging_data_file.write(f"detection {detection} point {point}\n")
             if detection.object_tag not in grouped_data:
                 # print(f"Data collector inserting new point object_tag {detection.object_tag}")
                 grouped_data[detection.object_tag] = [point]
+                # print(f"point ({detection.object_tag}) {point}")
             else:
                 grouped_data[detection.object_tag].append(point)
 
