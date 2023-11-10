@@ -61,6 +61,8 @@ class SensorlibIntegrationTestRunner(unittest.TestCase):
         # Remove previous integration test artifacts
         IntegrationTestUtilities.delete_simulation_objects(self.carla_world)
 
+        self.is_bounding_box_rendering_enabled = os.getenv("ENABLE_BOUNDING_BOX_RENDERING")
+
     @staticmethod
     def get_carla_connection(carla_host, carla_port):
         client = carla.Client(carla_host, carla_port)
@@ -108,6 +110,13 @@ class SensorlibIntegrationTestRunner(unittest.TestCase):
 
             # This can fix Open3D jittering issues:
             time.sleep(0.002)  # 0.05
+
+            # Display bounding boxes
+            if self.is_bounding_box_rendering_enabled:
+                self.display_bounding_boxes()
+
+
+
             self.carla_world.tick()
             frame += 1
 
@@ -154,3 +163,76 @@ class SensorlibIntegrationTestRunner(unittest.TestCase):
 
         point_list.points = o3d.utility.Vector3dVector(points)
         point_list.colors = o3d.utility.Vector3dVector(int_color)
+
+    def display_bounding_boxes(self, observer, object_transform, bbox):
+
+        # Source: https://carla.readthedocs.io/en/latest/tuto_G_bounding_boxes/
+
+        bounding_box_list = self.carla_world.get_level_bbs()
+        bounding_box_list = [actor.get_world_vertices(actor.get_transform()) for
+                             obj in detected_objects]
+
+        edges = [[0,1], [1,3], [3,2], [2,0], [0,4], [4,5], [5,1], [5,7], [7,6], [6,4], [6,2], [7,3]]
+
+
+        # Retrieve and reshape the image
+        image = image_queue.get()
+
+        img = np.reshape(np.copy(image.raw_data), (image.height, image.width, 4))
+
+        # Get the camera matrix
+        world_2_camera = np.array(observer.get_transform().get_inverse_matrix())
+        w = 500
+        h = 500
+        fov = 60.0
+        K = self.build_projection_matrix(w, h, fov)
+
+        # Calculate the dot product between the forward vector
+        # of the vehicle and the vector between the vehicle
+        # and the bounding box. We threshold this dot product
+        # to limit to drawing bounding boxes IN FRONT OF THE CAMERA
+        forward_vec = object_transform.get_forward_vector()
+        ray = bbox.location - object_transform.location
+
+        if forward_vec.dot(ray) > 1:
+            # Cycle through the vertices
+            verts = [v for v in bbox.get_world_vertices(carla.Transform())]
+            for edge in edges:
+                # Join the vertices into edges
+                p1 = self.get_image_point(verts[edge[0]], K, world_2_camera)
+                p2 = self.get_image_point(verts[edge[1]], K, world_2_camera)
+                # Draw the edges into the camera output
+                cv2.line(img, (int(p1[0]),int(p1[1])), (int(p2[0]),int(p2[1])), (0,0,255, 255), 1)
+
+
+        cv2.imshow('ImageWindowName',img)
+
+
+    def build_projection_matrix(self, w, h, fov):
+        focal = w / (2.0 * np.tan(fov * np.pi / 360.0))
+        K = np.identity(3)
+        K[0, 0] = K[1, 1] = focal
+        K[0, 2] = w / 2.0
+        K[1, 2] = h / 2.0
+        return K
+
+    def get_image_point(self, loc, K, w2c):
+        # Calculate 2D projection of 3D coordinate
+
+        # Format the input coordinate (loc is a carla.Position object)
+        point = np.array([loc.x, loc.y, loc.z, 1])
+        # transform to camera coordinates
+        point_camera = np.dot(w2c, point)
+
+        # New we must change from UE4's coordinate system to an "standard"
+        # (x, y ,z) -> (y, -z, x)
+        # and we remove the fourth componebonent also
+        point_camera = [point_camera[1], -point_camera[2], point_camera[0]]
+
+        # now project 3D->2D using the camera matrix
+        point_img = np.dot(K, point_camera)
+        # normalize
+        point_img[0] /= point_img[2]
+        point_img[1] /= point_img[2]
+
+        return point_img[0:2]

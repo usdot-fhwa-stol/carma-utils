@@ -75,7 +75,7 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
 
         # Get detected objects removing the primary vehicle from consideration
         detected_objects = self.api.get_detected_objects(infrastructure_id, sensor_id)
-        # TODO detected_objects = list(filter(lambda item: item.id != primary_vehicle.id, detected_objects))
+        detected_objects = list(filter(lambda item: item.id != primary_vehicle.id, detected_objects))
 
         # Test number of detected objects
         print(f"Number of detected_objects: {len(detected_objects)}")
@@ -97,7 +97,7 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
 
         # Get detected objects removing the primary vehicle from consideration
         detected_objects = self.api.get_detected_objects(infrastructure_id, sensor_id)
-        # TODO detected_objects = list(filter(lambda item: item.id != primary_vehicle.id, detected_objects))
+        detected_objects = list(filter(lambda item: item.id != primary_vehicle.id, detected_objects))
 
         # Test number of detected objects
         print(f"Number of detected_objects: {len(detected_objects)}")
