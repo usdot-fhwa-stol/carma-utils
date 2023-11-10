@@ -92,11 +92,11 @@ class SensorlibIntegrationTestRunner(unittest.TestCase):
             vis.poll_events()
             vis.update_renderer()
 
-            if frame % 120 == 0:
-                detected_objects = sensor.get_detected_objects()
-                print(f"Detected objects: {len(detected_objects)} objects")
-                for detected_object in detected_objects:
-                    print(f"ID: {detected_objects.get_id()}")
+            # if frame % 120 == 0:
+                # detected_objects = sensor.get_detected_objects()
+                # print(f"Detected objects: {len(detected_objects)} objects")
+                # for detected_object in detected_objects:
+                #     print(f"ID: {detected_objects.get_id()}")
 
             # This can fix Open3D jittering issues:
             time.sleep(0.002)  # 0.05

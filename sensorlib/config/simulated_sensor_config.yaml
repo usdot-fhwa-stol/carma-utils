@@ -10,7 +10,7 @@ simulated_sensor:
     adjustable_threshold_scaling_parameters:
       dropoff_rate: 0.01
   geometry_reassociation:
-    sample_count: 3
+    sample_count: 30000
     geometry_association_max_distance_threshold: 2.0
     trailing_id_associations_count: 2
   use_sensor_centric_frame: True
@@ -20,4 +20,4 @@ lidar_sensor:
   channels: 64
   range: 100.0
   rotation_period: 0.02
-  points_per_second: 100000
+  points_per_second: 1000000

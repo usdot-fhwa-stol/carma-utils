@@ -78,7 +78,8 @@ class CarlaCDASimAPI:
                                                infrastructure_id, sensor_id,
                                                sensor_position, sensor_rotation,
                                                parent_id=None,
-                                               custom_callback=None):
+                                               custom_callback=None,
+                                               enable_sensor_processing=True):
         """
         Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
         :param simulated_sensor_config: The configuration for the simulated sensor.
@@ -136,14 +137,15 @@ class CarlaCDASimAPI:
         sleep(0.8)
 
         # Start compute thread
-        scheduler = sched.scheduler(time.time, time.sleep)
-        scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,
-                        (scheduler, simulated_sensor, detection_cycle_delay_seconds))
-        scheduler_thread = threading.Thread(target=scheduler.run)
-        print("*********************************")
-        print("** Starting sensorlib compute. **")
-        print("*********************************")
-        scheduler_thread.start()
+        if enable_sensor_processing:
+            scheduler = sched.scheduler(time.time, time.sleep)
+            scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,
+                            (scheduler, simulated_sensor, detection_cycle_delay_seconds))
+            scheduler_thread = threading.Thread(target=scheduler.run)
+            print("*********************************")
+            print("** Starting sensorlib compute. **")
+            print("*********************************")
+            scheduler_thread.start()
 
         return simulated_sensor
 

@@ -52,4 +52,5 @@ class IntegrationTestUtilities:
                                                           infrastructure_id, sensor_id,
                                                           lidar_transform.location, lidar_transform.rotation,
                                                           parent_id,
-                                                          custom_callback)
+                                                          custom_callback,
+                                                          False)
