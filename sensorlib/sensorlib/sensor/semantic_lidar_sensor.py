@@ -106,22 +106,28 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Geometry re-association
         self.update_actor_id_association(instantaneous_actor_id_association)
-        hitpoints = self.update_hitpoint_ids_from_association(hitpoints)
+        # hitpoints = self.update_hitpoint_ids_from_association(hitpoints)
+
+        # TODO Debugging
+        old_hitpoints = hitpoints
+        hitpoints = {detected_objects[0].id: old_hitpoints[11]}
+        if 4 in old_hitpoints:
+            hitpoints[detected_objects[1].id] = old_hitpoints[4]
 
         # Apply occlusion
         print(f"Before {len(detected_objects)}")
-        for obj in detected_objects:
-            print(f"Before apply_occlusion {obj.id}")
+        # for obj in detected_objects:
+        #     print(f"Before apply_occlusion {obj.id}")
         detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints)
         print(f"After {len(detected_objects)}")
-        for obj in detected_objects:
-            print(f"After apply_occlusion {obj.id}")
+        # for obj in detected_objects:
+        #     print(f"After apply_occlusion {obj.id}")
 
         # Apply noise
         detected_objects = self.apply_noise(detected_objects)
 
         # Update object type, reference frame, and detection time
-        detected_objects = self.update_object_metadata(detected_objects, hitpoints, timestamp)
+        # detected_objects = self.update_object_metadata(detected_objects, hitpoints, timestamp)
 
         self.__detected_objects = detected_objects
 
@@ -408,12 +414,12 @@ class SemanticLidarSensor(SimulatedSensor):
         :param vertical_fov: Vertical field of view in radians.
         :return: Expected number of hitpoints in a scan across the specified field of view.
         """
-        num_horizontal_points_per_scan = ((self._sensor.points_per_second / self._sensor.rotation_frequency)
-                                          / self._sensor.number_of_channels)
-        horizontal_angular_resolution = self._sensor.horizontal_fov / num_horizontal_points_per_scan
+        num_horizontal_points_per_scan = ((float(self._sensor.points_per_second) / float(self._sensor.rotation_frequency))
+                                          / float(self._sensor.number_of_channels))
+        horizontal_angular_resolution = float(self._sensor.horizontal_fov) / num_horizontal_points_per_scan
 
-        num_vertical_points_per_scan = self._sensor.number_of_channels
-        vertical_angular_resolution = self._sensor.vertical_fov / num_vertical_points_per_scan
+        num_vertical_points_per_scan = float(self._sensor.number_of_channels)
+        vertical_angular_resolution = float(self._sensor.vertical_fov) / num_vertical_points_per_scan
 
         return (horizontal_fov / horizontal_angular_resolution) * (vertical_fov / vertical_angular_resolution)
 
