@@ -53,7 +53,7 @@ class TestOcclusion(SensorlibIntegrationTestRunner):
         # Start windows
         sensor_config = SimulatedSensorUtils.load_config_from_file("config/simulated_sensor_config.yaml")
         carla_sensor_config = sensor_config["lidar_sensor"]
-        # self.launch_display_windows(sensor, sensor_position, carla_sensor_config, point_list)
+        self.launch_display_windows(sensor, sensor_position, carla_sensor_config, point_list)
 
         # Run one computation loop
         sleep(1)

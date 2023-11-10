@@ -7,6 +7,7 @@
 # governing permissions and limitations under the License.
 
 import os
+import threading
 import unittest
 from abc import abstractmethod
 import numpy as np
@@ -33,7 +34,9 @@ class SensorlibIntegrationTestRunner(unittest.TestCase):
         (128, 64, 128),  # Road
         (244, 35, 232),  # Sidewalk
         (107, 142, 35),  # Vegetation
+
         (0, 0, 142),  # Vehicle
+
         (102, 102, 156),  # Wall
         (220, 220, 0),  # TrafficSign
         (70, 130, 180),  # Sky
@@ -68,6 +71,11 @@ class SensorlibIntegrationTestRunner(unittest.TestCase):
         return CarlaCDASimAPI.build_from_world(carla_world)
 
     def launch_display_windows(self, sensor, sensor_position, carla_sensor_config, point_list):
+        display_thread = threading.Thread(target=self.launch_display_windows_internal,
+                                          args=(sensor, sensor_position, carla_sensor_config, point_list))
+        display_thread.start()
+
+    def launch_display_windows_internal(self, sensor, sensor_position, carla_sensor_config, point_list):
 
         # Enable LIDAR visualization window
         vis = o3d.visualization.Visualizer()

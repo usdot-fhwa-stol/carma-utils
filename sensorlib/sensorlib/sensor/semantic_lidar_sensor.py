@@ -97,6 +97,13 @@ class SemanticLidarSensor(SimulatedSensor):
         instantaneous_actor_id_association = self.compute_instantaneous_actor_id_association(downsampled_hitpoints,
                                                                                              detected_objects)
 
+        # TODO Debugging
+        instantaneous_actor_id_association = {
+            11: detected_objects[0].id,
+            4: detected_objects[1].id
+        }
+
+
         # Geometry re-association
         self.update_actor_id_association(instantaneous_actor_id_association)
         hitpoints = self.update_hitpoint_ids_from_association(hitpoints)
