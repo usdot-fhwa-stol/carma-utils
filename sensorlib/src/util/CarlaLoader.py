@@ -12,49 +12,73 @@ import sys
 
 
 class CarlaLoader:
+
+    is_carla_lib_loaded = False
+
     # Constants
-    LOAD_CARLA_EGG = os.environ.get("LOAD_CARLA_EGG")
-    CARLA_VERSION = os.environ.get("CARLA_VERSION")
     HOME = os.environ.get("HOME")
-    CARLA_EGG_DIR = os.environ.get("CARLA_EGG_DIR")
     DEFAULT_CARLA_EGG_DIR = os.path.join(HOME, "carla")
 
     @staticmethod
-    def load_carla_lib(carla_version=None):
-        if CarlaLoader.LOAD_CARLA_EGG is None:
-            print("\nLOAD_CARLA_EGG not set, skipping CarlaLoader.")
+    def load_carla_lib():
+
+        if CarlaLoader.is_carla_lib_loaded:
             return
-        elif carla_version is None and CarlaLoader.CARLA_VERSION is None:
-            print("\nCARLA VERSION NOT SET. EXITING.")
-            sys.exit()
-        elif carla_version is None:
-            carla_version = CarlaLoader.CARLA_VERSION
-        carla_egg_file = CarlaLoader.__find_carla_egg(carla_version)
-        sys.path.append(carla_egg_file)
 
-    @staticmethod
-    def __find_file(pattern, path):
-        result = []
-        for root, dirs, files in os.walk(path):
-            for name in files:
-                if fnmatch.fnmatch(name, pattern):
-                    result.append(os.path.join(root, name))
-        return result
+        # Get environment variables
+        LOAD_CARLA_EGG = os.environ.get("LOAD_CARLA_EGG")
+        CARLA_VERSION = os.environ.get("CARLA_VERSION")
+        CARLA_EGG_DIR = os.environ.get("CARLA_EGG_DIR")
 
-    @staticmethod
-    def __find_carla_egg(carla_version):
+        # Load the .egg by default (if unset), or explicitly true
+        if LOAD_CARLA_EGG is None or LOAD_CARLA_EGG == "" or LOAD_CARLA_EGG.lower() == "true":
+            load_carla_egg = True
+        else:
+            load_carla_egg = False
 
-        if CarlaLoader.CARLA_EGG_DIR is None:
-            print(f"\nCARLA_EGG_DIR not set, using default {CarlaLoader.DEFAULT_CARLA_EGG_DIR}")
+        # Get carla version
+        if CARLA_VERSION is None or CARLA_VERSION == "":
+            carla_version = ""
+        else:
+            carla_version = CARLA_VERSION
+
+        # Get carla egg dir
+        if CARLA_EGG_DIR is None or CARLA_EGG_DIR == "":
             carla_egg_dir = CarlaLoader.DEFAULT_CARLA_EGG_DIR
         else:
-            carla_egg_dir = CarlaLoader.CARLA_EGG_DIR
+            carla_egg_dir = CARLA_EGG_DIR
+
+        # Abort .egg loading
+        if not load_carla_egg:
+            print("\nLOAD_CARLA_EGG set to False, skipping .egg loading.")
+            return
+
+        # Log the requested CARLA_VERSION
+        print(f"\nSearching for CARLA_VERSION \"{carla_version}\"")
+
+        # Log the requested CARLA_EGG_DIR
+        if CARLA_EGG_DIR is None:
+            print(
+                f"\nCARLA_EGG_DIR not set. Searching directory DEFAULT_CARLA_EGG_DIR \"{CarlaLoader.DEFAULT_CARLA_EGG_DIR}\"")
+        else:
+            print(f"\nSearching directory CARLA_EGG_DIR \"{carla_egg_dir}\"")
+
+        # Search for the .egg file and load it
+        carla_egg_file = CarlaLoader.__find_carla_egg(carla_version, carla_egg_dir)
+        print(f"\nLoading CARLA egg file: \"{carla_egg_file}\"")
+        sys.path.append(carla_egg_file)
+
+        # Only need to load once
+        CarlaLoader.is_carla_lib_loaded = True
+
+    @staticmethod
+    def __find_carla_egg(carla_version, carla_egg_dir):
 
         # Search for the CARLA python .egg file
         try:
             carla_egg_name = "carla-" + carla_version + "*" + str(sys.version_info.major) + "*-" + str(
                 "win-amd64" if os.name == "nt" else "linux-x86_64") + ".egg"
-            print("Looking for CARLA egg: " + carla_egg_name)
+            print("CARLA egg search string: " + carla_egg_name)
             carla_egg_locations = CarlaLoader.__find_file(carla_egg_name, carla_egg_dir)
             print("Found carla egg(s): " + str(carla_egg_locations))
 
@@ -67,3 +91,15 @@ class CarlaLoader:
         except IndexError:
             print("\nUNABLE TO FIND CARLA EGG")
             pass
+
+    @staticmethod
+    def __find_file(pattern, path):
+        result = []
+        for root, dirs, files in os.walk(path):
+            for name in files:
+                if fnmatch.fnmatch(name, pattern):
+                    result.append(os.path.join(root, name))
+        return result
+
+# Load the CARLA library
+CarlaLoader.load_carla_lib()

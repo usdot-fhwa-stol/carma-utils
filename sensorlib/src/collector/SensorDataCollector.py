@@ -25,11 +25,12 @@ class SensorDataCollector:
 
     New data scans are detected by a reset in the sensor read angle as reported by the simulator.
     """
-
-    def __init__(self, carla_world, carla_sensor):
+    detected_ids_set = set()
+    def __init__(self, carla_world, carla_sensor, custom_callback=None):
         self.debug = True
         self.__carla_world = carla_world
         self.__carla_sensor = carla_sensor
+        self.__custom_callback = custom_callback
         self.__prev_angle = 0.0
 
         # Time of latest data capture (in seconds)
@@ -75,6 +76,10 @@ class SensorDataCollector:
         
         self.__collect_raw_point_data(self.__data[0], semantic_sensor_data)
 
+        # Execute any custom callback
+        if self.__custom_callback is not None:
+            return self.__custom_callback(semantic_sensor_data)
+
     def __collect_raw_point_data(self, grouped_data, raw_sensor_data):
         """
         Collect the raw hit point data from the measurement.
@@ -88,7 +93,15 @@ class SensorDataCollector:
         # The resulting dictionary maps actor ID to a list of hitpoints
         for detection in raw_sensor_data:
             point = CarlaUtils.vector3d_to_numpy(detection.point)
+            # Skip if object_idx is 0 as it is not identifiable object in CARLA
+            # This is large number of hitpoints and not useful for sensorlib
+            if (detection.object_idx == 0):
+                continue
+            if (detection.object_tag == 10 or detection.object_tag == 4):
+                #print(f"detection {detection}")
+                self.detected_ids_set.add(detection.object_idx)
             if detection.object_idx not in grouped_data:
+                #print(f"Data collector inserting new point object_idx {detection.object_idx}")
                 grouped_data[detection.object_idx] = [point]
             else:
                 grouped_data[detection.object_idx].append(point)

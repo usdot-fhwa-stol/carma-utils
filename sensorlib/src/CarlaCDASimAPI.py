@@ -9,23 +9,21 @@
 import sched
 import threading
 import time
+from time import sleep
 
 from util.CarlaLoader import CarlaLoader
-CarlaLoader.load_carla_lib()
 import carla
-import sys
-sys.path.append('../')
 
 from collector.SensorDataCollector import SensorDataCollector
 from noise_models.NoiseModelFactory import NoiseModelFactory
 from objects.CarlaSensor import CarlaSensorBuilder
 from sensor.SemanticLidarSensor import SemanticLidarSensor
 from util.CarlaUtils import CarlaUtils
-
+import random
 
 class CarlaCDASimAPI:
     """
-    Interface to build a SimulatedSensor.
+    Interface to build and manage SimulatedSensor's.
     """
 
     def __init__(self):
@@ -35,7 +33,6 @@ class CarlaCDASimAPI:
 
     @staticmethod
     def build_from_host_spec(carla_host, carla_port):
-        print(f"connecting to carla {carla_host}:{carla_port}")
         """
         Build an API instance.
 
@@ -79,7 +76,9 @@ class CarlaCDASimAPI:
     def create_simulated_semantic_lidar_sensor(self, simulated_sensor_config, carla_sensor_config, noise_model_config,
                                                detection_cycle_delay_seconds,
                                                infrastructure_id, sensor_id,
-                                               sensor_position, sensor_rotation, parent_actor_id=-1):
+                                               sensor_position, sensor_rotation,
+                                               parent_id=None,
+                                               custom_callback=None):
         """
         Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
         :param simulated_sensor_config: The configuration for the simulated sensor.
@@ -90,10 +89,12 @@ class CarlaCDASimAPI:
         :param sensor_id: The ID of the sensor.
         :param sensor_position: Sensor position in CARLA world coordinates.
         :param sensor_rotation: Sensor rotation in degrees.
-        :param parent_actor_id: ID of the parent actor to which the sensor is attached (optional).
         :return: A registered SimulatedSensor.
         """
-
+        print(f"create_simulated_semantic_lidar_sensor: type(sensor_position): {type(sensor_position)}")
+        
+       
+        
         # Parameter checks
         if not isinstance(infrastructure_id, int) or infrastructure_id < 0:
             print("Error: infrastructure_id needs to be a non-negative integer.")
@@ -108,30 +109,51 @@ class CarlaCDASimAPI:
         # Retrieve the CARLA sensor
         blueprint_library = self.__carla_world.get_blueprint_library()
         sensor_bp = self.__generate_lidar_bp(blueprint_library, carla_sensor_config)
-        parent_actor = CarlaUtils.get_actor(self.__carla_world, parent_actor_id)
-        carla_sensor = self.__carla_world.spawn_actor(sensor_bp, sensor_transform, attach_to=parent_actor)
-        self.__carla_world.wait_for_tick()
+        parent = None
+        if parent_id is not None:
+            parent = self.__carla_world.get_actor(parent_id)
+        carla_sensor = self.__carla_world.spawn_actor(sensor_bp, sensor_transform, parent)
+        print(f"api sensor_transform construction {sensor_transform}")
+
+        # Fix for CARLA not updating position immediately
+        sleep(0.2)
+
+        print(f"api setting sensor_position {sensor_position} result {carla_sensor.get_location()}")
 
         # Build internal objects
         sensor = CarlaSensorBuilder.build_sensor(carla_sensor)
-        data_collector = SensorDataCollector(self.__carla_world, carla_sensor)
+        data_collector = SensorDataCollector(self.__carla_world, carla_sensor, custom_callback)
         noise_model = NoiseModelFactory.get_noise_model(noise_model_config["noise_model_name"], noise_model_config)
 
         # Construct the SimulatedSensor
         simulated_sensor = SemanticLidarSensor(infrastructure_id, sensor_id, simulated_sensor_config,
                                                carla_sensor_config,
                                                self.__carla_world, sensor,
-                                               data_collector, noise_model)
+                                               data_collector, noise_model,
+                                               parent_id)
 
         # Register the sensor
         self.__infrastructure_sensors[(infrastructure_id, sensor_id)] = simulated_sensor
+
+        sleep(0.5)
+
+        dummy_veh_spawn = carla.Transform(
+            carla.Location(x=67.0, y=7.0, z=.253),
+            carla.Rotation(yaw=0.0)
+        )
+        #   sensor     65.0, 7.0, .253
+        dummy_veh_bp = random.choice(blueprint_library.filter('vehicle.*'))
+        dummy_vehicle = self.__carla_world.spawn_actor(dummy_veh_bp, dummy_veh_spawn)
+        print("Created a dummy vehicle with id: " + str(dummy_vehicle.id))
 
         # Start compute thread
         scheduler = sched.scheduler(time.time, time.sleep)
         scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,
                         (scheduler, simulated_sensor, detection_cycle_delay_seconds))
         scheduler_thread = threading.Thread(target=scheduler.run)
-        print("Starting sensorlib compute.")
+        print("*********************************")
+        print("** Starting sensorlib compute. **")
+        print("*********************************")
         scheduler_thread.start()
 
         return simulated_sensor
