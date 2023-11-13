@@ -19,7 +19,7 @@ from noise_models.NoiseModelFactory import NoiseModelFactory
 from objects.CarlaSensor import CarlaSensorBuilder
 from sensor.SemanticLidarSensor import SemanticLidarSensor
 from util.CarlaUtils import CarlaUtils
-import random
+
 
 class CarlaCDASimAPI:
     """
@@ -137,15 +137,40 @@ class CarlaCDASimAPI:
 
         sleep(0.5)
 
-        dummy_veh_spawn = carla.Transform(
+        pedestrian_spawn = carla.Transform(
             carla.Location(x=67.0, y=7.0, z=.253),
             carla.Rotation(yaw=0.0)
         )
         #   sensor     65.0, 7.0, .253
-        dummy_veh_bp = random.choice(blueprint_library.filter('vehicle.*'))
-        dummy_vehicle = self.__carla_world.spawn_actor(dummy_veh_bp, dummy_veh_spawn)
-        print("Created a dummy vehicle with id: " + str(dummy_vehicle.id))
+    
+        pedestrian_bp = blueprint_library.filter("pedestrian")[0]
+        pedestrian_transform = pedestrian_spawn
+        pedestrian_spawn = self.__carla_world.spawn_actor(pedestrian_bp, pedestrian_transform)
+        print("Created a dummy pedestrian with id: " + str(pedestrian_spawn.id))
 
+        pedestrian_spawn = carla.Transform(
+            carla.Location(x=67.0, y=3.0, z=.253),
+            carla.Rotation(yaw=0.0)
+        )
+        #   sensor     65.0, 7.0, .253
+    
+        pedestrian_bp = blueprint_library.filter("pedestrian")[0]
+        pedestrian_transform = pedestrian_spawn
+        pedestrian_spawn = self.__carla_world.spawn_actor(pedestrian_bp, pedestrian_transform)
+        print("Created a dummy pedestrian with id: " + str(pedestrian_spawn.id))
+        
+        pedestrian_spawn = carla.Transform(
+            carla.Location(x=75.0, y=7.0, z=.253),
+            carla.Rotation(yaw=0.0)
+        )
+        #   sensor     65.0, 7.0, .253
+    
+        pedestrian_bp = blueprint_library.filter("model3")[0]
+        pedestrian_transform = pedestrian_spawn
+        pedestrian_spawn = self.__carla_world.spawn_actor(pedestrian_bp, pedestrian_transform)
+        print("Created a dummy pedestrian with id: " + str(pedestrian_spawn.id))
+        
+        
         # Start compute thread
         scheduler = sched.scheduler(time.time, time.sleep)
         scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,

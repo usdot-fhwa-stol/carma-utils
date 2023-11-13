@@ -343,8 +343,9 @@ class SemanticLidarSensor(SimulatedSensor):
             else:
                 grouped_data[actor_id].append(hitpoint)
         
-        print (f"len(grouped_data): {len(grouped_data)}")
-        #print (f"grouped_data: {grouped_data}")
+        print (f"after grouping, group_data size: {len(grouped_data)}")
+        for actor_id in grouped_data:
+            print(f"actor_id: {actor_id}, size: {len(grouped_data[actor_id])}")
         
         # Filter unassociated hitpoints
         return grouped_data
