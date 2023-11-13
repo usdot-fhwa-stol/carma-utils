@@ -15,6 +15,7 @@ sys.path.append('../')
 from CarlaCDASimAPI import CarlaCDASimAPI
 from util.SimulatedSensorUtils import SimulatedSensorUtils
 
+
 class CarlaCDASimAdapter:
     # Holds Sensor configuration object
     sensor_config = None
@@ -79,6 +80,7 @@ class CarlaCDASimAdapter:
     def __get_detected_objects(self, infrastructure_id, sensor_id):
         detected_objects = self.__api.get_detected_objects(infrastructure_id, sensor_id)
         return_json = str(SimulatedSensorUtils.serialize_to_json(detected_objects))
+        print(return_json)
         return return_json
 
 
@@ -112,14 +114,14 @@ if __name__ == "__main__":
         help="XML-RPC server port. (default: 8000)")
     arg_parser.add_argument(
         "--sensor-config-file",
-        default="./config/simulated_sensor_config.yaml",
+        default="/home/carma/Documents/GitHub/carma-utils/sensorlib/config/simulated_sensor_config.yaml",
         type=str,
-        help="Path to sensor configuration file. (default: ../config/simulated_sensor_config.yaml)")
+        help="Path to sensor configuration file. (default: /home/carma/Documents/Github/carma-utils/sensorlib/config/simulated_sensor_config.yaml)")
     arg_parser.add_argument(
         "--noise-model-config-file",
-        default="./config/noise_model_config.yaml",
+        default="/home/carma/Documents/GitHub/carma-utils/sensorlib/config/noise_model_config.yaml",
         type=str,
-        help="Path to noise mode configuration file. (default: ../config/noise_model_config.yaml)")
+        help="Path to noise mode configuration file. (default: /home/carma/Documents/Github/carma-utils/sensorlib/config/noise_model_config.yaml)")
     arg_parser.add_argument(
         "--detection-cycle-delay-seconds",
         default=0.5,

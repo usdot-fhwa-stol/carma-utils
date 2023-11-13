@@ -14,22 +14,23 @@ import numpy as np
 
 from util.CarlaUtils import CarlaUtils
 
+import os
+
 
 @dataclass(frozen=True)
 class DetectedObject:
     """Wrapper class for carla.Actor which are detected by the sensor."""
-    carla_actor: carla.Actor
-    id: int
-    object_type: str
-    timestamp: int
-    bounding_box_in_world_coordinate_frame: List[np.ndarray]
+    objectId: int
+    type: str
     position: np.ndarray
     velocity: np.ndarray
-    rotation: np.ndarray
-    angular_velocity: np.ndarray
-    position_covariance: np.ndarray
-    velocity_covariance: np.ndarray
+    angularVelocity: np.ndarray
+    positionCovariance: np.ndarray
+    velocityCovariance: np.ndarray
+    angularVelocityCovariance: np.ndarray
     confidence: float
+    projString: str
+    size: np.ndarray
 
 
 class DetectedObjectBuilder:
@@ -45,19 +46,24 @@ class DetectedObjectBuilder:
         if (bounding_box == None):
             return None
         
+        projection_string = os.environ['PROJSTRING']
+
+        size_x = carla_actor.bounding_box.extent.x*2
+        size_y = carla_actor.bounding_box.extent.y*2
+        size_z = carla_actor.bounding_box.extent.z*2
+
         return DetectedObject(
-            carla_actor,
             carla_actor.id,
             object_type,
-            0,
-            bounding_box,
             CarlaUtils.vector3d_to_numpy(carla_actor.get_location()),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_velocity()),
-            CarlaUtils.get_actor_rotation_matrix(carla_actor),
             CarlaUtils.get_actor_angular_velocity(carla_actor),
 
             # Use stand-in values which assume complete certainty
             np.zeros((3, 3)),
             np.zeros((3, 3)),
-            1.0
+            np.zeros((3, 3)),
+            1.0,
+            projection_string,
+            np.ndarray((size_x, size_y, size_z))
         )

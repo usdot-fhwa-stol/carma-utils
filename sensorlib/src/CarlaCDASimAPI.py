@@ -22,6 +22,7 @@ from objects.CarlaSensor import CarlaSensorBuilder
 from sensor.SemanticLidarSensor import SemanticLidarSensor
 from util.CarlaUtils import CarlaUtils
 
+import random
 
 class CarlaCDASimAPI:
     """
@@ -93,6 +94,18 @@ class CarlaCDASimAPI:
         :param parent_actor_id: ID of the parent actor to which the sensor is attached (optional).
         :return: A registered SimulatedSensor.
         """
+
+        #dummy
+        #######################################################
+        dummy_veh_spawn = carla.Transform(
+            carla.Location(x=-83.979, y=333.332, z=10.253),
+            carla.Rotation(yaw=0.0)
+        )
+
+        dummy_veh_bp = random.choice(blueprint_library.filter('vehicle.*'))
+        dummy_vehicle = self.__carla_world.spawn_actor(dummy_veh_bp, dummy_veh_spawn)
+        print("Created a dummy vehicle with id: " + str(dummy_vehicle.id))
+        #######################################################
 
         # Parameter checks
         if not isinstance(infrastructure_id, int) or infrastructure_id < 0:
