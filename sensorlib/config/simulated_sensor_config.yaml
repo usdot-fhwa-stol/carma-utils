@@ -3,7 +3,7 @@ simulated_sensor:
     allowed_semantic_tags:
       - Vehicles
       - Pedestrians
-    max_distance_meters: 30
+    max_distance_meters: 100
   detection_threshold_scaling_formula:
     nominal_hitpoint_detection_ratio_threshold: 0.6
     hitpoint_detection_ratio_threshold_per_meter_change_rate: -0.0033
@@ -20,4 +20,4 @@ lidar_sensor:
   channels: 32
   range: 100.0
   rotation_period: 0.1
-  points_per_second: 30000
+  points_per_second: 56000
