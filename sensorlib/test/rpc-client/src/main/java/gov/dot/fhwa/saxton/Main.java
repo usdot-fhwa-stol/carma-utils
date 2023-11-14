@@ -27,7 +27,7 @@ public class Main {
         // Specify sensor parameters
         int infrastructureID = 1;
         int sensorID = 7;
-        List<Double> location = Arrays.asList(65.0, 3.0, .253);
+        List<Double> location = Arrays.asList(63.0, 7.0, 7.253);
         List<Double> rotation = Arrays.asList(0.0, 0.0, 0.0);
         params = new Object[]{ infrastructureID, sensorID, location, rotation};
 

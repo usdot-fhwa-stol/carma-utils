@@ -131,8 +131,8 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Apply occlusion TODO!
         # https://usdot-carma.atlassian.net/browse/CDAR-435
-        #detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
-        #                                       detection_thresholds)
+        detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
+                                               detection_thresholds)
         print("detected object size after occlusion:" + str(len(detected_objects)))
         
         # Apply noise
@@ -501,6 +501,10 @@ class SemanticLidarSensor(SimulatedSensor):
         :param vertical_fov: Vertical field of view in radians.
         :return: Expected number of hitpoints in a scan across the specified field of view.
         """
+        print(f"self.__sensor.points_per_second: {type(self.__sensor.points_per_second)}")
+        print(f"self.__sensor.rotation_frequency: {type(self.__sensor.rotation_frequency)}")
+        print(f"self.__sensor.number_of_channels: {type(self.__sensor.number_of_channels)}")
+        
         num_horizontal_points_per_scan = (self.__sensor.points_per_second / self.__sensor.rotation_frequency) / self.__sensor.number_of_channels
         horizontal_angular_resolution = self.__sensor.horizontal_fov / num_horizontal_points_per_scan
 

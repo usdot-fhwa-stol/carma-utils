@@ -1,7 +1,7 @@
 simulated_sensor:
   prefilter:
     allowed_semantic_tags:
-      - vehicle.tesla.model3
+      - vehicle.carlamotors.carlacola
       - walker.pedestrian.0021
     max_distance_meters: 30
   detection_threshold_scaling_formula:
