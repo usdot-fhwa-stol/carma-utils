@@ -138,7 +138,7 @@ class CarlaCDASimAPI:
         sleep(0.5)
 
         lidar_spawn = carla.Transform(
-            carla.Location(x=63.0, y=7.0, z=7.253),
+            carla.Location(x=63.0, y=7.0, z=5.253),
             carla.Rotation(yaw=0.0)
         )
         #   sensor     65.0, 7.0, .253
