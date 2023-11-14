@@ -132,7 +132,8 @@ class CarlaCDASimAPI:
         self.__infrastructure_sensors[(infrastructure_id, sensor_id)] = simulated_sensor
 
         sleep(0.5)
-
+        # Adding corresponding dummy lidar solely for visualization in Carla Viz
+        # because semantic lidar sensor is not visualizable at the moment
         lidar_bp = blueprint_library.filter("lidar")[0]
         lidar_spawn = self.__carla_world.spawn_actor(lidar_bp, sensor_transform)
         print("Created a dummy lidar for visualizarion with id: " + str(lidar_spawn.id))

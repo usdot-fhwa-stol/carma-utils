@@ -352,6 +352,7 @@ class SemanticLidarSensor(SimulatedSensor):
         if closest_index is None or closest_index < 0:
             return None
 
+        # Due to vehicles being a large object compared to pedestrians, more buffer maybe required
         geometry_association_threshold_buffer = 0.0
         if scene_objects[closest_index].object_type == "Vehicles":
             geometry_association_threshold_buffer = 2.0
