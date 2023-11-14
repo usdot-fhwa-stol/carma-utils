@@ -425,7 +425,6 @@ class SemanticLidarSensor(SimulatedSensor):
 
         :param detected_objects: List of objects currently considered for detection.
         :param actor_angular_extents: Dictionary containing angular extent pairs referenced by object ID.
-        :param hitpoints: Dictionary containing a list of hitpoints associated with each object ID.
         :param detection_thresholds: Thresholds computed for each object based on distance from the sensor.
         :return: List of objects filtered by occlusion.
         """

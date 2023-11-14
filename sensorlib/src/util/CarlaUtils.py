@@ -15,8 +15,6 @@ class CarlaUtils:
     """
     Generic CARLA utility functions.
     """
-    
-    CarlaCityObjectLabelLookup = dict([(id, name) for name, id in carla.CityObjectLabel.names.items()])
 
     @staticmethod
     def vector3d_to_numpy(vec):
@@ -95,15 +93,6 @@ class CarlaUtils:
             return "Pedestrians"
         else:
             return "NONE"
-
-    @staticmethod
-    def get_semantic_tag_name(tag_id):
-        """
-        Get the semantic tag name for a given tag ID.
-        :param tag_id: The integer tag ID to look up.
-        :return: The tag name.
-        """
-        return CarlaUtils.CarlaCityObjectLabelLookup.get(tag_id, "NONE")
 
     @staticmethod
     def get_transform(sensor_position, sensor_rotation):
