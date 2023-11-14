@@ -25,7 +25,7 @@ class SensorDataCollector:
 
     New data scans are detected by a reset in the sensor read angle as reported by the simulator.
     """
-    detected_ids_set = set()
+
     def __init__(self, carla_world, carla_sensor, custom_callback=None):
         self.debug = True
         self.__carla_world = carla_world
@@ -97,11 +97,7 @@ class SensorDataCollector:
             # This is large number of hitpoints and not useful for sensorlib
             if (detection.object_idx == 0):
                 continue
-            if (detection.object_tag == 10 or detection.object_tag == 4):
-                #print(f"detection {detection}")
-                self.detected_ids_set.add(detection.object_idx)
             if detection.object_idx not in grouped_data:
-                #print(f"Data collector inserting new point object_idx {detection.object_idx}")
                 grouped_data[detection.object_idx] = [point]
             else:
                 grouped_data[detection.object_idx].append(point)

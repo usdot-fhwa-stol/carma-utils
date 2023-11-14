@@ -96,13 +96,6 @@ class SemanticLidarSensor(SimulatedSensor):
         
         # Prefilter
         detected_objects, object_ranges = self.prefilter(detected_objects)
-        #print("detected object size originally:" + str(len(detected_objects)))
-        
-        #for obj in detected_objects:
-        #    print("id:" + str(obj.id))
-        #    print(f"location: {obj.position}")
-        
-        #print(f"The scene global SET includes: {self.__data_collector.detected_ids_set}")
         
         # Get LIDAR hitpoints with Actor ID associations
         timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
@@ -112,25 +105,17 @@ class SemanticLidarSensor(SimulatedSensor):
         detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
         
         # Instantaneous geometry association
-        # sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
-        downsampled_hitpoints = hitpoints
-        # downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
+        sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
+        downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
         hitpoints_without_ids = []
         for hit_id, hitpoint_list in downsampled_hitpoints.items():
             print("old hit_id: " + str(hit_id) + ", hitpoint_list.size: " + str(len(hitpoint_list)))
             hitpoints_without_ids += hitpoint_list
         
         hitpoints = self.compute_instantaneous_actor_id_association(hitpoints_without_ids, detected_objects)
-        #print (f"hitpoints type: {type(hitpoints)}")
         for hit_id, hitpoint_list in hitpoints.items():
             print("new hit_id: " + str(hit_id) + ", hitpoint_list.size: " + str(len(hitpoint_list)))
-            
-        # Geometry re-association
-        #self.update_actor_id_association(instantaneous_actor_id_association)
-        #hitpoints = self.update_hitpoint_ids_from_association(hitpoints)
 
-        # Apply occlusion TODO!
-        # https://usdot-carma.atlassian.net/browse/CDAR-435
         print("detected object size before occlusion:>>>>>>>>>>" + str(len(detected_objects)))
         
         detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
@@ -320,35 +305,22 @@ class SemanticLidarSensor(SimulatedSensor):
         # Compute nearest neighbor for each hitpoint
         hitpoints_in_map_frame = []
         for hitpoint in hitpoints:
-            #print(f"hitpoint: {hitpoint}")
-            #print(f"self.__sensor.position: {self.__sensor.position}")
             new_pos = np.add(hitpoint, self.__sensor.position)
             hitpoints_in_map_frame.append(new_pos)
-            #print(f"new hitpoint: {new_pos}")
             
         matching_nearest_neighbot_ids = self.compute_closest_object_id_list(hitpoints_in_map_frame, scene_objects,
                                                           self.__simulated_sensor_config["geometry_reassociation"][
                                                               "geometry_association_max_distance_threshold"])
-        #print(f"hitpoints: {len(hitpoints)} and {hitpoints.shape}")
-        #print(f"matching_nearest_neighbot_ids: {len(matching_nearest_neighbot_ids)} and {matching_nearest_neighbot_ids.shape}")
-
+  
         association = zip(hitpoints, matching_nearest_neighbot_ids)
-        #print(association)
 
         grouped_data = dict()
         for hitpoint, actor_id in association:
-            #print(hitpoint)
-            #print(actor_id)
             # some hitpoints may not get association due to associator's range, which the library ignores
             if actor_id not in grouped_data and not None:
-                #print(f"Data collector inserting new point object_idx {detection.object_idx}")
                 grouped_data[actor_id] = [hitpoint]
             else:
                 grouped_data[actor_id].append(hitpoint)
-        
-        #print (f"after grouping, group_data size: {len(grouped_data)}")
-        #for actor_id in grouped_data:
-        #    print(f"actor_id: {actor_id}, size: {len(grouped_data[actor_id])}")
         
         # Filter unassociated hitpoints
         return grouped_data
@@ -369,15 +341,9 @@ class SemanticLidarSensor(SimulatedSensor):
             return None
         object_positions = [obj.position for obj in scene_objects]
         distances_list = distance.cdist([hitpoint], object_positions)
-        #print("distances_list: {distances_list}")
-        
-        #print("1!")
-        #print(f"hitpoint: {hitpoint}")
         
         if len(distances_list) <= 0 or len(distances_list[0]) <= 0:
             return None
-        
-        #print("2!")
         
         distances = distances_list[0]
         closest_index = np.argmin(distances)
@@ -386,7 +352,6 @@ class SemanticLidarSensor(SimulatedSensor):
         if closest_index is None or closest_index < 0:
             return None
 
-        #print("3!")
         geometry_association_threshold_buffer = 0.0
         if scene_objects[closest_index].object_type == "Vehicles":
             geometry_association_threshold_buffer = 2.0
@@ -394,9 +359,6 @@ class SemanticLidarSensor(SimulatedSensor):
         # Observe a maximum object distance to preclude association with far-away objects
         if distances[closest_index] > geometry_association_max_distance_threshold + geometry_association_threshold_buffer:
             return None
-        
-        #print("4!")
-
 
         # Return closest object's ID
         closest_object = scene_objects[closest_index]

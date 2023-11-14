@@ -10,7 +10,7 @@ simulated_sensor:
     adjustable_threshold_scaling_parameters:
       dropoff_rate: 0.01
   geometry_reassociation:
-    sample_count: 3
+    sample_count: 1
     geometry_association_max_distance_threshold: 3.0
     trailing_id_associations_count: 2
   use_sensor_centric_frame: False
