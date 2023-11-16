@@ -11,7 +11,9 @@ ENV CARLA_VERSION=0.9.10
 ENV CARLA_EGG_DIR="/home/CarlaCDASimAdapter/"
 
 WORKDIR /home/CarlaCDASimAdapter/
-RUN pip3 install numpy PyYAML scipy dataclasses art
+# currently carma-base is installing implicitly scipy:1.3.3, which is restricting usage of certain APIs
+# https://github.com/usdot-fhwa-stol/carma-platform/issues/2192
+RUN pip3 install numpy==1.17.4 PyYAML scipy==1.3.3 dataclasses art
 
 COPY ./src/ /home/CarlaCDASimAdapter/src
 COPY ./config/ /home/CarlaCDASimAdapter/config
