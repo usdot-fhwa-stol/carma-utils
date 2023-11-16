@@ -187,7 +187,7 @@ class CarlaCDASimAPI:
         simulated_sensor.compute_detected_objects()
 
 
-def generate_lidar_bp(self, blueprint_library, carla_sensor_config, type= None):
+def generate_lidar_bp(blueprint_library, carla_sensor_config, type= None):
     """Build the CARLA blueprint necessary for CARLA sensor construction."""
     if type is None:
         lidar_bp = blueprint_library.find("sensor.lidar.ray_cast_semantic")
