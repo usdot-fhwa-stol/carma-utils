@@ -82,31 +82,33 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
-        
+
         # Prefilter
         detected_objects, object_ranges = self.prefilter(detected_objects)
-        
+
         # Get LIDAR hitpoints with Actor ID associations
         timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
-        
+
         # Compute data needed for occlusion operation
         actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
         detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
-        
+
         # Instantaneous geometry association
         sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
         downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
         hitpoints_without_ids = []
-        
+
         for hit_id, hitpoint_list in downsampled_hitpoints.items():
             for hitpoint in hitpoint_list:
                 hitpoints_without_ids.append(hitpoint)
-        
+
+
         hitpoints = self.compute_instantaneous_actor_id_association(hitpoints_without_ids, detected_objects)
 
         detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
                                                detection_thresholds)
-        
+
+
         # Apply noise
         detected_objects = self.apply_noise(detected_objects)
 
@@ -133,7 +135,7 @@ class SemanticLidarSensor(SimulatedSensor):
         :return: DetectedObject wrappers objects referring to the actors.
         """
         actors = self.__carla_world.get_actors()
-        
+
         scene_objects = [DetectedObjectBuilder.build_detected_object(actor,
                                                             self.__simulated_sensor_config["prefilter"][
                                                                 "allowed_semantic_tags"])
@@ -145,7 +147,7 @@ class SemanticLidarSensor(SimulatedSensor):
         # Remove sensor's parent object if detected (LIDAR sensor detecting car to which it is attached)
         scene_objects = filter(lambda obj: obj.id != self.__parent_id, scene_objects)
 
-        return scene_objects
+        return list(scene_objects)
 
     # ------------------------------------------------------------------------------
     # Prefilter
@@ -286,17 +288,17 @@ class SemanticLidarSensor(SimulatedSensor):
         :return: Actor ID association applicable to this time step based on geometry-based association algorithm,
             in the form of a dictionary mapping {hitpoint ID -> actor ID}.
         """
-        
+
         # Compute nearest neighbor for each hitpoint
         hitpoints_in_map_frame = []
         for hitpoint in hitpoints:
             new_pos = np.add(hitpoint, self.__sensor.position)
             hitpoints_in_map_frame.append(new_pos)
-        
+
         matching_nearest_neighbor_ids = self.compute_closest_object_id_list(hitpoints_in_map_frame, scene_objects,
                                                           self.__simulated_sensor_config["geometry_reassociation"][
                                                               "geometry_association_max_distance_threshold"])
-  
+
         association = zip(hitpoints, matching_nearest_neighbor_ids)
 
         grouped_data = dict()
@@ -306,12 +308,12 @@ class SemanticLidarSensor(SimulatedSensor):
                 grouped_data[actor_id] = [hitpoint]
             else:
                 grouped_data[actor_id].append(hitpoint)
-        
+
         # Filter unassociated hitpoints
         return grouped_data
 
     def compute_closest_object_id_list(self, hitpoint_list, scene_objects, geometry_association_max_distance_threshold):
-        
+
         """Get the closest objects to each hitpoint."""
         return [self.compute_closest_object_id(hitpoint, scene_objects, geometry_association_max_distance_threshold) for
                 hitpoint in hitpoint_list]
@@ -328,10 +330,10 @@ class SemanticLidarSensor(SimulatedSensor):
         object_positions = [obj.position for obj in scene_objects]
 
         distances_list = distance.cdist([hitpoint], object_positions)
-        
+
         if len(distances_list) <= 0 or len(distances_list[0]) <= 0:
             return None
-        
+
         distances = distances_list[0]
         closest_index = np.argmin(distances)
 
@@ -343,7 +345,7 @@ class SemanticLidarSensor(SimulatedSensor):
         geometry_association_threshold_buffer = 0.0
         if scene_objects[closest_index].object_type == "Vehicles":
             geometry_association_threshold_buffer = 2.0
-        
+
         # Observe a maximum object distance to preclude association with far-away objects
         if distances[closest_index] > geometry_association_max_distance_threshold + geometry_association_threshold_buffer:
             return None
@@ -450,12 +452,12 @@ class SemanticLidarSensor(SimulatedSensor):
         """
         Compute the expected number of hitpoints for the given field of view. This result is heavily determined by
         the CARLA sensor configuration.
-        
+
         :param horizontal_fov: Horizontal field of view in radians.
         :param vertical_fov: Vertical field of view in radians.
         :return: Expected number of hitpoints in a scan across the specified field of view.
         """
-        
+
         num_horizontal_points_per_scan = (self.__sensor.points_per_second / self.__sensor.rotation_frequency) / self.__sensor.number_of_channels
         horizontal_angular_resolution = self.__sensor.horizontal_fov / num_horizontal_points_per_scan
 

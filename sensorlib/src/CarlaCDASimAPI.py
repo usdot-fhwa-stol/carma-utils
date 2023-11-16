@@ -94,7 +94,7 @@ class CarlaCDASimAPI:
         :param sensor_rotation: Sensor rotation in degrees.
         :return: A registered SimulatedSensor.
         """
-        
+
         # Parameter checks
         if not isinstance(infrastructure_id, int) or infrastructure_id < 0:
             print("Error: infrastructure_id needs to be a non-negative integer.")
@@ -141,7 +141,7 @@ class CarlaCDASimAPI:
         lidar_bp = generate_lidar_bp(blueprint_library, carla_sensor_config, "lidar")
         lidar_spawn = self.__carla_world.spawn_actor(lidar_bp, sensor_transform)
         print(f"Created a dummy lidar for visualization with id: {lidar_spawn.id}")
-        
+
         # Start compute thread
         scheduler = sched.scheduler(time.time, time.sleep)
         scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,
