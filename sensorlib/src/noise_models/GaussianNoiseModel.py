@@ -71,3 +71,51 @@ class GaussianNoiseModel(AbstractNoiseModel):
         if not self.__config["stages"]["list_inclusion_noise"]:
             return object_list
         return object_list[0:np.random.randint(0, len(object_list) + 1)]
+
+    def apply_position_covariance(self, object_list):
+        if not self.__config["stages"]["position_noise"]:
+            return object_list
+
+        # Apply position noise to the object_list
+        noise_std = self.__position_std
+        noise_covariance_matrix = noise_std * noise_std * np.identity(3)
+        for obj in object_list:
+            obj.position_covariance = noise_covariance_matrix
+
+        return object_list
+
+    def apply_orientation_covariance(self, object_list):
+        if not self.__config["stages"]["orientation_noise"]:
+            return object_list
+
+        # Apply orientation noise to the object_list
+        noise_std = self.__position_std
+        noise_covariance_matrix = noise_std * noise_std * np.identity(3)
+        for obj in object_list:
+            obj.orientation_covariance = noise_covariance_matrix
+
+        return
+
+    def apply_velocity_covariance(self, object_list):
+        if not self.__config["stages"]["position_noise"]:
+            return object_list
+
+        # Apply velocity noise to the object_list
+        noise_std = self.__position_std
+        noise_covariance_matrix = noise_std * noise_std * np.identity(3) *
+        for obj in object_list:
+            obj.velocity_covariance = noise_covariance_matrix
+
+        return
+
+    def apply_angular_velocity_covariance(self, object_list):
+        if not self.__config["stages"]["orientation_noise"]:
+            return object_list
+
+        # Apply angular velocity noise to the object_list
+        noise_std = self.__position_std
+        noise_covariance_matrix = noise_std * noise_std * np.identity(3)
+        for obj in object_list:
+            obj.angular_velocity_covariance = noise_covariance_matrix
+
+        return

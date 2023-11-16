@@ -28,6 +28,7 @@ class DetectedObject:
     rotation: np.ndarray
     angular_velocity: np.ndarray
     position_covariance: np.ndarray
+    orientation_covariance: np.ndarray
     velocity_covariance: np.ndarray
     angular_velocity_covariance: np.ndarray
     confidence: float
