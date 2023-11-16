@@ -441,6 +441,11 @@ class SemanticLidarSensor(SimulatedSensor):
         detected_objects = self.__noise_model.apply_orientation_noise(detected_objects)
         detected_objects = self.__noise_model.apply_type_noise(detected_objects)
         detected_objects = self.__noise_model.apply_list_inclusion_noise(detected_objects)
+        detected_objects = self.__noise_model.apply_position_covariance(detected_objects)
+        detected_objects = self.__noise_model.apply_orientation_covariance(detected_objects)
+        detected_objects = self.__noise_model.apply_velocity_covariance(detected_objects)
+        detected_objects = self.__noise_model.apply_angular_velocity_covariance(detected_objects)
+
         return detected_objects
 
     # ------------------------------------------------------------------------------

@@ -62,5 +62,7 @@ class DetectedObjectBuilder:
             np.zeros((3, 3)),
             np.zeros((3, 3)),
             np.zeros((3, 3)),
+            np.zeros((3, 3)),
+
             1.0
         )
