@@ -144,7 +144,7 @@ class CarlaCDASimAPI:
         
         
         pedestrian_spawn = carla.Transform(
-            carla.Location(x=72.0, y=3.0, z=100.253),
+            carla.Location(x=72.0, y=3.0, z=2.253),
             carla.Rotation(yaw=0.0)
         )
         #   sensor     65.0, 7.0, .253
@@ -155,7 +155,7 @@ class CarlaCDASimAPI:
         print("Created a dummy pedestrian with id: " + str(pedestrian_spawn.id))
 
         pedestrian_spawn = carla.Transform(
-            carla.Location(x=72.0, y=7.0, z=100.253),
+            carla.Location(x=72.0, y=7.0, z=2.253),
             carla.Rotation(yaw=0.0)
         )
         #   sensor     65.0, 7.0, .253
@@ -166,7 +166,7 @@ class CarlaCDASimAPI:
         print("Created a dummy pedestrian with id: " + str(pedestrian_spawn.id))
         
         pedestrian_spawn = carla.Transform(
-            carla.Location(x=70.0, y=14.0, z=100.253),
+            carla.Location(x=70.0, y=12.0, z=2.253),
             carla.Rotation(yaw=0.0)
         )
         
@@ -176,7 +176,7 @@ class CarlaCDASimAPI:
         print("Created a dummy pedestrian with id: " + str(pedestrian_spawn.id))
         
         vehicle_spawn = carla.Transform(
-            carla.Location(x=67.0, y=7.0, z=100.253),
+            carla.Location(x=67.0, y=7.0, z=2.253),
             carla.Rotation(yaw=0.0)
         )
         
