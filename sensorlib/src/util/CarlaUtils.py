@@ -55,7 +55,7 @@ class CarlaUtils:
         rotation_angles_deg = np.array([carla_rotation.roll, carla_rotation.pitch, carla_rotation.yaw])
         rotation_angles = np.deg2rad(rotation_angles_deg)
         rotation_matrix = Rotation.from_euler('xyz', rotation_angles)
-        return rotation_matrix.as_matrix()
+        return rotation_matrix.dcm()
 
     @staticmethod
     def get_actor_bounding_box_points(carla_actor):
@@ -68,7 +68,7 @@ class CarlaUtils:
         try:
             bounding_box = carla_actor.bounding_box
         except AttributeError:
-            # print("There is no bounding_box attribute, in 0.9.10 only Pedestrian and Vehicles have this attribute, please check the input...")
+            print("There is no bounding_box attribute, in 0.9.10 only Pedestrian and Vehicles have this attribute, please check the input...")
             return None
 
         bounding_box_locations = bounding_box.get_world_vertices(carla_actor.get_transform())

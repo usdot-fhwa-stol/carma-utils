@@ -88,8 +88,9 @@ class SensorDataCollector:
         # The resulting dictionary maps actor ID to a list of hitpoints
         for detection in raw_sensor_data:
             point = CarlaUtils.vector3d_to_numpy(detection.point)
-            # Skip if object_idx is 0 as it is not identifiable object in CARLA
-            # This is large number of hitpoints and not useful for sensorlib
+            # Skip if object_idx is 0 as it is static objects like buildings (it represents actor_id in new versions 0.9.11+)
+            # and a large number of hitpoints which creates performance issues for this library's nearest neighbor algorithm
+            # https://github.com/carla-simulator/carla/issues/3191
             if (detection.object_idx == 0):
                 continue
             if detection.object_idx not in grouped_data:
