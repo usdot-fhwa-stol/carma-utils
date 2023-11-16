@@ -12,7 +12,10 @@ import time
 from time import sleep
 
 from util.CarlaLoader import CarlaLoader
+CarlaLoader.load_carla_lib()
 import carla
+import sys
+sys.path.append('../')
 
 from collector.SensorDataCollector import SensorDataCollector
 from noise_models.NoiseModelFactory import NoiseModelFactory
@@ -134,6 +137,7 @@ class CarlaCDASimAPI:
 
         # Adding corresponding dummy lidar solely for visualization in Carla Viz
         # because semantic lidar sensor is not visualizable at the moment
+        # https://github.com/usdot-fhwa-stol/carma-utils/issues/180
         lidar_bp = self.__generate_lidar_bp(blueprint_library, carla_sensor_config, "lidar")
         lidar_spawn = self.__carla_world.spawn_actor(lidar_bp, sensor_transform)
         print("Created a dummy lidar for visualizarion with id: " + str(lidar_spawn.id))
