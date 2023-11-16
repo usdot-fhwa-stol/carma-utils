@@ -49,6 +49,9 @@ class GaussianNoiseModel(AbstractNoiseModel):
         noise_std = self.__orientation_std
         for obj in object_list:
             noise = np.random.normal(noise_mean, noise_std, size=3)
+            print(f"rotation: {obj.rotation}")
+            print(f"applied noise: {noise}")
+
             obj.rotation[0] += noise[0]
             obj.rotation[1] += noise[1]
             obj.rotation[2] += noise[2]

@@ -32,6 +32,7 @@ class DetectedObjectEncoder(json.JSONEncoder):
                 'angular_velocity': obj.angular_velocity.tolist(),
                 'position_covariance': obj.position_covariance.tolist(),
                 'velocity_covariance': obj.velocity_covariance.tolist(),
+                'angular_velocity_covariance': obj.angular_velocity_covariance.tolist(),
                 'confidence': obj.confidence,
                 'carla_actor': str(obj.carla_actor)
             }
