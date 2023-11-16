@@ -5,7 +5,9 @@ stages:
     type_noise: False
     list_inclusion_noise: False
 std_deviations:
+    # meters
     position: [0.8, 0.8, 0.8]
+    # radians
     orientation: [0.1, 0.1, 0.1]
 type_noise:
     allowed_semantic_tags:

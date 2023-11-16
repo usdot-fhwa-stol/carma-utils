@@ -86,7 +86,6 @@ def spawn_traffic_light_lidar(world):
         "geometry_reassociation": {
             "sample_count": 3,
             "geometry_association_max_distance_threshold": 2.0,
-            "trailing_id_associations_count": 2,
         },
         "use_sensor_centric_frame": True,
     }
@@ -145,7 +144,6 @@ def spawn_vehicle_lidar(world):
         "geometry_reassociation": {
             "sample_count": 3,
             "geometry_association_max_distance_threshold": 2.0,
-            "trailing_id_associations_count": 2,
         },
         "use_sensor_centric_frame": True,
     }

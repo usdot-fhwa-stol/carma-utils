@@ -15,7 +15,6 @@ from scipy.spatial import distance
 from objects.DetectedObject import DetectedObjectBuilder
 from sensor.SimulatedSensor import SimulatedSensor
 from util.CarlaUtils import CarlaUtils
-from util.HistoricalMapper import HistoricalMapper
 
 
 class SemanticLidarSensor(SimulatedSensor):
@@ -58,11 +57,6 @@ class SemanticLidarSensor(SimulatedSensor):
         self.__noise_model = noise_model
         self.__parent_id = parent_id
 
-        # Structures to store reassociation information
-        self.__actor_id_association = {}
-        trailing_id_associations_count = simulated_sensor_config[
-            "geometry_reassociation"]["trailing_id_associations_count"]
-        self.__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
         self.__rng = np.random.default_rng()
 
         # Object cache
