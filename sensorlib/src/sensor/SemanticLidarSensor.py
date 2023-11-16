@@ -108,9 +108,11 @@ class SemanticLidarSensor(SimulatedSensor):
         sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
         downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
         hitpoints_without_ids = []
+        print (f"downsampled_hitpoints size : {len(downsampled_hitpoints)}")
         for hit_id, hitpoint_list in downsampled_hitpoints.items():
             print("old hit_id: " + str(hit_id) + ", hitpoint_list.size: " + str(len(hitpoint_list)))
-            hitpoints_without_ids += hitpoint_list
+            for hitpoint in hitpoint_list:
+                hitpoints_without_ids.append(hitpoint)
         
         hitpoints = self.compute_instantaneous_actor_id_association(hitpoints_without_ids, detected_objects)
         for hit_id, hitpoint_list in hitpoints.items():
@@ -307,7 +309,7 @@ class SemanticLidarSensor(SimulatedSensor):
         for hitpoint in hitpoints:
             new_pos = np.add(hitpoint, self.__sensor.position)
             hitpoints_in_map_frame.append(new_pos)
-            
+        
         matching_nearest_neighbot_ids = self.compute_closest_object_id_list(hitpoints_in_map_frame, scene_objects,
                                                           self.__simulated_sensor_config["geometry_reassociation"][
                                                               "geometry_association_max_distance_threshold"])
@@ -326,6 +328,9 @@ class SemanticLidarSensor(SimulatedSensor):
         return grouped_data
 
     def compute_closest_object_id_list(self, hitpoint_list, scene_objects, geometry_association_max_distance_threshold):
+        print(f"compute_closest_object_id_list: len hitpoint_list: {len(hitpoint_list)} and {hitpoint_list}")
+        print(f"compute_closest_object_id_list: len scene_objects: {len(scene_objects)}")
+        
         """Get the closest objects to each hitpoint."""
         return [self.compute_closest_object_id(hitpoint, scene_objects, geometry_association_max_distance_threshold) for
                 hitpoint in hitpoint_list]
@@ -340,6 +345,9 @@ class SemanticLidarSensor(SimulatedSensor):
             print("No scene objects!")
             return None
         object_positions = [obj.position for obj in scene_objects]
+        print(f"len object_positions: {len(object_positions)} and {object_positions}")
+        print(f"len hitpoint: {len(hitpoint)} and {hitpoint}")
+
         distances_list = distance.cdist([hitpoint], object_positions)
         
         if len(distances_list) <= 0 or len(distances_list[0]) <= 0:
