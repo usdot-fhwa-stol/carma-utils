@@ -80,19 +80,3 @@ class SimulatedSensorUtils:
             return "[" + str.join(",", data) + "]"
         else:
             return json.dumps(obj, cls=DetectedObjectEncoder)
-
-    @staticmethod
-    def get_pwd():
-        return os.path.dirname(os.path.abspath(__file__))
-
-    @staticmethod
-    def get_root_dir():
-        return os.path.join(SimulatedSensorUtils.get_pwd(), "../../")
-
-    @staticmethod
-    def get_root_path(filename):
-        if filename.startswith("/"):
-            return filename
-        else:
-            root_dir = SimulatedSensorUtils.get_root_dir()
-            return os.path.join(root_dir, filename)

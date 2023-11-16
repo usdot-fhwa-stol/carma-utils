@@ -26,11 +26,10 @@ class SensorDataCollector:
     New data scans are detected by a reset in the sensor read angle as reported by the simulator.
     """
 
-    def __init__(self, carla_world, carla_sensor, custom_callback=None):
+    def __init__(self, carla_world, carla_sensor):
         self.debug = True
         self.__carla_world = carla_world
         self.__carla_sensor = carla_sensor
-        self.__custom_callback = custom_callback
         self.__prev_angle = 0.0
 
         # Time of latest data capture (in seconds)
@@ -75,10 +74,6 @@ class SensorDataCollector:
             return None
         
         self.__collect_raw_point_data(self.__data[0], semantic_sensor_data)
-
-        # Execute any custom callback
-        if self.__custom_callback is not None:
-            return self.__custom_callback(semantic_sensor_data)
 
     def __collect_raw_point_data(self, grouped_data, raw_sensor_data):
         """
