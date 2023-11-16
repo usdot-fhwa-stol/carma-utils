@@ -142,52 +142,6 @@ class CarlaCDASimAPI:
         lidar_spawn = self.__carla_world.spawn_actor(lidar_bp, sensor_transform)
         print("Created a dummy lidar for visualizarion with id: " + str(lidar_spawn.id))
         
-        
-        pedestrian_spawn = carla.Transform(
-            carla.Location(x=72.0, y=3.0, z=2.253),
-            carla.Rotation(yaw=0.0)
-        )
-        #   sensor     65.0, 7.0, .253
-    
-        pedestrian_bp = blueprint_library.filter("pedestrian")[0]
-        pedestrian_transform = pedestrian_spawn
-        pedestrian_spawn = self.__carla_world.spawn_actor(pedestrian_bp, pedestrian_transform)
-        print("Created a dummy pedestrian with id: " + str(pedestrian_spawn.id))
-
-        pedestrian_spawn = carla.Transform(
-            carla.Location(x=72.0, y=7.0, z=2.253),
-            carla.Rotation(yaw=0.0)
-        )
-        #   sensor     65.0, 7.0, .253
-    
-        pedestrian_bp = blueprint_library.filter("pedestrian")[0]
-        pedestrian_transform = pedestrian_spawn
-        pedestrian_spawn = self.__carla_world.spawn_actor(pedestrian_bp, pedestrian_transform)
-        print("Created a dummy pedestrian with id: " + str(pedestrian_spawn.id))
-        
-        pedestrian_spawn = carla.Transform(
-            carla.Location(x=70.0, y=12.0, z=2.253),
-            carla.Rotation(yaw=0.0)
-        )
-        
-        pedestrian_bp = blueprint_library.filter("pedestrian")[0]
-        pedestrian_transform = pedestrian_spawn
-        pedestrian_spawn = self.__carla_world.spawn_actor(pedestrian_bp, pedestrian_transform)
-        print("Created a dummy pedestrian with id: " + str(pedestrian_spawn.id))
-        
-        vehicle_spawn = carla.Transform(
-            carla.Location(x=67.0, y=7.0, z=2.253),
-            carla.Rotation(yaw=0.0)
-        )
-        
-        #   sensor     65.0, 7.0, .253
-    
-        vehicle_bp = blueprint_library.filter("carlacola")[0]
-        vehicle_transform = vehicle_spawn
-        vehicle_spawn = self.__carla_world.spawn_actor(vehicle_bp, vehicle_transform)
-        print("Created a dummy vehicle with id: " + str(vehicle_spawn.id))
-        
-        
         # Start compute thread
         scheduler = sched.scheduler(time.time, time.sleep)
         scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,

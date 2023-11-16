@@ -253,7 +253,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
         # Restore and verify real sampling returns the expected sample size
         sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 4)
-        print(f"sampled_hitpoints: {sampled_hitpoints}")
         assert len(sampled_hitpoints[0]) == 4
         assert len(sampled_hitpoints[1]) == 4
         sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 5)
