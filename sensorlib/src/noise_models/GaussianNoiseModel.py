@@ -102,7 +102,7 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
         # Apply velocity noise to the object_list
         noise_std = self.__position_std
-        noise_covariance_matrix = noise_std * noise_std * np.identity(3) *
+        noise_covariance_matrix = noise_std * noise_std * np.identity(3)
         for obj in object_list:
             obj.velocity_covariance = noise_covariance_matrix
 
