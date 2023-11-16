@@ -111,7 +111,7 @@ class SemanticLidarSensor(SimulatedSensor):
         detected_objects = self.apply_noise(detected_objects)
 
         # Update reference frame, and detection time
-        detected_objects = self.update_object_metadata(detected_objects, timestamp)
+        detected_objects = self.update_object_frame_and_timestamps(detected_objects, timestamp)
 
         self.__detected_objects = detected_objects
 
@@ -293,11 +293,11 @@ class SemanticLidarSensor(SimulatedSensor):
             new_pos = np.add(hitpoint, self.__sensor.position)
             hitpoints_in_map_frame.append(new_pos)
         
-        matching_nearest_neighbot_ids = self.compute_closest_object_id_list(hitpoints_in_map_frame, scene_objects,
+        matching_nearest_neighbor_ids = self.compute_closest_object_id_list(hitpoints_in_map_frame, scene_objects,
                                                           self.__simulated_sensor_config["geometry_reassociation"][
                                                               "geometry_association_max_distance_threshold"])
   
-        association = zip(hitpoints, matching_nearest_neighbot_ids)
+        association = zip(hitpoints, matching_nearest_neighbor_ids)
 
         grouped_data = dict()
         for hitpoint, actor_id in association:
@@ -485,21 +485,21 @@ class SemanticLidarSensor(SimulatedSensor):
     # Post Processing
     # ------------------------------------------------------------------------------
 
-    def update_object_metadata(self, detected_objects, timestamp):
+    def update_object_frame_and_timestamps(self, detected_objects, timestamp):
         """
-        Update object metadata including object type, detection timestamp in seconds, and adjusting the coordinates to the
+        Update object metadata including detection timestamp in seconds and adjusting the coordinates to the
         sensor-centric frame.
 
         :param detected_objects: List of objects currently considered for detection.
         :param timestamp: Timestamp of the current frame (seconds).
         :return: List of objects with updated metadata.
         """
-        return [self.update_object_metadata_from_hitpoint(obj, timestamp)
+        return [self.update_object_frame_and_timestamps_from_hitpoint(obj, timestamp)
                 for obj in detected_objects]
 
-    def update_object_metadata_from_hitpoint(self, obj, timestamp):
+    def update_object_frame_and_timestamps_from_hitpoint(self, obj, timestamp):
         """
-        Update the object metadata (object type, timestamp, coordinates).
+        Update the object metadata timestamp and coordinates .
 
         :param obj: Detected object.
         :param timestamp: Timestamp of the current frame (seconds).

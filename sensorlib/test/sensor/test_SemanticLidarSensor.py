@@ -105,7 +105,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor.update_hitpoint_ids_from_association = MagicMock(return_value=hitpoints)
         self.sensor.apply_occlusion = MagicMock(return_value=detected_objects)
         self.sensor.apply_noise = MagicMock(return_value=detected_objects)
-        self.sensor.update_object_metadata = MagicMock(return_value=detected_objects)
+        self.sensor.update_object_frame_and_timestamps = MagicMock(return_value=detected_objects)
 
         # Call and provide assertions
         result = self.sensor.compute_detected_objects()
@@ -118,7 +118,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor.apply_occlusion.assert_called_once_with(detected_objects, actor_angular_extents, hitpoints,
                                                             detection_thresholds)
         self.sensor.apply_noise.assert_called_once_with(detected_objects)
-        self.sensor.update_object_metadata.assert_called_once_with(detected_objects, hitpoints, timestamp)
+        self.sensor.update_object_frame_and_timestamps.assert_called_once_with(detected_objects, hitpoints, timestamp)
 
         self.assertEqual(result, detected_objects)
         self.assertEqual(self.sensor._SemanticLidarSensor__detected_objects, detected_objects)
@@ -785,7 +785,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         noise_model.apply_type_noise.assert_called_once_with(detected_objects)
         noise_model.apply_list_inclusion_noise.assert_called_once_with(detected_objects)
 
-    def test_update_object_metadata(self):
+    def test_update_object_frame_and_timestamps(self):
         original_type = "Vehicles"
         expected_type = "Bridge"
 
@@ -805,7 +805,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         ]
 
         # Execute
-        new_detected_objects = self.sensor.update_object_metadata(detected_objects, hitpoints, timestamp)
+        new_detected_objects = self.sensor.update_object_frame_and_timestamps(detected_objects, hitpoints, timestamp)
 
         # Assert object types updated
         assert new_detected_objects[0].object_type == "Bridge"
@@ -831,7 +831,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert np.allclose(new_detected_objects[4].position, np.array([7.0, 13.0, 0.0]))
         assert np.allclose(new_detected_objects[5].position, np.array([13.0, 13.0, 0.0]))
 
-    def test_update_object_metadata_from_hitpoint(self):
+    def test_update_object_frame_and_timestamps_from_hitpoint(self):
         # Build mock objects
         expected_type = 15
         carla_actor = MagicMock()
@@ -853,7 +853,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         timestamp = 3
 
         # Call and provide assertions
-        corrected_objects = self.sensor.update_object_metadata_from_hitpoint(detected_object,
+        corrected_objects = self.sensor.update_object_frame_and_timestamps_from_hitpoint(detected_object,
                                                                              hitpoints.get(detected_object.id),
                                                                              timestamp)
         assert "Bridge" == corrected_objects.object_type

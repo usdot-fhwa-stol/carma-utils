@@ -26,7 +26,7 @@ from util.CarlaUtils import CarlaUtils
 
 class CarlaCDASimAPI:
     """
-    Interface to build and manage SimulatedSensor's.
+    Interface to build and manage SimulatedSensors
     """
 
     def __init__(self):
@@ -108,7 +108,7 @@ class CarlaCDASimAPI:
 
         # Retrieve the CARLA sensor
         blueprint_library = self.__carla_world.get_blueprint_library()
-        sensor_bp = self.__generate_lidar_bp(blueprint_library, carla_sensor_config)
+        sensor_bp = generate_lidar_bp(blueprint_library, carla_sensor_config)
         parent = None
         if parent_id is not None:
             parent = self.__carla_world.get_actor(parent_id)
@@ -138,9 +138,9 @@ class CarlaCDASimAPI:
         # Adding corresponding dummy lidar solely for visualization in Carla Viz
         # because semantic lidar sensor is not visualizable at the moment
         # https://github.com/usdot-fhwa-stol/carma-utils/issues/180
-        lidar_bp = self.__generate_lidar_bp(blueprint_library, carla_sensor_config, "lidar")
+        lidar_bp = generate_lidar_bp(blueprint_library, carla_sensor_config, "lidar")
         lidar_spawn = self.__carla_world.spawn_actor(lidar_bp, sensor_transform)
-        print("Created a dummy lidar for visualizarion with id: " + str(lidar_spawn.id))
+        print(f"Created a dummy lidar for visualization with id: {lidar_spawn.id}")
         
         # Start compute thread
         scheduler = sched.scheduler(time.time, time.sleep)
@@ -186,16 +186,17 @@ class CarlaCDASimAPI:
                         (scheduler, simulated_sensor, detection_cycle_delay_seconds))
         simulated_sensor.compute_detected_objects()
 
-    def __generate_lidar_bp(self, blueprint_library, carla_sensor_config, type= None):
-        """Build the CARLA blueprint necessary for CARLA sensor construction."""
-        if type is None:
-            lidar_bp = blueprint_library.find("sensor.lidar.ray_cast_semantic")
-        else:
-            lidar_bp = blueprint_library.filter(type)[0]
-        lidar_bp.set_attribute("upper_fov", str(carla_sensor_config["upper_fov"]))
-        lidar_bp.set_attribute("lower_fov", str(carla_sensor_config["lower_fov"]))
-        lidar_bp.set_attribute("channels", str(carla_sensor_config["channels"]))
-        lidar_bp.set_attribute("range", str(carla_sensor_config["range"]))
-        lidar_bp.set_attribute("rotation_frequency", str(1.0 / carla_sensor_config["rotation_period"]))
-        lidar_bp.set_attribute("points_per_second", str(carla_sensor_config["points_per_second"]))
-        return lidar_bp
+
+def generate_lidar_bp(self, blueprint_library, carla_sensor_config, type= None):
+    """Build the CARLA blueprint necessary for CARLA sensor construction."""
+    if type is None:
+        lidar_bp = blueprint_library.find("sensor.lidar.ray_cast_semantic")
+    else:
+        lidar_bp = blueprint_library.filter(type)[0]
+    lidar_bp.set_attribute("upper_fov", str(carla_sensor_config["upper_fov"]))
+    lidar_bp.set_attribute("lower_fov", str(carla_sensor_config["lower_fov"]))
+    lidar_bp.set_attribute("channels", str(carla_sensor_config["channels"]))
+    lidar_bp.set_attribute("range", str(carla_sensor_config["range"]))
+    lidar_bp.set_attribute("rotation_frequency", str(1.0 / carla_sensor_config["rotation_period"]))
+    lidar_bp.set_attribute("points_per_second", str(carla_sensor_config["points_per_second"]))
+    return lidar_bp
