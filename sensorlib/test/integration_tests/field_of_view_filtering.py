@@ -197,7 +197,7 @@ def spawn_vehicle_lidar(world):
             sensor_id,
             lidar_offset.location,
             lidar_offset.rotation,
-            parent_actor_id=ego_vehicle.id,
+            parent_id=ego_vehicle.id,
         ),
         dummy_lidar,
     )

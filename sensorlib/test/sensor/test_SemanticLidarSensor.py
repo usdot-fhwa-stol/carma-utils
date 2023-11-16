@@ -101,11 +101,9 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor.sample_hitpoints = MagicMock(return_value=hitpoints)
         self.sensor.compute_instantaneous_actor_id_association = MagicMock(
             return_value={0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5})
-        self.sensor.update_actor_id_association = MagicMock(return_value={0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5})
-        self.sensor.update_hitpoint_ids_from_association = MagicMock(return_value=hitpoints)
         self.sensor.apply_occlusion = MagicMock(return_value=detected_objects)
         self.sensor.apply_noise = MagicMock(return_value=detected_objects)
-        self.sensor.update_object_metadata = MagicMock(return_value=detected_objects)
+        self.sensor.update_object_frame_and_timestamps = MagicMock(return_value=detected_objects)
 
         # Call and provide assertions
         result = self.sensor.compute_detected_objects()
@@ -118,7 +116,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         self.sensor.apply_occlusion.assert_called_once_with(detected_objects, actor_angular_extents, hitpoints,
                                                             detection_thresholds)
         self.sensor.apply_noise.assert_called_once_with(detected_objects)
-        self.sensor.update_object_metadata.assert_called_once_with(detected_objects, hitpoints, timestamp)
+        self.sensor.update_object_frame_and_timestamps.assert_called_once_with(detected_objects, hitpoints, timestamp)
 
         self.assertEqual(result, detected_objects)
         self.assertEqual(self.sensor._SemanticLidarSensor__detected_objects, detected_objects)
@@ -253,7 +251,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
         # Restore and verify real sampling returns the expected sample size
         sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 4)
-        print(f"sampled_hitpoints: {sampled_hitpoints}")
         assert len(sampled_hitpoints[0]) == 4
         assert len(sampled_hitpoints[1]) == 4
         sampled_hitpoints = self.sensor.sample_hitpoints(hitpoints, 5)
@@ -485,193 +482,6 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert self.sensor.vote_most_frequent_id([]) is None
         assert self.sensor.vote_most_frequent_id(None) is None
 
-    def test_update_actor_id_association(self):
-        trailing_id_associations_count = 3
-        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
-        instantaneous_actor_id_association = {
-            0: 0,
-            1: 1,
-            2: 2
-        }
-
-        # Inject empty mapping into empty history
-        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
-        self.sensor.update_actor_id_association({})
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == []
-        assert self.sensor._SemanticLidarSensor__actor_id_association == {}
-
-        # Inject one mapping
-        current_mapping = self.sensor.update_actor_id_association(instantaneous_actor_id_association)
-        assert current_mapping == {0: 0, 1: 1, 2: 2}
-        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
-
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2]
-
-        # Accumulate mapping
-        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
-        current_mapping = self.sensor.update_actor_id_association({0: 0})
-        assert current_mapping == {0: 0}
-        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
-        current_mapping = self.sensor.update_actor_id_association({1: 1})
-        assert current_mapping == {0: 0, 1: 1}
-        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
-        current_mapping = self.sensor.update_actor_id_association({2: 2})
-        assert current_mapping == {0: 0, 1: 1, 2: 2}
-        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
-
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2]
-
-        # Inject empty mapping into existing history
-        current_mapping = self.sensor.update_actor_id_association({})
-        assert current_mapping == {0: 0, 1: 1, 2: 2}
-        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
-
-        # Inject same mapping (full)
-        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
-        current_mapping = self.sensor.update_actor_id_association(instantaneous_actor_id_association)
-        current_mapping = self.sensor.update_actor_id_association(instantaneous_actor_id_association)
-        current_mapping = self.sensor.update_actor_id_association(instantaneous_actor_id_association)
-        assert current_mapping == {0: 0, 1: 1, 2: 2}
-        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
-
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0, 0]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1, 1]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2, 2, 2]
-
-        # Inject different mapping (full)
-        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
-        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
-        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
-        current_mapping = self.sensor.update_actor_id_association({0: 2, 1: 0, 2: 1})
-        assert current_mapping == {0: 0, 1: 1, 2: 2}
-        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
-
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [2, 0, 0]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [0, 1, 1]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [1, 2, 2]
-
-        # Inject same mapping (partial)
-        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
-        current_mapping = self.sensor.update_actor_id_association(instantaneous_actor_id_association)
-        current_mapping = self.sensor.update_actor_id_association(instantaneous_actor_id_association)
-        current_mapping = self.sensor.update_actor_id_association({0: 0})
-        assert current_mapping == {0: 0, 1: 1, 2: 2}
-        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
-
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0, 0]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2, 2]
-
-        # Inject different mapping (partial)
-        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
-        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
-        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
-        current_mapping = self.sensor.update_actor_id_association({2: 1})
-        assert current_mapping == {0: 0, 1: 1, 2: 2}
-        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
-
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [1, 2, 2]
-
-        # Odd voting
-        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(3)
-        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
-        current_mapping = self.sensor.update_actor_id_association({2: 1})
-        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
-        assert current_mapping == {0: 0, 1: 1, 2: 2}
-        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
-
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2, 1, 2]
-
-        # Even voting - Previous incorrect - Newer information should be preferred
-        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(2)
-        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
-        current_mapping = self.sensor.update_actor_id_association({2: 1})
-        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
-        assert current_mapping == {0: 0, 1: 1, 2: 2}
-        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
-
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [2, 1]
-
-        # Even voting - Current incorrect - Newer information should be preferred
-        self.sensor._SemanticLidarSensor__trailing_id_associations = HistoricalMapper(2)
-        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
-        current_mapping = self.sensor.update_actor_id_association({0: 0, 1: 1, 2: 2})
-        current_mapping = self.sensor.update_actor_id_association({2: 1})
-        assert current_mapping == {0: 0, 1: 1, 2: 1}
-        assert self.sensor._SemanticLidarSensor__actor_id_association == current_mapping
-
-        assert self.sensor._SemanticLidarSensor__trailing_id_associations.get_keys() == [0, 1, 2]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(0)) == [0, 0]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(1)) == [1, 1]
-        assert list(self.sensor._SemanticLidarSensor__trailing_id_associations.get_queue(2)) == [1, 2]
-
-    def test_update_hitpoint_ids_from_association(self):
-        hitpoints = {
-            0: "Point 0",
-            1: "Point 1",
-            2: "Point 2",
-            3: "Point 3",
-            4: "Point 4",
-            5: "Point 5"
-        }
-
-        # Same mapping
-        self.sensor._SemanticLidarSensor__actor_id_association = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
-        updated_hitpoints = self.sensor.update_hitpoint_ids_from_association(hitpoints)
-        assert updated_hitpoints[0] == "Point 0"
-        assert updated_hitpoints[1] == "Point 1"
-        assert updated_hitpoints[2] == "Point 2"
-        assert updated_hitpoints[3] == "Point 3"
-        assert updated_hitpoints[4] == "Point 4"
-        assert updated_hitpoints[5] == "Point 5"
-
-        # Full new mapping
-        self.sensor._SemanticLidarSensor__actor_id_association = {0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 0}
-        updated_hitpoints = self.sensor.update_hitpoint_ids_from_association(hitpoints)
-        assert updated_hitpoints[1] == "Point 0"
-        assert updated_hitpoints[2] == "Point 1"
-        assert updated_hitpoints[3] == "Point 2"
-        assert updated_hitpoints[4] == "Point 3"
-        assert updated_hitpoints[5] == "Point 4"
-        assert updated_hitpoints[0] == "Point 5"
-
-        # Partial new mapping - Preserve unmapped ID's
-        self.sensor._SemanticLidarSensor__actor_id_association = {0: 10, 3: 100}
-        updated_hitpoints = self.sensor.update_hitpoint_ids_from_association(hitpoints)
-        assert updated_hitpoints[10] == "Point 0"
-        assert updated_hitpoints[1] == "Point 1"
-        assert updated_hitpoints[2] == "Point 2"
-        assert updated_hitpoints[100] == "Point 3"
-        assert updated_hitpoints[4] == "Point 4"
-        assert updated_hitpoints[5] == "Point 5"
-
-        # Conflicted mapping
-        self.sensor._SemanticLidarSensor__actor_id_association = {0: 10, 1: 10}
-        updated_hitpoints = self.sensor.update_hitpoint_ids_from_association(hitpoints)
-        assert updated_hitpoints[10] == "Point 1"
-        assert updated_hitpoints[2] == "Point 2"
-        assert updated_hitpoints[3] == "Point 3"
-        assert updated_hitpoints[4] == "Point 4"
-        assert updated_hitpoints[5] == "Point 5"
-
     def test_apply_occlusion(self):
         # Specify inputs
         detected_objects = SimulatedSensorTestUtils.generate_test_data_detected_objects()
@@ -786,7 +596,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         noise_model.apply_type_noise.assert_called_once_with(detected_objects)
         noise_model.apply_list_inclusion_noise.assert_called_once_with(detected_objects)
 
-    def test_update_object_metadata(self):
+    def test_update_object_frame_and_timestamps(self):
         original_type = "Vehicles"
         expected_type = "Bridge"
 
@@ -806,7 +616,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         ]
 
         # Execute
-        new_detected_objects = self.sensor.update_object_metadata(detected_objects, hitpoints, timestamp)
+        new_detected_objects = self.sensor.update_object_frame_and_timestamps(detected_objects, hitpoints, timestamp)
 
         # Assert object types updated
         assert new_detected_objects[0].object_type == "Bridge"
@@ -832,7 +642,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         assert np.allclose(new_detected_objects[4].position, np.array([7.0, 13.0, 0.0]))
         assert np.allclose(new_detected_objects[5].position, np.array([13.0, 13.0, 0.0]))
 
-    def test_update_object_metadata_from_hitpoint(self):
+    def test_update_object_frame_and_timestamps_from_hitpoint(self):
         # Build mock objects
         expected_type = 15
         carla_actor = MagicMock()
@@ -854,7 +664,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         timestamp = 3
 
         # Call and provide assertions
-        corrected_objects = self.sensor.update_object_metadata_from_hitpoint(detected_object,
+        corrected_objects = self.sensor.update_object_frame_and_timestamps_from_hitpoint(detected_object,
                                                                              hitpoints.get(detected_object.id),
                                                                              timestamp)
         assert "Bridge" == corrected_objects.object_type

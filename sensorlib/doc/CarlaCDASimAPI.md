@@ -92,7 +92,7 @@ CARLA connection.
      |  
      |  Methods defined here:
      |  
-     |  create_simulated_semantic_lidar_sensor(self, simulated_sensor_config, carla_sensor_config, noise_model_config, detection_cycle_delay_seconds, infrastructure_id, sensor_id, sensor_position, sensor_rotation, parent_actor_id=-1)
+     |  create_simulated_semantic_lidar_sensor(self, simulated_sensor_config, carla_sensor_config, noise_model_config, detection_cycle_delay_seconds, infrastructure_id, sensor_id, sensor_position, sensor_rotation, parent_id=None)
      |      Builds a SemanticLidarSensor from a CARLA Semantic LIDAR Sensor.
      |      :param simulated_sensor_config: The configuration for the simulated sensor.
      |      :param carla_sensor_config: The configuration for the CARLA sensor.
@@ -102,7 +102,7 @@ CARLA connection.
      |      :param sensor_id: The ID of the sensor.
      |      :param sensor_position: Sensor position in CARLA world coordinates.
      |      :param sensor_rotation: Sensor rotation in degrees.
-     |      :param parent_actor_id: ID of the parent actor to which the sensor is attached (optional).
+     |      :param parent_id: The parent actor ID to which the sensor is attached (optional).
      |      :return: A registered SimulatedSensor.
      |  
      |  get_detected_objects(self, infrastructure_id, sensor_id)

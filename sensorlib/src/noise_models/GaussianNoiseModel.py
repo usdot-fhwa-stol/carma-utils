@@ -61,9 +61,7 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
         # Apply type noise to the object_list
         return [replace(obj,
-                        object_type=CarlaUtils.get_semantic_tag_name(
-                            self.__rng.choice(self.__config["type_noise"]["allowed_semantic_tags"],
-                                                      1, replace=False)))
+                        object_type= self.__rng.choice(self.__config["type_noise"]["allowed_semantic_tags"], 1))
                 for obj in object_list]
 
     def apply_list_inclusion_noise(self, object_list):
