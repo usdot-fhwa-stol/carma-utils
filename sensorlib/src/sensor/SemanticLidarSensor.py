@@ -371,40 +371,6 @@ class SemanticLidarSensor(SimulatedSensor):
             return None
 
     # ------------------------------------------------------------------------------
-    # Geometry Re-Association: Update Step
-    # ------------------------------------------------------------------------------
-
-    def update_actor_id_association(self, instantaneous_actor_id_association):
-        """
-        Update the most recent association based on the current time step's instantaneously-derived association.
-        """
-
-        if instantaneous_actor_id_association is None or len(instantaneous_actor_id_association) == 0:
-            return self.__actor_id_association
-
-        # Prepend instantaneous association to trailing associations
-        # Possible enhancement issue: https://github.com/usdot-fhwa-stol/carma-platform/issues/2142
-
-        for hitpoint_id, obj_id in instantaneous_actor_id_association.items():
-            self.__trailing_id_associations.push(hitpoint_id, obj_id)
-
-        # Recompute current association
-        self.__actor_id_association = dict()
-        for hitpoint_id in self.__trailing_id_associations.get_keys():
-            q = list(self.__trailing_id_associations.get_queue(hitpoint_id))
-            obj_id = self.vote_most_frequent_id(q)
-            self.__actor_id_association[hitpoint_id] = obj_id
-
-        return self.__actor_id_association
-
-    def update_hitpoint_ids_from_association(self, hitpoints):
-        """Update object ID using the latest ID association"""
-
-        # Update to the current association's mapped ID, or use the original ID as default
-        return dict(
-            [(self.__actor_id_association.get(id, id), hitpoint_list) for id, hitpoint_list in hitpoints.items()])
-
-    # ------------------------------------------------------------------------------
     # Occlusion Filter
     # ------------------------------------------------------------------------------
 
