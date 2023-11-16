@@ -22,7 +22,7 @@ class CarlaCDASimAdapter:
     """
 
     def __init__(self, sensor_api, sensor_config_file="config/simulated_sensor_config.yaml",
-                 noise_model_config_file="config/noise_model_config.yaml", detection_cycle_delay_seconds=0.5):
+                 noise_model_config_file="config/noise_model_config.yaml", detection_cycle_delay_seconds=0.1):
         """
         CarlaCDASimAdapter constructor.
         :param sensor_api: The API object exposing CARLA connection.
@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
     arg_parser.add_argument(
         "--xmlrpc-server-port",
-        default=8000,
+        default=8001,
         type=int,
         help="XML-RPC server port. (default: 8000)")
 
@@ -122,9 +122,9 @@ if __name__ == "__main__":
 
     arg_parser.add_argument(
         "--detection-cycle-delay-seconds",
-        default=0.5,
+        default=0.1,
         type=float,
-        help="Time interval between detection reporting. (default: 0.5)")
+        help="Time interval between detection reporting. (default: 0.1)")
 
     args = arg_parser.parse_args()
     sensor_api = CarlaCDASimAPI.build_from_host_spec(args.carla_host, args.carla_port)

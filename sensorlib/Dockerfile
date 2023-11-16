@@ -11,7 +11,7 @@ ENV CARLA_VERSION=0.9.10
 ENV CARLA_EGG_DIR="/home/CarlaCDASimAdapter/"
 
 WORKDIR /home/CarlaCDASimAdapter/
-RUN pip3 install numpy PyYAML scipy dataclasses
+RUN pip3 install numpy PyYAML scipy dataclasses art
 
 COPY ./src/ /home/CarlaCDASimAdapter/src
 COPY ./config/ /home/CarlaCDASimAdapter/config
