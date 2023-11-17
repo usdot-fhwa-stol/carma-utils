@@ -55,7 +55,7 @@ class AbstractNoiseModel:
         pass
 
     @abstractmethod
-    def apply_position_covariance(self, object_list):
+    def apply_position_covariance_noise(self, object_list):
         """
         Apply noise related to position covariance to the object positions.
 
@@ -65,7 +65,7 @@ class AbstractNoiseModel:
         pass
 
     @abstractmethod
-    def apply_orientation_covariance(self, object_list):
+    def apply_orientation_covariance_noise(self, object_list):
         """
         Apply noise related to orientation covariance to the object orientations.
 
@@ -75,7 +75,7 @@ class AbstractNoiseModel:
         pass
 
     @abstractmethod
-    def apply_velocity_covariance(self, object_list):
+    def apply_linear_velocity_covariance_noise(self, object_list):
         """
         Apply noise related to velocity covariance to the object velocities.
 
@@ -85,7 +85,7 @@ class AbstractNoiseModel:
         pass
 
     @abstractmethod
-    def apply_angular_velocity_covariance(self, object_list):
+    def apply_angular_velocity_covariance_noise(self, object_list):
         """
         Apply noise related to angular velocity covariance to the object angular velocities.
 

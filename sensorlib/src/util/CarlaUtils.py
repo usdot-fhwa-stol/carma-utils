@@ -45,7 +45,7 @@ class CarlaUtils:
         return np.deg2rad(angular_velocity_degpersecond)
 
     @staticmethod
-    def get_actor_orientation(carla_actor):
+    def get_actor_roll_pitch_yaw(carla_actor):
         """
         Get the orientation for an actor in order of roll, pitch, yaw.
         :param carla_actor: The carla.Actor to obtain data from.

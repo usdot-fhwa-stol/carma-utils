@@ -19,8 +19,8 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
     def __init__(self, config):
         self.__config = config
-        self.__position_std_in_meters = self.__config["std_deviations"]["position_in_meters"]
-        self.__orientation_std_in_radians = self.__config["std_deviations"]["orientation_in_radians"]
+        self.__position_std_in_meters_in_meters = self.__config["std_deviations"]["position_in_meters"]
+        self.__orientation_std_in_radians_in_radians = self.__config["std_deviations"]["orientation_in_radians"]
         self.__rng = np.random.default_rng()
 
     def apply_position_noise(self, object_list):
@@ -30,9 +30,8 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
         # Apply position noise to the object_list
         noise_mean = 0.0
-        noise_std = self.__position_std_in_meters
         for obj in object_list:
-            noise = np.random.normal(noise_mean, noise_std, size=3)
+            noise = np.random.normal(noise_mean, self.__position_std_in_meters_in_meters, size=3)
             obj.position[0] += noise[0]
             obj.position[1] += noise[1]
             obj.position[2] += noise[2]
@@ -46,9 +45,8 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
         # Apply orientation noise to the object_list
         noise_mean = 0.0
-        noise_std = self.__orientation_std_in_radians
         for obj in object_list:
-            noise = np.random.normal(noise_mean, noise_std, size=3)
+            noise = np.random.normal(noise_mean, self.__orientation_std_in_radians_in_radians, size=3)
 
             obj.rotation[0] += noise[0]
             obj.rotation[1] += noise[1]
@@ -70,54 +68,50 @@ class GaussianNoiseModel(AbstractNoiseModel):
             return object_list
         return object_list[0:np.random.randint(0, len(object_list) + 1)]
 
-    def apply_position_covariance(self, object_list):
+    def apply_position_covariance_noise(self, object_list):
         if not self.__config["stages"]["position_noise"]:
             return object_list
 
         # Apply position noise to the object_list
-        noise_std = self.__position_std
         for obj in object_list:
-            obj.position_covariance[0][0] = noise_std[0] * noise_std[0]
-            obj.position_covariance[1][1] = noise_std[1] * noise_std[1]
-            obj.position_covariance[2][2] = noise_std[2] * noise_std[2]
+            obj.position_covariance[0][0] = self.__position_std_in_meters[0] ** 2
+            obj.position_covariance[1][1] = self.__position_std_in_meters[1] ** 2
+            obj.position_covariance[2][2] = self.__position_std_in_meters[2] ** 2
 
         return object_list
 
-    def apply_orientation_covariance(self, object_list):
+    def apply_orientation_covariance_noise(self, object_list):
         if not self.__config["stages"]["orientation_noise"]:
             return object_list
 
         # Apply orientation noise to the object_list
-        noise_std = self.__orientation_std
         for obj in object_list:
-            obj.orientation_covariance[0][0] = noise_std[0] * noise_std[0]
-            obj.orientation_covariance[1][1] = noise_std[1] * noise_std[1]
-            obj.orientation_covariance[2][2] = noise_std[2] * noise_std[2]
+            obj.orientation_covariance[0][0] = self.__orientation_std_in_radians[0] ** 2
+            obj.orientation_covariance[1][1] = self.__orientation_std_in_radians[1] ** 2
+            obj.orientation_covariance[2][2] = self.__orientation_std_in_radians[2] ** 2
 
         return object_list
 
-    def apply_velocity_covariance(self, object_list):
+    def apply_linear_velocity_covariance_noise(self, object_list):
         if not self.__config["stages"]["position_noise"]:
             return object_list
 
         # Apply velocity noise to the object_list
-        noise_std = self.__position_std
         for obj in object_list:
-            obj.velocity_covariance[0][0] = noise_std[0] * noise_std[0]
-            obj.velocity_covariance[1][1] = noise_std[1] * noise_std[1]
-            obj.velocity_covariance[2][2] = noise_std[2] * noise_std[2]
+            obj.velocity_covariance[0][0] = self.__position_std_in_meters[0] ** 2
+            obj.velocity_covariance[1][1] = self.__position_std_in_meters[1] ** 2
+            obj.velocity_covariance[2][2] = self.__position_std_in_meters[2] ** 2
 
         return object_list
 
-    def apply_angular_velocity_covariance(self, object_list):
+    def apply_angular_velocity_covariance_noise(self, object_list):
         if not self.__config["stages"]["orientation_noise"]:
             return object_list
 
         # Apply angular velocity noise to the object_list
-        noise_std = self.__orientation_std
         for obj in object_list:
-            obj.angular_velocity_covariance[0][0] = noise_std[0] * noise_std[0]
-            obj.angular_velocity_covariance[1][1] = noise_std[1] * noise_std[1]
-            obj.angular_velocity_covariance[2][2] = noise_std[2] * noise_std[2]
+            obj.angular_velocity_covariance[0][0] = self.__orientation_std_in_radians[0] ** 2
+            obj.angular_velocity_covariance[1][1] = self.__orientation_std_in_radians[1] ** 2
+            obj.angular_velocity_covariance[2][2] = self.__orientation_std_in_radians[2] ** 2
 
         return object_list

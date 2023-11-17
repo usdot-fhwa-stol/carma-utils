@@ -55,7 +55,7 @@ class DetectedObjectBuilder:
             bounding_box,
             CarlaUtils.vector3d_to_numpy(carla_actor.get_location()),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_velocity()),
-            CarlaUtils.get_actor_orientation(carla_actor),
+            CarlaUtils.get_actor_roll_pitch_yaw(carla_actor),
             CarlaUtils.get_actor_angular_velocity(carla_actor),
 
             # Use stand-in values which assume complete certainty
