@@ -55,8 +55,8 @@ class SimulatedSensorTestUtils:
         return {
             "noise_model_name": "GaussianNoiseModel",
             "std_deviations": {
-                "position": [0.8, 0.8, 0.8],
-                "orientation": [0.1, 0.1, 0.1],
+                "position_in_meters": [0.8, 0.8, 0.8],
+                "orientation_in_radians": [0.1, 0.1, 0.1],
             },
             "stages": {
                 "position_noise": True,

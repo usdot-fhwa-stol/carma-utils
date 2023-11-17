@@ -28,7 +28,7 @@ NOISE_MODEL_CONFIG = {
         "type_noise": False,
         "list_inclusion_noise": False,
     },
-    "std_deviations": {"position": [0.8, 0.8, 0.8], "orientation": [0.1, 0.1, 0.1]},
+    "std_deviations": {"position_in_meters": [0.8, 0.8, 0.8], "orientation_in_radians": [0.1, 0.1, 0.1]},
     "type_noise": {
         "allowed_semantic_tags": {
             "Buildings",

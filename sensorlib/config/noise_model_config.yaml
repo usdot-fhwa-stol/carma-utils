@@ -6,9 +6,9 @@ stages:
     list_inclusion_noise: False
 std_deviations:
     # meters
-    position: [0.8, 0.8, 0.8]
+    position_in_meters: [0.8, 0.8, 0.8]
     # radians
-    orientation: [0.1, 0.1, 0.1]
+    orientation_in_radians: [0.1, 0.1, 0.1]
 type_noise:
     allowed_semantic_tags:
         Buildings

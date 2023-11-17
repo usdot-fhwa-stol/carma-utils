@@ -19,8 +19,8 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
     def __init__(self, config):
         self.__config = config
-        self.__position_std = self.__config["std_deviations"]["position"]
-        self.__orientation_std = self.__config["std_deviations"]["orientation"]
+        self.__position_std_in_meters = self.__config["std_deviations"]["position_in_meters"]
+        self.__orientation_std_in_radians = self.__config["std_deviations"]["orientation_in_radians"]
         self.__rng = np.random.default_rng()
 
     def apply_position_noise(self, object_list):
@@ -30,7 +30,7 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
         # Apply position noise to the object_list
         noise_mean = 0.0
-        noise_std = self.__position_std
+        noise_std = self.__position_std_in_meters
         for obj in object_list:
             noise = np.random.normal(noise_mean, noise_std, size=3)
             obj.position[0] += noise[0]
@@ -46,7 +46,7 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
         # Apply orientation noise to the object_list
         noise_mean = 0.0
-        noise_std = self.__orientation_std
+        noise_std = self.__orientation_std_in_radians
         for obj in object_list:
             noise = np.random.normal(noise_mean, noise_std, size=3)
             obj.rotation[0] += noise[0]
