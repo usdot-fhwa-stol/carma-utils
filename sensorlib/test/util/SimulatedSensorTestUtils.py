@@ -34,7 +34,7 @@ class SimulatedSensorTestUtils:
             },
             "geometry_reassociation": {
                 "sample_count": 3,
-                "geometry_association_max_distance_threshold": 2.0,
+                "geometry_association_max_dist_in_meters": 2.0,
             },
             "use_sensor_centric_frame": True
         }
