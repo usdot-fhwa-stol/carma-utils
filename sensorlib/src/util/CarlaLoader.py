@@ -29,7 +29,7 @@ class CarlaLoader:
             sys.exit()
         elif carla_version is None:
             carla_version = CarlaLoader.CARLA_VERSION
-        carla_egg_file = CarlaLoader.__find_carla_egg(carla_version)
+        carla_egg_file = CarlaLoader.find_carla_egg(carla_version)
         sys.path.append(carla_egg_file)
 
     @staticmethod
@@ -55,7 +55,7 @@ class CarlaLoader:
             carla_egg_name = "carla-" + carla_version + "*" + str(sys.version_info.major) + "*-" + str(
                 "win-amd64" if os.name == "nt" else "linux-x86_64") + ".egg"
             print("Looking for CARLA egg: " + carla_egg_name)
-            carla_egg_locations = CarlaLoader.__find_file(carla_egg_name, carla_egg_dir)
+            carla_egg_locations = CarlaLoader.find_file(carla_egg_name, carla_egg_dir)
             print("Found carla egg(s): " + str(carla_egg_locations))
 
             if len(carla_egg_locations) == 0:

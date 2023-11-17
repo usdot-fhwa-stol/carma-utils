@@ -28,18 +28,18 @@ class SensorDataCollector:
 
     def __init__(self, carla_world, carla_sensor):
         self.debug = True
-        self.__carla_world = carla_world
-        self.__carla_sensor = carla_sensor
-        self.__prev_angle = 0.0
+        self.carla_world = carla_world
+        self.carla_sensor = carla_sensor
+        self.prev_angle = 0.0
 
         # Time of latest data capture (in seconds)
-        self.__timestamp = 0
+        self.timestamp = 0
 
         # Store current and prior data collections. The current is actively being added to, previous is finalized.
-        self.__data = deque([{}, {}], maxlen=2)
+        self.data = deque([{}, {}], maxlen=2)
 
         # Register callback to collect data
-        self.__carla_sensor.listen(self.__collect_sensor_data)
+        self.carla_sensor.listen(self.collect_sensor_data)
 
     def get_carla_lidar_hitpoints(self):
         """
@@ -48,7 +48,7 @@ class SensorDataCollector:
         :return: Timestamp (in seconds), and collected hitpoints from most recent frame (dictionary mapping object ID
             to list of np.array points).
         """
-        return self.__timestamp, self.__data[1]
+        return self.timestamp, self.data[1]
 
     def __collect_sensor_data(self, semantic_sensor_data):
         """
@@ -61,19 +61,19 @@ class SensorDataCollector:
         """
 
         # Update the timestamp (in integer seconds)
-        self.__timestamp = int(semantic_sensor_data.timestamp)
+        self.timestamp = int(semantic_sensor_data.timestamp)
 
         # Check if this data collection belongs to the same data collection run as the previous time step
         sensor_rotation_angle = semantic_sensor_data.horizontal_angle
-        if not self.__is_same_data_collection(sensor_rotation_angle):
+        if not self.is_same_data_collection(sensor_rotation_angle):
             # Finalize current collection and append a new collection
-            self.__data.appendleft({})
+            self.data.appendleft({})
 
         # Add data to the current collection
         if (len(semantic_sensor_data.raw_data) == 0):
             return None
-        
-        self.__collect_raw_point_data(self.__data[0], semantic_sensor_data)
+
+        self.collect_raw_point_data(self.data[0], semantic_sensor_data)
 
     def __collect_raw_point_data(self, grouped_data, raw_sensor_data):
         """
@@ -92,9 +92,9 @@ class SensorDataCollector:
             # https://github.com/carla-simulator/carla/issues/3191
             if (detection.object_idx == 0):
                 continue
-            
+
             point = CarlaUtils.vector3d_to_numpy(detection.point)
-           
+
             if detection.object_idx not in grouped_data:
                 grouped_data[detection.object_idx] = [point]
             else:
@@ -107,6 +107,6 @@ class SensorDataCollector:
         :param sensor_rotation_angle: LIDAR sensor angular position at time of data collection.
         :return: True if new data belongs to current collection, False if it belongs to the next collection.
         """
-        is_increasing = sensor_rotation_angle > self.__prev_angle
-        self.__prev_angle = sensor_rotation_angle
+        is_increasing = sensor_rotation_angle > self.prev_angle
+        self.prev_angle = sensor_rotation_angle
         return is_increasing

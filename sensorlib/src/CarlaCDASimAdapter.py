@@ -27,7 +27,7 @@ class CarlaCDASimAdapter:
         CarlaCDASimAdapter constructor.
         :param sensor_api: The API object exposing CARLA connection.
         """
-        self.__api = sensor_api
+        self.api = sensor_api
 
     def start_xml_rpc_server(self, xmlrpc_server_host, xmlrpc_server_port, sensor_config_file, noise_model_config_file, detection_cycle_delay_seconds, blocking=True):
         """
@@ -43,10 +43,10 @@ class CarlaCDASimAdapter:
         print("Starting sensorlib XML-RPC server.")
         server = SimpleXMLRPCServer((xmlrpc_server_host, xmlrpc_server_port))
         server.register_introspection_functions()
-        server.register_function(self.__create_simulated_semantic_lidar_sensor,
+        server.register_function(self.create_simulated_semantic_lidar_sensor,
                                  "create_simulated_semantic_lidar_sensor")
-        server.register_function(self.__get_simulated_sensor, "get_simulated_sensor")
-        server.register_function(self.__get_detected_objects, "get_detected_objects")
+        server.register_function(self.get_simulated_sensor, "get_simulated_sensor")
+        server.register_function(self.get_detected_objects, "get_detected_objects")
         self.sensor_config = SimulatedSensorUtils.load_config_from_file(sensor_config_file)
         self.noise_model_config = SimulatedSensorUtils.load_config_from_file(noise_model_config_file)
         self.detection_cycle_delay_seconds = detection_cycle_delay_seconds
@@ -64,7 +64,7 @@ class CarlaCDASimAdapter:
                                                  sensor_position, sensor_rotation):
 
 
-        simulated_sensor = self.__api.create_simulated_semantic_lidar_sensor(self.sensor_config["simulated_sensor"],
+        simulated_sensor = self.api.create_simulated_semantic_lidar_sensor(self.sensor_config["simulated_sensor"],
                                                                              self.sensor_config["lidar_sensor"],
                                                                              self.noise_model_config,
                                                                              self.detection_cycle_delay_seconds,
@@ -73,11 +73,11 @@ class CarlaCDASimAdapter:
         return str(simulated_sensor.get_id())
 
     def __get_simulated_sensor(self, infrastructure_id, sensor_id):
-        sensor = self.__api.get_simulated_sensor(infrastructure_id, sensor_id)
+        sensor = self.api.get_simulated_sensor(infrastructure_id, sensor_id)
         return str(sensor.get_id())
 
     def __get_detected_objects(self, infrastructure_id, sensor_id):
-        detected_objects = self.__api.get_detected_objects(infrastructure_id, sensor_id)
+        detected_objects = self.api.get_detected_objects(infrastructure_id, sensor_id)
         return_json = str(SimulatedSensorUtils.serialize_to_json(detected_objects))
         return return_json
 
