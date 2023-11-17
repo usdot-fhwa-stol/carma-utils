@@ -18,22 +18,22 @@ class GaussianNoiseModel(AbstractNoiseModel):
     """Noise model which uses a generally Gaussian distribution for noise application."""
 
     def __init__(self, config):
-        self.__config = config
-        self.__position_std_in_meters = self.__config["std_deviations"]["position_in_meters"]
-        self.__orientation_std_in_radians = self.__config["std_deviations"]["orientation_in_radians"]
-        self.__linear_velocity_in_ms = self.__config["std_deviations"]["linear_velocity_in_ms"]
-        self.__angular_velocity_in_rs = self.__config["std_deviations"]["angular_velocity_in_rs"]
-        self.__rng = np.random.default_rng()
+        self.config = config
+        self.position_std_in_meters = self.config["std_deviations"]["position_in_meters"]
+        self.orientation_std_in_radians = self.config["std_deviations"]["orientation_in_radians"]
+        self.linear_velocity_in_ms = self.config["std_deviations"]["linear_velocity_in_ms"]
+        self.angular_velocity_in_rs = self.config["std_deviations"]["angular_velocity_in_rs"]
+        self.rng = np.random.default_rng()
 
     def apply_position_noise(self, object_list):
 
-        if not self.__config["stages"]["position_noise"]:
+        if not self.config["stages"]["position_noise"]:
             return object_list
 
         # Apply position noise to the object_list
         noise_mean = 0.0
         for obj in object_list:
-            noise = np.random.normal(noise_mean, self.__position_std_in_meters, size=3)
+            noise = np.random.normal(noise_mean, self.position_std_in_meters, size=3)
             obj.position[0] += noise[0]
             obj.position[1] += noise[1]
             obj.position[2] += noise[2]
@@ -42,13 +42,13 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
     def apply_orientation_noise(self, object_list):
 
-        if not self.__config["stages"]["orientation_noise"]:
+        if not self.config["stages"]["orientation_noise"]:
             return object_list
 
         # Apply orientation noise to the object_list
         noise_mean = 0.0
         for obj in object_list:
-            noise = np.random.normal(noise_mean, self.__orientation_std_in_radians, size=3)
+            noise = np.random.normal(noise_mean, self.orientation_std_in_radians, size=3)
 
             obj.rotation[0] += noise[0]
             obj.rotation[1] += noise[1]
@@ -57,63 +57,63 @@ class GaussianNoiseModel(AbstractNoiseModel):
         return object_list
 
     def apply_type_noise(self, object_list):
-        if not self.__config["stages"]["type_noise"]:
+        if not self.config["stages"]["type_noise"]:
             return object_list
 
         # Apply type noise to the object_list
         return [replace(obj,
-                        object_type= self.__rng.choice(self.__config["type_noise"]["allowed_semantic_tags"], 1))
+                        object_type= self.rng.choice(self.config["type_noise"]["allowed_semantic_tags"], 1))
                 for obj in object_list]
 
     def apply_list_inclusion_noise(self, object_list):
-        if not self.__config["stages"]["list_inclusion_noise"]:
+        if not self.config["stages"]["list_inclusion_noise"]:
             return object_list
         return object_list[0:np.random.randint(0, len(object_list) + 1)]
 
     def apply_position_covariance_noise(self, object_list):
-        if not self.__config["stages"]["position_noise"]:
+        if not self.config["stages"]["position_noise"]:
             return object_list
 
         # Apply position noise to the object_list
         for obj in object_list:
-            obj.position_covariance[0][0] = self.__position_std_in_meters[0] ** 2
-            obj.position_covariance[1][1] = self.__position_std_in_meters[1] ** 2
-            obj.position_covariance[2][2] = self.__position_std_in_meters[2] ** 2
+            obj.position_covariance[0][0] = self.position_std_in_meters[0] ** 2
+            obj.position_covariance[1][1] = self.position_std_in_meters[1] ** 2
+            obj.position_covariance[2][2] = self.position_std_in_meters[2] ** 2
 
         return object_list
 
     def apply_orientation_covariance_noise(self, object_list):
-        if not self.__config["stages"]["orientation_noise"]:
+        if not self.config["stages"]["orientation_noise"]:
             return object_list
 
         # Apply orientation noise to the object_list
         for obj in object_list:
-            obj.orientation_covariance[0][0] = self.__orientation_std_in_radians[0] ** 2
-            obj.orientation_covariance[1][1] = self.__orientation_std_in_radians[1] ** 2
-            obj.orientation_covariance[2][2] = self.__orientation_std_in_radians[2] ** 2
+            obj.orientation_covariance[0][0] = self.orientation_std_in_radians[0] ** 2
+            obj.orientation_covariance[1][1] = self.orientation_std_in_radians[1] ** 2
+            obj.orientation_covariance[2][2] = self.orientation_std_in_radians[2] ** 2
 
         return object_list
 
     def apply_linear_velocity_covariance_noise(self, object_list):
-        if not self.__config["stages"]["linear_velocity_noise"]:
+        if not self.config["stages"]["linear_velocity_noise"]:
             return object_list
 
         # Apply velocity noise to the object_list
         for obj in object_list:
-            obj.velocity_covariance[0][0] = self.__linear_velocity_in_ms[0] ** 2
-            obj.velocity_covariance[1][1] = self.__linear_velocity_in_ms[1] ** 2
-            obj.velocity_covariance[2][2] = self.__linear_velocity_in_ms[2] ** 2
+            obj.velocity_covariance[0][0] = self.linear_velocity_in_ms[0] ** 2
+            obj.velocity_covariance[1][1] = self.linear_velocity_in_ms[1] ** 2
+            obj.velocity_covariance[2][2] = self.linear_velocity_in_ms[2] ** 2
 
         return object_list
 
     def apply_angular_velocity_covariance_noise(self, object_list):
-        if not self.__config["stages"]["angular_velocity_noise"]:
+        if not self.config["stages"]["angular_velocity_noise"]:
             return object_list
 
         # Apply angular velocity noise to the object_list
         for obj in object_list:
-            obj.angular_velocity_covariance[0][0] = self.__angular_velocity_in_rs[0] ** 2
-            obj.angular_velocity_covariance[1][1] = self.__angular_velocity_in_rs[1] ** 2
-            obj.angular_velocity_covariance[2][2] = self.__angular_velocity_in_rs[2] ** 2
+            obj.angular_velocity_covariance[0][0] = self.angular_velocity_in_rs[0] ** 2
+            obj.angular_velocity_covariance[1][1] = self.angular_velocity_in_rs[1] ** 2
+            obj.angular_velocity_covariance[2][2] = self.angular_velocity_in_rs[2] ** 2
 
         return object_list

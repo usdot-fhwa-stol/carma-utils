@@ -44,23 +44,23 @@ class SemanticLidarSensor(SimulatedSensor):
         """
 
         # Configuration
-        super().__init__(infrastructure_id, sensor_id)
-        self.__simulated_sensor_config = simulated_sensor_config
-        self.__carla_sensor_config = carla_sensor_config
+        super().init__(infrastructure_id, sensor_id)
+        self.simulated_sensor_config = simulated_sensor_config
+        self.carla_sensor_config = carla_sensor_config
 
         # CARLA connection
-        self.__carla_world = carla_world
+        self.carla_world = carla_world
 
         # Internal objects
-        self.__sensor = sensor
-        self.__data_collector = data_collector
-        self.__noise_model = noise_model
-        self.__parent_id = parent_id
+        self.sensor = sensor
+        self.data_collector = data_collector
+        self.noise_model = noise_model
+        self.parent_id = parent_id
 
-        self.__rng = np.random.default_rng()
+        self.rng = np.random.default_rng()
 
         # Object cache
-        self.__detected_objects = []
+        self.detected_objects = []
 
     # ------------------------------------------------------------------------------
     # Primary functions
@@ -81,14 +81,14 @@ class SemanticLidarSensor(SimulatedSensor):
         detected_objects, object_ranges = self.prefilter(detected_objects)
 
         # Get LIDAR hitpoints with Actor ID associations
-        timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
+        timestamp, hitpoints = self.data_collector.get_carla_lidar_hitpoints()
 
         # Compute data needed for occlusion operation
         actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
         detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
 
         # Instantaneous geometry association
-        sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
+        sample_size = self.simulated_sensor_config["geometry_reassociation"]["sample_count"]
         downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
         hitpoints_without_ids = []
 
@@ -109,13 +109,13 @@ class SemanticLidarSensor(SimulatedSensor):
         # Update reference frame, and detection time
         detected_objects = self.update_object_frame_and_timestamps(detected_objects, timestamp)
 
-        self.__detected_objects = detected_objects
+        self.detected_objects = detected_objects
 
         return detected_objects
 
     def get_detected_objects(self):
         """Returns the latest detected objects."""
-        return self.__detected_objects
+        return self.detected_objects
 
     # ------------------------------------------------------------------------------
     # CARLA Scene DetectedObject Retrieval
@@ -128,10 +128,10 @@ class SemanticLidarSensor(SimulatedSensor):
 
         :return: DetectedObject wrappers objects referring to the actors.
         """
-        actors = self.__carla_world.get_actors()
+        actors = self.carla_world.get_actors()
 
         scene_objects = [DetectedObjectBuilder.build_detected_object(actor,
-                                                            self.__simulated_sensor_config["prefilter"][
+                                                            self.simulated_sensor_config["prefilter"][
                                                                 "allowed_semantic_tags"])
                 for actor in actors]
 
@@ -139,7 +139,7 @@ class SemanticLidarSensor(SimulatedSensor):
         scene_objects = filter(lambda obj: obj is not None, scene_objects)
 
         # Remove sensor's parent object if detected (LIDAR sensor detecting car to which it is attached)
-        scene_objects = filter(lambda obj: obj.id != self.__parent_id, scene_objects)
+        scene_objects = filter(lambda obj: obj.id != self.parent_id, scene_objects)
 
         return list(scene_objects)
 
@@ -164,11 +164,11 @@ class SemanticLidarSensor(SimulatedSensor):
             filter(lambda obj: obj is not None, detected_objects))
 
         detected_objects = list(
-            filter(lambda obj: obj.object_type in self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"],
+            filter(lambda obj: obj.object_type in self.simulated_sensor_config["prefilter"]["allowed_semantic_tags"],
                    detected_objects))
 
         # Compute ranges
-        sensor_location = self.__sensor.carla_sensor.get_location()
+        sensor_location = self.sensor.carla_sensor.get_location()
         sensor_location_np = np.array([sensor_location.x, sensor_location.y, sensor_location.z])
         object_ranges = dict(
             [(obj.id, np.linalg.norm(obj.position - sensor_location_np)) for obj in detected_objects])
@@ -176,7 +176,7 @@ class SemanticLidarSensor(SimulatedSensor):
         # Filter by radius
         detected_objects = list(
             filter(
-                lambda obj: object_ranges[obj.id] <= self.__simulated_sensor_config["prefilter"]["max_distance_meters"],
+                lambda obj: object_ranges[obj.id] <= self.simulated_sensor_config["prefilter"]["max_distance_meters"],
                 detected_objects))
 
         return detected_objects, object_ranges
@@ -213,13 +213,13 @@ class SemanticLidarSensor(SimulatedSensor):
 
     def compute_horizontal_angular_offset(self, vec):
         """Compute horizontal angle of a vector in relation to the sensor, as measured from the x axis."""
-        sensor_location = self.__sensor.carla_sensor.get_location()
+        sensor_location = self.sensor.carla_sensor.get_location()
         p = vec - np.array([sensor_location.x, sensor_location.y, sensor_location.z])  # Position vector relative to sensor
         return np.arctan2(p[1], p[0])
 
     def compute_vertical_angular_offset(self, vec):
         """Compute the vertical angle of a vector in relation to the sensor, as measured from the x-y plane."""
-        sensor_location = self.__sensor.carla_sensor.get_location()
+        sensor_location = self.sensor.carla_sensor.get_location()
         p = vec - np.array([sensor_location.x, sensor_location.y, sensor_location.z])
         return np.arcsin(p[2] / np.linalg.norm(p))
 
@@ -236,9 +236,9 @@ class SemanticLidarSensor(SimulatedSensor):
 
     def compute_adjusted_detection_threshold(self, range):
         """Compute the detection threshold appropriate for the given range."""
-        dt_dr = self.__simulated_sensor_config["detection_threshold_scaling_formula"][
+        dt_dr = self.simulated_sensor_config["detection_threshold_scaling_formula"][
             "hitpoint_detection_ratio_threshold_per_meter_change_rate"]
-        t_nominal = self.__simulated_sensor_config["detection_threshold_scaling_formula"][
+        t_nominal = self.simulated_sensor_config["detection_threshold_scaling_formula"][
             "nominal_hitpoint_detection_ratio_threshold"]
 
         return dt_dr * range * t_nominal
@@ -264,7 +264,7 @@ class SemanticLidarSensor(SimulatedSensor):
         return {
             # The choice() function will raise an error if we try to
             # sample more than the population
-            id_: self.__rng.choice(points, min(len(points), sample_size), replace=False)
+            id_: self.rng.choice(points, min(len(points), sample_size), replace=False)
             for id_, points in hitpoints.items()
         }
 
@@ -286,11 +286,11 @@ class SemanticLidarSensor(SimulatedSensor):
         # Compute nearest neighbor for each hitpoint
         hitpoints_in_map_frame = []
         for hitpoint in hitpoints:
-            new_pos = np.add(hitpoint, self.__sensor.position)
+            new_pos = np.add(hitpoint, self.sensor.position)
             hitpoints_in_map_frame.append(new_pos)
 
         matching_nearest_neighbor_ids = self.compute_closest_object_id_list(hitpoints_in_map_frame, scene_objects,
-                                                          self.__simulated_sensor_config["geometry_reassociation"][
+                                                          self.simulated_sensor_config["geometry_reassociation"][
                                                               "geometry_association_max_dist_in_meters"])
 
         association = zip(hitpoints, matching_nearest_neighbor_ids)
@@ -418,11 +418,11 @@ class SemanticLidarSensor(SimulatedSensor):
         :return: Expected number of hitpoints in a scan across the specified field of view.
         """
 
-        num_horizontal_points_per_scan = (self.__sensor.points_per_second / self.__sensor.rotation_frequency) / self.__sensor.number_of_channels
-        horizontal_angular_resolution = self.__sensor.horizontal_fov / num_horizontal_points_per_scan
+        num_horizontal_points_per_scan = (self.sensor.points_per_second / self.sensor.rotation_frequency) / self.sensor.number_of_channels
+        horizontal_angular_resolution = self.sensor.horizontal_fov / num_horizontal_points_per_scan
 
-        num_vertical_points_per_scan = self.__sensor.number_of_channels
-        vertical_angular_resolution = self.__sensor.vertical_fov / num_vertical_points_per_scan
+        num_vertical_points_per_scan = self.sensor.number_of_channels
+        vertical_angular_resolution = self.sensor.vertical_fov / num_vertical_points_per_scan
 
         return (horizontal_fov / horizontal_angular_resolution) * (vertical_fov / vertical_angular_resolution)
 
@@ -437,14 +437,14 @@ class SemanticLidarSensor(SimulatedSensor):
         :param detected_objects: List of objects currently considered for detection.
         :return: Objects with noise applied.
         """
-        detected_objects = self.__noise_model.apply_position_noise(detected_objects)
-        detected_objects = self.__noise_model.apply_orientation_noise(detected_objects)
-        detected_objects = self.__noise_model.apply_type_noise(detected_objects)
-        detected_objects = self.__noise_model.apply_list_inclusion_noise(detected_objects)
-        detected_objects = self.__noise_model.apply_position_covariance_noise(detected_objects)
-        detected_objects = self.__noise_model.apply_orientation_covariance_noise(detected_objects)
-        detected_objects = self.__noise_model.apply_linear_velocity_covariance_noise(detected_objects)
-        detected_objects = self.__noise_model.apply_angular_velocity_covariance_noise(detected_objects)
+        detected_objects = self.noise_model.apply_position_noise(detected_objects)
+        detected_objects = self.noise_model.apply_orientation_noise(detected_objects)
+        detected_objects = self.noise_model.apply_type_noise(detected_objects)
+        detected_objects = self.noise_model.apply_list_inclusion_noise(detected_objects)
+        detected_objects = self.noise_model.apply_position_covariance_noise(detected_objects)
+        detected_objects = self.noise_model.apply_orientation_covariance_noise(detected_objects)
+        detected_objects = self.noise_model.apply_linear_velocity_covariance_noise(detected_objects)
+        detected_objects = self.noise_model.apply_angular_velocity_covariance_noise(detected_objects)
 
         return detected_objects
 
@@ -475,8 +475,8 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # If enabled, convert coordinates to sensor-centric frame
         new_position = obj.position
-        if self.__simulated_sensor_config["use_sensor_centric_frame"]:
-            sensor_location = self.__sensor.carla_sensor.get_location()
+        if self.simulated_sensor_config["use_sensor_centric_frame"]:
+            sensor_location = self.sensor.carla_sensor.get_location()
             new_position = np.subtract(obj.position, np.array([sensor_location.x, sensor_location.y, sensor_location.z]))
 
         return replace(obj,

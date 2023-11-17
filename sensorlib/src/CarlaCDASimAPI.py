@@ -30,9 +30,9 @@ class CarlaCDASimAPI:
     """
 
     def __init__(self):
-        self.__client = None
-        self.__carla_world = None
-        self.__infrastructure_sensors = {}
+        self.client = None
+        self.carla_world = None
+        self.infrastructure_sensors = {}
 
     @staticmethod
     def build_from_host_spec(carla_host, carla_port):
@@ -56,9 +56,9 @@ class CarlaCDASimAPI:
         :return: A CarlaCDASimAPI instance.
         """
         api = CarlaCDASimAPI()
-        api.__client = carla_client
-        api.__client.set_timeout(2.0)
-        api.__carla_world = api.__client.get_world()
+        api.client = carla_client
+        api.client.set_timeout(2.0)
+        api.carla_world = api.client.get_world()
         return api
 
     @staticmethod
@@ -70,7 +70,7 @@ class CarlaCDASimAPI:
         :return: A CarlaCDASimAPI instance.
         """
         api = CarlaCDASimAPI()
-        api.__carla_world = carla_world
+        api.carla_world = carla_world
         return api
 
     # ------------------------------------------------------------------------------
@@ -107,12 +107,12 @@ class CarlaCDASimAPI:
         sensor_transform = CarlaUtils.get_transform(sensor_position, sensor_rotation)
 
         # Retrieve the CARLA sensor
-        blueprint_library = self.__carla_world.get_blueprint_library()
+        blueprint_library = self.carla_world.get_blueprint_library()
         sensor_bp = generate_lidar_bp(blueprint_library, carla_sensor_config)
         parent = None
         if parent_id is not None:
-            parent = self.__carla_world.get_actor(parent_id)
-        carla_sensor = self.__carla_world.spawn_actor(sensor_bp, sensor_transform, parent)
+            parent = self.carla_world.get_actor(parent_id)
+        carla_sensor = self.carla_world.spawn_actor(sensor_bp, sensor_transform, parent)
 
         # Fix for CARLA not updating position immediately
         sleep(0.2)
@@ -126,7 +126,7 @@ class CarlaCDASimAPI:
 
         # Construct the SimulatedSensor
         simulated_sensor = SemanticLidarSensor(infrastructure_id, sensor_id, simulated_sensor_config,
-                                               carla_sensor_config,
+                               .             carla_sensor_config,
                                                self.__carla_world, sensor,
                                                data_collector, noise_model,
                                                parent_id)
@@ -138,30 +138,30 @@ class CarlaCDASimAPI:
         # Adding corresponding dummy lidar solely for visualization in Carla Viz
         # because semantic lidar sensor is not visualizable at the moment
         # https://github.com/usdot-fhwa-stol/carma-utils/issues/180
-        lidar_bp = generate_lidar_bp(blueprint_library, carla_sensor_config, "lidar")
+        lidar_bp = generate_lidar_bp(blueprint_li.ry, carla_sensor_config, "lidar")
         lidar_spawn = self.__carla_world.spawn_actor(lidar_bp, sensor_transform)
         print(f"Created a dummy lidar for visualization with id: {lidar_spawn.id}")
 
         # Start compute thread
         scheduler = sched.scheduler(time.time, time.sleep)
-        scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,
+        scheduler.enter(detection_cycle_delay_secon. 1, self.__schedule_next_compute,
                         (scheduler, simulated_sensor, detection_cycle_delay_seconds))
         scheduler_thread = threading.Thread(target=scheduler.run)
         print("*********************************")
         print("** Starting sensorlib compute. **")
-        print("*********************************")
+        prin.*********************************")
         scheduler_thread.start()
 
         return simulated_sensor
 
     def get_simulated_sensor(self, infrastructure_id, sensor_id):
         """
-        Get a specific simulated sensor.
+        Get a specific sim.ted sensor.
 
         :param infrastructure_id: The ID of the infrastructure.
         :param sensor_id: The ID of the sensor.
         :return: The SimulatedSensor or None if not found.
-        """
+        """.
         return self.__infrastructure_sensors.get((infrastructure_id, sensor_id))
 
     def get_detected_objects(self, infrastructure_id, sensor_id):
@@ -179,7 +179,7 @@ class CarlaCDASimAPI:
     # ------------------------------------------------------------------------------
     # Helper Functions
     # ------------------------------------------------------------------------------
-
+.
     def __schedule_next_compute(self, scheduler, simulated_sensor, detection_cycle_delay_seconds):
         """Schedule the next compute cycle."""
         scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,
@@ -190,7 +190,7 @@ class CarlaCDASimAPI:
 def generate_lidar_bp(blueprint_library, carla_sensor_config, type= None):
     """Build the CARLA blueprint necessary for CARLA sensor construction."""
     if type is None:
-        lidar_bp = blueprint_library.find("sensor.lidar.ray_cast_semantic")
+        lidar_bp = blueprint_li.ry.find("sensor.lidar.ray_cast_semantic")
     else:
         lidar_bp = blueprint_library.filter(type)[0]
     lidar_bp.set_attribute("upper_fov", str(carla_sensor_config["upper_fov"]))
@@ -199,4 +199,4 @@ def generate_lidar_bp(blueprint_library, carla_sensor_config, type= None):
     lidar_bp.set_attribute("range", str(carla_sensor_config["range"]))
     lidar_bp.set_attribute("rotation_frequency", str(1.0 / carla_sensor_config["rotation_period"]))
     lidar_bp.set_attribute("points_per_second", str(carla_sensor_config["points_per_second"]))
-    return lidar_bp
+    return lidar_bp.
