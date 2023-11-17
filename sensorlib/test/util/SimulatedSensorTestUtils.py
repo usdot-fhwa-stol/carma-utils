@@ -34,8 +34,7 @@ class SimulatedSensorTestUtils:
             },
             "geometry_reassociation": {
                 "sample_count": 3,
-                "geometry_association_max_distance_threshold": 2.0,
-                "trailing_id_associations_count": 2
+                "geometry_association_max_dist_in_meters": 2.0,
             },
             "use_sensor_centric_frame": True
         }
@@ -56,8 +55,8 @@ class SimulatedSensorTestUtils:
         return {
             "noise_model_name": "GaussianNoiseModel",
             "std_deviations": {
-                "position": [0.8, 0.8, 0.8],
-                "orientation": [0.1, 0.1, 0.1],
+                "position_in_meters": [0.8, 0.8, 0.8],
+                "orientation_in_radians": [0.1, 0.1, 0.1],
             },
             "stages": {
                 "position_noise": True,

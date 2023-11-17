@@ -19,7 +19,6 @@ from objects.CarlaSensor import CarlaSensorBuilder
 from objects.DetectedObject import DetectedObjectBuilder
 from sensor.SemanticLidarSensor import SemanticLidarSensor
 from util.CarlaUtils import CarlaUtils
-from util.HistoricalMapper import HistoricalMapper
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 
@@ -371,21 +370,21 @@ class TestSemanticLidarSensor(unittest.TestCase):
             replace(generated_detected_objects[0], id=0),
             replace(generated_detected_objects[1], id=1)
         ]
-        geometry_association_max_distance_threshold = 0.2
+        geometry_association_max_dist_in_meters = 0.2
 
         # Mock internal function
         self.sensor.compute_closest_object_id = MagicMock(return_value=0)
 
         # Call
         self.sensor.compute_closest_object_id_list(hitpoint_list, scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
 
         # Assert internal function called correctly
         assert self.sensor.compute_closest_object_id.call_count == 2
         self.sensor.compute_closest_object_id.assert_any_call(hitpoint_list[0], scene_objects,
-                                                              geometry_association_max_distance_threshold)
+                                                              geometry_association_max_dist_in_meters)
         self.sensor.compute_closest_object_id.assert_any_call(hitpoint_list[1], scene_objects,
-                                                              geometry_association_max_distance_threshold)
+                                                              geometry_association_max_dist_in_meters)
 
     def test_compute_closest_object_id(self):
         # Generate test scenario with hitpoints clustered around the object positions
@@ -416,49 +415,49 @@ class TestSemanticLidarSensor(unittest.TestCase):
             0: points_list_1,
             1: points_list_2
         }
-        geometry_association_max_distance_threshold = 0.6
+        geometry_association_max_dist_in_meters = 0.6
 
         id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][0], scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
         assert id == 0
         id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][1], scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
         assert id == 0
         id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][2], scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
         assert id == 0
         id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][3], scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
         assert id == 0
         id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][4], scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
         assert id == 0
         id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][5], scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
         assert id == 0
         id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][0], scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
         assert id == 1
         id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][1], scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
         assert id == 1
         id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][2], scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
         assert id == 1
         id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][3], scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
         assert id == 1
         id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][4], scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
         assert id == 1
         id = self.sensor.compute_closest_object_id(downsampled_hitpoints[1][5], scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
         assert id == 1
 
         # Point out of range
-        geometry_association_max_distance_threshold = 0.001
+        geometry_association_max_dist_in_meters = 0.001
         id = self.sensor.compute_closest_object_id(downsampled_hitpoints[0][1], scene_objects,
-                                                   geometry_association_max_distance_threshold)
+                                                   geometry_association_max_dist_in_meters)
         assert id is None
 
     def test_vote_most_frequent_id(self):

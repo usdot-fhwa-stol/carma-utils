@@ -2,11 +2,15 @@ noise_model_name: GaussianNoiseModel
 stages:
     position_noise: True
     orientation_noise: True
+    linear_velocity_noise: True
+    angular_velocity_noise: True
     type_noise: False
     list_inclusion_noise: False
 std_deviations:
-    position: [0.8, 0.8, 0.8]
-    orientation: [0.1, 0.1, 0.1]
+    position_in_meters: [0.8, 0.8, 0.8]
+    orientation_in_radians: [0.1, 0.1, 0.1]
+    linear_velocity_in_ms: [0.8, 0.8, 0.8]
+    angular_velocity_in_rs: [0.1, 0.1, 0.1]
 type_noise:
     allowed_semantic_tags:
         Buildings

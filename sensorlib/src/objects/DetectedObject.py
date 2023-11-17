@@ -28,7 +28,9 @@ class DetectedObject:
     rotation: np.ndarray
     angular_velocity: np.ndarray
     position_covariance: np.ndarray
+    orientation_covariance: np.ndarray
     velocity_covariance: np.ndarray
+    angular_velocity_covariance: np.ndarray
     confidence: float
 
 
@@ -39,12 +41,12 @@ class DetectedObjectBuilder:
 
         if (object_type == "NONE"):
             return None
-        
+
         bounding_box = CarlaUtils.get_actor_bounding_box_points(carla_actor)
 
         if (bounding_box == None):
             return None
-        
+
         return DetectedObject(
             carla_actor,
             carla_actor.id,
@@ -53,11 +55,14 @@ class DetectedObjectBuilder:
             bounding_box,
             CarlaUtils.vector3d_to_numpy(carla_actor.get_location()),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_velocity()),
-            CarlaUtils.get_actor_rotation_matrix(carla_actor),
+            CarlaUtils.get_actor_roll_pitch_yaw(carla_actor),
             CarlaUtils.get_actor_angular_velocity(carla_actor),
 
             # Use stand-in values which assume complete certainty
             np.zeros((3, 3)),
             np.zeros((3, 3)),
+            np.zeros((3, 3)),
+            np.zeros((3, 3)),
+
             1.0
         )

@@ -15,7 +15,6 @@ from scipy.spatial import distance
 from objects.DetectedObject import DetectedObjectBuilder
 from sensor.SimulatedSensor import SimulatedSensor
 from util.CarlaUtils import CarlaUtils
-from util.HistoricalMapper import HistoricalMapper
 
 
 class SemanticLidarSensor(SimulatedSensor):
@@ -58,11 +57,6 @@ class SemanticLidarSensor(SimulatedSensor):
         self.__noise_model = noise_model
         self.__parent_id = parent_id
 
-        # Structures to store reassociation information
-        self.__actor_id_association = {}
-        trailing_id_associations_count = simulated_sensor_config[
-            "geometry_reassociation"]["trailing_id_associations_count"]
-        self.__trailing_id_associations = HistoricalMapper(trailing_id_associations_count)
         self.__rng = np.random.default_rng()
 
         # Object cache
@@ -297,7 +291,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         matching_nearest_neighbor_ids = self.compute_closest_object_id_list(hitpoints_in_map_frame, scene_objects,
                                                           self.__simulated_sensor_config["geometry_reassociation"][
-                                                              "geometry_association_max_distance_threshold"])
+                                                              "geometry_association_max_dist_in_meters"])
 
         association = zip(hitpoints, matching_nearest_neighbor_ids)
 
@@ -312,13 +306,13 @@ class SemanticLidarSensor(SimulatedSensor):
         # Filter unassociated hitpoints
         return grouped_data
 
-    def compute_closest_object_id_list(self, hitpoint_list, scene_objects, geometry_association_max_distance_threshold):
+    def compute_closest_object_id_list(self, hitpoint_list, scene_objects, geometry_association_max_dist_in_meters):
 
         """Get the closest objects to each hitpoint."""
-        return [self.compute_closest_object_id(hitpoint, scene_objects, geometry_association_max_distance_threshold) for
+        return [self.compute_closest_object_id(hitpoint, scene_objects, geometry_association_max_dist_in_meters) for
                 hitpoint in hitpoint_list]
 
-    def compute_closest_object_id(self, hitpoint, scene_objects, geometry_association_max_distance_threshold):
+    def compute_closest_object_id(self, hitpoint, scene_objects, geometry_association_max_dist_in_meters):
         """
         Compute the closest object to this hitpoint, which lies within a maximum distance threshold.
 
@@ -347,7 +341,7 @@ class SemanticLidarSensor(SimulatedSensor):
             geometry_association_threshold_buffer = 2.0
 
         # Observe a maximum object distance to preclude association with far-away objects
-        if distances[closest_index] > geometry_association_max_distance_threshold + geometry_association_threshold_buffer:
+        if distances[closest_index] > geometry_association_max_dist_in_meters + geometry_association_threshold_buffer:
             return None
 
         # Return closest object's ID
@@ -447,6 +441,11 @@ class SemanticLidarSensor(SimulatedSensor):
         detected_objects = self.__noise_model.apply_orientation_noise(detected_objects)
         detected_objects = self.__noise_model.apply_type_noise(detected_objects)
         detected_objects = self.__noise_model.apply_list_inclusion_noise(detected_objects)
+        detected_objects = self.__noise_model.apply_position_covariance_noise(detected_objects)
+        detected_objects = self.__noise_model.apply_orientation_covariance_noise(detected_objects)
+        detected_objects = self.__noise_model.apply_linear_velocity_covariance_noise(detected_objects)
+        detected_objects = self.__noise_model.apply_angular_velocity_covariance_noise(detected_objects)
+
         return detected_objects
 
     # ------------------------------------------------------------------------------

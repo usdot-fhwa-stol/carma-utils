@@ -45,17 +45,16 @@ class CarlaUtils:
         return np.deg2rad(angular_velocity_degpersecond)
 
     @staticmethod
-    def get_actor_rotation_matrix(carla_actor):
+    def get_actor_roll_pitch_yaw(carla_actor):
         """
-        Get the rotation matrix for an actor.
+        Get the orientation for an actor in order of roll, pitch, yaw.
         :param carla_actor: The carla.Actor to obtain data from.
-        :return: numpy.array containing the rotation matrix in radians.
+        :return: numpy.array containing roll, pitch, yaw in radians.
         """
         carla_rotation = carla_actor.get_transform().rotation
         rotation_angles_deg = np.array([carla_rotation.roll, carla_rotation.pitch, carla_rotation.yaw])
         rotation_angles = np.deg2rad(rotation_angles_deg)
-        rotation_matrix = Rotation.from_euler('xyz', rotation_angles)
-        return rotation_matrix.as_dcm()
+        return rotation_angles
 
     @staticmethod
     def get_actor_bounding_box_points(carla_actor):
@@ -83,9 +82,9 @@ class CarlaUtils:
         """
         #using type_id instead of semantic_tags
         #issue with semantic_tags in version 0.9.10:https://github.com/carla-simulator/carla/issues/2161
-        
+
         temp_id_list =  carla_actor.type_id.split(".")
-        temp_id = temp_id_list[0] 
+        temp_id = temp_id_list[0]
         if temp_id == "vehicle":
             return "Vehicles"
         elif temp_id == "walker":

@@ -28,7 +28,7 @@ NOISE_MODEL_CONFIG = {
         "type_noise": False,
         "list_inclusion_noise": False,
     },
-    "std_deviations": {"position": [0.8, 0.8, 0.8], "orientation": [0.1, 0.1, 0.1]},
+    "std_deviations": {"position_in_meters": [0.8, 0.8, 0.8], "orientation_in_radians": [0.1, 0.1, 0.1]},
     "type_noise": {
         "allowed_semantic_tags": {
             "Buildings",
@@ -85,8 +85,7 @@ def spawn_traffic_light_lidar(world):
         },
         "geometry_reassociation": {
             "sample_count": 3,
-            "geometry_association_max_distance_threshold": 2.0,
-            "trailing_id_associations_count": 2,
+            "geometry_association_max_dist_in_meters": 2.0,
         },
         "use_sensor_centric_frame": True,
     }
@@ -144,8 +143,7 @@ def spawn_vehicle_lidar(world):
         },
         "geometry_reassociation": {
             "sample_count": 3,
-            "geometry_association_max_distance_threshold": 2.0,
-            "trailing_id_associations_count": 2,
+            "geometry_association_max_dist_in_meters": 2.0,
         },
         "use_sensor_centric_frame": True,
     }

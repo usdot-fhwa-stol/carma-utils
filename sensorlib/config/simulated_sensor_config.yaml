@@ -11,8 +11,7 @@ simulated_sensor:
       dropoff_rate: 0.01
   geometry_reassociation:
     sample_count: 30
-    geometry_association_max_distance_threshold: 3.0
-    trailing_id_associations_count: 2
+    geometry_association_max_dist_in_meters: 3.0
   use_sensor_centric_frame: False
 lidar_sensor:
   lower_fov: -80.0
