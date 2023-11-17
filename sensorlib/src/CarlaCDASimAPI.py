@@ -36,7 +36,7 @@ class CarlaCDASimAPI:
 
     @staticmethod
     def build_from_host_spec(carla_host, carla_port):
-        print(f"connecting to carla {carla_host}:{carla_port}")
+        print(f"Connecting to carla {carla_host}:{carla_port}")
         """
         Build an API instance.
 

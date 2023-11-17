@@ -114,17 +114,17 @@ if __name__ == "__main__":
         "--sensor-config-file",
         default="./config/simulated_sensor_config.yaml",
         type=str,
-        help="Path to sensor configuration file. (default: ../config/simulated_sensor_config.yaml)")
+        help="Path to sensor configuration file. (default: ./config/simulated_sensor_config.yaml)")
     arg_parser.add_argument(
         "--noise-model-config-file",
         default="./config/noise_model_config.yaml",
         type=str,
-        help="Path to noise mode configuration file. (default: ../config/noise_model_config.yaml)")
+        help="Path to noise mode configuration file. (default: ./config/noise_model_config.yaml)")
     arg_parser.add_argument(
         "--detection-cycle-delay-seconds",
-        default=0.5,
+        default=0.1,
         type=float,
-        help="Time interval between detection reporting. (default: 0.5)")
+        help="Time interval between detection reporting. (default: 0.1)")
     args = arg_parser.parse_args()
     sensor_api = CarlaCDASimAPI.build_from_host_spec(args.carla_host, args.carla_port)
     sensor_data_service = CarlaCDASimAdapter(sensor_api)

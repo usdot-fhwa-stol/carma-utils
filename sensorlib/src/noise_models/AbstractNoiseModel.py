@@ -53,3 +53,45 @@ class AbstractNoiseModel:
         :return: List of DetectedObject objects with noise applied.
         """
         pass
+
+    @abstractmethod
+    def apply_position_covariance_noise(self, object_list):
+        """
+        Apply noise related to position covariance to the object positions.
+
+        :param object_list: List of DetectedObject objects to apply noise to.
+        :return: List of DetectedObject objects with noise applied.
+        """
+        pass
+
+    @abstractmethod
+    def apply_orientation_covariance_noise(self, object_list):
+        """
+        Apply noise related to orientation covariance to the object orientations.
+
+        :param object_list: List of DetectedObject objects to apply noise to.
+        :return: List of DetectedObject objects with noise applied.
+        """
+        pass
+
+    @abstractmethod
+    def apply_linear_velocity_covariance_noise(self, object_list):
+        """
+        Apply noise related to velocity covariance to the object velocities.
+
+        :param object_list: List of DetectedObject objects to apply noise to.
+        :return: List of DetectedObject objects with noise applied.
+        """
+        pass
+
+    @abstractmethod
+    def apply_angular_velocity_covariance_noise(self, object_list):
+        """
+        Apply noise related to angular velocity covariance to the object angular velocities.
+
+        :param object_list: List of DetectedObject objects to apply noise to.
+        :return: List of DetectedObject objects with noise applied.
+        """
+        pass
+
+
