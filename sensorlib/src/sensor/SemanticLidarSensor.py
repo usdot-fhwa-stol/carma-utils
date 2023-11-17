@@ -291,7 +291,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         matching_nearest_neighbor_ids = self.compute_closest_object_id_list(hitpoints_in_map_frame, scene_objects,
                                                           self.__simulated_sensor_config["geometry_reassociation"][
-                                                              "geometry_association_max_distance_threshold"])
+                                                              "geometry_association_max_dist_in_meters"])
 
         association = zip(hitpoints, matching_nearest_neighbor_ids)
 
@@ -306,13 +306,13 @@ class SemanticLidarSensor(SimulatedSensor):
         # Filter unassociated hitpoints
         return grouped_data
 
-    def compute_closest_object_id_list(self, hitpoint_list, scene_objects, geometry_association_max_distance_threshold):
+    def compute_closest_object_id_list(self, hitpoint_list, scene_objects, geometry_association_max_dist_in_meters):
 
         """Get the closest objects to each hitpoint."""
-        return [self.compute_closest_object_id(hitpoint, scene_objects, geometry_association_max_distance_threshold) for
+        return [self.compute_closest_object_id(hitpoint, scene_objects, geometry_association_max_dist_in_meters) for
                 hitpoint in hitpoint_list]
 
-    def compute_closest_object_id(self, hitpoint, scene_objects, geometry_association_max_distance_threshold):
+    def compute_closest_object_id(self, hitpoint, scene_objects, geometry_association_max_dist_in_meters):
         """
         Compute the closest object to this hitpoint, which lies within a maximum distance threshold.
 
@@ -341,7 +341,7 @@ class SemanticLidarSensor(SimulatedSensor):
             geometry_association_threshold_buffer = 2.0
 
         # Observe a maximum object distance to preclude association with far-away objects
-        if distances[closest_index] > geometry_association_max_distance_threshold + geometry_association_threshold_buffer:
+        if distances[closest_index] > geometry_association_max_dist_in_meters + geometry_association_threshold_buffer:
             return None
 
         # Return closest object's ID
