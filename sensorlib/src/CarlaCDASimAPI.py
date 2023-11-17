@@ -121,30 +121,30 @@ class CarlaCDASimAPI:
 
         # Build internal objects
         sensor = CarlaSensorBuilder.build_sensor(carla_sensor)
-        data_collector = SensorDataCollector(self.__carla_world, carla_sensor)
+        data_collector = SensorDataCollector(self.carla_world, carla_sensor)
         noise_model = NoiseModelFactory.get_noise_model(noise_model_config["noise_model_name"], noise_model_config)
 
         # Construct the SimulatedSensor
         simulated_sensor = SemanticLidarSensor(infrastructure_id, sensor_id, simulated_sensor_config,
                                                carla_sensor_config,
-                                               self.__carla_world, sensor,
+                                               self.carla_world, sensor,
                                                data_collector, noise_model,
                                                parent_id)
 
         # Register the sensor
-        self.__infrastructure_sensors[(infrastructure_id, sensor_id)] = simulated_sensor
+        self.infrastructure_sensors[(infrastructure_id, sensor_id)] = simulated_sensor
 
 
         # Adding corresponding dummy lidar solely for visualization in Carla Viz
         # because semantic lidar sensor is not visualizable at the moment
         # https://github.com/usdot-fhwa-stol/carma-utils/issues/180
         lidar_bp = generate_lidar_bp(blueprint_library, carla_sensor_config, "lidar")
-        lidar_spawn = self.__carla_world.spawn_actor(lidar_bp, sensor_transform)
+        lidar_spawn = self.carla_world.spawn_actor(lidar_bp, sensor_transform)
         print(f"Created a dummy lidar for visualization with id: {lidar_spawn.id}")
 
         # Start compute thread
         scheduler = sched.scheduler(time.time, time.sleep)
-        scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,
+        scheduler.enter(detection_cycle_delay_seconds, 1, self.schedule_next_compute,
                         (scheduler, simulated_sensor, detection_cycle_delay_seconds))
         scheduler_thread = threading.Thread(target=scheduler.run)
         print("*********************************")
@@ -162,7 +162,7 @@ class CarlaCDASimAPI:
         :param sensor_id: The ID of the sensor.
         :return: The SimulatedSensor or None if not found.
         """
-        return self.__infrastructure_sensors.get((infrastructure_id, sensor_id))
+        return self.infrastructure_sensors.get((infrastructure_id, sensor_id))
 
     def get_detected_objects(self, infrastructure_id, sensor_id):
         """
@@ -173,7 +173,7 @@ class CarlaCDASimAPI:
         :param sensor_id: The ID of the sensor.
         :return: List of DetectedObject's discovered by the associated sensor.
         """
-        simulated_sensor = self.__infrastructure_sensors.get((infrastructure_id, sensor_id))
+        simulated_sensor = self.infrastructure_sensors.get((infrastructure_id, sensor_id))
         return simulated_sensor.get_detected_objects()
 
     # ------------------------------------------------------------------------------
@@ -182,7 +182,7 @@ class CarlaCDASimAPI:
 
     def __schedule_next_compute(self, scheduler, simulated_sensor, detection_cycle_delay_seconds):
         """Schedule the next compute cycle."""
-        scheduler.enter(detection_cycle_delay_seconds, 1, self.__schedule_next_compute,
+        scheduler.enter(detection_cycle_delay_seconds, 1, self.schedule_next_compute,
                         (scheduler, simulated_sensor, detection_cycle_delay_seconds))
         simulated_sensor.compute_detected_objects()
 
