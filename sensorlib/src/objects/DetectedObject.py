@@ -65,5 +65,5 @@ class DetectedObjectBuilder:
             np.zeros((3, 3)),
             1.0,
             projection_string,
-            np.ndarray((size_x, size_y, size_z))
+            [size_x, size_y, size_z]
         )

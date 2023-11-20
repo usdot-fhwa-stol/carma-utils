@@ -1,8 +1,12 @@
 simulated_sensor:
   prefilter:
     allowed_semantic_tags:
-      - Vehicles
-      - Pedestrians
+      - CAR
+      - PEDESTRIAN
+      - VAN
+      - CYCLIST
+      - TRUCK
+      - MOTORCYCLE
     max_distance_meters: 100
   detection_threshold_scaling_formula:
     nominal_hitpoint_detection_ratio_threshold: 0.6

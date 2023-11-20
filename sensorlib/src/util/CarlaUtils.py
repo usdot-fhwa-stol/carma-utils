@@ -16,6 +16,17 @@ class CarlaUtils:
     Generic CARLA utility functions.
     """
 
+    #CARLA 0.9.10 type lookup table for van, cycle, motorcycle, truck
+    vehicle_lookup_table = {'carlacola': "TRUCK", 
+                            'cybertruck': "TRUCK", 
+                            't2': "VAN", 
+                            'low_rider': "MOTORCYCLE",
+                            'ninja': "MOTORCYCLE",
+                            'yzf': "MOTORCYCLE",
+                            'crossbike': "CYCLIST",
+                            'century': "CYCLIST",
+                            'omafiets': "CYCLIST"}
+
     # CARLA semantic tag lookup table
     #CarlaCityObjectLabelLookup = dict([(id, name) for name, id in carla.CityObjectLabel.names.items()])
 
@@ -88,11 +99,15 @@ class CarlaUtils:
         #using type_id instead of semantic_tags
         #issue with semantic_tags in version 0.9.10:https://github.com/carla-simulator/carla/issues/2161
         temp_id_list =  carla_actor.type_id.split(".")
-        temp_id = temp_id_list[0] 
+        temp_id = temp_id_list[0]
         if temp_id == "vehicle":
-            return "Vehicles"
+            vehicle_type = temp_id_list[2]
+            if vehicle_type in CarlaUtils.vehicle_lookup_table.keys():
+                return CarlaUtils.vehicle_lookup_table[vehicle_type]
+            else:
+                return "CAR"
         elif temp_id == "walker":
-            return "Pedestrians"
+            return "PEDESTRIAN"
         else:
             return "NONE"
 
