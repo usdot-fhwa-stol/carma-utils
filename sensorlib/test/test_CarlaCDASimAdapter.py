@@ -16,8 +16,8 @@ import numpy as np
 sys.path.append('../')
 
 
-from src.CarlaCDASimAPI import CarlaCDASimAPI
-from src.CarlaCDASimAdapter import CarlaCDASimAdapter
+from CarlaCDASimAPI import CarlaCDASimAPI
+from CarlaCDASimAdapter import CarlaCDASimAdapter
 from test.util.SimulatedSensorTestUtils import SimulatedSensorTestUtils
 
 

@@ -14,7 +14,6 @@ import numpy as np
 
 from util.CarlaUtils import CarlaUtils
 
-import os
 
 
 @dataclass(frozen=True)

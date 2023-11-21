@@ -22,7 +22,6 @@ from objects.CarlaSensor import CarlaSensorBuilder
 from sensor.SemanticLidarSensor import SemanticLidarSensor
 from util.CarlaUtils import CarlaUtils
 
-import random
 
 class CarlaCDASimAPI:
     """
