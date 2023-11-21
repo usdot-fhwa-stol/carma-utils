@@ -53,9 +53,9 @@ class DetectedObjectBuilder:
         projection_string = projection_string_config
 
         #TODO: replace with correct size calculation
-        size_x = carla_actor.bounding_box.extent.x*2
-        size_y = carla_actor.bounding_box.extent.y*2
-        size_z = carla_actor.bounding_box.extent.z*2
+        size_x = carla_actor.bounding_box.extent.x
+        size_y = carla_actor.bounding_box.extent.y
+        size_z = carla_actor.bounding_box.extent.z
 
         return DetectedObject(
             carla_actor.id,
