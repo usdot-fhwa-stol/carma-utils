@@ -9,7 +9,6 @@ RUN wget https://github.com/usdot-fhwa-stol/carma-carla-integration/raw/develop/
 ENV LOAD_CARLA_EGG=True
 ENV CARLA_VERSION=0.9.10
 ENV CARLA_EGG_DIR="/home/CarlaCDASimAdapter/"
-ENV PROJSTRING="testingString"
 
 WORKDIR /home/CarlaCDASimAdapter/
 RUN pip3 install numpy PyYAML scipy dataclasses
