@@ -102,6 +102,7 @@ class CarlaUtils:
         temp_id = temp_id_list[0]
         if temp_id == "vehicle":
             vehicle_type = temp_id_list[2]
+            #for object_type other than CAR
             if vehicle_type in CarlaUtils.vehicle_lookup_table.keys():
                 return CarlaUtils.vehicle_lookup_table[vehicle_type]
             else:
@@ -120,14 +121,14 @@ class CarlaUtils:
         """
         return CarlaUtils.CarlaCityObjectLabelLookup.get(tag_id, "NONE")
 
-    # @staticmethod
-    # def get_semantic_tag_id(tag_name):
-    #     """
-    #     Get the integer semantic tag ID for a given tag name.
-    #     :param tag_name: The string tag name to look up.
-    #     :return: The tag ID.
-    #     """
-    #     return carla.CityObjectLabel.names.get(tag_name, 0)
+    @staticmethod
+    def get_semantic_tag_id(tag_name):
+        """
+        Get the integer semantic tag ID for a given tag name.
+        :param tag_name: The string tag name to look up.
+        :return: The tag ID.
+        """
+        return carla.CityObjectLabel.names.get(tag_name, 0)
 
     @staticmethod
     def get_transform(sensor_position, sensor_rotation):

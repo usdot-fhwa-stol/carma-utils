@@ -30,11 +30,16 @@ class DetectedObject:
     confidence: float
     projString: str
     size: np.ndarray
+    timestamp: int
+    sensorId: str
+    carla_actor: carla.Actor
+    rotation: np.ndarray
+    bounding_box_in_world_coordinate_frame: List[np.ndarray]
 
 
 class DetectedObjectBuilder:
     @staticmethod
-    def build_detected_object(carla_actor, allowed_semantic_tags, projection_string_config):
+    def build_detected_object(carla_actor, allowed_semantic_tags, projection_string_config, sensor_Id):
         object_type = CarlaUtils.determine_object_type(carla_actor, allowed_semantic_tags)
 
         if (object_type == "NONE"):
@@ -47,6 +52,7 @@ class DetectedObjectBuilder:
         
         projection_string = projection_string_config
 
+        #TODO: replace with correct size calculation
         size_x = carla_actor.bounding_box.extent.x*2
         size_y = carla_actor.bounding_box.extent.y*2
         size_z = carla_actor.bounding_box.extent.z*2
@@ -64,5 +70,11 @@ class DetectedObjectBuilder:
             np.zeros((3, 3)),
             1.0,
             projection_string,
-            [size_x, size_y, size_z]
+            [size_x, size_y, size_z],
+            #TODO: replace with carla sensor timestamp
+            0,
+            sensor_Id,
+            carla_actor,
+            CarlaUtils.get_actor_rotation_matrix(carla_actor),
+            bounding_box
         )

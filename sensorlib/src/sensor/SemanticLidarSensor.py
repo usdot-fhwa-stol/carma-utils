@@ -101,7 +101,7 @@ class SemanticLidarSensor(SimulatedSensor):
         timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
 
         # Compute data needed for occlusion operation
-        #actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
+        actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
         detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
 
         # Instantaneous geometry association
@@ -147,7 +147,8 @@ class SemanticLidarSensor(SimulatedSensor):
         actors = self.__carla_world.get_actors()
         return [DetectedObjectBuilder.build_detected_object(actor,
                                                             self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"], 
-                                                            self.__carla_sensor_config["projection_string"])
+                                                            self.__carla_sensor_config["projection_string"],
+                                                            self._sensor_id)
                 for actor in actors]
 
     # ------------------------------------------------------------------------------
@@ -461,7 +462,7 @@ class SemanticLidarSensor(SimulatedSensor):
         :return: Objects with noise applied.
         """
         detected_objects = self.__noise_model.apply_position_noise(detected_objects)
-        #detected_objects = self.__noise_model.apply_orientation_noise(detected_objects)
+        detected_objects = self.__noise_model.apply_orientation_noise(detected_objects)
         detected_objects = self.__noise_model.apply_type_noise(detected_objects)
         detected_objects = self.__noise_model.apply_list_inclusion_noise(detected_objects)
         return detected_objects
@@ -510,6 +511,6 @@ class SemanticLidarSensor(SimulatedSensor):
 
         return replace(obj,
                        type=new_object_type,
-                       #timestamp=timestamp,
+                       timestamp=timestamp,
                        position=new_position
                        )
