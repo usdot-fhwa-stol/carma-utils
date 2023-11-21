@@ -13,8 +13,8 @@ from dataclasses import replace
 from unittest.mock import MagicMock
 
 import numpy as np
-sys.path.append('/home/carma/Documents/GitHub/carma-utils/sensorlib')
-print(sys.path)
+sys.path.append('../')
+
 
 from src.CarlaCDASimAPI import CarlaCDASimAPI
 from src.CarlaCDASimAdapter import CarlaCDASimAdapter

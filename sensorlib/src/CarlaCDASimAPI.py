@@ -95,19 +95,6 @@ class CarlaCDASimAPI:
         :return: A registered SimulatedSensor.
         """
 
-        #dummy
-        blueprint_library = self.__carla_world.get_blueprint_library()
-        #######################################################
-        dummy_veh_spawn = carla.Transform(
-            carla.Location(x=-83.979, y=333.332, z=10.253),
-            carla.Rotation(yaw=0.0)
-        )
-
-        dummy_veh_bp = random.choice(blueprint_library.filter('vehicle.*'))
-        dummy_vehicle = self.__carla_world.spawn_actor(dummy_veh_bp, dummy_veh_spawn)
-        print("Created a dummy vehicle with id: " + str(dummy_vehicle.id))
-        #######################################################
-
         # Parameter checks
         if not isinstance(infrastructure_id, int) or infrastructure_id < 0:
             print("Error: infrastructure_id needs to be a non-negative integer.")
@@ -120,7 +107,7 @@ class CarlaCDASimAPI:
         sensor_transform = CarlaUtils.get_transform(sensor_position, sensor_rotation)
 
         # Retrieve the CARLA sensor
-        
+        blueprint_library = self.__carla_world.get_blueprint_library()
         sensor_bp = self.__generate_lidar_bp(blueprint_library, carla_sensor_config)
         parent_actor = CarlaUtils.get_actor(self.__carla_world, parent_actor_id)
         carla_sensor = self.__carla_world.spawn_actor(sensor_bp, sensor_transform, attach_to=parent_actor)
