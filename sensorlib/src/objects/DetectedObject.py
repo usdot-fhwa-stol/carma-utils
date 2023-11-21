@@ -35,7 +35,7 @@ class DetectedObject:
 
 class DetectedObjectBuilder:
     @staticmethod
-    def build_detected_object(carla_actor, allowed_semantic_tags):
+    def build_detected_object(carla_actor, allowed_semantic_tags, projection_string_config):
         object_type = CarlaUtils.determine_object_type(carla_actor, allowed_semantic_tags)
 
         if (object_type == "NONE"):
@@ -46,7 +46,7 @@ class DetectedObjectBuilder:
         if (bounding_box == None):
             return None
         
-        projection_string = os.environ['PROJSTRING']
+        projection_string = projection_string_config
 
         size_x = carla_actor.bounding_box.extent.x*2
         size_y = carla_actor.bounding_box.extent.y*2
