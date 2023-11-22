@@ -23,17 +23,18 @@ class DetectedObject:
     type: str
     position: np.ndarray
     velocity: np.ndarray
+    rotation: np.ndarray
     angularVelocity: np.ndarray
     positionCovariance: np.ndarray
     velocityCovariance: np.ndarray
-    angularVelocityCovariance: np.ndarray
+    orientationCovariance: np.ndarray
+    angularVelocityCovariance: np.ndarray  
     confidence: float
     projString: str
     size: np.ndarray
     timestamp: int
     sensorId: str
-    carla_actor: carla.Actor
-    rotation: np.ndarray
+    carla_actor: carla.Actor  
     bounding_box_in_world_coordinate_frame: List[np.ndarray]
 
 
@@ -44,11 +45,12 @@ class DetectedObjectBuilder:
 
         if (object_type == "NONE"):
             return None
-        
+
         bounding_box = CarlaUtils.get_actor_bounding_box_points(carla_actor)
 
         if (bounding_box == None):
             return None
+
         
         projection_string = projection_string_config
 
@@ -57,17 +59,21 @@ class DetectedObjectBuilder:
         size_y = carla_actor.bounding_box.extent.y
         size_z = carla_actor.bounding_box.extent.z
 
+
         return DetectedObject(
             carla_actor.id,
             object_type,
             CarlaUtils.vector3d_to_numpy(carla_actor.get_location()),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_velocity()),
+            CarlaUtils.get_actor_roll_pitch_yaw(carla_actor),
             CarlaUtils.get_actor_angular_velocity(carla_actor),
 
             # Use stand-in values which assume complete certainty
             np.zeros((3, 3)),
             np.zeros((3, 3)),
             np.zeros((3, 3)),
+            np.zeros((3, 3)),
+
             1.0,
             projection_string,
             [size_x, size_y, size_z],
@@ -75,6 +81,5 @@ class DetectedObjectBuilder:
             0,
             sensor_Id,
             carla_actor,
-            CarlaUtils.get_actor_rotation_matrix(carla_actor),
             bounding_box
         )
