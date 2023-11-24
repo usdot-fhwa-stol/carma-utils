@@ -10,3 +10,4 @@ CMakeFiles/
 # Reference: https://github.com/github/gitignore/blob/main/Python.gitignore
 
 __pycache__/
+sensorlib/test/rpc-client/target/classes/gov/dot/fhwa/saxton/Main.class

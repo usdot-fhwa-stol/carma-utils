@@ -8,10 +8,13 @@
 
 import json
 
+import numpy as np
 import yaml
 import numpy
-from util.NumpyEncoder import NumpyEncoder
+import os
+
 from objects.DetectedObject import DetectedObject
+
 
 class DetectedObjectEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -35,7 +38,7 @@ class DetectedObjectEncoder(json.JSONEncoder):
                 #'rotation': obj.rotation.tolist(),        
                 #'carla_actor': str(obj.carla_actor)
             }
-            
+
             # Convert DetectedObject attributes to dictionary for serialization.
             # np.ndarray objects are converted to lists using the tolist() method.
             return dict_return
@@ -44,7 +47,8 @@ class DetectedObjectEncoder(json.JSONEncoder):
             return obj.tolist()
         # Fallback to the base class default method for other types.
         return super(DetectedObjectEncoder, self).default(obj)
-    
+
+
 class SimulatedSensorUtils:
     """
     Generic utilities.
@@ -75,6 +79,6 @@ class SimulatedSensorUtils:
             return obj.tolist()
         elif isinstance(obj, list):
             data = [SimulatedSensorUtils.serialize_to_json(item) for item in obj]
-            return json.dumps(data)
+            return "[" + str.join(",", data) + "]"
         else:
             return json.dumps(obj, cls=DetectedObjectEncoder)

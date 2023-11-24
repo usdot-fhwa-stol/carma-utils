@@ -56,17 +56,16 @@ class CarlaUtils:
         return np.deg2rad(angular_velocity_degpersecond)
 
     @staticmethod
-    def get_actor_rotation_matrix(carla_actor):
+    def get_actor_roll_pitch_yaw(carla_actor):
         """
-        Get the rotation matrix for an actor.
+        Get the orientation for an actor in order of roll, pitch, yaw.
         :param carla_actor: The carla.Actor to obtain data from.
-        :return: numpy.array containing the rotation matrix in radians.
+        :return: numpy.array containing roll, pitch, yaw in radians.
         """
         carla_rotation = carla_actor.get_transform().rotation
         rotation_angles_deg = np.array([carla_rotation.roll, carla_rotation.pitch, carla_rotation.yaw])
         rotation_angles = np.deg2rad(rotation_angles_deg)
-        rotation_matrix = Rotation.from_euler('xyz', rotation_angles)
-        return rotation_matrix.as_dcm()
+        return rotation_angles
 
     @staticmethod
     def get_actor_bounding_box_points(carla_actor):
@@ -75,7 +74,7 @@ class CarlaUtils:
         :param carla_actor: The carla.Actor to obtain data from.
         :return: List of numpy.array containing the bounding box points in the world frame.
         """
-        
+
         try:
             bounding_box = carla_actor.bounding_box
         except AttributeError:
@@ -92,9 +91,9 @@ class CarlaUtils:
         :param allowed_semantic_tags: List of semantic tags which are allowed to be detected by the sensor.
         :return: The object type, or NONE if not in the allowed list.
         """
-                
         #using type_id instead of semantic_tags
         #issue with semantic_tags in version 0.9.10:https://github.com/carla-simulator/carla/issues/2161
+
         temp_id_list =  carla_actor.type_id.split(".")
         temp_id = temp_id_list[0]
         if temp_id == "vehicle":
@@ -110,24 +109,6 @@ class CarlaUtils:
             return "NONE"
 
     @staticmethod
-    def get_semantic_tag_name(tag_id):
-        """
-        Get the semantic tag name for a given tag ID.
-        :param tag_id: The integer tag ID to look up.
-        :return: The tag name.
-        """
-        return CarlaUtils.CarlaCityObjectLabelLookup.get(tag_id, "NONE")
-
-    @staticmethod
-    def get_semantic_tag_id(tag_name):
-        """
-        Get the integer semantic tag ID for a given tag name.
-        :param tag_name: The string tag name to look up.
-        :return: The tag ID.
-        """
-        return carla.CityObjectLabel.names.get(tag_name, 0)
-
-    @staticmethod
     def get_transform(sensor_position, sensor_rotation):
         """
         Get a carla.Transform from a position and rotation.
@@ -139,6 +120,8 @@ class CarlaUtils:
             position = CarlaUtils.get_location(sensor_position)
         elif isinstance(sensor_position, carla.Location):
             position = sensor_position
+        elif isinstance(sensor_position, carla.libcarla.Vector3D):
+            position = carla.Location(x=sensor_position.x, y=sensor_position.y, z=sensor_position.z)
         else:
             raise ValueError("sensor_position must be a list of floats or a carla.Location object.")
 
