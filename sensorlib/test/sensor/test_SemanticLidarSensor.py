@@ -137,7 +137,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
         result = self.sensor.get_scene_detected_objects()
         self.assertEqual(len(result), len(actors))
         for i in range(len(result)):
-            self.assertEqual(result[i].id, 0)
+            self.assertEqual(result[i].objectId, 0)
 
         # Restore old function
         DetectedObjectBuilder.build_detected_object = old_fcn
@@ -148,8 +148,8 @@ class TestSemanticLidarSensor(unittest.TestCase):
         detected_objects[2] = replace(detected_objects[2], object_type="Bridge")
         filtered_objects, object_ranges = self.sensor.prefilter(detected_objects)
         self.assertEqual(len(filtered_objects), 2)
-        self.assertEqual(filtered_objects[0].object_type, "Vehicles")
-        self.assertEqual(filtered_objects[1].object_type, "Pedestrians")
+        self.assertEqual(filtered_objects[0].type, "Vehicles")
+        self.assertEqual(filtered_objects[1].type, "Pedestrians")
         self.assertEqual(object_ranges[0], 38.635709988013005)
         self.assertEqual(object_ranges[1], 38.635709988013005)
 
@@ -618,12 +618,12 @@ class TestSemanticLidarSensor(unittest.TestCase):
         new_detected_objects = self.sensor.update_object_frame_and_timestamps(detected_objects, hitpoints, timestamp)
 
         # Assert object types updated
-        assert new_detected_objects[0].object_type == "Bridge"
-        assert new_detected_objects[1].object_type == "Bridge"
-        assert new_detected_objects[2].object_type == "Bridge"
-        assert new_detected_objects[3].object_type == "Bridge"
-        assert new_detected_objects[4].object_type == "Bridge"
-        assert new_detected_objects[5].object_type == "Bridge"
+        assert new_detected_objects[0].type == "Bridge"
+        assert new_detected_objects[1].type == "Bridge"
+        assert new_detected_objects[2].type == "Bridge"
+        assert new_detected_objects[3].type == "Bridge"
+        assert new_detected_objects[4].type == "Bridge"
+        assert new_detected_objects[5].type == "Bridge"
 
         # Assert timestamps updated
         assert new_detected_objects[0].timestamp == timestamp
@@ -664,7 +664,7 @@ class TestSemanticLidarSensor(unittest.TestCase):
 
         # Call and provide assertions
         corrected_objects = self.sensor.update_object_frame_and_timestamps_from_hitpoint(detected_object,
-                                                                             hitpoints.get(detected_object.id),
+                                                                             hitpoints.get(detected_object.objectId),
                                                                              timestamp)
-        assert "Bridge" == corrected_objects.object_type
+        assert "Bridge" == corrected_objects.type
         assert timestamp == corrected_objects.timestamp

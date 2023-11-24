@@ -59,12 +59,12 @@ class TestGaussianNoiseModel(unittest.TestCase):
 
         object_list = noise_model.apply_type_noise(object_list)
 
-        self.assertEqual(object_list[0].object_type, "Pedestrians")
-        self.assertEqual(object_list[1].object_type, "Pedestrians")
-        self.assertEqual(object_list[2].object_type, "Pedestrians")
-        self.assertEqual(object_list[3].object_type, "Pedestrians")
-        self.assertEqual(object_list[4].object_type, "Pedestrians")
-        self.assertEqual(object_list[5].object_type, "Pedestrians")
+        self.assertEqual(object_list[0].type, "PEDESTRIAN")
+        self.assertEqual(object_list[1].type, "PEDESTRIAN")
+        self.assertEqual(object_list[2].type, "PEDESTRIAN")
+        self.assertEqual(object_list[3].type, "PEDESTRIAN")
+        self.assertEqual(object_list[4].type, "PEDESTRIAN")
+        self.assertEqual(object_list[5].type, "PEDESTRIAN")
 
     def test_apply_list_inclusion_noise(self):
         object_list = [MagicMock(), MagicMock(), MagicMock()]

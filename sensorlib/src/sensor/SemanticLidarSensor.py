@@ -140,7 +140,7 @@ class SemanticLidarSensor(SimulatedSensor):
         scene_objects = filter(lambda obj: obj is not None, scene_objects)
 
         # Remove sensor's parent object if detected (LIDAR sensor detecting car to which it is attached)
-        scene_objects = filter(lambda obj: obj.id != self.__parent_id, scene_objects)
+        scene_objects = filter(lambda obj: obj.objectId != self.__parent_id, scene_objects)
 
         return list(scene_objects)
 
@@ -338,7 +338,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Due to vehicles being a large object compared to pedestrians, more buffer maybe required
         geometry_association_threshold_buffer = 0.0
-        if scene_objects[closest_index].object_type == "Vehicles":
+        if scene_objects[closest_index].type == "Vehicles":
             geometry_association_threshold_buffer = 2.0
 
         # Observe a maximum object distance to preclude association with far-away objects
@@ -347,7 +347,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Return closest object's ID
         closest_object = scene_objects[closest_index]
-        return closest_object.id
+        return closest_object.objectId
 
     def vote_most_frequent_id(self, object_id_list):
         """Determine the object with the highest number of votes as determined by the nearest-neighbor search."""
@@ -380,8 +380,8 @@ class SemanticLidarSensor(SimulatedSensor):
         :return: List of objects filtered by occlusion.
         """
         return list(filter(
-            lambda obj: self.is_visible(actor_angular_extents.get(obj.id), hitpoints.get(obj.id),
-                                        detection_thresholds.get(obj.id)),
+            lambda obj: self.is_visible(actor_angular_extents.get(obj.objectId), hitpoints.get(obj.objectId),
+                                        detection_thresholds.get(obj.objectId)),
             detected_objects))
 
     def is_visible(self, actor_angular_extents, object_hitpoints, detection_threshold_ratio):
