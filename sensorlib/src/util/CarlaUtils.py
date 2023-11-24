@@ -27,9 +27,6 @@ class CarlaUtils:
                             'century': "CYCLIST",
                             'omafiets': "CYCLIST"}
 
-    # CARLA semantic tag lookup table
-    #CarlaCityObjectLabelLookup = dict([(id, name) for name, id in carla.CityObjectLabel.names.items()])
-
     @staticmethod
     def vector3d_to_numpy(vec):
         """

@@ -53,6 +53,7 @@ class DetectedObjectBuilder:
         projection_string = projection_string_config
 
         #TODO: replace with correct size calculation
+        #https://github.com/usdot-fhwa-stol/carma-utils/issues/188
         size_x = carla_actor.bounding_box.extent.x
         size_y = carla_actor.bounding_box.extent.y
         size_z = carla_actor.bounding_box.extent.z
@@ -72,6 +73,7 @@ class DetectedObjectBuilder:
             projection_string,
             [size_x, size_y, size_z],
             #TODO: replace with carla sensor timestamp
+            #https://github.com/usdot-fhwa-stol/carma-utils/issues/189
             0,
             sensor_Id,
             carla_actor,
