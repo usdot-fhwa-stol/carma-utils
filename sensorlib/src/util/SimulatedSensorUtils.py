@@ -21,21 +21,22 @@ class DetectedObjectEncoder(json.JSONEncoder):
         if isinstance(obj, DetectedObject):
 
             dict_return = {
-                'id': obj.id,
-                'object_type': obj.object_type,
-                'timestamp': obj.timestamp,
-                'bounding_box_in_world_coordinate_frame': [array.tolist() for array in
-                                                           obj.bounding_box_in_world_coordinate_frame],
-                'position': obj.position.tolist(),
-                'velocity': obj.velocity.tolist(),
-                'rotation': obj.rotation.tolist(),
-                'angular_velocity': obj.angular_velocity.tolist(),
-                'position_covariance': obj.position_covariance.tolist(),
-                'orientation_covariance': obj.orientation_covariance.tolist(),
-                'velocity_covariance': obj.velocity_covariance.tolist(),
-                'angular_velocity_covariance': obj.angular_velocity_covariance.tolist(),
+                'type': obj.type,
                 'confidence': obj.confidence,
-                'carla_actor': str(obj.carla_actor)
+                'projString': obj.projString,
+                'objectId': obj.objectId,
+                'position':{'x': obj.position[0], 'y': obj.position[1], 'z': obj.position[2]},
+                'positionCovariance': obj.positionCovariance.tolist(),
+                'velocity':{'x': obj.velocity[0], 'y': obj.velocity[1], 'z': obj.velocity[2]},
+                'velocityCovariance': obj.velocityCovariance.tolist(),
+                'angularVelocity': {'x': obj.angularVelocity[0], 'y': obj.angularVelocity[1], 'z': obj.angularVelocity[2]},
+                'angularVelocityCovariance': obj.angularVelocityCovariance.tolist(),
+                'size': {'length': obj.size[0], 'height': obj.size[1], 'width': obj.size[2]},
+                'timestamp': obj.timestamp,
+                'sensorID': obj.sensorId
+                #'bounding_box_in_world_coordinate_frame': [array.tolist() for array in obj.bounding_box_in_world_coordinate_frame],            
+                #'rotation': obj.rotation.tolist(),        
+                #'carla_actor': str(obj.carla_actor)
             }
 
             # Convert DetectedObject attributes to dictionary for serialization.

@@ -205,7 +205,7 @@ def print_detection_summary(lidar_name, lidar):
     actor_types = defaultdict(int)
 
     for detected_object in lidar.get_detected_objects():
-        actor_types[str(detected_object.object_type)] += 1
+        actor_types[str(detected_object.type)] += 1
 
     print(f"'{lidar_name}' detection summary by actor type:")
     print("\n".join([f"{key}, {value}" for key, value in actor_types.items()]))

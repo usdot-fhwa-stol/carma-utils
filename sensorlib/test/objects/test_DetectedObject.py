@@ -36,8 +36,8 @@ class TestDetectedObject(unittest.TestCase):
         detected_object = DetectedObjectBuilder.build_detected_object(self.carla_actor, ["Vehicles"])
 
         assert detected_object.carla_actor == self.carla_actor
-        assert detected_object.id == 1
-        assert detected_object.object_type == "Vehicles"
+        assert detected_object.objectId == 1
+        assert detected_object.type == "Vehicles"
 
         # Bounding box
         assert (detected_object.bounding_box_in_world_coordinate_frame[0] == np.array([1.0, 2.0, 3.0])).all()
@@ -56,9 +56,9 @@ class TestDetectedObject(unittest.TestCase):
         assert np.allclose(detected_object.rotation, rotation_matrix.as_matrix())
 
         # Angular velocity
-        assert (detected_object.angular_velocity == np.deg2rad(np.array([7.0, 8.0, 9.0]))).all()
+        assert (detected_object.angularVelocity == np.deg2rad(np.array([7.0, 8.0, 9.0]))).all()
 
         # Uncertainty
-        assert (detected_object.position_covariance == np.zeros((3, 3))).all()
-        assert (detected_object.velocity_covariance == np.zeros((3, 3))).all()
+        assert (detected_object.positionCovariance == np.zeros((3, 3))).all()
+        assert (detected_object.velocityCovariance == np.zeros((3, 3))).all()
         assert detected_object.confidence == 1.0

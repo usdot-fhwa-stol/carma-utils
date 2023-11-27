@@ -15,28 +15,32 @@ import numpy as np
 from util.CarlaUtils import CarlaUtils
 
 
+
 @dataclass(frozen=True)
 class DetectedObject:
     """Wrapper class for carla.Actor which are detected by the sensor."""
-    carla_actor: carla.Actor
-    id: int
-    object_type: str
-    timestamp: int
-    bounding_box_in_world_coordinate_frame: List[np.ndarray]
+    objectId: int
+    type: str
     position: np.ndarray
     velocity: np.ndarray
     rotation: np.ndarray
-    angular_velocity: np.ndarray
-    position_covariance: np.ndarray
-    orientation_covariance: np.ndarray
-    velocity_covariance: np.ndarray
-    angular_velocity_covariance: np.ndarray
+    angularVelocity: np.ndarray
+    positionCovariance: np.ndarray
+    velocityCovariance: np.ndarray
+    orientationCovariance: np.ndarray
+    angularVelocityCovariance: np.ndarray  
     confidence: float
+    projString: str
+    size: np.ndarray
+    timestamp: int
+    sensorId: str
+    carla_actor: carla.Actor  
+    bounding_box_in_world_coordinate_frame: List[np.ndarray]
 
 
 class DetectedObjectBuilder:
     @staticmethod
-    def build_detected_object(carla_actor, allowed_semantic_tags):
+    def build_detected_object(carla_actor, allowed_semantic_tags, projection_string_config, sensor_Id):
         object_type = CarlaUtils.determine_object_type(carla_actor, allowed_semantic_tags)
 
         if (object_type == "NONE"):
@@ -47,12 +51,19 @@ class DetectedObjectBuilder:
         if (bounding_box == None):
             return None
 
+        
+        projection_string = projection_string_config
+
+        #TODO: replace with correct size calculation
+        #https://github.com/usdot-fhwa-stol/carma-utils/issues/188
+        size_x = carla_actor.bounding_box.extent.x
+        size_y = carla_actor.bounding_box.extent.y
+        size_z = carla_actor.bounding_box.extent.z
+
+
         return DetectedObject(
-            carla_actor,
             carla_actor.id,
             object_type,
-            0,
-            bounding_box,
             CarlaUtils.vector3d_to_numpy(carla_actor.get_location()),
             CarlaUtils.vector3d_to_numpy(carla_actor.get_velocity()),
             CarlaUtils.get_actor_roll_pitch_yaw(carla_actor),
@@ -64,5 +75,13 @@ class DetectedObjectBuilder:
             np.zeros((3, 3)),
             np.zeros((3, 3)),
 
-            1.0
+            1.0,
+            projection_string,
+            [size_x, size_y, size_z],
+            #TODO: replace with carla sensor timestamp
+            #https://github.com/usdot-fhwa-stol/carma-utils/issues/189
+            0,
+            sensor_Id,
+            carla_actor,
+            bounding_box
         )

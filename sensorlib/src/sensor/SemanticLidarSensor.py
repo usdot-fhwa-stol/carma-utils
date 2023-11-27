@@ -130,16 +130,17 @@ class SemanticLidarSensor(SimulatedSensor):
         """
         actors = self.__carla_world.get_actors()
 
-        scene_objects = [DetectedObjectBuilder.build_detected_object(actor,
-                                                            self.__simulated_sensor_config["prefilter"][
-                                                                "allowed_semantic_tags"])
+        return [DetectedObjectBuilder.build_detected_object(actor,
+                                                            self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"], 
+                                                            self.__carla_sensor_config["projection_string"],
+                                                            self._sensor_id)
                 for actor in actors]
 
         # Remove invalid objects
         scene_objects = filter(lambda obj: obj is not None, scene_objects)
 
         # Remove sensor's parent object if detected (LIDAR sensor detecting car to which it is attached)
-        scene_objects = filter(lambda obj: obj.id != self.__parent_id, scene_objects)
+        scene_objects = filter(lambda obj: obj.objectId != self.__parent_id, scene_objects)
 
         return list(scene_objects)
 
@@ -164,19 +165,19 @@ class SemanticLidarSensor(SimulatedSensor):
             filter(lambda obj: obj is not None, detected_objects))
 
         detected_objects = list(
-            filter(lambda obj: obj.object_type in self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"],
+            filter(lambda obj: obj.type in self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"],
                    detected_objects))
 
         # Compute ranges
         sensor_location = self.__sensor.carla_sensor.get_location()
         sensor_location_np = np.array([sensor_location.x, sensor_location.y, sensor_location.z])
         object_ranges = dict(
-            [(obj.id, np.linalg.norm(obj.position - sensor_location_np)) for obj in detected_objects])
+            [(obj.objectId, np.linalg.norm(obj.position - sensor_location_np)) for obj in detected_objects])
 
         # Filter by radius
         detected_objects = list(
             filter(
-                lambda obj: object_ranges[obj.id] <= self.__simulated_sensor_config["prefilter"]["max_distance_meters"],
+                lambda obj: object_ranges[obj.objectId] <= self.__simulated_sensor_config["prefilter"]["max_distance_meters"],
                 detected_objects))
 
         return detected_objects, object_ranges
@@ -192,7 +193,7 @@ class SemanticLidarSensor(SimulatedSensor):
         :param detected_objects: List of objects currently considered for detection.
         :return: Dictionary mapping actor ID to tuple of (horizontal, vertical) angular extents.
         """
-        return dict([(detected_object.id,
+        return dict([(detected_object.objectId,
                       self.compute_actor_angular_extent(detected_object)) for detected_object in
                      detected_objects])
 
@@ -229,8 +230,8 @@ class SemanticLidarSensor(SimulatedSensor):
         with distance to accommodate ray spreading which naturally leads to lower hitpoint counts, risking object
         misdetections.
         """
-        return dict([(detected_object.id,
-                      self.compute_adjusted_detection_threshold(object_ranges[detected_object.id]))
+        return dict([(detected_object.objectId,
+                      self.compute_adjusted_detection_threshold(object_ranges[detected_object.objectId]))
                      for
                      detected_object in detected_objects])
 
@@ -337,7 +338,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Due to vehicles being a large object compared to pedestrians, more buffer maybe required
         geometry_association_threshold_buffer = 0.0
-        if scene_objects[closest_index].object_type == "Vehicles":
+        if scene_objects[closest_index].type == "Vehicles":
             geometry_association_threshold_buffer = 2.0
 
         # Observe a maximum object distance to preclude association with far-away objects
@@ -346,7 +347,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Return closest object's ID
         closest_object = scene_objects[closest_index]
-        return closest_object.id
+        return closest_object.objectId
 
     def vote_most_frequent_id(self, object_id_list):
         """Determine the object with the highest number of votes as determined by the nearest-neighbor search."""
@@ -379,8 +380,8 @@ class SemanticLidarSensor(SimulatedSensor):
         :return: List of objects filtered by occlusion.
         """
         return list(filter(
-            lambda obj: self.is_visible(actor_angular_extents.get(obj.id), hitpoints.get(obj.id),
-                                        detection_thresholds.get(obj.id)),
+            lambda obj: self.is_visible(actor_angular_extents.get(obj.objectId), hitpoints.get(obj.objectId),
+                                        detection_thresholds.get(obj.objectId)),
             detected_objects))
 
     def is_visible(self, actor_angular_extents, object_hitpoints, detection_threshold_ratio):
@@ -461,6 +462,7 @@ class SemanticLidarSensor(SimulatedSensor):
         :param timestamp: Timestamp of the current frame (seconds).
         :return: List of objects with updated metadata.
         """
+
         return [self.update_object_frame_and_timestamps_from_hitpoint(obj, timestamp)
                 for obj in detected_objects]
 

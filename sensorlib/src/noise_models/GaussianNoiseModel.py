@@ -62,7 +62,7 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
         # Apply type noise to the object_list
         return [replace(obj,
-                        object_type= self.__rng.choice(self.__config["type_noise"]["allowed_semantic_tags"], 1))
+                        type= self.__rng.choice(self.__config["type_noise"]["allowed_semantic_tags"], 1))
                 for obj in object_list]
 
     def apply_list_inclusion_noise(self, object_list):
@@ -76,9 +76,9 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
         # Apply position noise to the object_list
         for obj in object_list:
-            obj.position_covariance[0][0] = self.__position_std_in_meters[0] ** 2
-            obj.position_covariance[1][1] = self.__position_std_in_meters[1] ** 2
-            obj.position_covariance[2][2] = self.__position_std_in_meters[2] ** 2
+            obj.positionCovariance[0][0] = self.__position_std_in_meters[0] ** 2
+            obj.positionCovariance[1][1] = self.__position_std_in_meters[1] ** 2
+            obj.positionCovariance[2][2] = self.__position_std_in_meters[2] ** 2
 
         return object_list
 
@@ -88,9 +88,9 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
         # Apply orientation noise to the object_list
         for obj in object_list:
-            obj.orientation_covariance[0][0] = self.__orientation_std_in_radians[0] ** 2
-            obj.orientation_covariance[1][1] = self.__orientation_std_in_radians[1] ** 2
-            obj.orientation_covariance[2][2] = self.__orientation_std_in_radians[2] ** 2
+            obj.orientationCovariance[0][0] = self.__orientation_std_in_radians[0] ** 2
+            obj.orientationCovariance[1][1] = self.__orientation_std_in_radians[1] ** 2
+            obj.orientationCovariance[2][2] = self.__orientation_std_in_radians[2] ** 2
 
         return object_list
 
@@ -100,9 +100,9 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
         # Apply velocity noise to the object_list
         for obj in object_list:
-            obj.velocity_covariance[0][0] = self.__linear_velocity_in_ms[0] ** 2
-            obj.velocity_covariance[1][1] = self.__linear_velocity_in_ms[1] ** 2
-            obj.velocity_covariance[2][2] = self.__linear_velocity_in_ms[2] ** 2
+            obj.velocityCovariance[0][0] = self.__linear_velocity_in_ms[0] ** 2
+            obj.velocityCovariance[1][1] = self.__linear_velocity_in_ms[1] ** 2
+            obj.velocityCovariance[2][2] = self.__linear_velocity_in_ms[2] ** 2
 
         return object_list
 
@@ -112,8 +112,8 @@ class GaussianNoiseModel(AbstractNoiseModel):
 
         # Apply angular velocity noise to the object_list
         for obj in object_list:
-            obj.angular_velocity_covariance[0][0] = self.__angular_velocity_in_rs[0] ** 2
-            obj.angular_velocity_covariance[1][1] = self.__angular_velocity_in_rs[1] ** 2
-            obj.angular_velocity_covariance[2][2] = self.__angular_velocity_in_rs[2] ** 2
+            obj.angularVelocityCovariance[0][0] = self.__angular_velocity_in_rs[0] ** 2
+            obj.angularVelocityCovariance[1][1] = self.__angular_velocity_in_rs[1] ** 2
+            obj.angularVelocityCovariance[2][2] = self.__angular_velocity_in_rs[2] ** 2
 
         return object_list

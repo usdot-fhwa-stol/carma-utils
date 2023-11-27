@@ -15,6 +15,7 @@ sys.path.append('../')
 from CarlaCDASimAPI import CarlaCDASimAPI
 from util.SimulatedSensorUtils import SimulatedSensorUtils
 
+
 class CarlaCDASimAdapter:
     # Holds Sensor configuration object
     sensor_config = None
