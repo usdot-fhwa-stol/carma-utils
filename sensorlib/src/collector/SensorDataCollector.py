@@ -72,7 +72,7 @@ class SensorDataCollector:
         # Add data to the current collection
         if (len(semantic_sensor_data.raw_data) == 0):
             return None
-        
+
         self.__collect_raw_point_data(self.__data[0], semantic_sensor_data)
 
     def __collect_raw_point_data(self, grouped_data, raw_sensor_data):
@@ -92,9 +92,15 @@ class SensorDataCollector:
             # https://github.com/carla-simulator/carla/issues/3191
             if (detection.object_idx == 0):
                 continue
-            
+
             point = CarlaUtils.vector3d_to_numpy(detection.point)
-           
+
+            # CARLA 0.9.10 has a bug where the y-axis value is negated.
+            # This was resolved in a later release, but CARMA currently
+            # uses 0.9.10. Remove this fix when CARMA upgrades to a
+            # newer CARLA version.
+            point[1] *= -1
+
             if detection.object_idx not in grouped_data:
                 grouped_data[detection.object_idx] = [point]
             else:
