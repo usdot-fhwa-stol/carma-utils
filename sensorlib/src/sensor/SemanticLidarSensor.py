@@ -77,8 +77,12 @@ class SemanticLidarSensor(SimulatedSensor):
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
 
+        print(f'1 size: {len(detected_objects)}')
+
         # Prefilter
         detected_objects, object_ranges = self.prefilter(detected_objects)
+
+        print(f'2 size: {len(detected_objects)}')
 
         # Get LIDAR hitpoints with Actor ID associations
         timestamp, hitpoints = self.__data_collector.get_carla_lidar_hitpoints()
@@ -102,12 +106,17 @@ class SemanticLidarSensor(SimulatedSensor):
         detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
                                                detection_thresholds)
 
+        print(f'3 size: {len(detected_objects)}')
 
         # Apply noise
         detected_objects = self.apply_noise(detected_objects)
 
+        print(f'4 size: {len(detected_objects)}')
+
         # Update reference frame, and detection time
         detected_objects = self.update_object_frame_and_timestamps(detected_objects, timestamp)
+
+        print(f'5 size: {len(detected_objects)}')
 
         self.__detected_objects = detected_objects
 
@@ -130,8 +139,8 @@ class SemanticLidarSensor(SimulatedSensor):
         """
         actors = self.__carla_world.get_actors()
 
-        return [DetectedObjectBuilder.build_detected_object(actor,
-                                                            self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"], 
+        scene_objects = [DetectedObjectBuilder.build_detected_object(actor,
+                                                            self.__simulated_sensor_config["prefilter"]["allowed_semantic_tags"],
                                                             self.__carla_sensor_config["projection_string"],
                                                             self._sensor_id)
                 for actor in actors]

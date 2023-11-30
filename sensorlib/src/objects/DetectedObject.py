@@ -28,13 +28,13 @@ class DetectedObject:
     positionCovariance: np.ndarray
     velocityCovariance: np.ndarray
     orientationCovariance: np.ndarray
-    angularVelocityCovariance: np.ndarray  
+    angularVelocityCovariance: np.ndarray
     confidence: float
     projString: str
     size: np.ndarray
-    timestamp: int
+    timestamp: float
     sensorId: str
-    carla_actor: carla.Actor  
+    carla_actor: carla.Actor
     bounding_box_in_world_coordinate_frame: List[np.ndarray]
 
 
@@ -51,7 +51,7 @@ class DetectedObjectBuilder:
         if (bounding_box == None):
             return None
 
-        
+
         projection_string = projection_string_config
 
         #TODO: replace with correct size calculation
@@ -78,9 +78,7 @@ class DetectedObjectBuilder:
             1.0,
             projection_string,
             [size_x, size_y, size_z],
-            #TODO: replace with carla sensor timestamp
-            #https://github.com/usdot-fhwa-stol/carma-utils/issues/189
-            0,
+            0.0,
             sensor_Id,
             carla_actor,
             bounding_box
