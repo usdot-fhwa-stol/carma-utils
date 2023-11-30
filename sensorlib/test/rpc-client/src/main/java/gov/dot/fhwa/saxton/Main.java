@@ -25,8 +25,8 @@ public class Main {
         client.setConfig(config);
 
         // Specify sensor parameters
-        int infrastructureID = 1;
-        int sensorID = 7;
+        String infrastructureID = "1";
+        String sensorID = "7";
         List<Double> location = Arrays.asList(63.0, 7.0, 1.8);
         List<Double> rotation = Arrays.asList(0.0, 0.0, 0.0);
         params = new Object[]{ infrastructureID, sensorID, location, rotation};
