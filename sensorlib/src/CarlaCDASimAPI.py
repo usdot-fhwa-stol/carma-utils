@@ -94,13 +94,17 @@ class CarlaCDASimAPI:
         :param sensor_rotation: Sensor rotation in degrees.
         :return: A registered SimulatedSensor.
         """
-
+        is_return = False
         # Parameter checks
-        if not isinstance(infrastructure_id, int) or infrastructure_id < 0:
-            print("Error: infrastructure_id needs to be a non-negative integer.")
-            return None
-        if not isinstance(sensor_id, int) or sensor_id < 0:
-            print("Error: sensor_id needs to be a non-negative integer.")
+        if not isinstance(infrastructure_id, str):
+            print("Error: infrastructure_id needs to be a string.")
+            is_return = True
+        if not isinstance(sensor_id, str):
+            print("Error: sensor_id needs to be a string.")
+            is_return = True
+
+        if is_return:
+            is_return = False
             return None
 
         # Build the transform
