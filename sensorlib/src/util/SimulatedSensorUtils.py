@@ -32,10 +32,10 @@ class DetectedObjectEncoder(json.JSONEncoder):
                 'angularVelocity': {'x': obj.angularVelocity[0], 'y': obj.angularVelocity[1], 'z': obj.angularVelocity[2]},
                 'angularVelocityCovariance': obj.angularVelocityCovariance.tolist(),
                 'size': {'length': obj.size[0], 'height': obj.size[1], 'width': obj.size[2]},
-                'timestamp': obj.timestamp,
+                'timestamp': (int)(obj.timestamp), #TODO need to fix other instances in cdasim before changing https://github.com/usdot-fhwa-stol/carma-utils/issues/187
                 'sensorID': obj.sensorId
-                #'bounding_box_in_world_coordinate_frame': [array.tolist() for array in obj.bounding_box_in_world_coordinate_frame],            
-                #'rotation': obj.rotation.tolist(),        
+                #'bounding_box_in_world_coordinate_frame': [array.tolist() for array in obj.bounding_box_in_world_coordinate_frame],
+                #'rotation': obj.rotation.tolist(),
                 #'carla_actor': str(obj.carla_actor)
             }
 

@@ -33,7 +33,7 @@ class SensorDataCollector:
         self.__prev_angle = 0.0
 
         # Time of latest data capture (in seconds)
-        self.__timestamp = 0
+        self.__timestamp = 0.0
 
         # Store current and prior data collections. The current is actively being added to, previous is finalized.
         self.__data = deque([{}, {}], maxlen=2)
@@ -60,8 +60,8 @@ class SensorDataCollector:
         :return: None
         """
 
-        # Update the timestamp (in integer seconds)
-        self.__timestamp = int(semantic_sensor_data.timestamp)
+        # Update the timestamp (in float seconds)
+        self.__timestamp = semantic_sensor_data.timestamp
 
         # Check if this data collection belongs to the same data collection run as the previous time step
         sensor_rotation_angle = semantic_sensor_data.horizontal_angle
