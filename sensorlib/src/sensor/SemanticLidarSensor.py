@@ -100,8 +100,10 @@ class SemanticLidarSensor(SimulatedSensor):
 
         hitpoints = self.compute_instantaneous_actor_id_association(hitpoints_without_ids, detected_objects)
 
-        detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
-                                               detection_thresholds)
+        # Turning off temporarily as the function is clearning all the objects
+        # https://github.com/usdot-fhwa-stol/carma-utils/issues/194
+        #detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
+        #                                       detection_thresholds)
 
 
         # Apply noise
