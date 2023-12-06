@@ -24,8 +24,7 @@ setup(
     packages=[package_name],
     data_files=[
         ("share/ament_index/resource_index/packages", [f"resource/{package_name}"]),
-        (f"share/{package_name}", ["package.xml"]),
-        (f"share/{package_name}/tests", glob.glob("tests/test_*.*"))
+        (f"share/{package_name}", ["package.xml"])
     ],
     install_requires=["setuptools"],
     zip_safe=True,
