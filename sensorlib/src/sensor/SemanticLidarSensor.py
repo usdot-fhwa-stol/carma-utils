@@ -480,9 +480,17 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # If enabled, convert coordinates to sensor-centric frame
         new_position = obj.position
+
         if self.__simulated_sensor_config["use_sensor_centric_frame"]:
             sensor_location = self.__sensor.carla_sensor.get_location()
             new_position = np.subtract(obj.position, np.array([sensor_location.x, sensor_location.y, sensor_location.z]))
+
+        # CARLA 0.9.10 has a bug where the y-axis value is negated.
+        # This was resolved in a later release, but CARMA currently
+        # uses 0.9.10. Remove this fix when CARMA upgrades to a
+        # newer CARLA version.
+
+        new_position[1] *= -1.0
 
         return replace(obj,
                        timestamp=timestamp,
