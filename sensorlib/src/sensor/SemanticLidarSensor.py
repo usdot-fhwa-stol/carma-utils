@@ -88,6 +88,10 @@ class SemanticLidarSensor(SimulatedSensor):
         actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
         detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
 
+        print("====actor_angular_extents start=======")
+        print(f"hitpoints: {actor_angular_extents}")
+        print("====actor_angular_extents end=======")
+
         # Instantaneous geometry association
         sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
         downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
@@ -99,6 +103,9 @@ class SemanticLidarSensor(SimulatedSensor):
 
 
         hitpoints = self.compute_instantaneous_actor_id_association(hitpoints_without_ids, detected_objects)
+        print("====hitpoints_start=======")
+        print(f"hitpoints: {hitpoints}")
+        print("====hitpoints_end=======")
 
         # Turning off temporarily as the function is clearning all the objects
         # https://github.com/usdot-fhwa-stol/carma-utils/issues/194
