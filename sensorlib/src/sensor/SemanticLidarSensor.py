@@ -311,7 +311,7 @@ class SemanticLidarSensor(SimulatedSensor):
                                                           self.__simulated_sensor_config["geometry_reassociation"][
                                                               "geometry_association_max_dist_in_meters"])
 
-        association = zip(hitpoints, matching_nearest_neighbor_ids)
+        association = zip(hitpoints_in_map_frame, matching_nearest_neighbor_ids)
 
         grouped_data = dict()
         for hitpoint, actor_id in association:
