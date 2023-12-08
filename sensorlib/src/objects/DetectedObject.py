@@ -19,7 +19,7 @@ from util.CarlaUtils import CarlaUtils
 @dataclass(frozen=True)
 class DetectedObject:
     """Wrapper class for carla.Actor which are detected by the sensor."""
-    objectId: int
+    objectId: str
     type: str
     position: np.ndarray
     velocity: np.ndarray
