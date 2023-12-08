@@ -324,8 +324,10 @@ class SemanticLidarSensor(SimulatedSensor):
 
         grouped_data = dict()
         for hitpoint, actor_id in association:
+            if actor_id is None:
+                continue
             # some hitpoints may not get association due to associator's range, which the library ignores
-            if actor_id not in grouped_data and not None:
+            if actor_id not in grouped_data:
                 grouped_data[actor_id] = [hitpoint]
             else:
                 grouped_data[actor_id].append(hitpoint)
