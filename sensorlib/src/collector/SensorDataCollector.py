@@ -33,7 +33,7 @@ class SensorDataCollector:
         self.__prev_angle = 0.0
 
         # Time of latest data capture (in seconds)
-        self.__timestamp = 0.0
+        self.__timestamp = 0
 
         # Store current and prior data collections. The current is actively being added to, previous is finalized.
         self.__data = deque([{}, {}], maxlen=2)

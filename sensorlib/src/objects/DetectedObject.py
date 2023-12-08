@@ -32,7 +32,7 @@ class DetectedObject:
     confidence: float
     projString: str
     size: np.ndarray
-    timestamp: float
+    timestamp: int
     sensorId: str
     carla_actor: carla.Actor
     bounding_box_in_world_coordinate_frame: List[np.ndarray]
@@ -78,7 +78,7 @@ class DetectedObjectBuilder:
             1.0,
             projection_string,
             [size_x, size_y, size_z],
-            0.0,
+            0,
             sensor_Id,
             carla_actor,
             bounding_box
