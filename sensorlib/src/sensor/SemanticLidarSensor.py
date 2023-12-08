@@ -303,7 +303,8 @@ class SemanticLidarSensor(SimulatedSensor):
         # Compute nearest neighbor for each hitpoint
         hitpoints_in_map_frame = []
         for hitpoint in hitpoints:
-            new_pos = np.add(hitpoint, self.__sensor.position)
+            sensor_location = self.__sensor.carla_sensor.get_location()
+            new_pos = np.add(hitpoint, np.array([sensor_location.x, sensor_location.y, sensor_location.z]))
             hitpoints_in_map_frame.append(new_pos)
 
         matching_nearest_neighbor_ids = self.compute_closest_object_id_list(hitpoints_in_map_frame, scene_objects,
