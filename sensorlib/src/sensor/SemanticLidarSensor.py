@@ -102,8 +102,8 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Turning off temporarily as the function is clearning all the objects
         # https://github.com/usdot-fhwa-stol/carma-utils/issues/194
-        #detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
-        #                                       detection_thresholds)
+        detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
+                                               detection_thresholds)
 
 
         # Apply noise
@@ -111,6 +111,12 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Update reference frame, and detection time
         detected_objects = self.update_object_frame_and_timestamps(detected_objects, timestamp)
+
+        print(f"=============================")
+        for obj in detected_objects:
+            print(f"id: {obj.objectId} type: {obj.type}")
+        print(f"=============================")
+
 
         self.__detected_objects = detected_objects
 
@@ -341,7 +347,9 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Due to vehicles being a large object compared to pedestrians, more buffer maybe required
         geometry_association_threshold_buffer = 0.0
-        if scene_objects[closest_index].type == "Vehicles":
+        if scene_objects[closest_index].type == "VAN" or scene_objects[closest_index].type == "TRUCK":
+            geometry_association_threshold_buffer = 3.0
+        elif scene_objects[closest_index].type == "CAR":
             geometry_association_threshold_buffer = 2.0
 
         # Observe a maximum object distance to preclude association with far-away objects
@@ -383,11 +391,11 @@ class SemanticLidarSensor(SimulatedSensor):
         :return: List of objects filtered by occlusion.
         """
         return list(filter(
-            lambda obj: self.is_visible(actor_angular_extents.get(obj.objectId), hitpoints.get(obj.objectId),
+            lambda obj: self.is_visible(obj.objectId, actor_angular_extents.get(obj.objectId), hitpoints.get(obj.objectId),
                                         detection_thresholds.get(obj.objectId)),
             detected_objects))
 
-    def is_visible(self, actor_angular_extents, object_hitpoints, detection_threshold_ratio):
+    def is_visible(self, id, actor_angular_extents, object_hitpoints, detection_threshold_ratio):
         """
         Compute if an object is visible based on the ratio of actual to expected hitpoints.
 
@@ -409,6 +417,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Compare hitpoint count
         num_hitpoints = len(object_hitpoints)
+        print(f'id: {id}, num_expected_hitpoints: {num_expected_hitpoints}, detection_threshold_ratio: {detection_threshold_ratio}, and num_hitpoints: {num_hitpoints}')
 
         return num_hitpoints >= min_hitpoint_count
 

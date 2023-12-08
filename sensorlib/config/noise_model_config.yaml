@@ -13,20 +13,9 @@ std_deviations:
     angular_velocity_in_rs: [0.1, 0.1, 0.1]
 type_noise:
     allowed_semantic_tags:
-        Buildings
-        Fences
-        Ground
-        GuardRail
-        Pedestrians
-        Poles
-        RoadLines
-        Roads
-        Sidewalks
-        Sky
-        Terrain
-        TrafficLight
-        TrafficSigns
-        Vegetation
-        Vehicles
-        Walls
-        Water
+      - CAR
+      - PEDESTRIAN
+      - VAN
+      - CYCLIST
+      - TRUCK
+      - MOTORCYCLE
