@@ -10,7 +10,7 @@ simulated_sensor:
     max_distance_meters: 30
   detection_threshold_scaling_formula:
     nominal_hitpoint_detection_ratio_threshold: 0.6
-    hitpoint_detection_ratio_threshold_per_meter_change_rate: -0.0033
+    hitpoint_detection_ratio_threshold_per_meter_change_rate: 0.025
     adjustable_threshold_scaling_parameters:
       dropoff_rate: 0.01
   geometry_reassociation:

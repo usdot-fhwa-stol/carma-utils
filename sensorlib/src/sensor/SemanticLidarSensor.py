@@ -423,8 +423,8 @@ class SemanticLidarSensor(SimulatedSensor):
 
     def compute_expected_num_hitpoints(self, horizontal_fov, vertical_fov):
         """
-        Compute the expected number of hitpoints for the given field of view. This result is heavily determined by
-        the CARLA sensor configuration.
+        Compute the expected number of hitpoints for the given field of view without accounting for distance. Imagine even distribution of hitpoints within some radius.
+        NOTE: This result is heavily determined by the CARLA sensor configuration.
 
         :param horizontal_fov: Horizontal field of view in radians.
         :param vertical_fov: Vertical field of view in radians.
