@@ -93,10 +93,11 @@ class SemanticLidarSensor(SimulatedSensor):
         #print("====actor_angular_extents end=======")
 
         # Instantaneous geometry association
-        sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
+        min_sample_size = self.__simulated_sensor_config["geometry_reassociation"]["min_sample_count"]
+        max_sample_size = self.__simulated_sensor_config["geometry_reassociation"]["max_sample_count"]
         sample_ratio = self.__simulated_sensor_config["geometry_reassociation"]["sample_ratio"]
 
-        downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size, sample_ratio)
+        downsampled_hitpoints = self.sample_hitpoints(hitpoints, min_sample_size, max_sample_size, sample_ratio)
         hitpoints_without_ids = []
 
         for hit_id, hitpoint_list in downsampled_hitpoints.items():
@@ -265,7 +266,7 @@ class SemanticLidarSensor(SimulatedSensor):
     # Geometry Re-Association: Sampling
     # ------------------------------------------------------------------------------
 
-    def sample_hitpoints(self, hitpoints, sample_size, sample_ratio):
+    def sample_hitpoints(self, hitpoints, min_sample_size, max_sample_size, sample_ratio):
         """Down sample each object's hitpoint list
 
         Randomly sample points inside each object's set of LIDAR
@@ -276,14 +277,15 @@ class SemanticLidarSensor(SimulatedSensor):
         hitpoints will remain unchanged).
 
         :param hitpoints: lidar points associated with each object
-        :param sample_size: maximum size of the object's new hitpoint list
+        :param min_sample_size: maximum size of the object's new hitpoint list
         :return: downsampled hitpoints
         """
         for id_, points in hitpoints.items():
             print(f"before sampling, original id: {id_}, and size: {len(points)}")
 
-        sample_size_ratio_wise = (int)(max(len(points) / sample_ratio, sample_size))
-        true_sample_size = min(len(points), sample_size_ratio_wise)
+        min_sample_size_ratio_wise = (int)(max(len(points) / sample_ratio, min_sample_size))
+        sample_size_capped_with_boundary = min(len(points), min_sample_size_ratio_wise)
+        true_sample_size = min(max_sample_size, sample_size_capped_with_boundary)
 
         return {
             # The choice() function will raise an error if we try to
