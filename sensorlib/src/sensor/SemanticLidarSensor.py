@@ -94,7 +94,9 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Instantaneous geometry association
         sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
-        downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
+        sample_ratio = self.__simulated_sensor_config["geometry_reassociation"]["sample_ratio"]
+
+        downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size, sample_ratio)
         hitpoints_without_ids = []
 
         for hit_id, hitpoint_list in downsampled_hitpoints.items():
@@ -264,7 +266,7 @@ class SemanticLidarSensor(SimulatedSensor):
     # Geometry Re-Association: Sampling
     # ------------------------------------------------------------------------------
 
-    def sample_hitpoints(self, hitpoints, sample_size):
+    def sample_hitpoints(self, hitpoints, sample_size, sample_ratio):
         """Down sample each object's hitpoint list
 
         Randomly sample points inside each object's set of LIDAR
@@ -278,10 +280,16 @@ class SemanticLidarSensor(SimulatedSensor):
         :param sample_size: maximum size of the object's new hitpoint list
         :return: downsampled hitpoints
         """
+        for id_, points in hitpoints.items():
+            print(f"before sampling, original id: {id_}, and size: {len(points)}")
+
+        sample_size_ratio_wise = (int)(max(len(points) / sample_ratio, sample_size))
+        true_sample_size = min(len(points), sample_size_ratio_wise)
+
         return {
             # The choice() function will raise an error if we try to
             # sample more than the population
-            id_: self.__rng.choice(points, min(len(points), sample_size), replace=False)
+            id_: self.__rng.choice(points, min(len(points), true_sample_size), replace=False)
             for id_, points in hitpoints.items()
         }
 
@@ -421,11 +429,12 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Compute threshold hitpoint count for this object
         num_expected_hitpoints = self.compute_expected_num_hitpoints(horizontal_fov, vertical_fov)
-        min_hitpoint_count = detection_threshold_ratio * num_expected_hitpoints
 
-        # minimum hitpoint count is further reduced by sampling
-        sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
-        min_hitpoint_count = min_hitpoint_count * min(1.0, (sample_size / num_expected_hitpoints))
+        # number of expected hitpoint count is reduced by sampling
+        sample_ratio = self.__simulated_sensor_config["geometry_reassociation"]["sample_ratio"]
+        num_expected_hitpoints = num_expected_hitpoints / sample_ratio
+
+        min_hitpoint_count = detection_threshold_ratio * num_expected_hitpoints
 
         # Compare hitpoint count
         num_hitpoints = len(object_hitpoints)
