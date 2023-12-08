@@ -423,9 +423,13 @@ class SemanticLidarSensor(SimulatedSensor):
         num_expected_hitpoints = self.compute_expected_num_hitpoints(horizontal_fov, vertical_fov)
         min_hitpoint_count = detection_threshold_ratio * num_expected_hitpoints
 
+        # minimum hitpoint count is further reduced by sampling
+        sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
+        min_hitpoint_count = min_hitpoint_count * min(1.0, (sample_size / num_expected_hitpoints))
+
         # Compare hitpoint count
         num_hitpoints = len(object_hitpoints)
-        print(f'id: {id}, num_expected_hitpoints: {num_expected_hitpoints}, detection_threshold_ratio: {detection_threshold_ratio}, and num_hitpoints: {num_hitpoints}')
+        print(f'id: {id}, num_expected_hitpoints: {num_expected_hitpoints}, detection_threshold_ratio: {detection_threshold_ratio}, num_hitpoints: {num_hitpoints}, and min_hitpoint_count: {min_hitpoint_count}')
 
         return num_hitpoints >= min_hitpoint_count
 
