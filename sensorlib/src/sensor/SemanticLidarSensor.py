@@ -399,11 +399,11 @@ class SemanticLidarSensor(SimulatedSensor):
         :return: List of objects filtered by occlusion.
         """
         return list(filter(
-            lambda obj: self.is_visible(obj.objectId, actor_angular_extents.get(obj.objectId), hitpoints.get(obj.objectId),
+            lambda obj: self.is_visible(actor_angular_extents.get(obj.objectId), hitpoints.get(obj.objectId),
                                         detection_thresholds.get(obj.objectId)),
             detected_objects))
 
-    def is_visible(self, id, actor_angular_extents, object_hitpoints, detection_threshold_ratio):
+    def is_visible(self, actor_angular_extents, object_hitpoints, detection_threshold_ratio):
         """
         Compute if an object is visible based on the ratio of actual to expected hitpoints.
 
