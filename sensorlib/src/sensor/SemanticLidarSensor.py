@@ -268,6 +268,7 @@ class SemanticLidarSensor(SimulatedSensor):
         :param hitpoints: lidar points associated with each object
         :param min_sample_size: minimum size to sample from hitpoint list for each objects
         :param max_sample_size: maximum size to sample from hitpoint list for each objects
+        :param downsample_ratio: int number determining the factor to which the size of the sample is reduced
         :return: downsampled hitpoints
         """
 
