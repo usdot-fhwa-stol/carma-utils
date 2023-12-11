@@ -73,10 +73,9 @@ class SemanticLidarSensor(SimulatedSensor):
 
         :return: List of DetectedObject objects serialized in JSON form.
         """
-        print("====COMPUTE START=======")
+
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
-
 
         # Prefilter
         detected_objects, object_ranges = self.prefilter(detected_objects)
@@ -88,16 +87,12 @@ class SemanticLidarSensor(SimulatedSensor):
         actor_angular_extents = self.compute_actor_angular_extents(detected_objects)
         detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
 
-        #print("====actor_angular_extents start=======")
-        #print(f"hitpoints: {actor_angular_extents}")
-        #print("====actor_angular_extents end=======")
-
         # Instantaneous geometry association
         min_sample_size = self.__simulated_sensor_config["geometry_reassociation"]["min_sample_count"]
         max_sample_size = self.__simulated_sensor_config["geometry_reassociation"]["max_sample_count"]
-        sample_ratio = self.__simulated_sensor_config["geometry_reassociation"]["sample_ratio"]
+        downsample_ratio = self.__simulated_sensor_config["geometry_reassociation"]["downsample_ratio"]
 
-        downsampled_hitpoints = self.sample_hitpoints(hitpoints, min_sample_size, max_sample_size, sample_ratio)
+        downsampled_hitpoints = self.sample_hitpoints(hitpoints, min_sample_size, max_sample_size, downsample_ratio)
         hitpoints_without_ids = []
 
         for hit_id, hitpoint_list in downsampled_hitpoints.items():
@@ -106,8 +101,6 @@ class SemanticLidarSensor(SimulatedSensor):
 
 
         hitpoints = self.compute_instantaneous_actor_id_association(hitpoints_without_ids, detected_objects)
-        for id, points in hitpoints.items():
-            print(f"id: {id}, size: {len(points)}")
 
         # Turning off temporarily as the function is clearning all the objects
         # https://github.com/usdot-fhwa-stol/carma-utils/issues/194
@@ -119,13 +112,6 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Update reference frame, and detection time
         detected_objects = self.update_object_frame_and_timestamps(detected_objects, timestamp)
-
-        print(f"=============================")
-        for obj in detected_objects:
-            print(f"id: {obj.objectId} type: {obj.type}")
-        print(f"=============================")
-        print("====COMPUTE END=======")
-
 
         self.__detected_objects = detected_objects
 
@@ -266,7 +252,7 @@ class SemanticLidarSensor(SimulatedSensor):
     # Geometry Re-Association: Sampling
     # ------------------------------------------------------------------------------
 
-    def sample_hitpoints(self, hitpoints, min_sample_size, max_sample_size, sample_ratio):
+    def sample_hitpoints(self, hitpoints, min_sample_size, max_sample_size, downsample_ratio):
         """Down sample each object's hitpoint list
 
         Randomly sample points inside each object's set of LIDAR
@@ -277,13 +263,11 @@ class SemanticLidarSensor(SimulatedSensor):
         hitpoints will remain unchanged).
 
         :param hitpoints: lidar points associated with each object
-        :param min_sample_size: maximum size of the object's new hitpoint list
+        :param min_sample_size: minimum size to sample from hitpoint list for each objects
         :return: downsampled hitpoints
         """
-        for id_, points in hitpoints.items():
-            print(f"before sampling, original id: {id_}, and size: {len(points)}")
 
-        min_sample_size_ratio_wise = (int)(max(len(points) / sample_ratio, min_sample_size))
+        min_sample_size_ratio_wise = (int)(max(len(points) / downsample_ratio, min_sample_size))
         sample_size_capped_with_boundary = min(len(points), min_sample_size_ratio_wise)
         true_sample_size = min(max_sample_size, sample_size_capped_with_boundary)
 
@@ -434,8 +418,8 @@ class SemanticLidarSensor(SimulatedSensor):
         num_expected_hitpoints = self.compute_expected_num_hitpoints(horizontal_fov, vertical_fov)
 
         # number of expected hitpoint count is reduced by sampling
-        sample_ratio = self.__simulated_sensor_config["geometry_reassociation"]["sample_ratio"]
-        num_expected_hitpoints = num_expected_hitpoints / sample_ratio
+        downsample_ratio = self.__simulated_sensor_config["geometry_reassociation"]["downsample_ratio"]
+        num_expected_hitpoints = num_expected_hitpoints / downsample_ratio
 
         min_hitpoint_count = detection_threshold_ratio * num_expected_hitpoints
 
