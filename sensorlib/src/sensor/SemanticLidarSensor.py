@@ -278,7 +278,7 @@ class SemanticLidarSensor(SimulatedSensor):
         return {
             # The choice() function will raise an error if we try to
             # sample more than the population
-            id_: self.__rng.choice(points, min(len(points), true_sample_size), replace=False)
+            id_: self.__rng.choice(points, true_sample_size, replace=False)
             for id_, points in hitpoints.items()
         }
 
