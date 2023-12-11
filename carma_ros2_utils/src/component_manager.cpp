@@ -297,7 +297,16 @@ ComponentManager::on_load_node(
           auto result = rcutils_logging_set_logger_level(modified_name, sev);
 
           if (result != RCUTILS_RET_OK) {
-            RCLCPP_ERROR(get_logger(), "FAILED to set log level when provided with --log-level argument");
+            RCLCPP_ERROR_STREAM(get_logger(), "FAILED to set log level using the node's name with namespaces when provided with --log-level argument, name: " << std::string(modified_name));
+          }
+
+          // Set only using the node's name without namespace to accommodate nodes with hardcoded logger names as well
+          name =  node_wrappers_[node_id].get_node_base_interface()->get_name();
+
+          result = rcutils_logging_set_logger_level(name, sev);
+
+          if (result != RCUTILS_RET_OK) {
+            RCLCPP_ERROR_STREAM(get_logger(), "FAILED to set log level using the node's name without namespaces when provided with --log-level argument, name: " << std::string(name));
           }
         }
         /////
