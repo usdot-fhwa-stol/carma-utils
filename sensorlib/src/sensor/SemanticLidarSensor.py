@@ -261,9 +261,13 @@ class SemanticLidarSensor(SimulatedSensor):
         a specific object is less than the sample size, the whole
         hitpoint population will be used (i.e., the object's list of
         hitpoints will remain unchanged).
+        NOTE: sizes and ratio in inputs affect individual object_idx in CARLA 0.9.10
+        which is same as object_tag, but not actor_id. For example, if there are 2 vehicle.carlamotors.carlacola,
+        the size and ratios will apply to total hitpoints of vehicle.carlamotors.carlacola, but not individually.
 
         :param hitpoints: lidar points associated with each object
         :param min_sample_size: minimum size to sample from hitpoint list for each objects
+        :param max_sample_size: maximum size to sample from hitpoint list for each objects
         :return: downsampled hitpoints
         """
 
@@ -425,7 +429,6 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Compare hitpoint count
         num_hitpoints = len(object_hitpoints)
-        print(f'id: {id}, num_expected_hitpoints: {num_expected_hitpoints}, detection_threshold_ratio: {detection_threshold_ratio}, num_hitpoints: {num_hitpoints}, and min_hitpoint_count: {min_hitpoint_count}')
 
         return num_hitpoints >= min_hitpoint_count
 
