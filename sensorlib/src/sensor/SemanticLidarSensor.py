@@ -279,7 +279,7 @@ class SemanticLidarSensor(SimulatedSensor):
             id_: self.__rng.choice(
                 points, clamp(math.ceil(len(points) / downsample_ratio)), replace=False
             )
-            for id_, points in hitpoints
+            for id_, points in hitpoints.items()
         }
 
     # ------------------------------------------------------------------------------
