@@ -273,7 +273,7 @@ class SemanticLidarSensor(SimulatedSensor):
         """
 
         def clamp(value):
-            return min(min_sample_size, max(value, max_sample_size))
+            return max(min_sample_size, min(value, max_sample_size))
 
         return {
             id_: self.__rng.choice(
