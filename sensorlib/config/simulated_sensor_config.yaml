@@ -9,12 +9,15 @@ simulated_sensor:
       - MOTORCYCLE
     max_distance_meters: 100
   detection_threshold_scaling_formula:
-    nominal_hitpoint_detection_ratio_threshold: 0.6
-    hitpoint_detection_ratio_threshold_per_meter_change_rate: -0.0033
+    nominal_hitpoint_detection_ratio_threshold: 0.4
+    # Rate below was found experimentally by placing an object by 10 meter apart and seeing how many their average hitpoints get reduced
+    hitpoint_detection_ratio_threshold_per_meter_change_rate: 0.025
     adjustable_threshold_scaling_parameters:
       dropoff_rate: 0.01
   geometry_reassociation:
-    sample_count: 30
+    max_sample_count: 150
+    min_sample_count: 30
+    downsample_ratio: 2
     geometry_association_max_dist_in_meters: 3.0
   use_sensor_centric_frame: False
 lidar_sensor:

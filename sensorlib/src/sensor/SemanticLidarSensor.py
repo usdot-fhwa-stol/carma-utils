@@ -11,7 +11,7 @@ from dataclasses import replace
 
 import numpy as np
 from scipy.spatial import distance
-
+import math
 from objects.DetectedObject import DetectedObjectBuilder
 from sensor.SimulatedSensor import SimulatedSensor
 from util.CarlaUtils import CarlaUtils
@@ -77,7 +77,6 @@ class SemanticLidarSensor(SimulatedSensor):
         # Get detected_object truth states from simulation
         detected_objects = self.get_scene_detected_objects()
 
-
         # Prefilter
         detected_objects, object_ranges = self.prefilter(detected_objects)
 
@@ -89,8 +88,11 @@ class SemanticLidarSensor(SimulatedSensor):
         detection_thresholds = self.compute_adjusted_detection_thresholds(detected_objects, object_ranges)
 
         # Instantaneous geometry association
-        sample_size = self.__simulated_sensor_config["geometry_reassociation"]["sample_count"]
-        downsampled_hitpoints = self.sample_hitpoints(hitpoints, sample_size)
+        min_sample_size = self.__simulated_sensor_config["geometry_reassociation"]["min_sample_count"]
+        max_sample_size = self.__simulated_sensor_config["geometry_reassociation"]["max_sample_count"]
+        downsample_ratio = self.__simulated_sensor_config["geometry_reassociation"]["downsample_ratio"]
+
+        downsampled_hitpoints = self.sample_hitpoints(hitpoints, min_sample_size, max_sample_size, downsample_ratio)
         hitpoints_without_ids = []
 
         for hit_id, hitpoint_list in downsampled_hitpoints.items():
@@ -102,9 +104,8 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Turning off temporarily as the function is clearning all the objects
         # https://github.com/usdot-fhwa-stol/carma-utils/issues/194
-        #detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
-        #                                       detection_thresholds)
-
+        detected_objects = self.apply_occlusion(detected_objects, actor_angular_extents, hitpoints,
+                                               detection_thresholds)
 
         # Apply noise
         detected_objects = self.apply_noise(detected_objects)
@@ -251,7 +252,7 @@ class SemanticLidarSensor(SimulatedSensor):
     # Geometry Re-Association: Sampling
     # ------------------------------------------------------------------------------
 
-    def sample_hitpoints(self, hitpoints, sample_size):
+    def sample_hitpoints(self, hitpoints, min_sample_size, max_sample_size, downsample_ratio):
         """Down sample each object's hitpoint list
 
         Randomly sample points inside each object's set of LIDAR
@@ -260,15 +261,24 @@ class SemanticLidarSensor(SimulatedSensor):
         a specific object is less than the sample size, the whole
         hitpoint population will be used (i.e., the object's list of
         hitpoints will remain unchanged).
+        NOTE: sizes and ratio in inputs affect individual object_idx in CARLA 0.9.10
+        which is same as object_tag, but not actor_id. For example, if there are 2 vehicle.carlamotors.carlacola,
+        the size and ratios will apply to total hitpoints of vehicle.carlamotors.carlacola, but not individually.
 
         :param hitpoints: lidar points associated with each object
-        :param sample_size: maximum size of the object's new hitpoint list
+        :param min_sample_size: minimum size to sample from hitpoint list for each objects
+        :param max_sample_size: maximum size to sample from hitpoint list for each objects
+        :param downsample_ratio: int number determining the factor to which the size of the sample is reduced
         :return: downsampled hitpoints
         """
+
+        def clamp(value):
+            return max(min_sample_size, min(value, max_sample_size))
+
         return {
-            # The choice() function will raise an error if we try to
-            # sample more than the population
-            id_: self.__rng.choice(points, min(len(points), sample_size), replace=False)
+            id_: self.__rng.choice(
+                points, min(len(points), clamp(math.ceil(len(points) / downsample_ratio))), replace=False
+            )
             for id_, points in hitpoints.items()
         }
 
@@ -290,19 +300,22 @@ class SemanticLidarSensor(SimulatedSensor):
         # Compute nearest neighbor for each hitpoint
         hitpoints_in_map_frame = []
         for hitpoint in hitpoints:
-            new_pos = np.add(hitpoint, self.__sensor.position)
+            sensor_location = self.__sensor.carla_sensor.get_location()
+            new_pos = np.add(hitpoint, np.array([sensor_location.x, sensor_location.y, sensor_location.z]))
             hitpoints_in_map_frame.append(new_pos)
 
         matching_nearest_neighbor_ids = self.compute_closest_object_id_list(hitpoints_in_map_frame, scene_objects,
                                                           self.__simulated_sensor_config["geometry_reassociation"][
                                                               "geometry_association_max_dist_in_meters"])
 
-        association = zip(hitpoints, matching_nearest_neighbor_ids)
+        association = zip(hitpoints_in_map_frame, matching_nearest_neighbor_ids)
 
         grouped_data = dict()
         for hitpoint, actor_id in association:
+            if actor_id is None:
+                continue
             # some hitpoints may not get association due to associator's range, which the library ignores
-            if actor_id not in grouped_data and not None:
+            if actor_id not in grouped_data:
                 grouped_data[actor_id] = [hitpoint]
             else:
                 grouped_data[actor_id].append(hitpoint)
@@ -341,7 +354,9 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Due to vehicles being a large object compared to pedestrians, more buffer maybe required
         geometry_association_threshold_buffer = 0.0
-        if scene_objects[closest_index].type == "Vehicles":
+        if scene_objects[closest_index].type in ("VAN", "TRUCK"):
+            geometry_association_threshold_buffer = 3.0
+        elif scene_objects[closest_index].type == "CAR":
             geometry_association_threshold_buffer = 2.0
 
         # Observe a maximum object distance to preclude association with far-away objects
@@ -400,11 +415,16 @@ class SemanticLidarSensor(SimulatedSensor):
         if actor_angular_extents is None or object_hitpoints is None or detection_threshold_ratio is None:
             return False
 
-        horizontal_fov = actor_angular_extents[0]
-        vertical_fov = actor_angular_extents[1]
+        actor_horizontal_angular_extent = actor_angular_extents[0]
+        actor_vertical_angular_extent = actor_angular_extents[1]
 
         # Compute threshold hitpoint count for this object
-        num_expected_hitpoints = self.compute_expected_num_hitpoints(horizontal_fov, vertical_fov)
+        num_expected_hitpoints = self.compute_expected_num_hitpoints(actor_horizontal_angular_extent, actor_vertical_angular_extent)
+
+        # number of expected hitpoint count is reduced by sampling
+        downsample_ratio = self.__simulated_sensor_config["geometry_reassociation"]["downsample_ratio"]
+        num_expected_hitpoints = num_expected_hitpoints / downsample_ratio
+
         min_hitpoint_count = detection_threshold_ratio * num_expected_hitpoints
 
         # Compare hitpoint count
@@ -412,13 +432,13 @@ class SemanticLidarSensor(SimulatedSensor):
 
         return num_hitpoints >= min_hitpoint_count
 
-    def compute_expected_num_hitpoints(self, horizontal_fov, vertical_fov):
+    def compute_expected_num_hitpoints(self, actor_horizontal_angular_extent, actor_vertical_angular_extent):
         """
-        Compute the expected number of hitpoints for the given field of view. This result is heavily determined by
-        the CARLA sensor configuration.
+        Compute the expected number of hitpoints for the given field of view without accounting for distance. Imagine even distribution of hitpoints within some radius.
+        NOTE: This result is heavily determined by the CARLA sensor configuration.
 
-        :param horizontal_fov: Horizontal field of view in radians.
-        :param vertical_fov: Vertical field of view in radians.
+        :param actor_horizontal_angular_extent: Actor's detected horizontal field of view in radians.
+        :param actor_vertical_angular_extent: Actor's detected vertical field of view in radians.
         :return: Expected number of hitpoints in a scan across the specified field of view.
         """
 
@@ -428,7 +448,7 @@ class SemanticLidarSensor(SimulatedSensor):
         num_vertical_points_per_scan = self.__sensor.number_of_channels
         vertical_angular_resolution = self.__sensor.vertical_fov / num_vertical_points_per_scan
 
-        return (horizontal_fov / horizontal_angular_resolution) * (vertical_fov / vertical_angular_resolution)
+        return (actor_horizontal_angular_extent / horizontal_angular_resolution) * (actor_vertical_angular_extent / vertical_angular_resolution)
 
     # ------------------------------------------------------------------------------
     # Noise Filter
@@ -480,9 +500,21 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # If enabled, convert coordinates to sensor-centric frame
         new_position = obj.position
+
         if self.__simulated_sensor_config["use_sensor_centric_frame"]:
             sensor_location = self.__sensor.carla_sensor.get_location()
             new_position = np.subtract(obj.position, np.array([sensor_location.x, sensor_location.y, sensor_location.z]))
+
+        # CARLA 0.9.10 has a bug where the y-axis value is negated
+        # in reported objects positions and even lidar hitpoints.
+        # Therefore, all internal logic up until here works flawlessly
+        # just with negative Y value. However, just before reporting to
+        # external users, the Y value should be corrected.
+        # This was resolved in a later release, but CARMA currently
+        # uses 0.9.10. Remove this fix when CARMA upgrades to a
+        # newer CARLA version.
+
+        new_position[1] *= -1.0
 
         return replace(obj,
                        timestamp=timestamp,
