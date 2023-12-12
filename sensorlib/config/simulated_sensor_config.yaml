@@ -9,7 +9,7 @@ simulated_sensor:
       - MOTORCYCLE
     max_distance_meters: 100
   detection_threshold_scaling_formula:
-    nominal_hitpoint_detection_ratio_threshold: 0.6
+    nominal_hitpoint_detection_ratio_threshold: 0.4
     # Rate below was found experimentally by placing an object by 10 meter apart and seeing how many their average hitpoints get reduced
     hitpoint_detection_ratio_threshold_per_meter_change_rate: 0.025
     adjustable_threshold_scaling_parameters:
