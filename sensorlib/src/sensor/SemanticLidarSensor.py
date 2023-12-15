@@ -336,7 +336,6 @@ class SemanticLidarSensor(SimulatedSensor):
         The threshold prevents association between a point and object which are very far apart.
         """
         if len(scene_objects) == 0:
-            print("No scene objects!")
             return None
         object_positions = [obj.position for obj in scene_objects]
 
