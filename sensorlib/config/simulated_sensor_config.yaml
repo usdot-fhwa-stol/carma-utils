@@ -19,7 +19,7 @@ simulated_sensor:
     min_sample_count: 30
     downsample_ratio: 2
     geometry_association_max_dist_in_meters: 3.0
-  use_sensor_centric_frame: False
+  use_sensor_centric_frame: True
 lidar_sensor:
   lower_fov: -80.0
   upper_fov: 30.0

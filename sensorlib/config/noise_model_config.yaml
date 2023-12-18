@@ -7,9 +7,9 @@ stages:
     type_noise: False
     list_inclusion_noise: False
 std_deviations:
-    position_in_meters: [0.8, 0.8, 0.8]
+    position_in_meters: [0.2, 0.2, 0.2]
     orientation_in_radians: [0.1, 0.1, 0.1]
-    linear_velocity_in_ms: [0.8, 0.8, 0.8]
+    linear_velocity_in_ms: [0.2, 0.2, 0.2]
     angular_velocity_in_rs: [0.1, 0.1, 0.1]
 type_noise:
     allowed_semantic_tags:
