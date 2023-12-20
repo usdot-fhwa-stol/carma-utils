@@ -33,9 +33,12 @@ class DetectedObjectEncoder(json.JSONEncoder):
                 'angularVelocityCovariance': obj.angularVelocityCovariance.tolist(),
                 'size': {'length': obj.size[0], 'height': obj.size[1], 'width': obj.size[2]},
                 'timestamp': (int)((obj.timestamp)*1000), #CDASim expects Int in milliseconds
-                'sensorId': obj.sensorId
+                'sensorId': obj.sensorId,
                 #'bounding_box_in_world_coordinate_frame': [array.tolist() for array in obj.bounding_box_in_world_coordinate_frame],
-                #'rotation': obj.rotation.tolist(),
+                'rotation': {'x': obj.rotation[0], 'y': obj.rotation[1], 'z': obj.rotation[2]},
+                'rotationCovariance': obj.rotationCovariance.tolist(),
+                'orientation': {'x': obj.orientation[0], 'y': obj.orientation[1], 'z': obj.orientation[2]},
+                'orientationCovariance': obj.orientationCovariance.tolist() 
                 #'carla_actor': str(obj.carla_actor)
             }
 
