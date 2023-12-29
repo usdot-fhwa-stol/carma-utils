@@ -48,6 +48,8 @@ class CarlaCDASimAdapter:
                                  "create_simulated_semantic_lidar_sensor")
         server.register_function(self.__get_simulated_sensor, "get_simulated_sensor")
         server.register_function(self.__get_detected_objects, "get_detected_objects")
+        server.register_function(self.__connect, "connect")
+
         self.sensor_config = SimulatedSensorUtils.load_config_from_file(sensor_config_file)
         self.noise_model_config = SimulatedSensorUtils.load_config_from_file(noise_model_config_file)
         self.detection_cycle_delay_seconds = detection_cycle_delay_seconds
@@ -77,6 +79,8 @@ class CarlaCDASimAdapter:
                                                                              sensor_position, sensor_rotation)
         return str(simulated_sensor.get_id())
 
+    def __connect(self):
+        print("CARLA CDASim Adapter connected to CDASim")
     def __get_simulated_sensor(self, infrastructure_id, sensor_id):
         sensor = self.__api.get_simulated_sensor(infrastructure_id, sensor_id)
         return str(sensor.get_id())
