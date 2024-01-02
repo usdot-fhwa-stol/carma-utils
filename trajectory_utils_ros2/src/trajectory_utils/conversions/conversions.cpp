@@ -110,6 +110,7 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
   double prev_speed = initial_speed;
   double prev_time = times[0];
   speeds->push_back(prev_speed);
+  RCLCPP_ERROR_STREAM(rclcpp::get_logger("todo"), "start time_to_speed: " << prev_speed );
   for (int i = 1; i < downtrack.size(); i++)
   {
     double cur_pos = downtrack[i];
@@ -120,7 +121,11 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
     double cur_speed;
 
     cur_speed = (2.0 * delta_d / dt) - prev_speed;
-    
+    RCLCPP_ERROR_STREAM(rclcpp::get_logger("todo"), "time_to_speed: " << cur_speed );
+
+    // can't have negative speed!
+    cur_speed = std::max(0.0, cur_speed);
+
     speeds->push_back(cur_speed);
 
     prev_position = cur_pos;
@@ -157,7 +162,7 @@ void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::ve
 
     double cur_speed;
     double jerk_min = 0.01; //Min stop and wait jerk
-    
+
     if(decel_jerk > jerk_min){
       cur_speed = prev_speed - 0.5* decel_jerk*pow(dt,2);
       cur_speed = std::max(0.0,cur_speed);
@@ -166,11 +171,11 @@ void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::ve
       // stop and wait plugin doesn't create slow down traj for very low jerk requirement
       cur_speed = prev_speed;
     }
-    
+
     if(std::abs(delta_d) <= 0.0001){
       cur_speed =0.0;
     }
-      
+
     speeds->push_back(cur_speed);
 
     prev_position = cur_pos;
