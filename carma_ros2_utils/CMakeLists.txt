@@ -9,6 +9,8 @@ find_package(ament_cmake_auto REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 ament_auto_find_build_dependencies()
 
+# The generated compilation database is helpful with code completion in IDEs and linting tools
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # Includes
 include_directories(
