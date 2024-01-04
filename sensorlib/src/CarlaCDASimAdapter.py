@@ -8,7 +8,7 @@
 
 import argparse
 import threading
-
+import logging
 from xmlrpc.server import SimpleXMLRPCServer
 import sys
 sys.path.append('../')
@@ -63,8 +63,11 @@ class CarlaCDASimAdapter:
     def __create_simulated_semantic_lidar_sensor(self,
                                                  infrastructure_id, sensor_id,
                                                  sensor_position, sensor_rotation):
-
-
+        logging.info("Received request to create sensor at " + sensor_position)
+        # CARLA 0.9.10 has a bug where the y-axis value is negated.
+        # To correct for this we are negating the request sensor location y
+        # position
+        logging.info("Updated sensor position to " + sensor_position)
         simulated_sensor = self.__api.create_simulated_semantic_lidar_sensor(self.sensor_config["simulated_sensor"],
                                                                              self.sensor_config["lidar_sensor"],
                                                                              self.noise_model_config,
@@ -126,6 +129,13 @@ if __name__ == "__main__":
         default=0.1,
         type=float,
         help="Time interval between detection reporting. (default: 0.1)")
+    arg_parser.add_argument(
+        "--log-level",
+        default="INFO",
+        type=str,
+        help="Log Level for service (default: INFO)")
+    level = logging.getLevelName(args.log_level)
+    logging.getLogger().setLevel(level)
     args = arg_parser.parse_args()
     sensor_api = CarlaCDASimAPI.build_from_host_spec(args.carla_host, args.carla_port)
     sensor_data_service = CarlaCDASimAdapter(sensor_api)
