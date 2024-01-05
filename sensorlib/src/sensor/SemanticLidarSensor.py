@@ -16,6 +16,7 @@ from objects.DetectedObject import DetectedObjectBuilder
 from sensor.SimulatedSensor import SimulatedSensor
 from util.CarlaUtils import CarlaUtils
 
+prev_objects = {}
 
 class SemanticLidarSensor(SimulatedSensor):
     """
@@ -112,6 +113,8 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Update reference frame, and detection time
         detected_objects = self.update_object_frame_and_timestamps(detected_objects, timestamp)
+
+        detected_objects = self.update_velocity(detected_objects)
 
         self.__detected_objects = detected_objects
 
@@ -519,3 +522,28 @@ class SemanticLidarSensor(SimulatedSensor):
                        timestamp=timestamp,
                        position=new_position
                        )
+
+    def update_velocity(self, detected_objects):
+        for detected_object in detected_objects:
+            if detected_object.objectId in prev_objects:
+                time_diff = detected_object.timestamp - prev_objects[detected_object.objectId]['timestamp']
+
+                if time_diff:
+                    pose_diff_x = ((detected_object.position[0] - prev_objects[detected_object.objectId]['pose_x'])**2)**0.5
+                    pose_diff_y = ((detected_object.position[1] - prev_objects[detected_object.objectId]['pose_y'])**2)**0.5
+                    pose_diff_z = ((detected_object.position[2] - prev_objects[detected_object.objectId]['pose_z'])**2)**0.5
+
+                    detected_object.velocity[0] = pose_diff_x / time_diff
+                    detected_object.velocity[1] = pose_diff_y / time_diff
+                    detected_object.velocity[2] = pose_diff_z / time_diff
+            else:
+                prev_objects[detected_object.objectId] = {}
+            
+            prev_objects[detected_object.objectId]['timestamp'] = detected_object.timestamp
+            prev_objects[detected_object.objectId]['pose_x'] = detected_object.position[0]
+            prev_objects[detected_object.objectId]['pose_y'] = detected_object.position[1]
+            prev_objects[detected_object.objectId]['pose_z'] = detected_object.position[2]
+        
+        return detected_objects
+
+
