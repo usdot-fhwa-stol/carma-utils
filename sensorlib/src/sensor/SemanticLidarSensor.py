@@ -528,7 +528,7 @@ class SemanticLidarSensor(SimulatedSensor):
             if detected_object.objectId in prev_objects:
                 time_diff = detected_object.timestamp - prev_objects[detected_object.objectId]['timestamp']
 
-                if time_diff:
+                if time_diff and np.all(detected_object.velocity==0):
                     pose_diff_x = ((detected_object.position[0] - prev_objects[detected_object.objectId]['pose_x'])**2)**0.5
                     pose_diff_y = ((detected_object.position[1] - prev_objects[detected_object.objectId]['pose_y'])**2)**0.5
                     pose_diff_z = ((detected_object.position[2] - prev_objects[detected_object.objectId]['pose_z'])**2)**0.5
