@@ -23,8 +23,8 @@ simulated_sensor:
 lidar_sensor:
   lower_fov: -80.0
   upper_fov: 30.0
-  channels: 32
+  channels: 64
   range: 100
-  rotation_period: 0.1
-  points_per_second: 56000
+  rotation_period: 0.05
+  points_per_second: 320000
   projection_string: +proj=tmerc +lat_0=0 +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +geoidgrids=egm96_15.gtx +vunits=m +no_defs
