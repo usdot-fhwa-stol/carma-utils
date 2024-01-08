@@ -537,6 +537,7 @@ class SemanticLidarSensor(SimulatedSensor):
                     detected_object.velocity[1] = pose_diff_y / time_diff
                     detected_object.velocity[2] = pose_diff_z / time_diff
 
+                #Calculation based on an assumption that the object's orientation is the direction of travel
                 if time_diff and np.all(detected_object.angularVelocity==0) and not (prev_objects[detected_object.objectId]['rotation'] == detected_object.rotation).all():
                     rotation_diff_pitch = math.radians(detected_object.rotation[0] - prev_objects[detected_object.objectId]['rotation'][0])
                     rotation_diff_yaw = math.radians(detected_object.rotation[1] - prev_objects[detected_object.objectId]['rotation'][1])
