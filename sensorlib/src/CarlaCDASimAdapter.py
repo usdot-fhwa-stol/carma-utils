@@ -63,12 +63,12 @@ class CarlaCDASimAdapter:
     def __create_simulated_semantic_lidar_sensor(self,
                                                  infrastructure_id, sensor_id,
                                                  sensor_position, sensor_rotation):
-        logging.info("Received request to create sensor at " + sensor_position)
+        logging.info(f"Received request to create sensor at {sensor_position}")
         # CARLA 0.9.10 has a bug where the y-axis value is negated.
         # To correct for this we are negating the request sensor location y
         # position
         sensor_position[1] *= -1.0
-        logging.info("Updated sensor position to " + sensor_position)
+        logging.info(f"Updated sensor position to {sensor_position}")
         simulated_sensor = self.__api.create_simulated_semantic_lidar_sensor(self.sensor_config["simulated_sensor"],
                                                                              self.sensor_config["lidar_sensor"],
                                                                              self.noise_model_config,
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         default="INFO",
         type=str,
         help="Log Level for service (default: INFO)")
-    
+
     args = arg_parser.parse_args()
     level = logging.getLevelName(args.log_level)
     logging.getLogger().setLevel(level)
