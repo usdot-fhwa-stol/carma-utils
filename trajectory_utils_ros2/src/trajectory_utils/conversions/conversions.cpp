@@ -110,7 +110,6 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
   double prev_speed = initial_speed;
   double prev_time = times[0];
   speeds->push_back(prev_speed);
-  RCLCPP_ERROR_STREAM(rclcpp::get_logger("todo"), "start time_to_speed: " << prev_speed );
   for (int i = 1; i < downtrack.size(); i++)
   {
     double cur_pos = downtrack[i];
@@ -121,7 +120,6 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
     double cur_speed;
 
     cur_speed = (2.0 * delta_d / dt) - prev_speed;
-    RCLCPP_ERROR_STREAM(rclcpp::get_logger("todo"), "time_to_speed: " << cur_speed );
 
     // can't have negative speed!
     cur_speed = std::max(0.0, cur_speed);
