@@ -542,9 +542,9 @@ class SemanticLidarSensor(SimulatedSensor):
                     rotation_diff_yaw = math.radians(detected_object.rotation[1] - prev_objects[detected_object.objectId]['rotation'][1])
                     rotation_diff_roll = math.radians(detected_object.rotation[2] - prev_objects[detected_object.objectId]['rotation'][2])
 
-                    detected_object.angularVelocity[0] = rotation_diff_pitch/time_diff
-                    detected_object.angularVelocity[1] = rotation_diff_yaw/time_diff
-                    detected_object.angularVelocity[2] = rotation_diff_roll/time_diff
+                    detected_object.angularVelocity[0] = abs(rotation_diff_pitch/time_diff)
+                    detected_object.angularVelocity[1] = abs(rotation_diff_yaw/time_diff)
+                    detected_object.angularVelocity[2] = abs(rotation_diff_roll/time_diff)
 
             else:
                 prev_objects[detected_object.objectId] = {}
