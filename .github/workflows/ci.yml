@@ -65,7 +65,16 @@ jobs:
     - name: Combine ROS1 and ROS2 compile_commands.json files
       run: |
         mv /opt/carma/build/compile_commands.json /opt/carma/compile_commands.ros2.json
-        jq -s add /opt/carma/compile_commands.ros1.json /opt/carma/compile_commands.ros2.json > /opt/carma/build/compile_commands.json        
+        jq -s add /opt/carma/compile_commands.ros1.json /opt/carma/compile_commands.ros2.json > /opt/carma/build/compile_commands.json   
+     # Trigger dispatch to carma-carla-integration
+    - name: Trigger carma-carla-integration Build
+      if: github.ref == 'refs/heads/feature/add_rebuild_carma_carla' && github.event_name == 'push'
+      run: |
+        curl -X POST \
+        -H "Accept: application/vnd.github.v3+json" \
+        -H "Authorization: token ${{ secrets.CARLA_GITHUB_TOKEN }}" \
+        https://api.github.com/repos/usdot-fhwa-stol/carma-carla-integration/dispatches \
+        -d '{"event_type": "trigger-dockerhub-build"}'
     - name: Run SonarScanner
       uses: usdot-fhwa-stol/actions/sonar-scanner@main
       with:
