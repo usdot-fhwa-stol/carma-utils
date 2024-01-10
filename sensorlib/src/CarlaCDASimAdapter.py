@@ -80,15 +80,17 @@ class CarlaCDASimAdapter:
         return str(simulated_sensor.get_id())
 
     def __connect(self):
-        print("CARLA CDASim Adapter connected to CDASim")
+        logging.info("CARLA CDASim Adapter connected to CDASim CARLA Ambassador!")
         return True
     def __get_simulated_sensor(self, infrastructure_id, sensor_id):
         sensor = self.__api.get_simulated_sensor(infrastructure_id, sensor_id)
+        logging.debug(f"Retrieved sensor : {sensor.get_id()} for infrastructure {infrastructure_id}")
         return str(sensor.get_id())
 
     def __get_detected_objects(self, infrastructure_id, sensor_id):
         detected_objects = self.__api.get_detected_objects(infrastructure_id, sensor_id)
         return_json = str(SimulatedSensorUtils.serialize_to_json(detected_objects))
+        logging.debug(f"Sensor {sensor_id} detected objects {return_json}")
         return return_json
 
 
@@ -142,8 +144,8 @@ if __name__ == "__main__":
         help="Log Level for service (default: INFO)")
 
     args = arg_parser.parse_args()
-    level = logging.getLevelName(args.log_level)
-    logging.getLogger().setLevel(level)
+    log_level = logging.getLevelName(args.log_level)
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', filename='cdasim_adapter.log', encoding='utf-8', level=log_level)
     sensor_api = CarlaCDASimAPI.build_from_host_spec(args.carla_host, args.carla_port)
     sensor_data_service = CarlaCDASimAdapter(sensor_api)
     sensor_data_service.start_xml_rpc_server(args.xmlrpc_server_host, args.xmlrpc_server_port, args.sensor_config_file, args.noise_model_config_file, args.detection_cycle_delay_seconds, True)
