@@ -81,6 +81,7 @@ class CarlaCDASimAdapter:
 
     def __connect(self):
         print("CARLA CDASim Adapter connected to CDASim")
+        return True
     def __get_simulated_sensor(self, infrastructure_id, sensor_id):
         sensor = self.__api.get_simulated_sensor(infrastructure_id, sensor_id)
         return str(sensor.get_id())
