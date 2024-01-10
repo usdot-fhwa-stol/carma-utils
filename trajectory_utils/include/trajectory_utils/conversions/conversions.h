@@ -23,15 +23,6 @@ namespace trajectory_utils
 namespace conversions
 {
 
-class negative_speed_from_conversion : public std::exception {
-    private:
-    std::string message_;
-
-    public:
-    negative_speed_from_conversion(const std::string& msg) : message_(msg) {}
-    char const* what() const throw() {return message_.c_str();};
-};
-
 /**
  * \brief Converts a list of speeds to a list of times for the corresponding downtrack points
  *
@@ -50,7 +41,7 @@ void speed_to_time(const std::vector<double>& downtrack, const std::vector<doubl
  * \param initial_speed
  * \param speeds Output parameter which points to the vector which will store the speeds at each point.
  *              The first speed will always be initial_speed
- * \throw negative_speed_from_conversion if more than -0.01 negative speed detected, which could indicate invalid trajectory input
+ * \throw std::runtime_error if more than -0.01 negative speed detected, which could indicate invalid trajectory input
  */
 void time_to_speed(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
                    std::vector<double>* speeds);

@@ -98,7 +98,7 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
                    std::vector<double>* speeds)
 {
   bool detected_negative_speed = false;
-  double detected_nagative_speed = 0.0;
+  double minimum_detected_speed = 0.0;
   if (downtrack.size() != times.size())
   {
     throw std::invalid_argument("Input vector sizes do not match");
@@ -134,7 +134,7 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
     if (cur_speed < -0.1)
     {
       detected_negative_speed = true;
-      detected_nagative_speed = std::min(cur_speed, detected_nagative_speed);
+      minimum_detected_speed = std::min(cur_speed, minimum_detected_speed);
     }
 
     cur_speed = std::max(0.0, cur_speed);
@@ -147,7 +147,7 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
 
   if (detected_negative_speed)
   {
-    throw negative_speed_from_conversion("Detected negative speed while converting from time to speed in trajectory. The most negative value detected was: " + std::to_string(detected_nagative_speed));
+    throw std::runtime_error("Detected negative speed while converting from time to speed in trajectory. The most negative value detected was: " + std::to_string(detected_nagative_speed));
   }
 }
 
