@@ -144,7 +144,7 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
 
   if (detected_negative_speed)
   {
-    throw std::runtime_error("Detected negative speed while converting from time to speed in trajectory. The most negative value detected was: " + std::to_string(detected_nagative_speed));
+    throw std::runtime_error("Detected negative speed while converting from time to speed in trajectory. The most negative value detected was: " + std::to_string(minimum_detected_speed));
   }
 }
 
