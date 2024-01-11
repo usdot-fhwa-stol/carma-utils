@@ -1,3 +1,0 @@
-export LOAD_CARLA_EGG=True
-export CARLA_VERSION=0.9.10
-export CARLA_EGG_DIR="/home/stol/Downloads/CARLA_0.9.10/PythonAPI/carla"
