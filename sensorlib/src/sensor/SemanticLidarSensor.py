@@ -525,13 +525,12 @@ class SemanticLidarSensor(SimulatedSensor):
 
     def update_velocity_angularVelocity(self, detected_objects):
         for detected_object in detected_objects:
-            print(detected_object.rotation)
             if detected_object.objectId in prev_objects:
                 time_diff = detected_object.timestamp - prev_objects[detected_object.objectId]['timestamp']
                 if  time_diff and np.all(detected_object.velocity==0) and not (prev_objects[detected_object.objectId]['pose'] == detected_object.position).all():
-                    pose_diff_x = ((detected_object.position[0] - prev_objects[detected_object.objectId]['pose'][0])**2)**0.5
-                    pose_diff_y = ((detected_object.position[1] - prev_objects[detected_object.objectId]['pose'][1])**2)**0.5
-                    pose_diff_z = ((detected_object.position[2] - prev_objects[detected_object.objectId]['pose'][2])**2)**0.5
+                    pose_diff_x = (detected_object.position[0] - prev_objects[detected_object.objectId]['pose'][0])
+                    pose_diff_y = (detected_object.position[1] - prev_objects[detected_object.objectId]['pose'][1])
+                    pose_diff_z = (detected_object.position[2] - prev_objects[detected_object.objectId]['pose'][2])
 
                     detected_object.velocity[0] = pose_diff_x / time_diff
                     detected_object.velocity[1] = pose_diff_y / time_diff
@@ -543,9 +542,9 @@ class SemanticLidarSensor(SimulatedSensor):
                     rotation_diff_yaw = math.radians(detected_object.rotation[1] - prev_objects[detected_object.objectId]['rotation'][1])
                     rotation_diff_roll = math.radians(detected_object.rotation[2] - prev_objects[detected_object.objectId]['rotation'][2])
 
-                    detected_object.angularVelocity[0] = abs(rotation_diff_pitch/time_diff)
-                    detected_object.angularVelocity[1] = abs(rotation_diff_yaw/time_diff)
-                    detected_object.angularVelocity[2] = abs(rotation_diff_roll/time_diff)
+                    detected_object.angularVelocity[0] = rotation_diff_pitch/time_diff
+                    detected_object.angularVelocity[1] = rotation_diff_yaw/time_diff
+                    detected_object.angularVelocity[2] = rotation_diff_roll/time_diff
 
             else:
                 prev_objects[detected_object.objectId] = {}
