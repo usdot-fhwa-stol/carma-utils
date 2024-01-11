@@ -16,6 +16,7 @@ from objects.DetectedObject import DetectedObjectBuilder
 from sensor.SimulatedSensor import SimulatedSensor
 from util.CarlaUtils import CarlaUtils
 
+prev_objects = {}
 
 class SemanticLidarSensor(SimulatedSensor):
     """
@@ -112,6 +113,8 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Update reference frame, and detection time
         detected_objects = self.update_object_frame_and_timestamps(detected_objects, timestamp)
+
+        detected_objects = self.update_velocity_angularVelocity(detected_objects)
 
         self.__detected_objects = detected_objects
 
@@ -519,3 +522,37 @@ class SemanticLidarSensor(SimulatedSensor):
                        timestamp=timestamp,
                        position=new_position
                        )
+
+    def update_velocity_angularVelocity(self, detected_objects):
+        for detected_object in detected_objects:
+            if detected_object.objectId in prev_objects:
+                time_diff = detected_object.timestamp - prev_objects[detected_object.objectId]['timestamp']
+                if  time_diff and np.all(detected_object.velocity==0) and not (prev_objects[detected_object.objectId]['pose'] == detected_object.position).all():
+                    pose_diff_x = (detected_object.position[0] - prev_objects[detected_object.objectId]['pose'][0])
+                    pose_diff_y = (detected_object.position[1] - prev_objects[detected_object.objectId]['pose'][1])
+                    pose_diff_z = (detected_object.position[2] - prev_objects[detected_object.objectId]['pose'][2])
+
+                    detected_object.velocity[0] = pose_diff_x / time_diff
+                    detected_object.velocity[1] = pose_diff_y / time_diff
+                    detected_object.velocity[2] = pose_diff_z / time_diff
+
+                #Calculation based on an assumption that the object's orientation is the direction of travel
+                if time_diff and np.all(detected_object.angularVelocity==0) and not (prev_objects[detected_object.objectId]['rotation'] == detected_object.rotation).all():
+                    rotation_diff_pitch = math.radians(detected_object.rotation[0] - prev_objects[detected_object.objectId]['rotation'][0])
+                    rotation_diff_yaw = math.radians(detected_object.rotation[1] - prev_objects[detected_object.objectId]['rotation'][1])
+                    rotation_diff_roll = math.radians(detected_object.rotation[2] - prev_objects[detected_object.objectId]['rotation'][2])
+
+                    detected_object.angularVelocity[0] = rotation_diff_pitch/time_diff
+                    detected_object.angularVelocity[1] = rotation_diff_yaw/time_diff
+                    detected_object.angularVelocity[2] = rotation_diff_roll/time_diff
+
+            else:
+                prev_objects[detected_object.objectId] = {}
+            
+            prev_objects[detected_object.objectId]['timestamp'] = detected_object.timestamp
+            prev_objects[detected_object.objectId]['pose'] = detected_object.position
+            prev_objects[detected_object.objectId]['rotation'] = detected_object.rotation
+
+        
+        return detected_objects       
+
