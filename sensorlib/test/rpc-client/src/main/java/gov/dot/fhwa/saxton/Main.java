@@ -27,7 +27,7 @@ public class Main {
         // Specify sensor parameters
         String infrastructureID = "1";
         String sensorID = "7";
-        List<Double> location = Arrays.asList(263.799988, -178.050003, 10.0);
+        List<Double> location = Arrays.asList(63.0, 7.0, 1.8);
         List<Double> rotation = Arrays.asList(0.0, 0.0, 0.0);
         params = new Object[]{ infrastructureID, sensorID, location, rotation};
 
@@ -38,7 +38,7 @@ public class Main {
         execute("get_simulated_sensor", new Object[]{infrastructureID, sensorID});
         int timer = 0;
         // Get detected objects
-        while (timer < 100)
+        while (timer < 10)
         {
             execute("get_detected_objects", new Object[]{infrastructureID, sensorID});
             try {

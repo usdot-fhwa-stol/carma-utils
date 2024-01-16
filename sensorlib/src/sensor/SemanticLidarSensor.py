@@ -113,7 +113,7 @@ class SemanticLidarSensor(SimulatedSensor):
 
         # Update reference frame, and detection time
         detected_objects = self.update_object_frame_and_timestamps(detected_objects, timestamp)
-        #due to sumo vehicle not having velocity and angular velocity in CARLA, added a patch to calculate those parameters
+
         detected_objects = self.update_velocity_angularVelocity(detected_objects)
 
         self.__detected_objects = detected_objects
