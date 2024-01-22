@@ -4,7 +4,11 @@ find_package(ros2_lifecycle_manager REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(ament_cmake_pytest REQUIRED)
-find_package(launch_testing_ament_cmake REQUIRED) 
+find_package(launch_testing_ament_cmake REQUIRED)
+find_package(ament_cmake_clang_tidy REQUIRED)
+
+set(ament_cmake_clang_tidy_CONFIG_FILE ${PROJECT_SOURCE_DIR}/.clang-tidy)
+ament_clang_tidy(${PROJECT_BINARY_DIR})
 
 set(dependencies ${dependencies} ros2_lifecycle_manager std_srvs)
 
@@ -104,10 +108,10 @@ install(
   # EXPORT should not be needed for unit tests
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib/${PROJECT_NAME}
-  RUNTIME DESTINATION lib/${PROJECT_NAME} # In Ament, Executables are installed to lib/${PROJECT_NAME} not bin 
+  RUNTIME DESTINATION lib/${PROJECT_NAME} # In Ament, Executables are installed to lib/${PROJECT_NAME} not bin
   INCLUDES DESTINATION include
 )
 
-# This is a bit of a hack to allow for rclcpp_component registration in this subdirectory 
+# This is a bit of a hack to allow for rclcpp_component registration in this subdirectory
 # Based off sloretz's answer from ROS Answers here https://answers.ros.org/question/361289/ros2-components-registration-from-subdirectory-cmakelists-file/
 #set(AMENT_EXTENSIONS_ament_package ${AMENT_EXTENSIONS_ament_package} PARENT_SCOPE)
