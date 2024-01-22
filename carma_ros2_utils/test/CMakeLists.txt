@@ -5,10 +5,10 @@ find_package(std_srvs REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(ament_cmake_pytest REQUIRED)
 find_package(launch_testing_ament_cmake REQUIRED)
-find_package(carma_ament_cmake_clang_tidy REQUIRED)
+find_package(ament_cmake_clang_tidy REQUIRED)
 
-set(carma_ament_cmake_clang_tidy_CONFIG_FILE ${PROJECT_SOURCE_DIR}/.clang-tidy)
-carma_ament_clang_tidy(${PROJECT_BINARY_DIR})
+set(ament_cmake_clang_tidy_CONFIG_FILE ${PROJECT_SOURCE_DIR}/.clang-tidy)
+ament_clang_tidy(${PROJECT_BINARY_DIR})
 
 set(dependencies ${dependencies} ros2_lifecycle_manager std_srvs)
 
