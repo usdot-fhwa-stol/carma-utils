@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 LEIDOS.
+ * Copyright (C) 2021-2024 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,7 +28,7 @@ namespace ros2_lifecycle_manager
       rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services)
       : node_base_(node_base), node_graph_(node_graph), node_logging_(node_logging), node_services_(node_services)
   {
-    service_callback_group_ = node_base_->create_callback_group(rclcpp::callback_group::CallbackGroupType::Reentrant);
+    service_callback_group_ = node_base_->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
   }
 
   void Ros2LifecycleManager::set_managed_nodes(const std::vector<std::string> &nodes)
@@ -138,7 +138,7 @@ namespace ros2_lifecycle_manager
     {
       RCLCPP_ERROR_STREAM(
           node_logging_->get_logger(), "transition_node_to_state does not support transitioning to temporary states.");
-      
+
       return get_managed_node_state(node); // Return whatever the current state is
     }
 
@@ -155,19 +155,19 @@ namespace ros2_lifecycle_manager
 
     // This object represents a mapping of all source->target combinations for primary states to the function call path required to reach that state
     // It is implemented as a map of maps where the keys for each map are source state and target state respectively
-    // The inner map contains a list of transition functions to call in order to move a node to the target state from the source state 
+    // The inner map contains a list of transition functions to call in order to move a node to the target state from the source state
     static std::unordered_map<uint8_t, std::unordered_map<uint8_t, std::vector<TransitionFunc>>> transitions_paths = {
-      { UNCONFIGURED, { 
-        { INACTIVE, { configure_func } }, 
-        { ACTIVE, {configure_func, activate_func } }, 
+      { UNCONFIGURED, {
+        { INACTIVE, { configure_func } },
+        { ACTIVE, {configure_func, activate_func } },
         { FINALIZED, { shutdown_func } } } },
-      { INACTIVE, { 
-        { UNCONFIGURED, { cleanup_func } }, 
-        { ACTIVE, { activate_func } }, 
+      { INACTIVE, {
+        { UNCONFIGURED, { cleanup_func } },
+        { ACTIVE, { activate_func } },
         { FINALIZED, { shutdown_func } } } },
-      { ACTIVE, { 
-        { UNCONFIGURED, { deactivate_func, cleanup_func } }, 
-        { INACTIVE, { deactivate_func } }, 
+      { ACTIVE, {
+        { UNCONFIGURED, { deactivate_func, cleanup_func } },
+        { INACTIVE, { deactivate_func } },
         { FINALIZED, { shutdown_func } } } }
     };
 
@@ -176,8 +176,8 @@ namespace ros2_lifecycle_manager
     auto current_state = get_managed_node_state(node);
 
     // If the states are the same or current state is finalized, or unknown then no need for further transition
-    if (current_state == state 
-      || current_state == UNKNOWN 
+    if (current_state == state
+      || current_state == UNKNOWN
       || current_state == FINALIZED)
     {
       return current_state;
@@ -199,7 +199,7 @@ namespace ros2_lifecycle_manager
     for (const auto transition_func : transitions_paths.at(current_state).at(state))
     {
       bool success = transition_func(connection_timeout, call_timeout, true, {node}).empty();
-      
+
       // If a transition failed then return whatever the resulting state is
       if (!success)
       {
@@ -208,10 +208,10 @@ namespace ros2_lifecycle_manager
     }
 
 
-    // Since all our transitions succeeded 
+    // Since all our transitions succeeded
     // we can be confident that the node is in the desired state and just return that without an extra service call
     return state;
-    
+
   }
 
   std::vector<std::string> Ros2LifecycleManager::configure(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered, std::vector<std::string> nodes)
@@ -237,12 +237,12 @@ namespace ros2_lifecycle_manager
   std::vector<std::string> Ros2LifecycleManager::shutdown(const std_nanosec &connection_timeout, const std_nanosec &call_timeout, bool ordered, std::vector<std::string> nodes)
   {
     // To avoid having to track all the node sates and pick the appropriate shutdown we will simply shut down in order of most dangerous
-    // Active is shutdown first to avoid more data being published, this is followed by inactive and finally unconfigured    
+    // Active is shutdown first to avoid more data being published, this is followed by inactive and finally unconfigured
     auto failed_nodes = transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVE_SHUTDOWN, ordered, connection_timeout, call_timeout, nodes);
     transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_INACTIVE_SHUTDOWN, ordered, connection_timeout, call_timeout, nodes);
     transition_multiplex(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN, ordered, connection_timeout, call_timeout, nodes);
-    
-    return failed_nodes; 
+
+    return failed_nodes;
   }
 
   std::vector<std::string> Ros2LifecycleManager::transition_multiplex(uint8_t transition, bool ordered, const std_nanosec &connection_timeout, const std_nanosec &call_timeout, std::vector<std::string> nodes)
@@ -259,7 +259,7 @@ namespace ros2_lifecycle_manager
     {
       // If empty then transition all nodes
       nodes_to_transition = managed_nodes_;
-    } 
+    }
     else
     {
       nodes_to_transition.reserve(nodes.size());
@@ -292,7 +292,7 @@ namespace ros2_lifecycle_manager
             node_logging_->get_logger(), "Calling node: " << node.node_name);
 
         // Call service
-        ChangeStateSharedFutureWithRequest future_result = node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {});
+        auto future_result = static_cast<ChangeStateSharedFutureWithRequest const &>(node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {}));
 
         // Wait for response
         if (!wait_on_change_state_future(future_result, call_timeout))
@@ -320,14 +320,14 @@ namespace ros2_lifecycle_manager
             node_logging_->get_logger(), "Calling node a-sync: " << node.node_name);
 
         // Call service and record future
-        futures.emplace_back(node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {}));
+        futures.emplace_back(detail::get_future(node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {})));
         future_node_map.emplace(futures.size() - 1, node.node_name);
       }
       size_t i = 0;
       for (auto future : futures)
       {
         RCLCPP_INFO_STREAM(node_logging_->get_logger(), "Waiting on future for node: " << future_node_map.at(i));
-        
+
         if (!wait_on_change_state_future(future, call_timeout))
         {
           failed_nodes.push_back(future_node_map.at(i));
@@ -346,7 +346,7 @@ namespace ros2_lifecycle_manager
     // If the request times out, we return an unknown state.
     RCLCPP_INFO(
         node_logging_->get_logger(), "Waiting for future");
-      
+
     auto future_status = future.wait_for(timeout);
 
     if (future_status != std::future_status::ready)
