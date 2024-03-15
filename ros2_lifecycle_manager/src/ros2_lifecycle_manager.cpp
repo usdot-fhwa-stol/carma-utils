@@ -292,7 +292,7 @@ namespace ros2_lifecycle_manager
             node_logging_->get_logger(), "Calling node: " << node.node_name);
 
         // Call service
-        auto future_result = static_cast<ChangeStateSharedFutureWithRequest const &>(node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {}));
+        auto future_result{node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {})};
 
         // Wait for response
         if (!wait_on_change_state_future(future_result, call_timeout))
@@ -320,7 +320,8 @@ namespace ros2_lifecycle_manager
             node_logging_->get_logger(), "Calling node a-sync: " << node.node_name);
 
         // Call service and record future
-        futures.emplace_back(detail::get_future(node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {})));
+        // TODO(CAR-6014): Remove static cast when CARMA Platform drops ROS Foxy support
+        futures.emplace_back(static_cast<const ChangeStateSharedFutureWithRequest &>(node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {})));
         future_node_map.emplace(futures.size() - 1, node.node_name);
       }
       size_t i = 0;
