@@ -20,9 +20,7 @@
 #include <future>
 #include <memory>
 #include <thread>
-#include <future>
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include <utility>
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
