@@ -65,9 +65,9 @@ TEST(LifecycleManagerTest, BasicTest)
   auto spin_future{std::async(std::launch::async, [&executor]
                               { executor.spin(); })};
 
-  ASSERT_EQ((uint8_t)2, managed_nodes.size());
-  ASSERT_EQ((uint8_t)0, managed_nodes[0].compare("test_lifecycle_node_1"));
-  ASSERT_EQ((uint8_t)0, managed_nodes[1].compare("test_lifecycle_node_2"));
+  ASSERT_EQ(static_cast<std::size_t>(2U), managed_nodes.size());
+  ASSERT_EQ(0, managed_nodes[0].compare("test_lifecycle_node_1"));
+  ASSERT_EQ(0, managed_nodes[1].compare("test_lifecycle_node_2"));
 
   // Test get managed node states
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1"));
