@@ -27,8 +27,7 @@
 
 #include "ros2_lifecycle_manager/ros2_lifecycle_manager.hpp"
 
-
-using std_msec = std::chrono::milliseconds;
+using std::chrono_literals::operator""ms;
 
 /**
  * This test is meant to exercise the standard flow of the lifecycle manager.
@@ -53,7 +52,7 @@ TEST(LifecycleManagerTest, BasicTest)
   // Test set_managed_nodes
   lifecycle_mgr_.set_managed_nodes({"test_lifecycle_node_1", "test_lifecycle_node_2"});
 
-  std::this_thread::sleep_for(std_msec(2000));
+  std::this_thread::sleep_for(2000ms);
 
   // Test get_managed_nodes
   auto managed_nodes = lifecycle_mgr_.get_managed_nodes();
@@ -76,50 +75,50 @@ TEST(LifecycleManagerTest, BasicTest)
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN, lifecycle_mgr_.get_managed_node_state("unknown_node"));
 
   // Test Configure
-  ASSERT_TRUE(lifecycle_mgr_.configure(std_msec(2000), std_msec(2000)).empty());
+  ASSERT_TRUE(lifecycle_mgr_.configure(2000ms, 2000ms).empty());
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1"));
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_2"));
 
   // Test Activate
-  ASSERT_TRUE(lifecycle_mgr_.activate(std_msec(2000), std_msec(2000)).empty());
+  ASSERT_TRUE(lifecycle_mgr_.activate(2000ms, 2000ms).empty());
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1"));
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_2"));
 
   // Test Deactivate
-  ASSERT_TRUE(lifecycle_mgr_.deactivate(std_msec(2000), std_msec(2000)).empty());
+  ASSERT_TRUE(lifecycle_mgr_.deactivate(2000ms, 2000ms).empty());
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1"));
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_2"));
 
   // Test cleanup
-  ASSERT_TRUE(lifecycle_mgr_.cleanup(std_msec(2000), std_msec(2000)).empty());
+  ASSERT_TRUE(lifecycle_mgr_.cleanup(2000ms, 2000ms).empty());
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1"));
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_2"));
 
   RCLCPP_INFO(node->get_logger(), "Using requested state methods");
 
   // Bring to active via requested state
-  ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.transition_node_to_state(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, "test_lifecycle_node_1", std_msec(2000), std_msec(2000)));
+  ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.transition_node_to_state(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, "test_lifecycle_node_1", 2000ms, 2000ms));
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1"));
 
-  ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.transition_node_to_state(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, "test_lifecycle_node_2", std_msec(2000), std_msec(2000)));
+  ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.transition_node_to_state(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, "test_lifecycle_node_2", 2000ms, 2000ms));
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_2"));
 
   // Bring to unconfigured via requested state
-  ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, lifecycle_mgr_.transition_node_to_state(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, "test_lifecycle_node_1", std_msec(2000), std_msec(2000)));
+  ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, lifecycle_mgr_.transition_node_to_state(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, "test_lifecycle_node_1", 2000ms, 2000ms));
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1"));
 
-  ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, lifecycle_mgr_.transition_node_to_state(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, "test_lifecycle_node_2", std_msec(2000), std_msec(2000)));
+  ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, lifecycle_mgr_.transition_node_to_state(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, "test_lifecycle_node_2", 2000ms, 2000ms));
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_2"));
 
   RCLCPP_INFO(node->get_logger(), "Done with requested state methods");
 
   // Bring back to active then shutdown via transitions
-  ASSERT_TRUE(lifecycle_mgr_.configure(std_msec(2000), std_msec(2000)).empty());
-  ASSERT_TRUE(lifecycle_mgr_.activate(std_msec(2000), std_msec(2000)).empty());
+  ASSERT_TRUE(lifecycle_mgr_.configure(2000ms, 2000ms).empty());
+  ASSERT_TRUE(lifecycle_mgr_.activate(2000ms, 2000ms).empty());
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1"));
   ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_2"));
 
-  ASSERT_TRUE(lifecycle_mgr_.shutdown(std_msec(2000), std_msec(2000)).empty());
+  ASSERT_TRUE(lifecycle_mgr_.shutdown(2000ms, 2000ms).empty());
   ASSERT_TRUE(lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED == lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1") || lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN == lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_1"));
   ASSERT_TRUE(lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED == lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_2") || lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN == lifecycle_mgr_.get_managed_node_state("test_lifecycle_node_2"));
 
