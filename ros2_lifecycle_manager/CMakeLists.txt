@@ -1,7 +1,16 @@
 cmake_minimum_required(VERSION 3.16)
 project(ros2_lifecycle_manager)
 
+# CARMA builds packages in an environment with both ROS 1 and ROS 2 installed.
+# This check gracefully skips the current package if the sourced ROS environment
+# is not the specified version. This call must come before any other ROS
+# dependencies becasue ROS 1 does not have some of the required packages.
+find_package(carma_cmake_common REQUIRED)
+carma_check_ros_version(2)
+
 include(dependencies.cmake)
+
+carma_package()
 
 ament_auto_add_library(ros2_lifecycle_manager SHARED
   src/ros2_lifecycle_manager.cpp
