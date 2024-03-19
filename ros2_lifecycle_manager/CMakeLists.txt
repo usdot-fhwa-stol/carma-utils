@@ -1,40 +1,42 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 project(ros2_lifecycle_manager)
 
-find_package(carma_cmake_common REQUIRED)
-carma_check_ros_version(2)
-carma_package()
+include(dependencies.cmake)
 
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(lifecycle_msgs REQUIRED)
-find_package(rclcpp_action REQUIRED)
-find_package(rclcpp_lifecycle REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(rcutils REQUIRED)
-
-set(dependencies
-    lifecycle_msgs
-    rclcpp
-    rclcpp_action
-    rclcpp_lifecycle
-    rcutils
-    rclcpp_components
-)
-
-set(cpp_files
+ament_auto_add_library(ros2_lifecycle_manager SHARED
   src/ros2_lifecycle_manager.cpp
 )
 
-carma_define_ament_library(${PROJECT_NAME} "${dependencies}" "${cpp_files}")
-
-
 if(BUILD_TESTING)
+  # These CMake commands were added to ament_cmake_auto in ROS 2 Humble. Until
+  # CARMA supports ROS 2 Humble, we will use package-local copies.
+  include(cmake/ament_auto_find_test_dependencies.cmake)
+  include(cmake/ament_auto_add_gtest.cmake)
 
-  find_package(ament_cmake_gtest REQUIRED)
-  find_package(ament_cmake_pytest REQUIRED)
+  ament_auto_add_executable(test_lifecycle_node
+    test/test_node.cpp
+  )
 
-  add_subdirectory(test)
+  ament_add_gtest_executable(test_lifecycle_gtest
+    test/test_lifecycle_manager.cpp
+  )
+
+  # ament_add_gtest_executable() does not automaticallly link libraries
+  target_link_libraries(test_lifecycle_gtest
+    rclcpp::rclcpp
+    rclcpp_lifecycle::rclcpp_lifecycle
+    ros2_lifecycle_manager
+  )
+
+  # TODO(CAR-6015): Replace this with launch_testing package
+  ament_add_test(test_lifecycle
+    GENERATE_RESULT_FOR_RETURN_CODE_ZERO
+    COMMAND "${PROJECT_SOURCE_DIR}/test/launch_lifecycle_test.py"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    TIMEOUT 20
+    ENV
+      TEST_EXECUTABLE=$<TARGET_FILE:test_lifecycle_gtest>
+  )
 endif()
 
-ament_package()
+ament_auto_package()
