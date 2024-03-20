@@ -402,10 +402,12 @@ namespace carma_ros2_utils
     std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<carma_msgs::msg::SystemAlert>>
         system_alert_pub_;
 
-    //! A list of lifecycle publishers produced from this node whose lifetimes can be managed
+    // TODO(CAR-6017): Remove when we drop support for Foxy
 #ifdef ROS_DISTRO_FOXY
+    //! A list of lifecycle publishers produced from this node whose lifetimes can be managed
     std::vector<std::shared_ptr<rclcpp_lifecycle::LifecyclePublisherInterface>> lifecycle_publishers_;
 #else
+    //! A list of lifecycle publishers produced from this node whose lifetimes can be managed
     std::vector<std::shared_ptr<rclcpp_lifecycle::ManagedEntityInterface>> lifecycle_publishers_;
 #endif
 

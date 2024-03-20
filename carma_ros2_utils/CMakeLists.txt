@@ -29,6 +29,7 @@ include_directories(
   include
 )
 
+# TODO(CAR-6017): Remove when we drop support for Foxy
 if("$ENV{ROS_DISTRO}" STREQUAL "foxy")
   target_compile_definitions(carma_ros2_utils
     PUBLIC
