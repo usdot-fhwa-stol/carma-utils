@@ -15,10 +15,12 @@ include_directories(
   include
 )
 
-# Build
-ament_auto_add_library(${PROJECT_NAME} SHARED
-  src/carma_lifecycle_node.cpp
-)
+if("$ENV{ROS_DISTRO}" STREQUAL "foxy")
+  target_compile_definitions(carma_ros2_utils
+    PUBLIC
+      ROS_DISTRO_FOXY
+  )
+endif()
 
 ament_auto_add_library(carma_ros2_utils_timers SHARED
   src/timers/testing/TestTimer.cpp
