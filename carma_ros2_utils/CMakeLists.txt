@@ -29,11 +29,22 @@ include_directories(
   include
 )
 
+# Build
+ament_auto_add_library(${PROJECT_NAME} SHARED
+  src/carma_lifecycle_node.cpp
+)
+
 # TODO(CAR-6017): Remove when we drop support for Foxy
+# rclcpp_lifecycle has breaking API changes starting with Humble
 if("$ENV{ROS_DISTRO}" STREQUAL "foxy")
   target_compile_definitions(carma_ros2_utils
     PUBLIC
       ROS_DISTRO_FOXY
+  )
+elseif("$ENV{ROS_DISTRO}" STREQUAL "galactic")
+  target_compile_definitions(carma_ros2_utils
+    PUBLIC
+      ROS_DISTRO_GALACTIC
   )
 endif()
 
