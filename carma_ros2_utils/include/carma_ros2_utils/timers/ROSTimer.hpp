@@ -15,7 +15,7 @@
  * the License.
  */
 #include <memory>
-#include "../carma_lifecycle_node.hpp"
+#include "carma_ros2_utils/carma_lifecycle_node.hpp"
 #include <rclcpp/timer.hpp>
 #include <rclcpp/time.hpp>
 #include "Timer.hpp"

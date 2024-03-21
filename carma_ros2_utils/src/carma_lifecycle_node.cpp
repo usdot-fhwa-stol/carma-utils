@@ -17,15 +17,15 @@
 /**
  * This file is loosely based on the reference architecture developed by OSRF for Leidos located here
  * https://github.com/mjeronimo/carma2/blob/master/carma_utils/carma_utils/src/carma_lifecycle_node.cpp
- * 
+ *
  * That file has the following license and some code snippets from it may be present in this file as well and are under the same license.
- * 
+ *
  * Copyright 2021 Open Source Robotics Foundation, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -33,7 +33,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 #include "carma_ros2_utils/carma_lifecycle_node.hpp"
 
@@ -55,7 +55,7 @@ namespace carma_ros2_utils
 
     // NOTE: When creating this callback group it was not immediately clear if it should go in on_configure or the constructor
     //       Further usage of callback groups may elucidate this in the future
-    service_callback_group_ = get_node_base_interface()->create_callback_group(rclcpp::callback_group::CallbackGroupType::Reentrant);
+    service_callback_group_ = get_node_base_interface()->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
   }
 
   CarmaLifecycleNode::~CarmaLifecycleNode()
@@ -141,8 +141,8 @@ namespace carma_ros2_utils
     }
 
     // Call the user error handling before clean up of the publishers to allow them to publish if needed
-    auto return_val = handle_on_error(prev_state, error_string); 
-    
+    auto return_val = handle_on_error(prev_state, error_string);
+
     cleanup_publishers();
     cleanup_timers();
     return  return_val;
@@ -178,7 +178,7 @@ namespace carma_ros2_utils
       RCLCPP_WARN_STREAM(get_logger(), "Sending SystemAlert likely failed as publisher is deactivated.");
     }
 
-    system_alert_pub_->publish(pub_msg); 
+    system_alert_pub_->publish(pub_msg);
   }
 
   void CarmaLifecycleNode::send_error_alert_msg_for_string(const std::string &alert_string)
@@ -196,7 +196,7 @@ namespace carma_ros2_utils
 
     rclcpp_lifecycle::State state_at_exception = get_current_state();
 
-    if (get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) // If the exception was caught in the ACTIVE state we can try to gracefully fail to on_error, by transitioning to deactivate and then throwning an exception
+    if (get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) // If the exception was caught in the ACTIVE state we can try to gracefully fail to on_error, by transitioning to deactivate and then throwing an exception
     {
       std::string error_msg = "Uncaught Exception from node: " + std::string(get_name()) + " exception: " + e.what() + " while in ACTIVE state.";
       caught_exception_ = error_msg;
@@ -270,7 +270,7 @@ namespace carma_ros2_utils
         {
           try
           {
-            
+
             return callback(params);
           }
           catch (const std::exception &e)
@@ -287,7 +287,7 @@ namespace carma_ros2_utils
         });
 
     param_callback_handles_.push_back(handle);
-    
+
     return handle;
   }
 

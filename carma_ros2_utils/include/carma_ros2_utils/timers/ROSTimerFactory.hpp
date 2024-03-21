@@ -17,7 +17,7 @@
 #include <memory>
 #include <rclcpp/time.hpp>
 #include <rclcpp/timer.hpp>
-#include "../carma_lifecycle_node.hpp"
+#include "carma_ros2_utils/carma_lifecycle_node.hpp"
 #include "TimerFactory.hpp"
 #include "Timer.hpp"
 #include "ROSTimer.hpp"
@@ -38,7 +38,7 @@ public:
    * @brief Destructor
    */
   ~ROSTimerFactory();
-  
+
   void setCarmaLifecycleNode(std::weak_ptr<carma_ros2_utils::CarmaLifecycleNode> weak_node_pointer);
 
   //// Overrides
