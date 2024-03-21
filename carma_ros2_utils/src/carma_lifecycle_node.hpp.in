@@ -14,6 +14,13 @@
  * the License.
  */
 
+/*
+ * TODO(CAR-6017): When we drop support for Foxy:
+ *   - replace CMake substitution strings with rclcpp::ManagedEntityInterface
+ *   - drop the .in filename suffix
+ *   - relocate file to include/ directory
+ */
+
 /**
  * This file is loosely based on the reference architecture developed by OSRF for Leidos located here
  * https://github.com/mjeronimo/carma2/blob/master/carma_utils/carma_utils/include/carma_utils/carma_lifecycle_node.hpp
@@ -402,15 +409,12 @@ namespace carma_ros2_utils
     std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<carma_msgs::msg::SystemAlert>>
         system_alert_pub_;
 
-    // TODO(CAR-6017): Remove when we transition to Humble
-    // LifecyclePublisherInterface was replaced with ManagedEntityInterface in Humble
-#if defined(ROS_DISTRO_FOXY) || defined(ROS_DISTRO_GALACTIC)
+    /*
+     * TODO(CAR-6017): Refactor when we transition to Humble.
+     * LifecyclePublisherInterface was replaced with ManagedEntityInterface in Humble
+     */
     //! A list of lifecycle publishers produced from this node whose lifetimes can be managed
-    std::vector<std::shared_ptr<rclcpp_lifecycle::LifecyclePublisherInterface>> lifecycle_publishers_;
-#else
-    //! A list of lifecycle publishers produced from this node whose lifetimes can be managed
-    std::vector<std::shared_ptr<rclcpp_lifecycle::ManagedEntityInterface>> lifecycle_publishers_;
-#endif
+    std::vector<std::shared_ptr<@carma_ros2_utils_LIFECYCLE_PUBLISHER_INTERFACE_TYPE@>> lifecycle_publishers_;
 
     //! A list of timers produced from this node whose lifetimes can be managed
     std::vector<std::shared_ptr<rclcpp::TimerBase>> timers_;
@@ -434,6 +438,6 @@ namespace carma_ros2_utils
 
 // Template functions cannot be linked unless the implementation is provided
 // Therefore include implementation to allow for template functions
-#include "internal/carma_lifecycle_node.tpp"
+#include "carma_ros2_utils/internal/carma_lifecycle_node.tpp"
 
 #endif // CARMA_ROS2_UTILS__CARMA_LIFECYCLE_NODE_HPP_"

@@ -29,24 +29,39 @@ include_directories(
   include
 )
 
+# TODO(CAR-6017): Remove when we drop support for Foxy
+# rclcpp_lifecycle has breaking API changes starting with Humble
+if(("$ENV{ROS_DISTRO}" STREQUAL "foxy") OR ("$ENV{ROS_DISTRO}" STREQUAL "galactic"))
+  set(carma_ros2_utils_LIFECYCLE_PUBLISHER_INTERFACE_TYPE
+    rclcpp_lifecycle::LifecyclePublisherInterface
+  )
+else()
+  set(carma_ros2_utils_LIFECYCLE_PUBLISHER_INTERFACE_TYPE
+    rclcpp_lifecycle::ManagedEntityInterface
+  )
+endif()
+
+configure_file(
+  src/carma_lifecycle_node.hpp.in
+  carma_ros2_utils/carma_lifecycle_node.hpp
+)
+
 # Build
 ament_auto_add_library(${PROJECT_NAME} SHARED
   src/carma_lifecycle_node.cpp
 )
 
-# TODO(CAR-6017): Remove when we drop support for Foxy
-# rclcpp_lifecycle has breaking API changes starting with Humble
-if("$ENV{ROS_DISTRO}" STREQUAL "foxy")
-  target_compile_definitions(carma_ros2_utils
-    PUBLIC
-      ROS_DISTRO_FOXY
-  )
-elseif("$ENV{ROS_DISTRO}" STREQUAL "galactic")
-  target_compile_definitions(carma_ros2_utils
-    PUBLIC
-      ROS_DISTRO_GALACTIC
-  )
-endif()
+target_include_directories(${PROJECT_NAME}
+  PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
+)
+
+include(GNUInstallDirs)
+
+INSTALL(FILES ${PROJECT_BINARY_DIR}/carma_ros2_utils/carma_lifecycle_node.hpp
+  DESTINATION
+    ${CMAKE_INSTALL_INCLUDEDIR}/carma_ros2_utils
+)
 
 ament_auto_add_library(carma_ros2_utils_timers SHARED
   src/timers/testing/TestTimer.cpp
