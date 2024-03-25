@@ -48,7 +48,7 @@ def generate_test_description():
             namespace="/",
             exec_name='wrapper_container',
             composable_node_descriptions=[
-    
+
                 ComposableNode(
                     package='carma_ros2_utils',
                     plugin='carma_ros2_utils_testing::MinimalNode',
@@ -69,10 +69,10 @@ def generate_test_description():
 class TestRuntime(unittest.TestCase):
 
     def test_nominal_lifecycle(self, proc_output):
-        
+
         # Check that that the wrapper has started and did not load any nodes on startup
         proc_output.assertWaitFor("Got request to load node: minimal_node but we are not in the active state, caching for later lifecycle based activation.", process='wrapper_container', strict_proc_matching=True,timeout=5)
-        
+
 
         d = dict(os.environ)   # Make a copy of the current environment
         completed_proc = subprocess.run(['ros2', 'lifecycle', 'set', '/wrapper_container', 'configure'], env=d, capture_output=True, timeout=8)
@@ -88,7 +88,7 @@ class TestRuntime(unittest.TestCase):
         proc_output.assertWaitFor("libtest_minimal_node.so", process='wrapper_container', strict_proc_matching=True,timeout=5)
         proc_output.assertWaitFor("Found class: rclcpp_components::NodeFactoryTemplate<carma_ros2_utils_testing::MinimalNode>", process='wrapper_container', strict_proc_matching=True,timeout=5)
         proc_output.assertWaitFor("Instantiate class: rclcpp_components::NodeFactoryTemplate<carma_ros2_utils_testing::MinimalNode>", process='wrapper_container', strict_proc_matching=True,timeout=5)
-        
+
         completed_proc = subprocess.run(['ros2', 'lifecycle', 'set', '/wrapper_container', 'deactivate'], env=d, capture_output=True, timeout=8)
 
         output_str = completed_proc.stdout.decode()
@@ -113,7 +113,3 @@ class TestPostShutdown(unittest.TestCase):
         # Check that all processes in the launch (in this case, there's just one) exit
         # with code 0
         launch_testing.asserts.assertExitCodes(proc_info, allowable_exit_codes=[0])
-
-
-
-
