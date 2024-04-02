@@ -75,8 +75,17 @@ namespace carma_ros2_utils
   CarmaLifecycleNode::on_configure(const rclcpp_lifecycle::State &prev_state)
   {
 
+    // NOTE: Currently, intra-process comms must be disabled for publishers that are transient_local: https://github.com/ros2/rclcpp/issues/1753
+    rclcpp::PublisherOptions intra_proc_disabled;
+    intra_proc_disabled.use_intra_process_comm = rclcpp::IntraProcessSetting::Disable;
+
+    // Create a publisher that will send all previously published messages to late-joining subscribers ONLY If the subscriber is transient_local too
+    auto pub_qos_transient_local = rclcpp::QoS(rclcpp::KeepAll()); // A publisher with this QoS will store all messages that it has sent on the topic
+    pub_qos_transient_local.transient_local();  // A publisher with this QoS will re-send all (when KeepAll is used) messages to all late-joining subscribers
+                                                // NOTE: The subscriber's QoS must be set to transient_local() as well for earlier messages to be resent to the later-joiner.
+
     system_alert_pub_ = create_publisher<carma_msgs::msg::SystemAlert>(
-        system_alert_topic_, 10);
+        system_alert_topic_, pub_qos_transient_local, intra_proc_disabled);
 
     return handle_on_configure(prev_state);
   }
