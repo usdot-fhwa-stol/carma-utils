@@ -17,15 +17,15 @@
 /**
  * This file is loosely based on the reference architecture developed by OSRF for Leidos located here
  * https://github.com/mjeronimo/carma2/blob/master/carma_utils/carma_utils/src/carma_lifecycle_node.cpp
- * 
+ *
  * That file has the following license and some code snippets from it may be present in this file as well and are under the same license.
- * 
+ *
  * Copyright 2021 Open Source Robotics Foundation, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -33,7 +33,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 #include "carma_ros2_utils/carma_lifecycle_node.hpp"
 
@@ -76,10 +76,10 @@ namespace carma_ros2_utils
   {
 
     // NOTE: Currently, intra-process comms must be disabled for a publisher that is transient_local: https://github.com/ros2/rclcpp/issues/1753
-    rclcpp::PublisherOptions intra_proc_disabled; 
+    rclcpp::PublisherOptions intra_proc_disabled;
     intra_proc_disabled.use_intra_process_comm = rclcpp::IntraProcessSetting::Disable;
-    
-    // Create a publisher that will send all previously published messages to late-joining subscribers ONLY If the subscriber is transient_local too
+
+    // Create a publisher that will send previously published messages to late-joining subscribers ONLY If the subscriber is transient_local too
     auto pub_qos_transient_local = rclcpp::QoS(rclcpp::KeepLast(5)); // A publisher with this QoS will store the last 5 messages that it has sent on the topic
     pub_qos_transient_local.transient_local();
 
@@ -149,8 +149,8 @@ namespace carma_ros2_utils
     }
 
     // Call the user error handling before clean up of the publishers to allow them to publish if needed
-    auto return_val = handle_on_error(prev_state, error_string); 
-    
+    auto return_val = handle_on_error(prev_state, error_string);
+
     cleanup_publishers();
     cleanup_timers();
     return  return_val;
@@ -186,7 +186,7 @@ namespace carma_ros2_utils
       RCLCPP_WARN_STREAM(get_logger(), "Sending SystemAlert likely failed as publisher is deactivated.");
     }
 
-    system_alert_pub_->publish(pub_msg); 
+    system_alert_pub_->publish(pub_msg);
   }
 
   void CarmaLifecycleNode::send_error_alert_msg_for_string(const std::string &alert_string)
@@ -278,7 +278,7 @@ namespace carma_ros2_utils
         {
           try
           {
-            
+
             return callback(params);
           }
           catch (const std::exception &e)
@@ -295,7 +295,7 @@ namespace carma_ros2_utils
         });
 
     param_callback_handles_.push_back(handle);
-    
+
     return handle;
   }
 
