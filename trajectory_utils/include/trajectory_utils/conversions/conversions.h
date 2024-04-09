@@ -22,35 +22,37 @@ namespace trajectory_utils
 {
 namespace conversions
 {
+
 /**
  * \brief Converts a list of speeds to a list of times for the corresponding downtrack points
- * 
+ *
  * \param downtracks The downtrack points where each speed and time will be
  * \param speeds The speed at each downtrack point. Must have the same length as the downtracks list
- * \param times Output parameter which points to the vector which will store the times at each point. 
+ * \param times Output parameter which points to the vector which will store the times at each point.
  *              The first time will always be 0 as the times are relative
  */
 void speed_to_time(const std::vector<double>& downtrack, const std::vector<double>& speeds, std::vector<double>* times);
 
 /**
  * \brief Converts a list of times to a list of speeds for the corresponding downtrack points
- * 
+ *
  * \param downtracks The downtrack points where each speed and time will be
  * \param times The time at each downtrack point. Must have the same length as the downtracks list
- * \param initial_speed 
- * \param speeds Output parameter which points to the vector which will store the speeds at each point. 
+ * \param initial_speed
+ * \param speeds Output parameter which points to the vector which will store the speeds at each point.
  *              The first speed will always be initial_speed
+ * \throw std::runtime_error if more than -0.01 negative speed detected, which could indicate invalid trajectory input
  */
 void time_to_speed(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
                    std::vector<double>* speeds);
 
 /**
  * \brief Converts a list of times to a list of speeds for the corresponding downtrack points using constant jerk equations
- * 
+ *
  * \param downtracks The downtrack points where each speed and time will be
  * \param times The time at each downtrack point. Must have the same length as the downtracks list
- * \param initial_speed 
- * \param speeds Output parameter which points to the vector which will store the speeds at each point. 
+ * \param initial_speed
+ * \param speeds Output parameter which points to the vector which will store the speeds at each point.
  *              The first speed will always be initial_speed
  * \param decel_jerk The decelerating constant jerk used in calculation
  */
@@ -59,12 +61,12 @@ void time_to_speed_constjerk(const std::vector<double>& downtracks, const std::v
 
 /**
  * \brief Converts the trajectory points of a TrajectoryPlan message into equal sized vectors of downtrack distance and time
- * 
+ *
  * \param traj_points The trajectory points to convert
  * \param downtrack Output parameter which points to the vector which will store the resulting downtracks.
  * \param times Output parameter which points to the vector which will store the resulting downtracks
- * 
- */ 
+ *
+ */
 void trajectory_to_downtrack_time(const std::vector<cav_msgs::TrajectoryPlanPoint>& traj_points,
                                   std::vector<double>* downtrack, std::vector<double>* times);
 }  // namespace conversions

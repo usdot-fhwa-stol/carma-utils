@@ -22,13 +22,10 @@ namespace carma_ros2_utils
   template <
       typename MessageT,
       typename CallbackT,
-      typename AllocatorT = std::allocator<void>,
-      typename CallbackMessageT =
-          typename rclcpp::subscription_traits::has_message_type<CallbackT>::type,
-      typename SubscriptionT = rclcpp::Subscription<MessageT, AllocatorT>,
-      typename MessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
-          CallbackMessageT,
-          AllocatorT>>
+      typename AllocatorT,
+      typename CallbackMessageT,
+      typename SubscriptionT,
+      typename MessageMemoryStrategyT>
   std::shared_ptr<SubscriptionT>
   CarmaLifecycleNode::create_subscription(
       const std::string &topic_name,
@@ -41,7 +38,7 @@ namespace carma_ros2_utils
     return rclcpp_lifecycle::LifecycleNode::create_subscription<MessageT>(
         topic_name, qos,
         // The move capture "callback = std::move(callback)" is specifically needed
-        // here because of the unique_ptr<> in the callback arguments 
+        // here because of the unique_ptr<> in the callback arguments
         // when the callback is provided with std::bind
         // the returned functor degrades to be move-constructable not copy-constructable
         // https://www.cplusplus.com/reference/functional/bind/
@@ -52,15 +49,18 @@ namespace carma_ros2_utils
           {
             callback(std::move(m));
           }
-          catch (const std::exception &e)
+          catch(const std::exception &e)
           {
             handle_primary_state_exception(e);
+
+          } catch (...) {
+            handle_primary_state_exception();
           }
         },
         options, msg_mem_strat);
   }
 
-  template <typename MessageT, typename AllocatorT = std::allocator<void>>
+  template <typename MessageT, typename AllocatorT>
   std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<MessageT, AllocatorT>>
   CarmaLifecycleNode::create_publisher(
       const std::string &topic_name,
@@ -72,7 +72,7 @@ namespace carma_ros2_utils
     return pub;
   }
 
-  template <typename DurationRepT = int64_t, typename DurationT = std::milli, typename CallbackT>
+  template <typename DurationRepT, typename DurationT, typename CallbackT>
   std::shared_ptr<rclcpp::TimerBase>
   CarmaLifecycleNode::create_wall_timer(
       std::chrono::duration<DurationRepT, DurationT> period,
@@ -87,9 +87,12 @@ namespace carma_ros2_utils
       {
         callback();
       }
-      catch (const std::exception &e)
+      catch(const std::exception &e)
       {
         handle_primary_state_exception(e);
+
+      } catch (...) {
+        handle_primary_state_exception();
       }
     };
 
@@ -119,7 +122,11 @@ namespace carma_ros2_utils
           catch (const std::exception &e)
           {
             handle_primary_state_exception(e);
+
+          } catch (...) {
+            handle_primary_state_exception();
           }
+
         },
         group);
 
@@ -142,9 +149,12 @@ namespace carma_ros2_utils
           {
             callback(header, req, resp);
           }
-          catch (const std::exception &e)
+          catch(const std::exception &e)
           {
             handle_primary_state_exception(e);
+
+          } catch (...) {
+            handle_primary_state_exception();
           }
         },
         qos_profile, group);
@@ -153,7 +163,7 @@ namespace carma_ros2_utils
   template <class ServiceT>
   typename rclcpp::Client<ServiceT>::SharedPtr
   CarmaLifecycleNode::create_client (
-    const std::string service_name, 
+    const std::string service_name,
     const rmw_qos_profile_t & qos_profile,
     rclcpp::CallbackGroup::SharedPtr group
   )
@@ -161,7 +171,7 @@ namespace carma_ros2_utils
     // nullptr is the default argument for group
     // when nullptr is provided use the class level service group
     // this is needed instead of a default argument because you cannot change default arguments in overrides
-    if (group == nullptr) { 
+    if (group == nullptr) {
       group = this->service_callback_group_;
     }
 
@@ -175,9 +185,9 @@ namespace carma_ros2_utils
    * \brief Internal helper method to compare a ParameterType with a template argument
    * \tparam T The compiled type to compare
    * \param type The ROS ParameterType to compare
-   * 
+   *
    * \return true if the ParameterType matches the template argument. False otherwise.
-   */ 
+   */
   template<typename T>
   bool same_param_type(const rclcpp::ParameterType& type)
   {
@@ -206,7 +216,7 @@ namespace carma_ros2_utils
 
       case rclcpp::ParameterType::PARAMETER_STRING_ARRAY:
         return std::is_same_v<T, std::vector<std::string>>;
-    
+
       default:
         return false;
     }
@@ -214,18 +224,18 @@ namespace carma_ros2_utils
 
   template<typename T>
   boost::optional<std::string> CarmaLifecycleNode::update_params(const std::unordered_map<std::string, std::reference_wrapper<T>>& update_targets,
-                   const std::vector< rclcpp::Parameter > & new_params) 
+                   const std::vector< rclcpp::Parameter > & new_params)
   {
     std::unordered_map<std::string, std::function<T(T)>> func_map;
     func_map.reserve(update_targets.size());
 
     // Create setter methods for all reference parameters
     for (auto& pair : update_targets) {
-      func_map[pair.first] = [&pair](T t) { 
-        
+      func_map[pair.first] = [&pair](T t) {
+
         T temp = pair.second;
         pair.second.get() = t; // Assign to the reference
-        return temp; 
+        return temp;
 
       };
     }
@@ -248,7 +258,7 @@ namespace carma_ros2_utils
 
         std::string error = "Cannot update parameter " + param.get_name() + " it has mismatched type " + typeid(T).name() + " and " + param.get_type_name();
         RCLCPP_ERROR_STREAM(get_logger(), error);
-      
+
         return error;
       }
 

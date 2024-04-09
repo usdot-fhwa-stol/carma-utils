@@ -97,6 +97,8 @@ void speed_to_time(const std::vector<double>& downtrack, const std::vector<doubl
 void time_to_speed(const std::vector<double>& downtrack, const std::vector<double>& times, double initial_speed,
                    std::vector<double>* speeds)
 {
+  bool detected_negative_speed = false;
+  double minimum_detected_speed = 0.0;
   if (downtrack.size() != times.size())
   {
     throw std::invalid_argument("Input vector sizes do not match");
@@ -123,12 +125,29 @@ void time_to_speed(const std::vector<double>& downtrack, const std::vector<doubl
     double cur_speed;
 
     cur_speed = (2.0 * delta_d / dt) - prev_speed;
-    
+    // first speed value is often the measured speed, which can
+    // be small negative number when stopping (it happens in simulation for example)
+    // which is not an error and can be set to 0.0 safely. However, if large
+    // negative speed is detected, it most certainly has error in the given trajectory.
+    // The function throws in the end to indicate the user, while trying its best to
+    // continue converting by treating negative speed as 0.
+    if (cur_speed < -0.1)
+    {
+      detected_negative_speed = true;
+      minimum_detected_speed = std::min(cur_speed, minimum_detected_speed);
+    }
+
+    cur_speed = std::max(0.0, cur_speed);
     speeds->push_back(cur_speed);
 
     prev_position = cur_pos;
     prev_time = cur_time;
     prev_speed = cur_speed;
+  }
+
+  if (detected_negative_speed)
+  {
+    throw std::runtime_error("Detected negative speed while converting from time to speed in trajectory. The most negative value detected was: " + std::to_string(minimum_detected_speed));
   }
 }
 
@@ -160,7 +179,7 @@ void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::ve
 
     double cur_speed;
     double jerk_min = 0.01; //Min stop and wait jerk
-    
+
     if(decel_jerk > jerk_min){
       cur_speed = prev_speed - 0.5* decel_jerk*pow(dt,2);
       cur_speed = std::max(0.0,cur_speed);
@@ -169,11 +188,11 @@ void time_to_speed_constjerk(const std::vector<double>& downtrack, const std::ve
       // stop and wait plugin doesn't create slow down traj for very low jerk requirement
       cur_speed = prev_speed;
     }
-    
+
     if(std::abs(delta_d) <= 0.0001){
       cur_speed =0.0;
     }
-      
+
     speeds->push_back(cur_speed);
 
     prev_position = cur_pos;
