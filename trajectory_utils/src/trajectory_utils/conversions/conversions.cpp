@@ -15,7 +15,7 @@
  */
 
 #include <vector>
-#include <exception>
+#include <stdexcept>
 #include <stdexcept>
 #include <cav_msgs/TrajectoryPlanPoint.h>
 #include <trajectory_utils/conversions/conversions.h>

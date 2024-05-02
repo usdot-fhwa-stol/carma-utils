@@ -14,7 +14,7 @@
  * the License.
  */
 
-#include <exception>
+#include <stdexcept>
 #include <stdexcept>
 #include <trajectory_utils/conversions/conversions.hpp>
 

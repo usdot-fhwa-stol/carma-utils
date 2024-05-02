@@ -16,7 +16,7 @@
 
 #include <vector>
 #include <trajectory_utils/trajectory_utils.h>
-#include <exception>
+#include <stdexcept>
 #include <stdexcept>
 #include <math.h>
 #include <algorithm>
