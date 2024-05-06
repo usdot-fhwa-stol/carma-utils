@@ -17,7 +17,6 @@
 #include <vector>
 #include <trajectory_utils/trajectory_utils.hpp>
 #include <stdexcept>
-#include <stdexcept>
 #include <math.h>
 #include <algorithm>
 
