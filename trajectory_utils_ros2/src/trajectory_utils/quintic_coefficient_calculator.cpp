@@ -18,7 +18,7 @@
 #include <vector>
 #include <tuple>
 #include <math.h>
-#include <exception>
+#include <stdexcept>
 #include <trajectory_utils/quintic_coefficient_calculator.hpp>
 
 namespace quintic_coefficient_calculator {

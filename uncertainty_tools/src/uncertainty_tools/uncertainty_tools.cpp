@@ -18,7 +18,7 @@
 #include <vector>
 #include <tuple>
 #include <math.h>
-#include <exception>
+#include <stdexcept>
 #include <uncertainty_tools/uncertainty_tools.h>
 
 

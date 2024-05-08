@@ -18,7 +18,7 @@
 
 #include <string>
 #include <vector>
-#include <exception>
+#include <stdexcept>
 #include <ros/ros.h>
 #include <mutex>
 #include <memory>

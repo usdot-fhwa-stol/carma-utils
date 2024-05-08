@@ -154,7 +154,7 @@ TEST(predict_ctrv, predictStepExternal)
   ASSERT_NEAR(0.99, result.predicted_position_confidence, 0.01);
   ASSERT_NEAR(0.001, result.predicted_velocity_confidence, 0.001);
   
-  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(0.1 * 1e9); // Increase by 0.1 sec
+  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(int32_t(0.1 * 1e9), 0); // Increase by 0.1 sec
   int32_t new_time_sec = int32_t(new_time.nanoseconds() / 1e9);
   uint32_t new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);
   ASSERT_EQ(result.header.stamp.sec, new_time_sec);
@@ -178,7 +178,7 @@ TEST(predict_ctrv, predictStep)
   ASSERT_NEAR(0.99, result.predicted_position_confidence, 0.01);
   ASSERT_NEAR(0.495, result.predicted_velocity_confidence, 0.0001);
 
-  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(0.1 * 1e9); // Increase by 0.1 sec
+  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(int32_t(0.1 * 1e9), 0); // Increase by 0.1 sec
   int32_t new_time_sec = int32_t(new_time.nanoseconds() / 1e9);
   uint32_t new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);
   ASSERT_EQ(result.header.stamp.sec, new_time_sec);
@@ -207,7 +207,7 @@ TEST(predict_ctrv, predictPeriod)
   ASSERT_NEAR(0.99, results[0].predicted_position_confidence, 0.01);
   ASSERT_NEAR(0.001, results[0].predicted_velocity_confidence, 0.001);
   
-  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(0.1 * 1e9); // Increase by 0.1 sec
+  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(int32_t(0.1 * 1e9), 0); // Increase by 0.1 sec
   int32_t new_time_sec = int32_t(new_time.nanoseconds() / 1e9);
   uint32_t new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);  
   ASSERT_EQ(results[0].header.stamp.sec, new_time_sec);
@@ -218,7 +218,7 @@ TEST(predict_ctrv, predictPeriod)
   ASSERT_NEAR(0.9801, results[1].predicted_position_confidence, 0.01);
   ASSERT_NEAR(0.00099, results[1].predicted_velocity_confidence, 0.00001);
 
-  new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(0.2 * 1e9); // Increase by 0.2 sec
+  new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(int32_t(0.2 * 1e9), 0); // Increase by 0.2 sec
   new_time_sec = int32_t(new_time.nanoseconds() / 1e9);
   new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);  
   ASSERT_EQ(results[1].header.stamp.sec, new_time_sec);
