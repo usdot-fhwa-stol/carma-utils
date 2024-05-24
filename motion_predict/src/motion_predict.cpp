@@ -29,9 +29,9 @@ double Mapping(const double input,const double process_noise_max)
   double output_start = 1; // The lowest number of the range output.
   double output_end = 0; // The largest number of the range ouput.
   double output = (input - input_start) / (input_end - input_start) * (output_end - output_start) + output_start;
-  
+
   return output;
-}  
+}
 
 carma_perception_msgs::msg::PredictedState predictState(const geometry_msgs::msg::Pose& pose, const geometry_msgs::msg::Twist& twist,const double delta_t)
 {
@@ -41,13 +41,13 @@ carma_perception_msgs::msg::PredictedState predictState(const geometry_msgs::msg
   x(1)=pose.position.y; // Position Y
   x(2)=twist.linear.x; // Linear Velocity X
   x(3)=twist.linear.y; // Linear Velocity Y
-  
+
   Eigen::MatrixXd F=Eigen::MatrixXd::Identity(x.size(), x.size()); // Generate identity matrix for state transition matrix
 
-  F(0,2)=delta_t; 
+  F(0,2)=delta_t;
   F(1,3)=delta_t;
-  
-  x = F * x; // Predict 
+
+  x = F * x; // Predict
 
   carma_perception_msgs::msg::PredictedState pobj;
 
@@ -69,7 +69,7 @@ carma_perception_msgs::msg::PredictedState predictState(const geometry_msgs::msg
   pobj.predicted_velocity.angular.z=twist.angular.y;
 
   return pobj;
-} 
+}
 
 
 // Forward predict an external object
@@ -80,7 +80,7 @@ carma_perception_msgs::msg::PredictedState externalPredict(const carma_perceptio
 
   Eigen::MatrixXd F=Eigen::MatrixXd::Identity(4,4); // Generate identity matrix for state transition matrix
 
-  F(0,2)=delta_t; 
+  F(0,2)=delta_t;
   F(1,3)=delta_t;
 
   Eigen::MatrixXd P(4,4); // State Covariance Matrix
@@ -95,13 +95,13 @@ carma_perception_msgs::msg::PredictedState externalPredict(const carma_perceptio
   Eigen::MatrixXd Q(4,4); // Process Noise Matrix
 
   double delta_t2 = delta_t * delta_t; //t^2
-  double delta_t3 = delta_t2 * delta_t;//t^3 
+  double delta_t3 = delta_t2 * delta_t;//t^3
   double delta_t4 = delta_t3 * delta_t;//t^4
 
   Q << (delta_t4 / 4 * ax), 0,( delta_t3 / 2 * ax), 0, 0, (delta_t4 / 4 * ay), 0,( delta_t3 / 2 * ay), (delta_t3 / 2 * ax), 0,(delta_t2*ax), 0 , 0 , (delta_t3 / 2 * ay), 0 , (delta_t2*ay); // Process Noise Matrix
-  
+
   Eigen::MatrixXd Ft = F.transpose(); // Transpose of State Transition Function
-    
+
   P = F * P * Ft + Q; //State Covariance Matrix
 
   double position_process_noise_avg=(P(0,0)+P(1,1))/2; // Position process noise average
@@ -114,7 +114,7 @@ carma_perception_msgs::msg::PredictedState externalPredict(const carma_perceptio
 
   // Update header
   pobj.header = obj.header;
-  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(int32_t(delta_t * 1e9), 0);
+  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(std::chrono::nanoseconds(int32_t(delta_t * 1e9)));
   pobj.header.stamp = builtin_interfaces::msg::Time(updated_time);
 
   return pobj;
@@ -133,9 +133,9 @@ carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_ms
 
   // Update header
   pobj.header = obj.header;
-  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(int32_t(delta_t * 1e9), 0);
+  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(std::chrono::nanoseconds(int32_t(delta_t * 1e9)));
   pobj.header.stamp = builtin_interfaces::msg::Time(updated_time);
-    
+
   return pobj;
 }
 
