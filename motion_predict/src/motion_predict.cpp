@@ -114,7 +114,7 @@ carma_perception_msgs::msg::PredictedState externalPredict(const carma_perceptio
 
   // Update header
   pobj.header = obj.header;
-  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(std::chrono::nanoseconds(int32_t(delta_t * 1e9)));
+  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(std::chrono::nanoseconds(int64_t(delta_t * sec_to_nanosec)));
   pobj.header.stamp = builtin_interfaces::msg::Time(updated_time);
 
   return pobj;
@@ -133,7 +133,7 @@ carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_ms
 
   // Update header
   pobj.header = obj.header;
-  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(std::chrono::nanoseconds(int32_t(delta_t * 1e9)));
+  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(std::chrono::nanoseconds(int64_t(delta_t * sec_to_nanosec)));
   pobj.header.stamp = builtin_interfaces::msg::Time(updated_time);
 
   return pobj;
