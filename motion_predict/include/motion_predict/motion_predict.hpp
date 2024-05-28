@@ -80,6 +80,8 @@ namespace cv{
 
     carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_msgs::msg::PredictedState& obj, const double delta_t, const double confidence_drop_rate);
 
+    /*Constant for conversion from seconds to nanoseconds*/
+    const int64_t sec_to_nanosec = 1e9;
 }//cv
 
 }//motion_predict

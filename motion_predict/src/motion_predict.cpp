@@ -20,8 +20,6 @@ namespace motion_predict{
 
 namespace cv{
 
-int64_t sec_to_nanosec = 1e9;
-
 double Mapping(const double input,const double process_noise_max)
 {
   // Note as the value of the covariance increases confidence value increase.
