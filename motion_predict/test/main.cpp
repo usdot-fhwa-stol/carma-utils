@@ -15,7 +15,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "motion_predict/motion_predict.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 // Run all the tests
 int main(int argc, char **argv) {
