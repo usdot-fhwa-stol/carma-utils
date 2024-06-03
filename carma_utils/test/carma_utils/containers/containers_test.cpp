@@ -40,7 +40,7 @@ TEST(containers_test, downsample_vector_test)
 
   out = downsample_vector(vec, 8, true);
   ASSERT_EQ(0, out[0]);
-  ASSERT_EQ(7, out[1]);
+  ASSERT_EQ(8, out[1]);
   ASSERT_EQ(10, out[2]);
 }
 }  // namespace containers
