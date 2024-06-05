@@ -122,11 +122,12 @@ CTRV_State CTRVPredict(const CTRV_State& state, const double delta_t)
 
   double v_w = state.v / state.yaw_rate;
   double sin_yaw = sin(state.yaw);
+  double cos_yaw = cos(state.yaw);
   double wT = state.yaw_rate * delta_t;
-
-  next_state.x = v_w * sin(wT + state.yaw) - v_w * sin_yaw + state.x;
-  next_state.y = -v_w * cos(wT + state.yaw) + v_w * sin_yaw + state.y;
-  next_state.yaw = wT + state.yaw;
+  
+  next_state.x = state.x + v_w * (sin(state.yaw + wT) - sin_yaw);
+  next_state.y = state.y + v_w * (cos_yaw - cos(state.yaw + wT));
+  next_state.yaw = state.yaw + wT;
   next_state.v = state.v;
   next_state.yaw_rate = state.yaw_rate;
 
