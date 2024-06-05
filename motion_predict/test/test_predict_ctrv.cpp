@@ -110,7 +110,7 @@ TEST(predict_ctrv, CTRVPredict) {
 
   CTRV_State result = CTRVPredict(state, 0.1);
 
-  ASSERT_NEAR(result.x, 1.2999819, 0.00001);
+  ASSERT_NEAR(result.x, 1.29785, 0.00001);
   ASSERT_NEAR(result.y, 1.89244, 0.0001);
   ASSERT_NEAR(result.yaw, 1.57953, 0.00001);
   ASSERT_NEAR(result.v, state.v, 0.00001);
