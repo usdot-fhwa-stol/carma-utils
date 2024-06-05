@@ -138,26 +138,35 @@ TEST(predict_ctrv, predictStepExternal)
   obj.header.stamp = builtin_interfaces::msg::Time(rclcpp::Time(5, 0));
   obj.header.frame_id = "my_frame";
   obj.pose.pose.position.x = 5.0;
-  obj.pose.pose.orientation.w = 1.0;
+  obj.pose.pose.position.y = 1.4; // Added y position
+  // Set the orientation quaternion for 0.79 radians yaw
+  double yaw_angle = 0.79;
+  obj.pose.pose.orientation.w = cos(yaw_angle / 2);
+  obj.pose.pose.orientation.x = 0.0;
+  obj.pose.pose.orientation.y = 0.0;
+  obj.pose.pose.orientation.z = sin(yaw_angle / 2);
   obj.pose.covariance[0] = 1;
   obj.pose.covariance[7] = 1;
   obj.pose.covariance[35] = 1;
+  obj.velocity.twist.linear.x = 4.9244289009; // Initial velocity speed
   obj.velocity.covariance[0] = 999;
   obj.velocity.covariance[7] = 999;
   obj.velocity.covariance[35] = 999;
 
   carma_perception_msgs::msg::PredictedState result = motion_predict::ctrv::predictStep(obj, 0.1, 1000, 0.99);
 
-  ASSERT_NEAR(5.0, result.predicted_position.position.x, 0.00001);  // Verify update functions were called
-  ASSERT_NEAR(0.99, result.predicted_position_confidence, 0.01);
-  ASSERT_NEAR(0.001, result.predicted_velocity_confidence, 0.001);
+  EXPECT_NEAR(5.3466, result.predicted_position.position.x, 0.00001);  // Verify x position update
+  EXPECT_NEAR(1.7498, result.predicted_position.position.y, 0.00001);  // Verify y position update
+  EXPECT_NEAR(4.9244289009, result.predicted_velocity.linear.x, 0.00001); // Verify velocity speed
+  EXPECT_NEAR(0.99, result.predicted_position_confidence, 0.01);
+  EXPECT_NEAR(0.001, result.predicted_velocity_confidence, 0.001);
 
   rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(std::chrono::nanoseconds(int32_t(0.1 * 1e9))); // Increase by 0.1 sec
   int32_t new_time_sec = int32_t(new_time.nanoseconds() / 1e9);
-  uint32_t new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);
-  ASSERT_EQ(result.header.stamp.sec, new_time_sec);
-  ASSERT_EQ(result.header.stamp.nanosec, new_time_nanosec);
-  ASSERT_EQ(result.header.frame_id, obj.header.frame_id);
+  uint32_t new_time_nanosec = new_time.nanoseconds() - (new_time_sec * 1e9);
+  EXPECT_EQ(result.header.stamp.sec, new_time_sec);
+  EXPECT_EQ(result.header.stamp.nanosec, new_time_nanosec);
+  EXPECT_EQ(result.header.frame_id, obj.header.frame_id);
 }
 
 TEST(predict_ctrv, predictStep)
