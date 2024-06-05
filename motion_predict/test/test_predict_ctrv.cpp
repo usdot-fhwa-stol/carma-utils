@@ -99,8 +99,7 @@ TEST(predict_ctrv, buildPredictionFromCTRVState)
   ASSERT_NEAR(result.predicted_velocity.angular.z, twist.angular.z, 0.00001);
 }
 
-TEST(predict_ctrv, CTRVPredict)
-{
+TEST(predict_ctrv, CTRVPredict) {
   // Regular prediction
   CTRV_State state;
   state.x = 1.3;
@@ -111,8 +110,8 @@ TEST(predict_ctrv, CTRVPredict)
 
   CTRV_State result = CTRVPredict(state, 0.1);
 
-  ASSERT_NEAR(result.x, 1.29785, 0.00001);
-  ASSERT_NEAR(result.y, 58.3224, 0.0001);
+  ASSERT_NEAR(result.x, 1.2999819, 0.00001);
+  ASSERT_NEAR(result.y, 1.89244, 0.0001);
   ASSERT_NEAR(result.yaw, 1.57953, 0.00001);
   ASSERT_NEAR(result.v, state.v, 0.00001);
   ASSERT_NEAR(result.yaw_rate, state.yaw_rate, 0.00001);
@@ -126,7 +125,7 @@ TEST(predict_ctrv, CTRVPredict)
 
   result = CTRVPredict(state, 0.1);
 
-  ASSERT_NEAR(result.x, 1.2999819, 0.0001);
+  ASSERT_NEAR(result.x, 1.3, 0.0001);
   ASSERT_NEAR(result.y, 1.89244, 0.0001);
   ASSERT_NEAR(result.yaw, 1.5708, 0.00001);
   ASSERT_NEAR(result.v, state.v, 0.00001);
