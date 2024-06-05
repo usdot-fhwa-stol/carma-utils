@@ -66,7 +66,7 @@ carma_perception_msgs::msg::PredictedState predictState(const geometry_msgs::msg
 
   pobj.predicted_velocity.angular.x=twist.angular.x;
   pobj.predicted_velocity.angular.y=twist.angular.y;
-  pobj.predicted_velocity.angular.z=twist.angular.y;
+  pobj.predicted_velocity.angular.z=twist.angular.z;
 
   return pobj;
 }
