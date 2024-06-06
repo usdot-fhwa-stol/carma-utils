@@ -28,14 +28,15 @@ namespace containers
  * \brief Downsamples an input vector by saving only each nth element.
  * For example, given an input vector of { 0, 1, 2, 3, 4, 5 } and n = 2
  * The output vector will be {0, 2, 4}
- * 
+ *
  * \param input The input vector to downsample
  * \param n The count of the elements to save
  * \param include_last_point If true, append the last point
-          NOTE: default is true as this function is only used for trajectory generation 
+          NOTE: default is true as this function is only used for trajectory generation
           and this keeps the lanelet's boundaries consistent no matter the downsample ratio
  * \return The downsampled vector
- */ 
+          NOTE: downsampled vector will always include the first point of the input vector
+ */
 template <class T, class A = std::allocator<T>>
 std::vector<T, A> downsample_vector(const std::vector<T, A>& input, unsigned int n, bool include_last_point = true)
 {
@@ -47,17 +48,17 @@ std::vector<T, A> downsample_vector(const std::vector<T, A>& input, unsigned int
 
   output.reserve((input.size() / n) + 1);
 
-  bool included_last_point = false;
+  bool has_included_last_point = false;
   for (size_t i = 0; i < input.size(); i += n)
   {
     output.push_back(input[i]);
     if (i == input.size() - 1)
     {
-      included_last_point = true;
+      has_included_last_point = true;
     }
   }
 
-  if (include_last_point && !included_last_point)
+  if (include_last_point && !has_included_last_point)
   {
     output.push_back(input.back());
   }
