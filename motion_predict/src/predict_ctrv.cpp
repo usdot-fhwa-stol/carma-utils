@@ -61,10 +61,13 @@ CTRV_State buildCTRVState(const geometry_msgs::msg::Pose& pose, const geometry_m
   CTRV_State state;
   state.x = pose.position.x;
   state.y = pose.position.y;
-  state.yaw = std::get<0>(vel_angle_and_mag); // TODO: currently, object's linear velocity is already in map frame.
-                                              // https://github.com/usdot-fhwa-stol/carma-platform/issues/2401
+  state.yaw = std::get<0>(vel_angle_and_mag); // Currently, object's linear velocity is already in map frame.
+                                              // Orientation of the object cannot be trusted for objects 
+                                              // as it could be drifting sideways while facing other direction
+                              
   //    rpy[2] + std::get<0>(vel_angle_and_mag);  // The yaw is relative to the velocity vector so take the heading and
   //                                              // add it to the angle of the velocity vector in the local frame
+  // Replace with logic above if this issue is decided: // https://github.com/usdot-fhwa-stol/carma-platform/issues/2401
   state.v = std::get<1>(vel_angle_and_mag);
   state.yaw_rate = twist.angular.z;
 
