@@ -47,7 +47,7 @@ TEST(predict_ctrv, buildCTRVState)
   CTRV_State result = buildCTRVState(pose, twist);
   ASSERT_NEAR(result.x, 1.3, 0.000001);
   ASSERT_NEAR(result.y, 1.4, 0.000001);
-  ASSERT_NEAR(result.yaw, 1.98902433, 0.00001);
+  ASSERT_NEAR(result.yaw, 0.41822, 0.00001); // directly uses direction of x, y
   ASSERT_NEAR(result.v, 4.9244289009, 0.000001);
   ASSERT_NEAR(result.yaw_rate, 0.0872665, 0.0000001);
 }
@@ -148,7 +148,8 @@ TEST(predict_ctrv, predictStepExternal)
   obj.pose.covariance[0] = 1;
   obj.pose.covariance[7] = 1;
   obj.pose.covariance[35] = 1;
-  obj.velocity.twist.linear.x = 4.9244289009; // Initial velocity speed
+  obj.velocity.twist.linear.x = 4.9244289009 * cos(yaw_angle); // Matching velocity to orientation, as currently map frame is expected in the velocity
+  obj.velocity.twist.linear.y = 4.9244289009 * sin(yaw_angle); // Matching velocity to orientation,  as currently map frame is expected in the velocity
   obj.velocity.covariance[0] = 999;
   obj.velocity.covariance[7] = 999;
   obj.velocity.covariance[35] = 999;
@@ -157,7 +158,8 @@ TEST(predict_ctrv, predictStepExternal)
 
   EXPECT_NEAR(5.3466, result.predicted_position.position.x, 0.00001);  // Verify x position update
   EXPECT_NEAR(1.7498, result.predicted_position.position.y, 0.00001);  // Verify y position update
-  EXPECT_NEAR(4.9244289009, result.predicted_velocity.linear.x, 0.00001); // Verify velocity speed
+  EXPECT_NEAR(4.9244289009 * cos(yaw_angle), result.predicted_velocity.linear.x, 0.00001); // Verify velocity speed
+  EXPECT_NEAR(4.9244289009 * sin(yaw_angle), result.predicted_velocity.linear.y, 0.00001); // Verify velocity speed
   EXPECT_NEAR(0.99, result.predicted_position_confidence, 0.01);
   EXPECT_NEAR(0.001, result.predicted_velocity_confidence, 0.001);
 
