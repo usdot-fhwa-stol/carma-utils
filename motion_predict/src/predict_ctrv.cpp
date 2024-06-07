@@ -45,7 +45,7 @@ std::tuple<double, double> localVelOrientationAndMagnitude(const double v_x, con
   }
   else
   {
-    local_v_orientation = asin(v_y / v_mag);
+    local_v_orientation = atan2(v_y, v_x);
   }
   return std::make_tuple(local_v_orientation, v_mag);
 }
@@ -61,9 +61,10 @@ CTRV_State buildCTRVState(const geometry_msgs::msg::Pose& pose, const geometry_m
   CTRV_State state;
   state.x = pose.position.x;
   state.y = pose.position.y;
-  state.yaw =
-      rpy[2] + std::get<0>(vel_angle_and_mag);  // The yaw is relative to the velocity vector so take the heading and
-                                                // add it to the angle of the velocity vector in the local frame
+  state.yaw = std::get<0>(vel_angle_and_mag); // TODO: currently, object's linear velocity is already in map frame.
+                                              // https://github.com/usdot-fhwa-stol/carma-platform/issues/2401
+  //    rpy[2] + std::get<0>(vel_angle_and_mag);  // The yaw is relative to the velocity vector so take the heading and
+  //                                              // add it to the angle of the velocity vector in the local frame
   state.v = std::get<1>(vel_angle_and_mag);
   state.yaw_rate = twist.angular.z;
 
@@ -124,7 +125,7 @@ CTRV_State CTRVPredict(const CTRV_State& state, const double delta_t)
   double sin_yaw = sin(state.yaw);
   double cos_yaw = cos(state.yaw);
   double wT = state.yaw_rate * delta_t;
-  
+
   next_state.x = state.x + v_w * (sin(state.yaw + wT) - sin_yaw);
   next_state.y = state.y + v_w * (cos_yaw - cos(state.yaw + wT));
   next_state.yaw = state.yaw + wT;
