@@ -52,7 +52,7 @@ std::tuple<double, double> localVelOrientationAndMagnitude(const double v_x, con
 
 CTRV_State buildCTRVState(const geometry_msgs::msg::Pose& pose, const geometry_msgs::msg::Twist& twist)
 {
-  // TODO: Need a logic here to possible detect whether if twist.linear.x,y
+  // Need a logic here to possible detect whether if twist.linear.x,y
   // is in map frame. https://github.com/usdot-fhwa-stol/carma-platform/issues/2407
   auto vel_angle_and_mag = localVelOrientationAndMagnitude(twist.linear.x, twist.linear.y);
 
