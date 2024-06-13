@@ -52,10 +52,6 @@ std::tuple<double, double> localVelOrientationAndMagnitude(const double v_x, con
 
 CTRV_State buildCTRVState(const geometry_msgs::msg::Pose& pose, const geometry_msgs::msg::Twist& twist)
 {
-  geometry_msgs::msg::Quaternion quat = pose.orientation;
-  Eigen::Quaternionf e_quat(quat.w, quat.x, quat.y, quat.z);
-  Eigen::Vector3f rpy = e_quat.toRotationMatrix().eulerAngles(0, 1, 2);
-
   // TODO: Need a logic here to possible detect whether if twist.linear.x,y
   // is in map frame. https://github.com/usdot-fhwa-stol/carma-platform/issues/2407
   auto vel_angle_and_mag = localVelOrientationAndMagnitude(twist.linear.x, twist.linear.y);
@@ -67,6 +63,9 @@ CTRV_State buildCTRVState(const geometry_msgs::msg::Pose& pose, const geometry_m
                                               // Orientation of the object cannot be trusted for objects
                                               // as it could be drifting sideways while facing other direction
 
+  // geometry_msgs::msg::Quaternion quat = pose.orientation;
+  // Eigen::Quaternionf e_quat(quat.w, quat.x, quat.y, quat.z);
+  // Eigen::Vector3f rpy = e_quat.toRotationMatrix().eulerAngles(0, 1, 2);
   //    rpy[2] + std::get<0>(vel_angle_and_mag);  // The yaw is relative to the velocity vector so take the heading and
   //                                              // add it to the angle of the velocity vector in the local frame
   // Replace with logic above if this issue is decided: // https://github.com/usdot-fhwa-stol/carma-platform/issues/2401
@@ -87,21 +86,23 @@ carma_perception_msgs::msg::PredictedState buildPredictionFromCTRVState(const CT
   pobj.predicted_position.position.z = original_pose.position.z;
 
   // Map orientation
-  Eigen::Quaternionf original_quat(original_pose.orientation.w, original_pose.orientation.x,
-                                   original_pose.orientation.y, original_pose.orientation.z);
-  Eigen::Vector3f original_rpy = original_quat.toRotationMatrix().eulerAngles(0, 1, 2);
-
-  auto vel_angle_and_mag = localVelOrientationAndMagnitude(original_twist.linear.x, original_twist.linear.y);
-
-  Eigen::Quaternionf final_quat;
-  final_quat = Eigen::AngleAxisf(original_rpy[0], Eigen::Vector3f::UnitX()) *
-               Eigen::AngleAxisf(original_rpy[1], Eigen::Vector3f::UnitY()) *
-               Eigen::AngleAxisf(state.yaw - std::get<0>(vel_angle_and_mag), Eigen::Vector3f::UnitZ());
-
-  pobj.predicted_position.orientation.x = final_quat.x();
-  pobj.predicted_position.orientation.y = final_quat.y();
-  pobj.predicted_position.orientation.z = final_quat.z();
-  pobj.predicted_position.orientation.w = final_quat.w();
+  pobj.predicted_position.orientation = original_pose.orientation;
+  //  Eigen::Quaternionf original_quat(original_pose.orientation.w, original_pose.orientation.x,
+  //                                   original_pose.orientation.y, original_pose.orientation.z);
+  //  Eigen::Vector3f original_rpy = original_quat.toRotationMatrix().eulerAngles(0, 1, 2);
+  //
+  //  auto vel_angle_and_mag = localVelOrientationAndMagnitude(original_twist.linear.x, original_twist.linear.y);
+  //
+  //  Eigen::Quaternionf final_quat;
+  //  final_quat = Eigen::AngleAxisf(original_rpy[0], Eigen::Vector3f::UnitX()) *
+  //               Eigen::AngleAxisf(original_rpy[1], Eigen::Vector3f::UnitY()) *
+  //               Eigen::AngleAxisf(state.yaw - std::get<0>(vel_angle_and_mag), Eigen::Vector3f::UnitZ());
+  //
+  //  pobj.predicted_position.orientation.x = final_quat.x();
+  //  pobj.predicted_position.orientation.y = final_quat.y();
+  //  pobj.predicted_position.orientation.z = final_quat.z();
+  //  pobj.predicted_position.orientation.w = final_quat.w();
+  //  Replace with logic above if this issue is decided: // https://github.com/usdot-fhwa-stol/carma-platform/issues/2401
 
   // Map twist
   // Constant velocity model means twist remains unchanged
