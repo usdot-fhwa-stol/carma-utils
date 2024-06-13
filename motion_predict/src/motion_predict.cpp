@@ -39,6 +39,9 @@ carma_perception_msgs::msg::PredictedState predictState(const geometry_msgs::msg
 
   x(0)=pose.position.x; // Position X
   x(1)=pose.position.y; // Position Y
+
+  // TODO: Need a logic here to possible detect whether if twist.linear.x,y
+  // is in map frame. https://github.com/usdot-fhwa-stol/carma-platform/issues/2407
   x(2)=twist.linear.x; // Linear Velocity X
   x(3)=twist.linear.y; // Linear Velocity Y
 

@@ -32,7 +32,8 @@ namespace ctrv
  * \param  delta_t prediction time step size in seconds
  * \param  period The total prediction period in seconds
  * \param  process_noise_max is the maximum process noise of the system
- *
+ * \note twist.linear vector is expected to be in the map frame and used as the yaw for future prediction.
+ *       pose.orientation is not meaningfully used at the moment except passing it on.
  * \return The predicted state of the external object at time t + delta_t
  */
 std::vector<carma_perception_msgs::msg::PredictedState> predictPeriod(const carma_perception_msgs::msg::ExternalObject& obj, const double delta_t,
@@ -45,7 +46,8 @@ std::vector<carma_perception_msgs::msg::PredictedState> predictPeriod(const carm
  * \param  obj external object.
  * \param  delta_t prediction time into the future in seconds
  * \param  process_noise_max is the maximum process noise of the system
- *
+ * \note twist.linear vector is expected to be in the map frame and used as the yaw for future prediction.
+ *       pose.orientation is not meaningfully used at the moment except passing it on.
  * \return The predicted state of the external object at time t + delta_t
  */
 
@@ -59,7 +61,8 @@ carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_ms
  * \param  obj previous prediction object.
  * \param  delta_t prediction time into the future in seconds
  * \param  process_noise_max is the maximum process noise of the system
- *
+ * \note twist.linear vector is expected to be in the map frame and used as the yaw for future prediction.
+ *       pose.orientation is not meaningfully used at the moment except passing it on.
  * \return The predicted state of the external object at time t + delta_t
  */
 
