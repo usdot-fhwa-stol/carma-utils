@@ -70,11 +70,9 @@ namespace cv{
 
     /*!
     \brief  Mapping is used to map input range to an output range of different bandwidth.
-    \param  obj predicted object
+    \param  obj predicted object whose pose and twist are expected in map frame
     \param  delta_t time predicted into the future (sec)
     \param  confidence_drop_rate rate of drop in confidence with time
-    \note twist.linear vector is expected to be in the map frame and used as the yaw for future prediction.
-        pose.orientation is not meaningfully used at the moment except passing it on.
     */
     carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_msgs::msg::PredictedState& obj, const double delta_t, const double confidence_drop_rate);
 

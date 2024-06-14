@@ -44,8 +44,6 @@ std::vector<carma_perception_msgs::msg::PredictedState> predictPeriod(const carm
  * \param  obj external object whose twist and pose are expected in map frame
  * \param  delta_t prediction time into the future in seconds
  * \param  process_noise_max is the maximum process noise of the system
- * \note twist.linear vector is expected to be in the map frame and used as the yaw for future prediction.
- *       pose.orientation is not meaningfully used at the moment except passing it on.
  * \return The predicted state of the external object at time t + delta_t
  */
 
