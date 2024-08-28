@@ -17,95 +17,31 @@ cmake_minimum_required(VERSION 3.5)
 project(uncertainty_tools)
 
 find_package(carma_cmake_common REQUIRED)
+carma_check_ros_version(2)
 carma_package()
 
-find_package(ros_environment REQUIRED)
-set(ROS_VERSION $ENV{ROS_VERSION})
+find_package(ament_cmake_auto REQUIRED)
 
-if(${ROS_VERSION} EQUAL 1)
- 
-  ## Find catkin macros and libraries
-  ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-  ## is used, also find other catkin packages
-  find_package(catkin REQUIRED COMPONENTS)
+include_directories(
+  include
+)
 
-  catkin_package(
-    INCLUDE_DIRS include
-    LIBRARIES ${PROJECT_NAME}
-  )
+ament_auto_add_library(${PROJECT_NAME}
+  src/${PROJECT_NAME}/${PROJECT_NAME}.cpp)
 
-  ###########
-  ## Build ##
-  ###########
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
 
-    ## Specify additional locations of header files
-    ## Your package locations should be listed before other locations
-    include_directories(
-      include
-      ${catkin_INCLUDE_DIRS}
-    )
+# Testing
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
 
-  add_library(${PROJECT_NAME} src/${PROJECT_NAME}/${PROJECT_NAME}.cpp)
-  target_link_libraries(${PROJECT_NAME})
-  add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+  ament_add_gtest(${PROJECT_NAME}-test test/${PROJECT_NAME}/uncertainty_tools_test.cpp)
+  ament_target_dependencies(${PROJECT_NAME}-test ${${PROJECT_NAME}_FOUND_TEST_DEPENDS})
 
-
-  #############
-  ## Install ##
-  #############
-
-  ## Mark executables and/or libraries for installation
-  install(TARGETS ${PROJECT_NAME}
-    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  )
-
-  ## Mark cpp header files for installation
-  install(DIRECTORY include/${PROJECT_NAME}/
-    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-    FILES_MATCHING PATTERN "*.h"
-    PATTERN ".svn" EXCLUDE
-  )
-
-  ##########
-  ## Test ##
-  ##########
-
-  # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-  catkin_add_gmock(${PROJECT_NAME}-test test/${PROJECT_NAME}/uncertainty_tools_test.cpp)
-  if(TARGET ${PROJECT_NAME}-test)
-    target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-  endif()
-
-else() #ROS2
-
-  find_package(ament_cmake_auto REQUIRED)
-
-  include_directories(
-    include
-  )
-
-  ament_auto_add_library(${PROJECT_NAME}
-    src/${PROJECT_NAME}/${PROJECT_NAME}.cpp)
-
-
-  ament_export_include_directories(include)
-  ament_export_libraries(${PROJECT_NAME})
-
-  # Testing
-  if(BUILD_TESTING) 
-    find_package(ament_lint_auto REQUIRED)
-    ament_lint_auto_find_test_dependencies()
-
-    ament_add_gtest(${PROJECT_NAME}-test test/${PROJECT_NAME}/uncertainty_tools_test.cpp)
-    ament_target_dependencies(${PROJECT_NAME}-test ${${PROJECT_NAME}_FOUND_TEST_DEPENDS})
-
-    target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-
-  endif()
+  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 
   ament_auto_package()
 
 endif()
-
