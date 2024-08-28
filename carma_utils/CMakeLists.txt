@@ -64,7 +64,7 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(${PROJECT_NAME} 
+add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/CARMANodeHandle.cpp
   src/${PROJECT_NAME}/timers/ROSTimer.cpp
   src/${PROJECT_NAME}/timers/ROSTimerFactory.cpp
@@ -91,7 +91,7 @@ install(TARGETS ${PROJECT_NAME}
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  
+
 )
 
 #############
@@ -109,4 +109,3 @@ if(CATKIN_ENABLE_TESTING)
   target_link_libraries(${PROJECT_NAME}_CARMANodeHandle_test ${PROJECT_NAME} ${catkin_LIBRARIES})
   add_dependencies( ${PROJECT_NAME}_CARMANodeHandle_test ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 endif()
-
