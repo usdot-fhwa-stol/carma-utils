@@ -26,7 +26,7 @@ include_directories(
   include
 )
 
-ament_auto_add_library(${PROJECT_NAME}
+ament_auto_add_library(${PROJECT_NAME} SHARED
   src/${PROJECT_NAME}/${PROJECT_NAME}.cpp)
 
 ament_export_include_directories(include)
@@ -42,6 +42,7 @@ if(BUILD_TESTING)
 
   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 
-  ament_auto_package()
-
 endif()
+
+# Install
+ament_auto_package()

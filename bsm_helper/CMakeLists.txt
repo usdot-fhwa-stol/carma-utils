@@ -29,9 +29,12 @@ include_directories(
 )
 
 # Build
-ament_auto_add_library(bsm_helper
+ament_auto_add_library(bsm_helper SHARED
   src/bsm_helper.cpp
 )
+
+ament_export_include_directories(include)
+ament_export_libraries(bsm_helper)
 
 if(BUILD_TESTING)
 
@@ -47,6 +50,7 @@ if(BUILD_TESTING)
 
   target_link_libraries(${PROJECT_NAME}-test bsm_helper)
 
-  ament_auto_package()
-
 endif()
+
+# Install
+ament_auto_package()
