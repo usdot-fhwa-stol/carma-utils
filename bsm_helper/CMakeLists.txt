@@ -17,6 +17,7 @@ project(bsm_helper)
 
 find_package(carma_cmake_common REQUIRED)
 carma_check_ros_version(2)
+carma_package()
 
 find_package(ament_cmake_auto REQUIRED)
 find_package(ament_cmake_python REQUIRED)
