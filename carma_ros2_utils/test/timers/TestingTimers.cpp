@@ -19,6 +19,7 @@
 #include <carma_ros2_utils/timers/testing/TestTimer.hpp>
 #include <carma_ros2_utils/timers/testing/TestTimerFactory.hpp>
 #include <carma_ros2_utils/testing/TestHelpers.hpp>
+#include <chrono>
 
 
 namespace carma_ros2_utils
@@ -27,17 +28,20 @@ namespace timers
 {
 namespace testing
 {
-  
+
 TEST(TestingTimers, buildTimer)
 {
+  using std::chrono_literals::operator""s;
+  using std::chrono_literals::operator""ns;
+
   std::shared_ptr<carma_ros2_utils::timers::testing::TestTimerFactory> factory(new TestTimerFactory());  // Verify casting behavior
-  
+
   uint32_t id = 1;
   std::atomic<int> call_count(0);
 
   std::unique_ptr<carma_ros2_utils::timers::Timer> timer = factory->buildTimer(
-      id, rclcpp::Duration(1.0e9), [&]() -> void { call_count++; }, true);
-  
+      id, rclcpp::Duration(1s), [&]() -> void { call_count++; }, true);
+
 
   // Test setting and getting the timer id
   ASSERT_EQ(id, timer->getId());
@@ -59,7 +63,7 @@ TEST(TestingTimers, buildTimer)
   id = 3;
   call_count.store(0);
   timer = factory->buildTimer(
-      id, rclcpp::Duration(1.0), [&]() -> void { call_count++; }, true, false);
+      id, rclcpp::Duration(1ns), [&]() -> void { call_count++; }, true, false);
 
   ASSERT_EQ(0, call_count.load());
   factory->setNow(rclcpp::Time(3.2e9));
@@ -73,7 +77,7 @@ TEST(TestingTimers, buildTimer)
   id = 4;
   call_count.store(0);
   timer = factory->buildTimer(
-      id, rclcpp::Duration(1.0), [&]() -> void { call_count++; }, false, true);
+      id, rclcpp::Duration(1ns), [&]() -> void { call_count++; }, false, true);
 
   ASSERT_EQ(0, call_count.load());
   factory->setNow(rclcpp::Time(5.2e9));
@@ -92,7 +96,7 @@ TEST(TestingTimers, buildTimer)
   timer->start(); // Run start twice; This requires visual inspection of output to verify
 
   // // Verify duplicate initialization throw
-  ASSERT_THROW(timer->initializeTimer(rclcpp::Duration(1.0), [&](){}), std::invalid_argument);
+  ASSERT_THROW(timer->initializeTimer(rclcpp::Duration(1ns), [&](){}), std::invalid_argument);
 }
 
 }  // namespace testing

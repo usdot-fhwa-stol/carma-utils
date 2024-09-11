@@ -55,7 +55,7 @@ namespace carma_ros2_utils
 
     // NOTE: When creating this callback group it was not immediately clear if it should go in on_configure or the constructor
     //       Further usage of callback groups may elucidate this in the future
-    service_callback_group_ = get_node_base_interface()->create_callback_group(rclcpp::callback_group::CallbackGroupType::Reentrant);
+    service_callback_group_ = get_node_base_interface()->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
   }
 
   CarmaLifecycleNode::~CarmaLifecycleNode()
@@ -204,7 +204,7 @@ namespace carma_ros2_utils
 
     rclcpp_lifecycle::State state_at_exception = get_current_state();
 
-    if (get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) // If the exception was caught in the ACTIVE state we can try to gracefully fail to on_error, by transitioning to deactivate and then throwning an exception
+    if (get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) // If the exception was caught in the ACTIVE state we can try to gracefully fail to on_error, by transitioning to deactivate and then throwing an exception
     {
       std::string error_msg = "Uncaught Exception from node: " + std::string(get_name()) + " exception: " + e.what() + " while in ACTIVE state.";
       caught_exception_ = error_msg;

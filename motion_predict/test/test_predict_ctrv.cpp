@@ -14,7 +14,6 @@
  * the License.
  */
 
-#include "motion_predict/predict_ctrv.hpp"
 #include "../src/predict_ctrv.cpp"
 #include <gtest/gtest.h>
 
@@ -48,7 +47,7 @@ TEST(predict_ctrv, buildCTRVState)
   CTRV_State result = buildCTRVState(pose, twist);
   ASSERT_NEAR(result.x, 1.3, 0.000001);
   ASSERT_NEAR(result.y, 1.4, 0.000001);
-  ASSERT_NEAR(result.yaw, 1.98902433, 0.00001);
+  ASSERT_NEAR(result.yaw, 0.41822, 0.00001); // directly uses direction of x, y
   ASSERT_NEAR(result.v, 4.9244289009, 0.000001);
   ASSERT_NEAR(result.yaw_rate, 0.0872665, 0.0000001);
 }
@@ -100,8 +99,7 @@ TEST(predict_ctrv, buildPredictionFromCTRVState)
   ASSERT_NEAR(result.predicted_velocity.angular.z, twist.angular.z, 0.00001);
 }
 
-TEST(predict_ctrv, CTRVPredict)
-{
+TEST(predict_ctrv, CTRVPredict) {
   // Regular prediction
   CTRV_State state;
   state.x = 1.3;
@@ -113,7 +111,7 @@ TEST(predict_ctrv, CTRVPredict)
   CTRV_State result = CTRVPredict(state, 0.1);
 
   ASSERT_NEAR(result.x, 1.29785, 0.00001);
-  ASSERT_NEAR(result.y, 58.3224, 0.0001);
+  ASSERT_NEAR(result.y, 1.89244, 0.0001);
   ASSERT_NEAR(result.yaw, 1.57953, 0.00001);
   ASSERT_NEAR(result.v, state.v, 0.00001);
   ASSERT_NEAR(result.yaw_rate, state.yaw_rate, 0.00001);
@@ -127,7 +125,7 @@ TEST(predict_ctrv, CTRVPredict)
 
   result = CTRVPredict(state, 0.1);
 
-  ASSERT_NEAR(result.x, 1.2999819, 0.0001);
+  ASSERT_NEAR(result.x, 1.3, 0.0001);
   ASSERT_NEAR(result.y, 1.89244, 0.0001);
   ASSERT_NEAR(result.yaw, 1.5708, 0.00001);
   ASSERT_NEAR(result.v, state.v, 0.00001);
@@ -140,26 +138,37 @@ TEST(predict_ctrv, predictStepExternal)
   obj.header.stamp = builtin_interfaces::msg::Time(rclcpp::Time(5, 0));
   obj.header.frame_id = "my_frame";
   obj.pose.pose.position.x = 5.0;
-  obj.pose.pose.orientation.w = 1.0;
+  obj.pose.pose.position.y = 1.4; // Added y position
+  // Set the orientation quaternion for 0.79 radians yaw
+  double yaw_angle = 0.79;
+  obj.pose.pose.orientation.w = cos(yaw_angle / 2);
+  obj.pose.pose.orientation.x = 0.0;
+  obj.pose.pose.orientation.y = 0.0;
+  obj.pose.pose.orientation.z = sin(yaw_angle / 2);
   obj.pose.covariance[0] = 1;
   obj.pose.covariance[7] = 1;
   obj.pose.covariance[35] = 1;
+  obj.velocity.twist.linear.x = 4.9244289009 * cos(yaw_angle); // Matching velocity to orientation, as currently map frame is expected in the velocity
+  obj.velocity.twist.linear.y = 4.9244289009 * sin(yaw_angle); // Matching velocity to orientation,  as currently map frame is expected in the velocity
   obj.velocity.covariance[0] = 999;
   obj.velocity.covariance[7] = 999;
   obj.velocity.covariance[35] = 999;
 
   carma_perception_msgs::msg::PredictedState result = motion_predict::ctrv::predictStep(obj, 0.1, 1000, 0.99);
 
-  ASSERT_NEAR(5.0, result.predicted_position.position.x, 0.00001);  // Verify update functions were called
-  ASSERT_NEAR(0.99, result.predicted_position_confidence, 0.01);
-  ASSERT_NEAR(0.001, result.predicted_velocity_confidence, 0.001);
-  
-  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(0.1 * 1e9); // Increase by 0.1 sec
+  EXPECT_NEAR(5.3466, result.predicted_position.position.x, 0.00001);  // Verify x position update
+  EXPECT_NEAR(1.7498, result.predicted_position.position.y, 0.00001);  // Verify y position update
+  EXPECT_NEAR(4.9244289009 * cos(yaw_angle), result.predicted_velocity.linear.x, 0.00001); // Verify velocity speed
+  EXPECT_NEAR(4.9244289009 * sin(yaw_angle), result.predicted_velocity.linear.y, 0.00001); // Verify velocity speed
+  EXPECT_NEAR(0.99, result.predicted_position_confidence, 0.01);
+  EXPECT_NEAR(0.001, result.predicted_velocity_confidence, 0.001);
+
+  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(std::chrono::nanoseconds(int32_t(0.1 * 1e9))); // Increase by 0.1 sec
   int32_t new_time_sec = int32_t(new_time.nanoseconds() / 1e9);
-  uint32_t new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);
-  ASSERT_EQ(result.header.stamp.sec, new_time_sec);
-  ASSERT_EQ(result.header.stamp.nanosec, new_time_nanosec);
-  ASSERT_EQ(result.header.frame_id, obj.header.frame_id);
+  uint32_t new_time_nanosec = new_time.nanoseconds() - (new_time_sec * 1e9);
+  EXPECT_EQ(result.header.stamp.sec, new_time_sec);
+  EXPECT_EQ(result.header.stamp.nanosec, new_time_nanosec);
+  EXPECT_EQ(result.header.frame_id, obj.header.frame_id);
 }
 
 TEST(predict_ctrv, predictStep)
@@ -178,7 +187,7 @@ TEST(predict_ctrv, predictStep)
   ASSERT_NEAR(0.99, result.predicted_position_confidence, 0.01);
   ASSERT_NEAR(0.495, result.predicted_velocity_confidence, 0.0001);
 
-  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(0.1 * 1e9); // Increase by 0.1 sec
+  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(std::chrono::nanoseconds(int32_t(0.1 * 1e9))); // Increase by 0.1 sec
   int32_t new_time_sec = int32_t(new_time.nanoseconds() / 1e9);
   uint32_t new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);
   ASSERT_EQ(result.header.stamp.sec, new_time_sec);
@@ -206,10 +215,10 @@ TEST(predict_ctrv, predictPeriod)
   ASSERT_NEAR(5.1, results[0].predicted_position.position.x, 0.00001);  // Verify update functions were called
   ASSERT_NEAR(0.99, results[0].predicted_position_confidence, 0.01);
   ASSERT_NEAR(0.001, results[0].predicted_velocity_confidence, 0.001);
-  
-  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(0.1 * 1e9); // Increase by 0.1 sec
+
+  rclcpp::Time new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(std::chrono::nanoseconds(int32_t(0.1 * 1e9))); // Increase by 0.1 sec
   int32_t new_time_sec = int32_t(new_time.nanoseconds() / 1e9);
-  uint32_t new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);  
+  uint32_t new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);
   ASSERT_EQ(results[0].header.stamp.sec, new_time_sec);
   ASSERT_EQ(results[0].header.stamp.nanosec, new_time_nanosec);
   ASSERT_EQ(results[0].header.frame_id, obj.header.frame_id);
@@ -218,9 +227,9 @@ TEST(predict_ctrv, predictPeriod)
   ASSERT_NEAR(0.9801, results[1].predicted_position_confidence, 0.01);
   ASSERT_NEAR(0.00099, results[1].predicted_velocity_confidence, 0.00001);
 
-  new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(0.2 * 1e9); // Increase by 0.2 sec
+  new_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(std::chrono::nanoseconds(int32_t(0.2 * 1e9))); // Increase by 0.2 sec
   new_time_sec = int32_t(new_time.nanoseconds() / 1e9);
-  new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);  
+  new_time_nanosec = new_time.nanoseconds() - (new_time_sec*1e9);
   ASSERT_EQ(results[1].header.stamp.sec, new_time_sec);
   ASSERT_EQ(results[1].header.stamp.nanosec, new_time_nanosec);
   ASSERT_EQ(results[1].header.frame_id, obj.header.frame_id);

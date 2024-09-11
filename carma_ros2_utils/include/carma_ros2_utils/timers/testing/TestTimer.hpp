@@ -47,7 +47,7 @@ private:
   std::function<void()> callback_;
 
   rclcpp::Time start_time_ = rclcpp::Time(0);
-  rclcpp::Duration duration_ = rclcpp::Duration(0);
+  rclcpp::Duration duration_ = rclcpp::Duration(std::chrono::nanoseconds{0});
   carma_ros2_utils::timers::testing::TestClock::SharedPtr clock_; //! Interface used for accessing current time from rclcpp
   bool oneshot_ = false;
 

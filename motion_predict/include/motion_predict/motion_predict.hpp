@@ -30,37 +30,35 @@ namespace motion_predict{
 
 namespace cv{
 
-    /*! 
+    /*!
     \brief  Mapping is used to map input range to an output range of different bandwidth.
     \param  input is the current value of the process noise.
     \param  process_noise_max is the maxium process noise of the system
     */
-
     double Mapping(const double input,const double process_noise_max);
 
-    /*! 
+    /*!
     \brief  predictState is used to predict future state.
     \param  pose is position and orientation (m).
     \param  twist is velocity (m/s).
     \param  delta_t time predicted into the future (sec).
+    \note pose and twist are expected in the map frame.
     */
-
     carma_perception_msgs::msg::PredictedState predictState(const geometry_msgs::msg::Pose& pose, const geometry_msgs::msg::Twist& twist,const double delta_t);
 
-    /*! 
+    /*!
     \brief  externalPredict populates motion prediction with future pose and velocity.
-    \param  obj external object.
+    \param  obj external object, whose pose and twist are expected in map frame
     \param  delta_t prediciton time into the future (sec)
     \param  ax acceleration noise along x-axis (m^2/s^4)
     \param  ay acceleration noise along y-axis (m^2/s^4)
     \param  process_noise_max is the maximum process noise of the system
     */
-
     carma_perception_msgs::msg::PredictedState externalPredict(const carma_perception_msgs::msg::ExternalObject &obj,const double delta_t,const double ax,const double ay,const double process_noise_max);
 
-    /*! 
+    /*!
     \brief  externalPeriod populates sequence of predicted motion of the object.
-    \param  obj external object.
+    \param  obj external object, whose pose and twist are expected in map frame
     \param  delta_t prediciton time into the future (sec)
     \param  period sequence/time steps (sec)
     \param  ax acceleration noise along x-axis (m^2/s^4)
@@ -68,19 +66,18 @@ namespace cv{
     \param  process_noise_max is the maximum process noise of the system
     \param  confidence_drop_rate rate of drop in confidence with time
     */
-
     std::vector<carma_perception_msgs::msg::PredictedState> predictPeriod(const carma_perception_msgs::msg::ExternalObject& obj, const double delta_t, const double period,const double ax,const double ay ,const double process_noise_max,const double confidence_drop_rate);
 
-    /*! 
+    /*!
     \brief  Mapping is used to map input range to an output range of different bandwidth.
-    \param  obj predicted object
+    \param  obj predicted object whose pose and twist are expected in map frame
     \param  delta_t time predicted into the future (sec)
     \param  confidence_drop_rate rate of drop in confidence with time
     */
-
     carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_msgs::msg::PredictedState& obj, const double delta_t, const double confidence_drop_rate);
-   
 
+    /*Constant for conversion from seconds to nanoseconds*/
+    constexpr int64_t SEC_TO_NANOSEC = 1e9;
 }//cv
 
 }//motion_predict

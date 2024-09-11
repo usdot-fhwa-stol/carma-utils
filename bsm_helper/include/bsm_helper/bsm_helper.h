@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 #pragma once
 #include <string.h>
 #include <vector>
-#include <exception>
+#include <stdexcept>
 #include <mutex>
 #include <memory>
 #include <boost/optional.hpp>

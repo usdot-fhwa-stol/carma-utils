@@ -14,8 +14,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+#include <chrono>
 #include <memory>
-#include "../carma_lifecycle_node.hpp"
+#include "carma_ros2_utils/carma_lifecycle_node.hpp"
 #include <rclcpp/timer.hpp>
 #include <rclcpp/time.hpp>
 #include "Timer.hpp"
@@ -32,7 +33,7 @@ class ROSTimer : public Timer
 {
   rclcpp::TimerBase::SharedPtr timer_;
   std::weak_ptr<carma_ros2_utils::CarmaLifecycleNode> weak_node_pointer_;
-  rclcpp::Duration duration_ = rclcpp::Duration(0);
+  rclcpp::Duration duration_ = rclcpp::Duration(std::chrono::nanoseconds{0});
   bool autostart_=true;
   std::function<void()> callback_;
 

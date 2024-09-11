@@ -31,7 +31,7 @@ namespace test_1
 {
     // This is a test node to support unit tests for the carma_lifecycle_node
     // NOTE: To make unit testing easier this node by default returns to unconfigured from ErrorProcessing unless an exception occurs in ErrorProcessing
-    //       This is different from the default CarmaLifecycleNode behavior which shuts the node down on exceptions 
+    //       This is different from the default CarmaLifecycleNode behavior which shuts the node down on exceptions
     class CarmaLifecycleNodeTest : public carma_ros2_utils::CarmaLifecycleNode
     {
     public:
@@ -235,7 +235,7 @@ TEST(CARMALifecycleNode, PrimaryStateErrors)
     // Evaluate timers
     auto exception_timer = node->create_timer(
         node->get_clock(),
-        rclcpp::Duration(10.0),
+        rclcpp::Duration(std::chrono::nanoseconds{10}),
         []()
         {
             throw std::runtime_error("Timer exception");
@@ -263,7 +263,7 @@ TEST(CARMALifecycleNode, PrimaryStateErrors)
         {
             throw std::runtime_error("Wall Timer exception");
         });
-    
+
     ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, node->get_current_state().id());
 
     // Trigger the callback
@@ -337,7 +337,7 @@ TEST(CARMALifecycleNode, PrimaryStateErrors)
     // Force the service callback to trigger the exception
     service->handle_request(header, request);
     ASSERT_EQ(lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED, node->get_current_state().id());
-    
+
 
 }
 

@@ -45,25 +45,26 @@ std::tuple<double, double> localVelOrientationAndMagnitude(const double v_x, con
   }
   else
   {
-    local_v_orientation = asin(v_y / v_mag);
+    local_v_orientation = atan2(v_y, v_x);
   }
   return std::make_tuple(local_v_orientation, v_mag);
 }
 
 CTRV_State buildCTRVState(const geometry_msgs::msg::Pose& pose, const geometry_msgs::msg::Twist& twist)
 {
-  geometry_msgs::msg::Quaternion quat = pose.orientation;
-  Eigen::Quaternionf e_quat(quat.w, quat.x, quat.y, quat.z);
-  Eigen::Vector3f rpy = e_quat.toRotationMatrix().eulerAngles(0, 1, 2);
-
+  // TODO: Need a logic here to possible detect whether if twist.linear.x,y
+  // is in map frame. https://github.com/usdot-fhwa-stol/carma-platform/issues/2407
   auto vel_angle_and_mag = localVelOrientationAndMagnitude(twist.linear.x, twist.linear.y);
 
   CTRV_State state;
   state.x = pose.position.x;
   state.y = pose.position.y;
-  state.yaw =
-      rpy[2] + std::get<0>(vel_angle_and_mag);  // The yaw is relative to the velocity vector so take the heading and
-                                                // add it to the angle of the velocity vector in the local frame
+  state.yaw = std::get<0>(vel_angle_and_mag); // Currently, object's linear velocity is already in map frame.
+                                              // Orientation of the object cannot be trusted for objects
+                                              // as it could be drifting sideways while facing other direction.
+                                              // This may not be what the user expect, and below issue tracks it.
+                                              // https://github.com/usdot-fhwa-stol/carma-platform/issues/2401
+
   state.v = std::get<1>(vel_angle_and_mag);
   state.yaw_rate = twist.angular.z;
 
@@ -81,21 +82,9 @@ carma_perception_msgs::msg::PredictedState buildPredictionFromCTRVState(const CT
   pobj.predicted_position.position.z = original_pose.position.z;
 
   // Map orientation
-  Eigen::Quaternionf original_quat(original_pose.orientation.w, original_pose.orientation.x,
-                                   original_pose.orientation.y, original_pose.orientation.z);
-  Eigen::Vector3f original_rpy = original_quat.toRotationMatrix().eulerAngles(0, 1, 2);
-
-  auto vel_angle_and_mag = localVelOrientationAndMagnitude(original_twist.linear.x, original_twist.linear.y);
-
-  Eigen::Quaternionf final_quat;
-  final_quat = Eigen::AngleAxisf(original_rpy[0], Eigen::Vector3f::UnitX()) *
-               Eigen::AngleAxisf(original_rpy[1], Eigen::Vector3f::UnitY()) *
-               Eigen::AngleAxisf(state.yaw - std::get<0>(vel_angle_and_mag), Eigen::Vector3f::UnitZ());
-
-  pobj.predicted_position.orientation.x = final_quat.x();
-  pobj.predicted_position.orientation.y = final_quat.y();
-  pobj.predicted_position.orientation.z = final_quat.z();
-  pobj.predicted_position.orientation.w = final_quat.w();
+  pobj.predicted_position.orientation = original_pose.orientation;
+  // TODO: Take another look at orientation calculation after addressing this:
+  // https://github.com/usdot-fhwa-stol/carma-platform/issues/2401
 
   // Map twist
   // Constant velocity model means twist remains unchanged
@@ -122,11 +111,12 @@ CTRV_State CTRVPredict(const CTRV_State& state, const double delta_t)
 
   double v_w = state.v / state.yaw_rate;
   double sin_yaw = sin(state.yaw);
+  double cos_yaw = cos(state.yaw);
   double wT = state.yaw_rate * delta_t;
 
-  next_state.x = v_w * sin(wT + state.yaw) - v_w * sin_yaw + state.x;
-  next_state.y = -v_w * cos(wT + state.yaw) + v_w * sin_yaw + state.y;
-  next_state.yaw = wT + state.yaw;
+  next_state.x = state.x + v_w * (sin(state.yaw + wT) - sin_yaw);
+  next_state.y = state.y + v_w * (cos_yaw - cos(state.yaw + wT));
+  next_state.yaw = state.yaw + wT;
   next_state.v = state.v;
   next_state.yaw_rate = state.yaw_rate;
 
@@ -165,7 +155,7 @@ carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_ms
 
   // Update header
   pobj.header = obj.header;
-  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(delta_t * 1e9);
+  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(std::chrono::nanoseconds(int32_t(delta_t * 1e9)));
   pobj.header.stamp = builtin_interfaces::msg::Time(updated_time);
 
   return pobj;
@@ -191,9 +181,9 @@ carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_ms
 
   // Update header
   pobj.header = obj.header;
-  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(delta_t * 1e9);
+  rclcpp::Time updated_time = rclcpp::Time(obj.header.stamp) + rclcpp::Duration(std::chrono::nanoseconds(int32_t(delta_t * 1e9)));
   pobj.header.stamp = builtin_interfaces::msg::Time(updated_time);
-  
+
   return pobj;
 }
 
