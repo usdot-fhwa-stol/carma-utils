@@ -24,7 +24,7 @@ namespace containers
 TEST(containers_test, downsample_vector_test)
 {
   std::vector<int> vec = {0,1,2,3,4,5,6,7,8,9,10};
-  std::vector<int> out = downsample_vector(vec, 3);
+  std::vector<int> out = downsample_vector(vec, 3, false);
   
   ASSERT_EQ(4, out.size());
   ASSERT_EQ(0, out[0]);
@@ -36,6 +36,11 @@ TEST(containers_test, downsample_vector_test)
   ASSERT_EQ(0, out.size());
   out = downsample_vector<int>({}, 4);
   ASSERT_EQ(0, out.size());
+
+  out = downsample_vector(vec, 8, true);
+  ASSERT_EQ(0, out[0]);
+  ASSERT_EQ(8, out[1]);
+  ASSERT_EQ(10, out[2]);
 }
 
 int main(int argc, char ** argv)
