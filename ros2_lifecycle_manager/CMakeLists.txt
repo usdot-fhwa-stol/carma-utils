@@ -31,11 +31,6 @@ ament_auto_add_library(ros2_lifecycle_manager SHARED
 )
 
 if(BUILD_TESTING)
-  # These CMake commands were added to ament_cmake_auto in ROS 2 Humble. Until
-  # CARMA supports ROS 2 Humble, we will use package-local copies.
-  include(cmake/ament_auto_find_test_dependencies.cmake)
-  include(cmake/ament_auto_add_gtest.cmake)
-
   ament_auto_add_executable(test_lifecycle_node
     test/test_node.cpp
   )

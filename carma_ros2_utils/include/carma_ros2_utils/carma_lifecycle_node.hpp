@@ -14,13 +14,6 @@
  * the License.
  */
 
-/*
- * TODO(CAR-6017): When we drop support for Foxy:
- *   - replace CMake substitution strings with rclcpp::ManagedEntityInterface
- *   - drop the .in filename suffix
- *   - relocate file to include/ directory
- */
-
 /**
  * This file is loosely based on the reference architecture developed by OSRF for Leidos located here
  * https://github.com/mjeronimo/carma2/blob/master/carma_utils/carma_utils/include/carma_utils/carma_lifecycle_node.hpp
@@ -409,12 +402,8 @@ namespace carma_ros2_utils
     std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<carma_msgs::msg::SystemAlert>>
         system_alert_pub_;
 
-    /*
-     * TODO(CAR-6017): Refactor when we transition to Humble.
-     * LifecyclePublisherInterface was replaced with ManagedEntityInterface in Humble
-     */
     //! A list of lifecycle publishers produced from this node whose lifetimes can be managed
-    std::vector<std::shared_ptr<@carma_ros2_utils_LIFECYCLE_PUBLISHER_INTERFACE_TYPE@>> lifecycle_publishers_;
+    std::vector<std::shared_ptr<rclcpp_lifecycle::ManagedEntityInterface>> lifecycle_publishers_;
 
     //! A list of timers produced from this node whose lifetimes can be managed
     std::vector<std::shared_ptr<rclcpp::TimerBase>> timers_;
