@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - develop
+      - humble-develop
       - master
       - "release/*"
   pull_request:
@@ -12,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       docker_organization: ${{ steps.docker-org-and-tag.outputs.docker_organization }}
-      docker_image_tag: ${{ steps.docker-org-and-tag.outputs.docker_image_tag }}
+      docker_image_tag: ${{ steps.docker-org-and-tag.outputs.docker_image_tag }}-humble
     steps:
       - id: docker-org-and-tag
         uses: usdot-fhwa-stol/actions/docker-org-and-tag@main
@@ -27,7 +28,7 @@ jobs:
       image: ${{ needs.determine_docker_org_and_tag.outputs.docker_organization }}/carma-base:${{ needs.determine_docker_org_and_tag.outputs.docker_image_tag }}
       env:
         INIT_ENV: "/home/carma/.base-image/init-env.sh"
-        ROS_2_ENV: "/opt/ros/foxy/setup.bash"
+        ROS_2_ENV: "/opt/ros/humble/setup.bash"
         TERM: xterm
       options: "--user root"
     steps:
@@ -50,26 +51,6 @@ jobs:
       run: |
         source "$INIT_ENV"
         git clone -b ${{ steps.determine-base-branch.outputs.git_branch }} --depth 1 https://github.com/usdot-fhwa-stol/carma-msgs.git src/CARMAMsgs
-    - name: Build ROS1
-      run: |
-        source "$INIT_ENV"
-        PACKAGES=$(find . -maxdepth 2 -type f -name package.xml | sed 's/\.\///' | cut -d/ -f1)
-        sed -i '/colcon build/ s/$/ --parallel-workers 4 --packages-up-to $PACKAGES/' /home/carma/.ci-image/engineering_tools/code_coverage/make_with_coverage.bash
-        make_with_coverage.bash -m -e /opt/carma/ -o ./coverage_reports/gcov
-    - name: Run ROS1 C++ Tests
-      continue-on-error: true
-      run: |
-        source "$INIT_ENV"
-        sed -i '/colcon test/ s/$/ --parallel-workers 4 --packages-above $PACKAGES/' /home/carma/.ci-image/engineering_tools/code_coverage/make_with_coverage.bash
-        make_with_coverage.bash -t -e /opt/carma/ -o ./coverage_reports/gcov   
-    - name: Backup ROS1 compile_commands.json
-      run: |
-        mv /opt/carma/build/compile_commands.json /opt/carma/compile_commands.ros1.json        
-    - name: Cleanup before ROS 2 build
-      # Clear the build and install folders before building ROS 2 
-      run: |
-        rm -rf /opt/carma/install
-        rm -rf /opt/carma/build             
     - name: Build ROS2
       run: |
         source "$INIT_ENV"
@@ -84,10 +65,6 @@ jobs:
         source "$ROS_2_ENV"
         sed -i '/colcon test/ s/$/ --parallel-workers 4 --packages-above $PACKAGES/' /home/carma/.ci-image/engineering_tools/code_coverage/make_with_coverage.bash
         make_with_coverage.bash -t -e /opt/carma/ -o ./coverage_reports/gcov
-    - name: Combine ROS1 and ROS2 compile_commands.json files
-      run: |
-        mv /opt/carma/build/compile_commands.json /opt/carma/compile_commands.ros2.json
-        jq -s add /opt/carma/compile_commands.ros1.json /opt/carma/compile_commands.ros2.json > /opt/carma/build/compile_commands.json        
     - name: Run SonarScanner
       uses: usdot-fhwa-stol/actions/sonar-scanner@main
       with:
