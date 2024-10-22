@@ -22,23 +22,6 @@ include(dependencies.cmake)
 
 carma_package()
 
-# TODO(CAR-6017): Remove when we drop support for Foxy
-# rclcpp_lifecycle has breaking API changes starting with Humble
-if(("$ENV{ROS_DISTRO}" STREQUAL "foxy") OR ("$ENV{ROS_DISTRO}" STREQUAL "galactic"))
-  set(carma_ros2_utils_LIFECYCLE_PUBLISHER_INTERFACE_TYPE
-    rclcpp_lifecycle::LifecyclePublisherInterface
-  )
-else()
-  set(carma_ros2_utils_LIFECYCLE_PUBLISHER_INTERFACE_TYPE
-    rclcpp_lifecycle::ManagedEntityInterface
-  )
-endif()
-
-configure_file(
-  src/carma_lifecycle_node.hpp.in
-  carma_ros2_utils/carma_lifecycle_node.hpp
-)
-
 ament_auto_add_library(carma_ros2_utils SHARED
   src/carma_lifecycle_node.cpp
 )
@@ -49,11 +32,6 @@ target_include_directories(carma_ros2_utils
 )
 
 include(GNUInstallDirs)
-
-INSTALL(FILES ${PROJECT_BINARY_DIR}/carma_ros2_utils/carma_lifecycle_node.hpp
-  DESTINATION
-    ${CMAKE_INSTALL_INCLUDEDIR}/carma_ros2_utils
-)
 
 ament_auto_add_library(carma_ros2_utils_timers SHARED
   src/timers/testing/TestTimer.cpp
@@ -88,11 +66,6 @@ ament_auto_add_executable(carma_component_container_mt
 )
 
 if(BUILD_TESTING)
-  # These CMake commands were added to ament_cmake_auto in ROS 2 Humble. Until
-  # CARMA supports ROS 2 Humble, we will use package-local copies.
-  include(cmake/ament_auto_find_test_dependencies.cmake)
-  include(cmake/ament_auto_add_gtest.cmake)
-
   ament_auto_add_executable(test_carma_lifecycle_node
     test/test_node.cpp
   )

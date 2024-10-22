@@ -14,13 +14,6 @@
  * the License.
  */
 
-/*
- * TODO(CAR-6017): When we drop support for Foxy:
- *   - replace CMake substitution strings with rclcpp::ManagedEntityInterface
- *   - drop the .in filename suffix
- *   - relocate file to include/ directory
- */
-
 /**
  * This file is loosely based on the reference architecture developed by OSRF for Leidos located here
  * https://github.com/mjeronimo/carma2/blob/master/carma_utils/carma_utils/include/carma_utils/carma_lifecycle_node.hpp
@@ -107,16 +100,16 @@ namespace carma_ros2_utils
     virtual ~CarmaLifecycleNode();
 
     /**
-   * \brief Overrides: See https://github.com/ros2/rclcpp/blob/foxy/rclcpp_lifecycle/include/rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp for their details
+   * \brief Overrides: See https://github.com/ros2/rclcpp/blob/humble/rclcpp_lifecycle/include/rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp for their details
    * NOTE: These methods are NOT meant to be used by extending classes. Instead the corresponding handle_<method> methods should be used
    *       to ensure the full CARMALifecycleNode functionality is employed.
    */
-    carma_ros2_utils::CallbackReturn on_configure(const rclcpp_lifecycle::State &prev_state) override;
-    carma_ros2_utils::CallbackReturn on_activate(const rclcpp_lifecycle::State &prev_state) override;
-    carma_ros2_utils::CallbackReturn on_deactivate(const rclcpp_lifecycle::State &prev_state) override;
-    carma_ros2_utils::CallbackReturn on_cleanup(const rclcpp_lifecycle::State &prev_state) override;
-    carma_ros2_utils::CallbackReturn on_error(const rclcpp_lifecycle::State &prev_state) override;
-    carma_ros2_utils::CallbackReturn on_shutdown(const rclcpp_lifecycle::State &prev_state) override;
+    carma_ros2_utils::CallbackReturn on_configure(const rclcpp_lifecycle::State &prev_state) override final;
+    carma_ros2_utils::CallbackReturn on_activate(const rclcpp_lifecycle::State &prev_state) override final;
+    carma_ros2_utils::CallbackReturn on_deactivate(const rclcpp_lifecycle::State &prev_state) override final;
+    carma_ros2_utils::CallbackReturn on_cleanup(const rclcpp_lifecycle::State &prev_state) override final;
+    carma_ros2_utils::CallbackReturn on_error(const rclcpp_lifecycle::State &prev_state) override final;
+    carma_ros2_utils::CallbackReturn on_shutdown(const rclcpp_lifecycle::State &prev_state) override final;
 
     /**
    * \brief Callback triggered when transitioning from UNCONFIGURED to INACTIVE due to the configure signal.
@@ -274,7 +267,7 @@ namespace carma_ros2_utils
     /**
      * \brief Method to create a timer whose lifecycle can be managed by this node.
      *
-     *  NOTE: In foxy the LifecycleNode api is slightly out of sync with the node api so there is not a create_timer method there. We use rclcpp directly here
+     *  NOTE: In humble the LifecycleNode api is slightly out of sync with the node api so there is not a create_timer method there. We use rclcpp directly here
      *
      *  \param clock The underlying clock to use for the timer.
      *  \param period The period of trigger of the timer.
@@ -298,8 +291,6 @@ namespace carma_ros2_utils
     /**
      * \brief Override of rclcpp method. See descriptive comments here:
      *  https://github.com/ros2/rclcpp/blob/4859c4e43576d0c6fe626679b2c2604a9a8b336c/rclcpp_lifecycle/include/rclcpp_lifecycle/lifecycle_node.hpp#L271
-     *
-     *  NOTE: In foxy the LifecycleNode api is slightly out of sync with the node api so there is not a create_service method there. We use rclcpp directly here
      *
      * NOTE: The function object passed to this method will be moved using std::move.
      *       The user should therefore assume ownership of this function object has been relinquished
@@ -409,12 +400,8 @@ namespace carma_ros2_utils
     std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<carma_msgs::msg::SystemAlert>>
         system_alert_pub_;
 
-    /*
-     * TODO(CAR-6017): Refactor when we transition to Humble.
-     * LifecyclePublisherInterface was replaced with ManagedEntityInterface in Humble
-     */
     //! A list of lifecycle publishers produced from this node whose lifetimes can be managed
-    std::vector<std::shared_ptr<@carma_ros2_utils_LIFECYCLE_PUBLISHER_INTERFACE_TYPE@>> lifecycle_publishers_;
+    std::vector<std::shared_ptr<rclcpp_lifecycle::ManagedEntityInterface>> lifecycle_publishers_;
 
     //! A list of timers produced from this node whose lifetimes can be managed
     std::vector<std::shared_ptr<rclcpp::TimerBase>> timers_;
