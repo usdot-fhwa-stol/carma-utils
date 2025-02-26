@@ -76,7 +76,7 @@ int CarmaRecordNode::run() const
 
   // remove the final "|" from the regex
   exclude_regex.pop_back();
- 
+
   // set the exclude_regex as a param in the param server
   cnh_.setParam("exclude_regex", exclude_regex);
 
@@ -86,7 +86,7 @@ int CarmaRecordNode::run() const
   } else {
     cnh_.setParam("no_exclusions", false);
   }
-  // No need to spin here, but it prevents ros1_bridge from continuously 
+  // No need to spin here, but it prevents ros1_bridge from continuously
   // printing error logs about failing to connect
   // to this node's services indefinitely which is confusing to many users
   ros::spin();
