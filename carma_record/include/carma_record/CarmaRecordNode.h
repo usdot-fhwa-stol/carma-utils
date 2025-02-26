@@ -25,7 +25,7 @@ namespace carma_record
 /*!
  * \brief Node which manages rosbag record with additional carma specific functionality
  *
- * The CarmaRecordNode handles communicating with the ROS network, loading in configuration parameters, and 
+ * The CarmaRecordNode handles communicating with the ROS network, loading in configuration parameters, and
  * excluding record topics that are not desired.
  *
  */
@@ -43,7 +43,7 @@ public:
    * @return 0 on exit with no errors
    */
   int run() const;
-  
+
 private:
 
   ros::CARMANodeHandle cnh_;
