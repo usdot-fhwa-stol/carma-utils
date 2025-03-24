@@ -17,6 +17,8 @@
 #include <functional>
 #include <lifecycle_msgs/msg/state.hpp>
 #include "ros2_lifecycle_manager/ros2_lifecycle_manager.hpp"
+#include "ros2_lifecycle_manager/ros2_lifecycle_utils.hpp"
+
 
 namespace ros2_lifecycle_manager
 {
@@ -320,7 +322,6 @@ namespace ros2_lifecycle_manager
             node_logging_->get_logger(), "Calling node a-sync: " << node.node_name);
 
         // Call service and record future
-        // TODO(CAR-6014): Remove static cast when CARMA Platform drops ROS Foxy support
         futures.emplace_back(static_cast<const ChangeStateSharedFutureWithRequest &>(node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {})));
         future_node_map.emplace(futures.size() - 1, node.node_name);
       }
@@ -360,15 +361,23 @@ namespace ros2_lifecycle_manager
     // We have an answer, let's print our success.
     if (future.get().second->success)
     {
-      RCLCPP_INFO(
-          node_logging_->get_logger(), "Transition %d successfully triggered.", static_cast<int>(future.get().first->transition.id));
-      return true;
+        RCLCPP_INFO(
+            node_logging_->get_logger(),
+            "Transition %s (%d) successfully triggered.",
+            get_transition_name(future.get().first->transition.id).c_str(),
+            static_cast<int>(future.get().first->transition.id)
+        );
+        return true;
     }
     else
     {
-      RCLCPP_WARN(
-          node_logging_->get_logger(), "Failed to trigger transition %u", static_cast<unsigned int>(future.get().first->transition.id));
-      return false;
+        RCLCPP_WARN(
+            node_logging_->get_logger(),
+            "Failed to trigger transition %s (%u)",
+            get_transition_name(future.get().first->transition.id).c_str(),
+            static_cast<unsigned int>(future.get().first->transition.id)
+        );
+        return false;
     }
 
     return true;
