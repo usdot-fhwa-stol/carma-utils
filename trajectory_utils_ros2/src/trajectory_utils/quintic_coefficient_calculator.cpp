@@ -23,27 +23,30 @@
 
 namespace quintic_coefficient_calculator {
 
-    std::vector<double> quintic_coefficient_calculator(double x0, double xt, double v0, double vt, double a0, double at, __uint64_t t0, __uint64_t tt ) {
+    std::vector<double> quintic_coefficient_calculator(double x0, double xt, double v0, double vt, double a0, double at, double t0, double tt) {
+        // Changed __uint64_t to double for time parameters to avoid potential conversion issues
 
         Eigen::VectorXd state_values(6);
         state_values << x0, xt, v0, vt, a0, at;
 
         Eigen::Matrix<double, 6, 6> mat;
 
+        // Position constraints at t0 and tt
         mat(0,0) = pow(t0, 5);
         mat(0,1) = pow(t0, 4);
-        mat(0,2) = pow(t0, 3); 
+        mat(0,2) = pow(t0, 3);
         mat(0,3) = pow(t0, 2);
         mat(0,4) = t0;
         mat(0,5) = 1;
 
         mat(1,0) = pow(tt, 5);
         mat(1,1) = pow(tt, 4);
-        mat(1,2) = pow(tt, 3); 
+        mat(1,2) = pow(tt, 3);
         mat(1,3) = pow(tt, 2);
         mat(1,4) = tt;
         mat(1,5) = 1;
 
+        // Velocity constraints at t0 and tt
         mat(2,0) = 5 * pow(t0, 4);
         mat(2,1) = 4 * pow(t0, 3);
         mat(2,2) = 3 * pow(t0, 2);
@@ -58,6 +61,7 @@ namespace quintic_coefficient_calculator {
         mat(3,4) = 1;
         mat(3,5) = 0;
 
+        // Acceleration constraints at t0 and tt
         mat(4,0) = 20 * pow(t0, 3);
         mat(4,1) = 12 * pow(t0, 2);
         mat(4,2) = 6 * t0;
@@ -72,10 +76,9 @@ namespace quintic_coefficient_calculator {
         mat(5,4) = 0;
         mat(5,5) = 0;
 
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> mat_ = mat.inverse();
-        Eigen::VectorXd result;
-
-        result = mat_*state_values;
+        // Using direct solve instead of calculating the inverse explicitly
+        // This is both more numerically stable and more efficient
+        Eigen::VectorXd result = mat.colPivHouseholderQr().solve(state_values);
 
         std::vector<double> vector_result;
         for (size_t i = 0; i < result.size(); i++) {
