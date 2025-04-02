@@ -24,7 +24,6 @@
 namespace quintic_coefficient_calculator {
 
     std::vector<double> quintic_coefficient_calculator(double x0, double xt, double v0, double vt, double a0, double at, double t0, double tt) {
-        // Changed __uint64_t to double for time parameters to avoid potential conversion issues
 
         Eigen::VectorXd state_values(6);
         state_values << x0, xt, v0, vt, a0, at;
