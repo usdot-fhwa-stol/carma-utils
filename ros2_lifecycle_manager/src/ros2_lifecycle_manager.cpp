@@ -300,7 +300,23 @@ namespace ros2_lifecycle_manager
         // Wait for response
         if (!wait_on_change_state_future(future_result, call_timeout))
         {
+          RCLCPP_WARN(
+            node_logging_->get_logger(),
+            "Failed to trigger transition %s (%u) for node %s",
+            get_transition_name(future_result.get().first->transition.id).c_str(),
+            static_cast<unsigned int>(future_result.get().first->transition.id),
+            node.node_name.c_str()
+          );
           failed_nodes.push_back(node.node_name);
+        }
+        else{
+          RCLCPP_INFO(
+            node_logging_->get_logger(),
+            "Transition %s (%d) successfully triggered for node %s",
+            get_transition_name(future_result.get().first->transition.id).c_str(),
+            static_cast<int>(future_result.get().first->transition.id),
+            node.node_name.c_str()
+          );
         }
       }
     }
@@ -331,9 +347,26 @@ namespace ros2_lifecycle_manager
       {
         RCLCPP_INFO_STREAM(node_logging_->get_logger(), "Waiting on future for node: " << future_node_map.at(i));
 
+        // Wait for response
         if (!wait_on_change_state_future(future, call_timeout))
         {
+          RCLCPP_WARN(
+            node_logging_->get_logger(),
+            "Failed to trigger transition %s (%u) for node %s",
+            get_transition_name(future.get().first->transition.id).c_str(),
+            static_cast<unsigned int>(future.get().first->transition.id),
+            future_node_map.at(i).c_str()
+          );
           failed_nodes.push_back(future_node_map.at(i));
+        }
+        else{
+          RCLCPP_INFO(
+            node_logging_->get_logger(),
+            "Transition %s (%d) successfully triggered for node %s",
+            get_transition_name(future.get().first->transition.id).c_str(),
+            static_cast<int>(future.get().first->transition.id),
+            future_node_map.at(i).c_str()
+          );
         }
         i++;
       }
@@ -356,28 +389,13 @@ namespace ros2_lifecycle_manager
       return false;
     }
 
-    // We have an answer, let's print our success.
     if (future.get().second->success)
     {
-        RCLCPP_INFO(
-            node_logging_->get_logger(),
-            "Transition %s (%d) successfully triggered for node %s",
-            get_transition_name(future.get().first->transition.id).c_str(),
-            static_cast<int>(future.get().first->transition.id),
-            future.get().first->node_name.c_str()
-        );
-        return true;
+      return true;
     }
     else
     {
-        RCLCPP_WARN(
-            node_logging_->get_logger(),
-            "Failed to trigger transition %s (%u) for node %s",
-            get_transition_name(future.get().first->transition.id).c_str(),
-            static_cast<unsigned int>(future.get().first->transition.id),
-            future.get().first->node_name.c_str()
-        );
-        return false;
+      return false;
     }
 
     return true;
