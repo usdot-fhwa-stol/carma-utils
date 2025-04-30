@@ -291,7 +291,9 @@ namespace ros2_lifecycle_manager
         }
 
         RCLCPP_INFO_STREAM(
-            node_logging_->get_logger(), "Calling node: " << node.node_name);
+            node_logging_->get_logger(), "Calling node: " << node.node_name
+            << ", to transition: " << get_transition_name(transition).c_str()
+            << " (" << static_cast<int>(transition) << ")");
 
         // Call service
         auto future_result{node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {})};
