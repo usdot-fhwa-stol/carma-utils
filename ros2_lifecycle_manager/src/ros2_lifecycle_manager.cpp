@@ -348,9 +348,6 @@ namespace ros2_lifecycle_manager
   {
     // Let's wait until we have the answer from the node.
     // If the request times out, we return an unknown state.
-    RCLCPP_INFO(
-        node_logging_->get_logger(), "Waiting for future");
-
     auto future_status = future.wait_for(timeout);
 
     if (future_status != std::future_status::ready)
