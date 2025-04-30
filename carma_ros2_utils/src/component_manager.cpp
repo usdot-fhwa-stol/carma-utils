@@ -115,7 +115,6 @@ ComponentManager::create_component_factory(const ComponentResource & resource)
 
   class_loader::ClassLoader * loader;
   if (loaders_.find(library_path) == loaders_.end()) {
-    RCLCPP_INFO(get_logger(), "Load Library: %s", library_path.c_str());
     try {
       loaders_[library_path] = std::make_unique<class_loader::ClassLoader>(library_path);
     } catch (const std::exception & ex) {
