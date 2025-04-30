@@ -170,7 +170,9 @@ ComponentManager::create_node_options(const std::shared_ptr<LoadNode::Request> r
 
     if (extra_argument.get_name() == "--log-level") {
 
-      RCLCPP_INFO(get_logger(), "Found log-level argument: %s", extra_argument.get_value<std::string>().c_str());
+      RCLCPP_INFO(get_logger(), "Found log-level argument: %s for node: %s",
+        extra_argument.get_value<std::string>().c_str(),
+        request->node_name.c_str());
 
       if (extra_argument.get_type() != rclcpp::ParameterType::PARAMETER_STRING) {
         throw ComponentManagerException(

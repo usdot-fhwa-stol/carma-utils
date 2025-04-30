@@ -362,9 +362,10 @@ namespace ros2_lifecycle_manager
     {
         RCLCPP_INFO(
             node_logging_->get_logger(),
-            "Transition %s (%d) successfully triggered.",
+            "Transition %s (%d) successfully triggered for node %s",
             get_transition_name(future.get().first->transition.id).c_str(),
-            static_cast<int>(future.get().first->transition.id)
+            static_cast<int>(future.get().first->transition.id),
+            future.get().first->node_name.c_str()
         );
         return true;
     }
@@ -372,9 +373,10 @@ namespace ros2_lifecycle_manager
     {
         RCLCPP_WARN(
             node_logging_->get_logger(),
-            "Failed to trigger transition %s (%u)",
+            "Failed to trigger transition %s (%u) for node %s",
             get_transition_name(future.get().first->transition.id).c_str(),
-            static_cast<unsigned int>(future.get().first->transition.id)
+            static_cast<unsigned int>(future.get().first->transition.id),
+            future.get().first->node_name.c_str()
         );
         return false;
     }
