@@ -62,7 +62,6 @@ namespace ros2_lifecycle_manager
     managed_node_names_.push_back(node); // Store node names
 
     // Create a new ManagedNode instance
-    RCLCPP_INFO_STREAM(node_logging_->get_logger(), "Creating Managed Node with topics: " << (node + change_state_topic_) << " and " << (node + get_state_topic_));
     ManagedNode managed_node(node,
                               create_client<lifecycle_msgs::srv::ChangeState>(node + change_state_topic_),
                               create_client<lifecycle_msgs::srv::GetState>(node + get_state_topic_));
