@@ -62,7 +62,6 @@ namespace ros2_lifecycle_manager
     managed_node_names_.push_back(node); // Store node names
 
     // Create a new ManagedNode instance
-    RCLCPP_INFO_STREAM(node_logging_->get_logger(), "Creating Managed Node with topics: " << (node + change_state_topic_) << " and " << (node + get_state_topic_));
     ManagedNode managed_node(node,
                               create_client<lifecycle_msgs::srv::ChangeState>(node + change_state_topic_),
                               create_client<lifecycle_msgs::srv::GetState>(node + get_state_topic_));
@@ -290,16 +289,29 @@ namespace ros2_lifecycle_manager
           continue;
         }
 
-        RCLCPP_INFO_STREAM(
-            node_logging_->get_logger(), "Calling node: " << node.node_name);
-
         // Call service
         auto future_result{node.change_state_client->async_send_request(request, [](ChangeStateSharedFutureWithRequest) {})};
 
         // Wait for response
         if (!wait_on_change_state_future(future_result, call_timeout))
         {
+          RCLCPP_WARN(
+            node_logging_->get_logger(),
+            "Failed to trigger transition %s (%u) for node %s",
+            get_transition_name(future_result.get().first->transition.id).c_str(),
+            static_cast<unsigned int>(future_result.get().first->transition.id),
+            node.node_name.c_str()
+          );
           failed_nodes.push_back(node.node_name);
+        }
+        else{
+          RCLCPP_INFO(
+            node_logging_->get_logger(),
+            "Transition %s (%d) successfully triggered for node %s",
+            get_transition_name(future_result.get().first->transition.id).c_str(),
+            static_cast<int>(future_result.get().first->transition.id),
+            node.node_name.c_str()
+          );
         }
       }
     }
@@ -330,9 +342,26 @@ namespace ros2_lifecycle_manager
       {
         RCLCPP_INFO_STREAM(node_logging_->get_logger(), "Waiting on future for node: " << future_node_map.at(i));
 
+        // Wait for response
         if (!wait_on_change_state_future(future, call_timeout))
         {
+          RCLCPP_WARN(
+            node_logging_->get_logger(),
+            "Failed to trigger transition %s (%u) for node %s",
+            get_transition_name(future.get().first->transition.id).c_str(),
+            static_cast<unsigned int>(future.get().first->transition.id),
+            future_node_map.at(i).c_str()
+          );
           failed_nodes.push_back(future_node_map.at(i));
+        }
+        else{
+          RCLCPP_INFO(
+            node_logging_->get_logger(),
+            "Transition %s (%d) successfully triggered for node %s",
+            get_transition_name(future.get().first->transition.id).c_str(),
+            static_cast<int>(future.get().first->transition.id),
+            future_node_map.at(i).c_str()
+          );
         }
         i++;
       }
@@ -346,9 +375,6 @@ namespace ros2_lifecycle_manager
   {
     // Let's wait until we have the answer from the node.
     // If the request times out, we return an unknown state.
-    RCLCPP_INFO(
-        node_logging_->get_logger(), "Waiting for future");
-
     auto future_status = future.wait_for(timeout);
 
     if (future_status != std::future_status::ready)
@@ -358,26 +384,13 @@ namespace ros2_lifecycle_manager
       return false;
     }
 
-    // We have an answer, let's print our success.
     if (future.get().second->success)
     {
-        RCLCPP_INFO(
-            node_logging_->get_logger(),
-            "Transition %s (%d) successfully triggered.",
-            get_transition_name(future.get().first->transition.id).c_str(),
-            static_cast<int>(future.get().first->transition.id)
-        );
-        return true;
+      return true;
     }
     else
     {
-        RCLCPP_WARN(
-            node_logging_->get_logger(),
-            "Failed to trigger transition %s (%u)",
-            get_transition_name(future.get().first->transition.id).c_str(),
-            static_cast<unsigned int>(future.get().first->transition.id)
-        );
-        return false;
+      return false;
     }
 
     return true;
