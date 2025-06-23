@@ -86,8 +86,6 @@ class TestRuntime(unittest.TestCase):
         self.assertTrue(output_str == 'Transitioning successful\n')
 
         proc_output.assertWaitFor("libtest_minimal_node.so", process='wrapper_container', strict_proc_matching=True,timeout=5)
-        proc_output.assertWaitFor("Found class: rclcpp_components::NodeFactoryTemplate<carma_ros2_utils_testing::MinimalNode>", process='wrapper_container', strict_proc_matching=True,timeout=5)
-        proc_output.assertWaitFor("Instantiate class: rclcpp_components::NodeFactoryTemplate<carma_ros2_utils_testing::MinimalNode>", process='wrapper_container', strict_proc_matching=True,timeout=5)
 
         completed_proc = subprocess.run(['ros2', 'lifecycle', 'set', '/wrapper_container', 'deactivate'], env=d, capture_output=True, timeout=8)
 

@@ -15,8 +15,8 @@
 /**
  * Modifications copyright (C) 2021 Leidos
  * - Converted into CARMA Component Manager by adding log-level support
- * 
- */ 
+ *
+ */
 
 #include "carma_ros2_utils/component_manager.hpp"
 
@@ -115,7 +115,6 @@ ComponentManager::create_component_factory(const ComponentResource & resource)
 
   class_loader::ClassLoader * loader;
   if (loaders_.find(library_path) == loaders_.end()) {
-    RCLCPP_INFO(get_logger(), "Load Library: %s", library_path.c_str());
     try {
       loaders_[library_path] = std::make_unique<class_loader::ClassLoader>(library_path);
     } catch (const std::exception & ex) {
@@ -128,9 +127,7 @@ ComponentManager::create_component_factory(const ComponentResource & resource)
 
   auto classes = loader->getAvailableClasses<rclcpp_components::NodeFactory>();
   for (const auto & clazz : classes) {
-    RCLCPP_INFO(get_logger(), "Found class: %s", clazz.c_str());
     if (clazz == class_name || clazz == fq_class_name) {
-      RCLCPP_INFO(get_logger(), "Instantiate class: %s", clazz.c_str());
       return loader->createInstance<rclcpp_components::NodeFactory>(clazz);
     }
   }
@@ -173,7 +170,9 @@ ComponentManager::create_node_options(const std::shared_ptr<LoadNode::Request> r
 
     if (extra_argument.get_name() == "--log-level") {
 
-      RCLCPP_INFO(get_logger(), "Found log-level argument: %s", extra_argument.get_value<std::string>().c_str());
+      RCLCPP_INFO(get_logger(), "Found log-level argument: %s for node: %s",
+        extra_argument.get_value<std::string>().c_str(),
+        request->node_name.c_str());
 
       if (extra_argument.get_type() != rclcpp::ParameterType::PARAMETER_STRING) {
         throw ComponentManagerException(
@@ -256,10 +255,10 @@ ComponentManager::on_load_node(
 
         if (log_level_arg_it == options.arguments().end()) {
           RCLCPP_DEBUG(get_logger(), "--log-level arg does not appear to be set");
-        
+
         } else if (log_level_arg_it + 1 == options.arguments().end()) {
           RCLCPP_ERROR(get_logger(), "--log-level arg option provided but the log level itself was not");
-        
+
         } else {
           // If the log-level has been set on this component then try to set it for the specific logger
           RCUTILS_LOG_SEVERITY sev = RCUTILS_LOG_SEVERITY_WARN;
@@ -282,7 +281,7 @@ ComponentManager::on_load_node(
           }
           // Set the log level
           auto result = rcutils_logging_set_logger_level(node_wrappers_[node_id].get_node_base_interface()->get_name(), sev);
-          
+
           if (result != RCUTILS_RET_OK) {
             RCLCPP_ERROR(get_logger(), "FAILED to set log level when provided with --log-level argument");
           }
@@ -290,7 +289,7 @@ ComponentManager::on_load_node(
         /////
         // CARMA CHANGE END
         /////
-          
+
       } catch (const std::exception & ex) {
         // In the case that the component constructor throws an exception,
         // rethrow into the following catch block.

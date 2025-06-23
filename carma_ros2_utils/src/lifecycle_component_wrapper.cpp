@@ -15,8 +15,8 @@
 /**
  * Modifications copyright (C) 2021 Leidos
  * - Converted into Lifecycle Component Wrapper
- * 
- */ 
+ *
+ */
 
 #include "carma_ros2_utils/lifecycle_component_wrapper.hpp"
 
@@ -114,7 +114,6 @@ LifecycleComponentWrapper::create_component_factory(const ComponentResource & re
 
   class_loader::ClassLoader * loader;
   if (loaders_.find(library_path) == loaders_.end()) {
-    RCLCPP_INFO(get_logger(), "Load Library: %s", library_path.c_str());
     try {
       loaders_[library_path] = std::make_unique<class_loader::ClassLoader>(library_path);
     } catch (const std::exception & ex) {
@@ -127,9 +126,7 @@ LifecycleComponentWrapper::create_component_factory(const ComponentResource & re
 
   auto classes = loader->getAvailableClasses<rclcpp_components::NodeFactory>();
   for (const auto & clazz : classes) {
-    RCLCPP_INFO(get_logger(), "Found class: %s", clazz.c_str());
     if (clazz == class_name || clazz == fq_class_name) {
-      RCLCPP_INFO(get_logger(), "Instantiate class: %s", clazz.c_str());
       return loader->createInstance<rclcpp_components::NodeFactory>(clazz);
     }
   }
@@ -172,7 +169,9 @@ LifecycleComponentWrapper::create_node_options(const std::shared_ptr<LoadNode::R
 
     if (extra_argument.get_name() == "--log-level") {
 
-      RCLCPP_INFO(get_logger(), "Found log-level argument: %s", extra_argument.get_value<std::string>().c_str());
+      RCLCPP_INFO(get_logger(), "Found log-level argument: %s for node: %s",
+        extra_argument.get_value<std::string>().c_str(),
+        request->node_name.c_str());
 
       if (extra_argument.get_type() != rclcpp::ParameterType::PARAMETER_STRING) {
         throw rclcpp_components::ComponentManagerException(
@@ -219,12 +218,12 @@ LifecycleComponentWrapper::on_load_node(
   // If this was an external request and we are NOT in the ACTIVE state
   // then we should not load the node and simply cache it for load on activate
   if (!internal_id && get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
-    
+
     RCLCPP_INFO_STREAM(get_logger(), "Got request to load node: " << request->node_name <<
       " but we are not in the active state, caching for later lifecycle based activation.");
 
     auto node_id = unique_id_++; // Store and update the unique id
-     
+
     load_node_requests_.emplace(node_id, std::make_pair(*request_header, *request));
 
     // NOTE: This is a bit of a hack, but we need to return a valid response
@@ -281,10 +280,10 @@ LifecycleComponentWrapper::on_load_node(
 
         if (log_level_arg_it == options.arguments().end()) {
           RCLCPP_DEBUG(get_logger(), "--log-level arg does not appear to be set");
-        
+
         } else if (log_level_arg_it + 1 == options.arguments().end()) {
           RCLCPP_ERROR(get_logger(), "--log-level arg option provided but the log level itself was not");
-        
+
         } else {
           // If the log-level has been set on this component then try to set it for the specific logger
           RCUTILS_LOG_SEVERITY sev = RCUTILS_LOG_SEVERITY_WARN;
@@ -307,7 +306,7 @@ LifecycleComponentWrapper::on_load_node(
           }
           // Set the log level
           auto result = rcutils_logging_set_logger_level(node_wrappers_[node_id].get_node_base_interface()->get_name(), sev);
-        
+
           if (result != RCUTILS_RET_OK) {
             RCLCPP_ERROR(get_logger(), "FAILED to set log level when provided with --log-level argument");
           }
@@ -334,20 +333,20 @@ LifecycleComponentWrapper::on_load_node(
 
       // Check if the loaded node is a lifecycle node and if it is then updates its activation
       for (const auto & a : request->extra_arguments) {
-        
+
         const rclcpp::Parameter extra_argument = rclcpp::Parameter::from_parameter_msg(a);
-        
+
         if (extra_argument.get_name() == "is_lifecycle_node") {
-          
+
           if (extra_argument.get_type() != rclcpp::ParameterType::PARAMETER_BOOL) {
             throw rclcpp_components::ComponentManagerException(
                     "Extra component argument 'is_lifecycle_node' must be a boolean");
           }
 
           if (extra_argument.as_bool()) {
-            
+
             RCLCPP_INFO_STREAM(get_logger(), "A lifecycle component has been loaded by the LifecycleComponentWrapper. Attempting to move it to the ACTIVE state.");
-            
+
             std::shared_ptr<rclcpp_lifecycle::LifecycleNode> lifecycle_node = std::static_pointer_cast<rclcpp_lifecycle::LifecycleNode>(node_wrappers_[node_id].get_node_instance());
             lifecycle_node->configure();
             lifecycle_node->activate();
@@ -440,7 +439,7 @@ carma_ros2_utils::CallbackReturn LifecycleComponentWrapper::handle_on_activate(c
   bool success = true;
 
   for (auto & request : load_node_requests_) {
-    
+
     auto response = std::make_shared<LoadNode::Response>();
     auto header = std::make_shared<rmw_request_id_t>(request.second.first);
     auto req = std::make_shared<LoadNode::Request>(request.second.second);
@@ -493,7 +492,7 @@ bool LifecycleComponentWrapper::unload_all_nodes() {
     request->unique_id = it->first;
 
     auto response = std::make_shared<UnloadNode::Response>();
-      
+
 
     // NOTE: This call will erase "it" so do not access it beyond this line
     on_unload_node(std::make_shared<rmw_request_id_t>(),

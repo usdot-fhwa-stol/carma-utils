@@ -23,8 +23,8 @@
 #include <Eigen/Dense>
 
 namespace quintic_coefficient_calculator {
-    
-    /*! 
+
+    /*!
     \brief  quintic_coefficient_calculator is used to solve quintic_coefficient for object avoidance .
     \param x0 position at time t0
     \param xt position at time t
@@ -36,6 +36,6 @@ namespace quintic_coefficient_calculator {
     \param tt goal time
     */
 
-    std::vector<double> quintic_coefficient_calculator(double x0, double xt, double v0, double vt, double a0, double at, __uint64_t t0, __uint64_t tt);
+    std::vector<double> quintic_coefficient_calculator(double x0, double xt, double v0, double vt, double a0, double at, double t0, double tt);
 
 }  // namespace quintic_coefficient_calculator
