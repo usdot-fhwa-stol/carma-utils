@@ -50,21 +50,34 @@ std::tuple<double, double> localVelOrientationAndMagnitude(const double v_x, con
   return std::make_tuple(local_v_orientation, v_mag);
 }
 
+double getYawFromQuaternion(const geometry_msgs::msg::Quaternion& q)
+{
+  return atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z));
+}
+
+geometry_msgs::msg::Quaternion getQuaternionFromYaw(double yaw)
+{
+  geometry_msgs::msg::Quaternion q;
+  q.x = 0.0;
+  q.y = 0.0;
+  q.z = sin(yaw / 2.0);
+  q.w = cos(yaw / 2.0);
+  return q;
+}
+
 CTRV_State buildCTRVState(const geometry_msgs::msg::Pose& pose, const geometry_msgs::msg::Twist& twist)
 {
-  // TODO: Need a logic here to possible detect whether if twist.linear.x,y
-  // is in map frame. https://github.com/usdot-fhwa-stol/carma-platform/issues/2407
+  // twist.linear is expected in the object's own body frame (x = forward, y = left), matching
+  // pose.orientation, rather than already being in the map frame.
+  // https://github.com/usdot-fhwa-stol/carma-platform/issues/2407
+  // The local velocity vector's own heading (e.g. a lateral slip angle) is composed with the
+  // object's orientation to get the absolute direction of travel used to propagate position.
   auto vel_angle_and_mag = localVelOrientationAndMagnitude(twist.linear.x, twist.linear.y);
 
   CTRV_State state;
   state.x = pose.position.x;
   state.y = pose.position.y;
-  state.yaw = std::get<0>(vel_angle_and_mag); // Currently, object's linear velocity is already in map frame.
-                                              // Orientation of the object cannot be trusted for objects
-                                              // as it could be drifting sideways while facing other direction.
-                                              // This may not be what the user expect, and below issue tracks it.
-                                              // https://github.com/usdot-fhwa-stol/carma-platform/issues/2401
-
+  state.yaw = getYawFromQuaternion(pose.orientation) + std::get<0>(vel_angle_and_mag);
   state.v = std::get<1>(vel_angle_and_mag);
   state.yaw_rate = twist.angular.z;
 
@@ -81,10 +94,11 @@ carma_perception_msgs::msg::PredictedState buildPredictionFromCTRVState(const CT
   pobj.predicted_position.position.y = state.y;
   pobj.predicted_position.position.z = original_pose.position.z;
 
-  // Map orientation
-  pobj.predicted_position.orientation = original_pose.orientation;
-  // TODO: Take another look at orientation calculation after addressing this:
-  // https://github.com/usdot-fhwa-stol/carma-platform/issues/2401
+  // Map orientation: state.yaw is the direction of travel (object heading composed with any
+  // local slip angle); subtract the slip angle back out to recover the object's own propagated
+  // heading, which may differ from its direction of travel (e.g. drifting sideways).
+  double slip_angle = std::get<0>(localVelOrientationAndMagnitude(original_twist.linear.x, original_twist.linear.y));
+  pobj.predicted_position.orientation = getQuaternionFromYaw(state.yaw - slip_angle);
 
   // Map twist
   // Constant velocity model means twist remains unchanged
