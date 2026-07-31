@@ -15,58 +15,85 @@
 # limitations under the License.
 
 '''
-Generates a json dictionary of package names with log levels.
+Generates a json dictionary of logger names with log levels.
 The default level will be at key default_level.
-Possible levels [ debug, info, warn, error, fatal ]
-param: config_file_path The path to a log4j format .conf file.
-       relevent log level lines should have the form log4j.logger.ros.<package_name>=<log_level>
+Possible levels [ DEBUG, INFO, WARN, ERROR, FATAL ]
+
+Supported config file formats
+------------------------------
+New simple format (preferred):
+    ros=WARN                          # sets the default level
+    yield_plugin=DEBUG                # exact logger name
+    carma_wm=INFO                     # library logger
+    carma_wm.route=DEBUG              # child logger (dot hierarchy)
+    guidance.plugins.yield_plugin=DEBUG  # fully-qualified node logger
+
+Legacy log4j format (still accepted for backward compatibility):
+    log4j.logger.ros=WARN
+    log4j.logger.ros.<logger_name>=<level>
+
+param: config_file_path  Path to a .conf file in either format.
 '''
+
+
 def generate_log_levels_impl(config_file_path):
 
-    levels = { 'default_level' : 'WARN' } # Default log level will be WARN
+    levels = {'default_level': 'WARN'}  # Default log level will be WARN
 
-    # Open the config file and parse its contents
     with open(config_file_path, 'r') as config_file:
 
         for line in config_file:
-            
-            no_ws_line = "".join(line.split()) # Remove white space
 
-            if not no_ws_line.startswith('log4j'): # If this line is not a log configuration line then continue
+            no_ws_line = "".join(line.split())  # Remove whitespace
+
+            if not no_ws_line or no_ws_line.startswith('#'):
                 continue
 
-            parts = no_ws_line.split('=') # Separate the logger name from the log level
-            
+            # ---- Legacy log4j format ----------------------------------------
+            if no_ws_line.startswith('log4j'):
+                parts = no_ws_line.split('=')
+                if len(parts) != 2:
+                    print("Failed to process line: " + str(no_ws_line))
+                    continue
+
+                full_logger_package = parts[0]
+                log_level = parts[1]
+                package_parts = full_logger_package.split('.')
+
+                if len(package_parts) < 3:
+                    print("Failed to process line: " + str(no_ws_line))
+                    continue
+
+                # log4j.logger.ros=LEVEL  → default
+                if len(package_parts) == 3 and package_parts[2] == 'ros':
+                    levels['default_level'] = log_level
+                elif len(package_parts) >= 4:
+                    # log4j.logger.ros.<name>=LEVEL  → join remaining parts with dots
+                    levels['.'.join(package_parts[3:])] = log_level
+                else:
+                    print("Failed to process line: " + str(no_ws_line))
+                continue
+
+            # ---- New simple format: key=LEVEL --------------------------------
+            parts = no_ws_line.split('=')
             if len(parts) != 2:
                 print("Failed to process line: " + str(no_ws_line))
                 continue
 
-            full_logger_package = parts[0]
-            log_level = parts[1]
+            key, log_level = parts[0], parts[1]
 
-            package_parts = full_logger_package.split('.')
-
-            if (len(package_parts) < 3): # We are expecting a format of log4j.logger.ros.<package_name>
+            if not key or not log_level:
                 print("Failed to process line: " + str(no_ws_line))
+                continue
 
-            # If this line is the top ros level log then update the default value based on the provided log level
-            if (len(package_parts) == 3 and package_parts[2] == 'ros'):
+            if key == 'ros':
                 levels['default_level'] = log_level
-                continue
-
-            elif(len(package_parts) >= 4): # This is a package log level descripter so get the package name
-                package = ''
-                for part in package_parts[3:]:
-                    package += part
-                    package += '.'
-                package = package[:-1]
-                levels[ package ] = log_level
-
             else:
-                print("Failed to process line: " + str(no_ws_line))
-                continue
+                levels[key] = log_level
 
     return levels
 
+
 def generate_log_levels(config_file_path):
-    return str(generate_log_levels_impl(config_file_path)).replace("'", '"') # Convert dictionary to string and use double quotes instead of single for valid json format
+    # Convert dictionary to JSON string (replace single quotes with double quotes)
+    return str(generate_log_levels_impl(config_file_path)).replace("'", '"')
