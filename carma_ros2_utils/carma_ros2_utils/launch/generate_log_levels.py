@@ -28,10 +28,6 @@ New simple format (preferred):
     carma_wm.route=DEBUG              # child logger (dot hierarchy)
     guidance.plugins.yield_plugin=DEBUG  # fully-qualified node logger
 
-Legacy log4j format (still accepted for backward compatibility):
-    log4j.logger.ros=WARN
-    log4j.logger.ros.<logger_name>=<level>
-
 param: config_file_path  Path to a .conf file in either format.
 '''
 
