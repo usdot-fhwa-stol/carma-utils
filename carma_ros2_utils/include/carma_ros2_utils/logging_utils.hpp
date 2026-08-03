@@ -62,9 +62,11 @@ inline RCUTILS_LOG_SEVERITY log_level_to_severity(const std::string & level_str)
 
 // Parse the flat JSON object produced by generate_log_levels.py (e.g.
 // {"default_level": "WARN", "yield_plugin": "DEBUG"}) into a string map.
-// Defined in logging_utils.cpp: the boost::property_tree JSON parser transitively
+
+// NOTE: Implementation is explicitly defined in logging_utils.cpp file
+// This is because the boost::property_tree JSON parser transitively
 // drags in boost::bind, which collides with std::placeholders in some translation
-// units, so it must not leak into this header.
+// units, so keeping it in the .cpp file to prevent the leak into this header
 // \param json_str Flat JSON object string of logger_name -> level.
 // \return Map of logger_name -> level string. Empty if json_str is malformed.
 std::map<std::string, std::string> parse_log_levels_json(const std::string & json_str);
@@ -73,9 +75,12 @@ std::map<std::string, std::string> parse_log_levels_json(const std::string & jso
 // (e.g. guidance.plugins.yield_plugin) and leaf name (e.g. yield_plugin).
 //
 // Lookup priority:
-//   1. Exact FQN match  (guidance.plugins.yield_plugin)
-//   2. Leaf name match  (yield_plugin) — convenient: one conf entry covers all namespaces
-//   3. default_level entry
+//   1. Fully-qualified dot name  (e.g. guidance.plugins.yield_plugin)
+//   2. Leaf node name            (e.g. yield_plugin) — one conf entry covers all namespaces
+//                                Because it is convenient to use only the node name instead
+//                                of the fully-qualified name. Typically, node name is
+//                                unique enough to avoid collisions.
+//   3. default_level
 //   4. WARN as hard fallback
 // \param levels Parsed logger_name -> level map (see parse_log_levels_json).
 // \param fqn_logger Fully qualified dot-separated logger name.
