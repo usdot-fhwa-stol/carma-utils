@@ -17,24 +17,18 @@
 '''
 Generates a json dictionary of logger names with log levels.
 The default level will be at key default_level.
+The output is typically used in the ros2 launch file (e.g. carma_docker_launch.py)
+to set the log levels for the nodes in the launch file.
 Possible levels [ DEBUG, INFO, WARN, ERROR, FATAL ]
-
-Supported config file formats
-------------------------------
-ros=WARN                          # sets the default level
-yield_plugin=DEBUG                # exact logger name (rclcpp::get_logger("yield_plugin")) OR
-                                  # the node name without the full namespace for convenience
-                                  # (without `guidance.plugins.yield_plugin` prefix)
-carma_wm=INFO                     # library loggers (applies to all nodes using the library)
-yield_plugin.carma_wm=DEBUG       # child loggers:
-                                  # - scopes to only yield_plugin's carma_wm logger
-                                  # - setting the parent (yield_plugin=DEBUG) will also affect
-                                  # the child loggers
-guidance.plugins.yield_plugin=DEBUG  # full namespace node logger
-
-param: config_file_path  Path to a .conf file in either format.
+Expects a .conf file in either format:
+    logger_key=LEVEL
+    logger_key1=LEVEL
+    logger_key2=LEVEL
+    ...
+@param: config_file_path  Path to a .conf file in either format
+@return: A json dictionary of logger names with log levels.
+         The default level will be at key default_level.
 '''
-
 def generate_log_levels_impl(config_file_path):
 
     levels = {'default_level': 'WARN'}  # Default log level will be WARN
