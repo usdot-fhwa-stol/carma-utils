@@ -21,18 +21,19 @@ Possible levels [ DEBUG, INFO, WARN, ERROR, FATAL ]
 
 Supported config file formats
 ------------------------------
-New simple format (preferred):
-    ros=WARN                          # sets the default level
-    yield_plugin=DEBUG                # exact logger name
-    carma_wm=INFO                     # library logger
-    yield_plugin.carma_wm=DEBUG       # child logger:
-                                      # - scopes to only yield_plugin's carma_wm logger
-                                      # - setting the parent will also affect the child loggers
-    guidance.plugins.yield_plugin=DEBUG  # fully-qualified node logger
+ros=WARN                          # sets the default level
+yield_plugin=DEBUG                # exact logger name (rclcpp::get_logger("yield_plugin")) OR
+                                  # the node name without the full namespace for convenience
+                                  # (without `guidance.plugins.yield_plugin` prefix)
+carma_wm=INFO                     # library loggers (applies to all nodes using the library)
+yield_plugin.carma_wm=DEBUG       # child loggers:
+                                  # - scopes to only yield_plugin's carma_wm logger
+                                  # - setting the parent (yield_plugin=DEBUG) will also affect
+                                  # the child loggers
+guidance.plugins.yield_plugin=DEBUG  # full namespace node logger
 
 param: config_file_path  Path to a .conf file in either format.
 '''
-
 
 def generate_log_levels_impl(config_file_path):
 
