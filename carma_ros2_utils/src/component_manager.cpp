@@ -13,8 +13,10 @@
 // limitations under the License.
 
 /**
- * Modifications copyright (C) 2021 Leidos
+ * Modifications copyright (C) 2021-2026 Leidos
  * - Converted into CARMA Component Manager by adding log-level support
+ * - Added support for full namespace (dot separated) logger name, leaf
+ *  node name, and default_level in CARMA_ROS_LOGGING_CONFIG
  *
  */
 

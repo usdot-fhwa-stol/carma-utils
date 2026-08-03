@@ -13,9 +13,10 @@
 // limitations under the License.
 
 /**
- * Modifications copyright (C) 2021 Leidos
+ * Modifications copyright (C) 2021-2026 Leidos
  * - Converted into Lifecycle Component Wrapper
- *
+ * - Added support for full namespace (dot separated) logger name, leaf
+ *  node name, and default_level in CARMA_ROS_LOGGING_CONFIG
  */
 
 #include "carma_ros2_utils/lifecycle_component_wrapper.hpp"

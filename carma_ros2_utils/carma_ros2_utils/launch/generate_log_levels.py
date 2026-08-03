@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2021 LEIDOS.
+# Copyright (C) 2021-2026 LEIDOS.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,31 +47,6 @@ def generate_log_levels_impl(config_file_path):
             no_ws_line = "".join(line.split())  # Remove whitespace
 
             if not no_ws_line or no_ws_line.startswith('#'):
-                continue
-
-            # ---- Legacy log4j format ----------------------------------------
-            if no_ws_line.startswith('log4j'):
-                parts = no_ws_line.split('=')
-                if len(parts) != 2:
-                    print("Failed to process line: " + str(no_ws_line))
-                    continue
-
-                full_logger_package = parts[0]
-                log_level = parts[1]
-                package_parts = full_logger_package.split('.')
-
-                if len(package_parts) < 3:
-                    print("Failed to process line: " + str(no_ws_line))
-                    continue
-
-                # log4j.logger.ros=LEVEL  → default
-                if len(package_parts) == 3 and package_parts[2] == 'ros':
-                    levels['default_level'] = log_level
-                elif len(package_parts) >= 4:
-                    # log4j.logger.ros.<name>=LEVEL  → join remaining parts with dots
-                    levels['.'.join(package_parts[3:])] = log_level
-                else:
-                    print("Failed to process line: " + str(no_ws_line))
                 continue
 
             # ---- New simple format: key=LEVEL --------------------------------
