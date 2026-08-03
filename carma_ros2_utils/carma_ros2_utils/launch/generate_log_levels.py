@@ -47,7 +47,7 @@ def generate_log_levels_impl(config_file_path):
             if not no_ws_line or no_ws_line.startswith('#'):
                 continue
 
-            # ---- New simple format: key=LEVEL --------------------------------
+            # ---- Format: logger_key=LEVEL --------------------------------
             parts = no_ws_line.split('=')
             if len(parts) != 2:
                 print("Failed to process line: " + str(no_ws_line))
