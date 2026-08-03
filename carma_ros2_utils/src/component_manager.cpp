@@ -59,7 +59,7 @@ ComponentManager::ComponentManager(
   // CARMA CHANGE START
   /////
   // Apply all logger levels from CARMA_ROS_LOGGING_CONFIG at startup so that
-  // library loggers (e.g. carma_wm_ros2, basic_autonomy_ros2) that are not
+  // library loggers (e.g. carma_wm, basic_autonomy) that are not
   // associated with any ROS node also receive the configured level.
   apply_logger_levels_from_env();
   /////
@@ -266,6 +266,9 @@ ComponentManager::on_load_node(
         // Lookup order in CARMA_ROS_LOGGING_CONFIG:
         //   1. Fully-qualified dot name  (e.g. guidance.plugins.yield_plugin)
         //   2. Leaf node name            (e.g. yield_plugin) — one conf entry covers all namespaces
+        //                                Because it is convenient to use only the node name instead
+        //                                of the fully-qualified name. Typically, node name is
+        //                                unique enough to avoid collisions.
         //   3. default_level
         {
           const std::string fqn_logger = fqn_to_logger_name(

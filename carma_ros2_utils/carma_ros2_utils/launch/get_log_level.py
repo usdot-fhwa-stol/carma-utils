@@ -62,7 +62,7 @@ class GetLogLevel(Substitution):
         super().__init__()
 
         from launch.utilities import normalize_to_list_of_substitutions  # import here to avoid loop
-        
+
         # Normalize the substitution inputs
         self.__package_name = normalize_to_list_of_substitutions(package_name)
 
@@ -92,21 +92,19 @@ class GetLogLevel(Substitution):
 
         json_dict = perform_substitutions(context, self.json_dict)
         package_name = perform_substitutions(context, self.package_name)
-        
+
         return self.log_level_from_dict(package_name, json_dict)
 
     def log_level_from_dict(self, package, levels_json):
         """Helper method to get the log level from the json dictionary."""
 
         try:
-            levels_json = levels_json.strip()
+            levels_dict = json.loads(levels_json.strip())
         except json.JSONDecodeError:
             print("The input to GetLogLevel was not a valid json string. Setting default log level WARN")
             return 'WARN'
 
-        levels_dict = json.loads(levels_json)
-        
-        if (package in levels_dict.keys()):
+        if (package in levels_dict):
             return levels_dict[package]
 
         elif ('default_level' in levels_dict):

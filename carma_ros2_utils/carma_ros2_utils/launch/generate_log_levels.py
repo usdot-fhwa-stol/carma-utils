@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 '''
 Generates a json dictionary of logger names with log levels.
 The default level will be at key default_level.
@@ -63,5 +65,4 @@ def generate_log_levels_impl(config_file_path):
 
 
 def generate_log_levels(config_file_path):
-    # Convert dictionary to JSON string (replace single quotes with double quotes)
-    return str(generate_log_levels_impl(config_file_path)).replace("'", '"')
+    return json.dumps(generate_log_levels_impl(config_file_path))
