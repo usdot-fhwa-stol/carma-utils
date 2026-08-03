@@ -25,7 +25,9 @@ New simple format (preferred):
     ros=WARN                          # sets the default level
     yield_plugin=DEBUG                # exact logger name
     carma_wm=INFO                     # library logger
-    carma_wm.route=DEBUG              # child logger (dot hierarchy)
+    yield_plugin.carma_wm=DEBUG       # child logger:
+                                      # - scopes to only yield_plugin's carma_wm logger
+                                      # - setting the parent will also affect the child loggers
     guidance.plugins.yield_plugin=DEBUG  # fully-qualified node logger
 
 param: config_file_path  Path to a .conf file in either format.
