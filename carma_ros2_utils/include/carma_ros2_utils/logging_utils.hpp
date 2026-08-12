@@ -103,6 +103,58 @@ inline RCUTILS_LOG_SEVERITY resolve_node_log_level(
   return RCUTILS_LOG_SEVERITY_WARN;
 }
 
+// Apply conf entries scoped to this node's leaf name (e.g. "yield_plugin.carma_wm")
+// to the node's actual runtime child logger name (e.g.
+// "guidance.plugins.yield_plugin.carma_wm").
+//
+// rcutils only walks left-anchored prefixes of a logger's fully-qualified name when
+// resolving its effective level, so a key like "yield_plugin.carma_wm" is never a
+// prefix of the node's real child logger name and can never match on its own -- it has
+// to be rewritten in terms of this node's fqn_logger before being set.
+// \param levels Parsed logger_name -> level map (see parse_log_levels_json).
+// \param fqn_logger Fully qualified dot-separated logger name of this node.
+// \param leaf_name Node's leaf (unqualified) name.
+inline void apply_scoped_child_logger_levels(
+  const std::map<std::string, std::string> & levels,
+  const std::string & fqn_logger,
+  const std::string & leaf_name)
+{
+  const std::string prefix = leaf_name + ".";
+  for (const auto & kv : levels) {
+    if (kv.first.compare(0, prefix.size(), prefix) == 0) {
+      const std::string child_logger = fqn_logger + "." + kv.first.substr(prefix.size());
+      rcutils_logging_set_logger_level(child_logger.c_str(), log_level_to_severity(kv.second));
+    }
+  }
+}
+
+// Apply "library name" conf entries (bare keys with no dot, e.g. "carma_wm",
+// "basic_autonomy") to this node's own child logger for that library (e.g.
+// "guidance.plugins.yield_plugin.carma_wm"). Library code commonly logs through a
+// node-scoped child logger (node_logger.get_child("carma_wm")) rather than the bare
+// global one, so without this a plain "carma_wm=DEBUG" would only ever reach the bare
+// "carma_wm" logger and not each plugin's own instance -- this makes it cascade to
+// every loaded node, matching what the conf file documents ("applies to all plugins
+// that link to that library").
+// \param levels Parsed logger_name -> level map (see parse_log_levels_json).
+// \param fqn_logger Fully qualified dot-separated logger name of this node.
+// \param leaf_name Node's leaf (unqualified) name.
+inline void apply_library_logger_levels_for_node(
+  const std::map<std::string, std::string> & levels,
+  const std::string & fqn_logger,
+  const std::string & leaf_name)
+{
+  for (const auto & kv : levels) {
+    const std::string & key = kv.first;
+    if (key == "default_level") continue;
+    if (key == fqn_logger || key == leaf_name) continue;
+    if (key.find('.') != std::string::npos) continue;  // scoped keys handled elsewhere
+
+    const std::string child_logger = fqn_logger + "." + key;
+    rcutils_logging_set_logger_level(child_logger.c_str(), log_level_to_severity(kv.second));
+  }
+}
+
 // Read CARMA_ROS_LOGGING_CONFIG (produced by generate_log_levels.py) and call
 // rcutils_logging_set_logger_level for every explicitly-named logger.
 //

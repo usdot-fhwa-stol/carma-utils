@@ -31,7 +31,7 @@ class GetLogLevel(Substitution):
 
     The returned level will be debug, info, warning, error, or fatal.
 
-    The input is a json string that contains a dictionary of package names and log levels.
+    The input is a json string that contains a dictionary of node names and log levels.
     This can be provided by an environment variable or launch file argument.
 
     Example of intended usage:
@@ -57,7 +57,7 @@ class GetLogLevel(Substitution):
         Construct a log level variable substitution.
 
         :param package_name: name of the package to check the log level for.
-        :param json_dict: A json formatted dictionary that is a mapping of package names to log levels.
+        :param json_dict: A json formatted dictionary that is a mapping of node names to log levels.
         """
         super().__init__()
 
@@ -85,8 +85,7 @@ class GetLogLevel(Substitution):
         return 'A log level substitution'
 
     def perform(self, context: LaunchContext) -> Text:
-        """Perform the substitution by looking up the package name in the json dictionary."""
-
+        """Perform the substitution by looking up the node name in the json dictionary."""
 
         from launch.utilities import perform_substitutions  # import here to avoid loop
 
@@ -95,7 +94,7 @@ class GetLogLevel(Substitution):
 
         return self.log_level_from_dict(package_name, json_dict)
 
-    def log_level_from_dict(self, package, levels_json):
+    def log_level_from_dict(self, node_name, levels_json):
         """Helper method to get the log level from the json dictionary."""
 
         try:
@@ -104,8 +103,8 @@ class GetLogLevel(Substitution):
             print("The input to GetLogLevel was not a valid json string. Setting default log level WARN")
             return 'WARN'
 
-        if (package in levels_dict):
-            return levels_dict[package]
+        if (node_name in levels_dict):
+            return levels_dict[node_name]
 
         elif ('default_level' in levels_dict):
             return levels_dict['default_level']

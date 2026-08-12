@@ -305,6 +305,8 @@ LifecycleComponentWrapper::on_load_node(
             if (rcutils_logging_set_logger_level(fqn_logger.c_str(), sev) != RCUTILS_RET_OK) {
               RCLCPP_ERROR(get_logger(), "FAILED to set log level for node: %s", fqn_logger.c_str());
             }
+            apply_library_logger_levels_for_node(levels, fqn_logger, leaf_name);
+            apply_scoped_child_logger_levels(levels, fqn_logger, leaf_name);
           }
         }
         /////
