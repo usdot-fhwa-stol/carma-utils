@@ -69,3 +69,4 @@ jobs:
       with:
         sonar-token: ${{ secrets.SONAR_TOKEN }}
         working-dir: "/opt/carma/src/${{ github.event.repository.name }}"
+
