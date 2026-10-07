@@ -47,7 +47,10 @@ TEST(predict_ctrv, buildCTRVState)
   CTRV_State result = buildCTRVState(pose, twist);
   ASSERT_NEAR(result.x, 1.3, 0.000001);
   ASSERT_NEAR(result.y, 1.4, 0.000001);
-  ASSERT_NEAR(result.yaw, 0.41822, 0.00001); // directly uses direction of x, y
+  // twist.linear is expected in the object's body frame, so the propagation yaw is the
+  // object's own heading (~90 deg from pose.orientation) composed with the local velocity
+  // vector's angle (atan2(2, 4.5) =~ 0.41822), not the velocity angle alone.
+  ASSERT_NEAR(result.yaw, 1.98902, 0.00001);
   ASSERT_NEAR(result.v, 4.9244289009, 0.000001);
   ASSERT_NEAR(result.yaw_rate, 0.0872665, 0.0000001);
 }
@@ -86,10 +89,14 @@ TEST(predict_ctrv, buildPredictionFromCTRVState)
   ASSERT_NEAR(result.predicted_position.position.x, pose.position.x, 0.00001);
   ASSERT_NEAR(result.predicted_position.position.y, pose.position.y, 0.00001);
   ASSERT_NEAR(result.predicted_position.position.z, pose.position.z, 0.00001);
-  ASSERT_NEAR(result.predicted_position.orientation.x, pose.orientation.x, 0.00001);
-  ASSERT_NEAR(result.predicted_position.orientation.y, pose.orientation.y, 0.00001);
-  ASSERT_NEAR(result.predicted_position.orientation.z, pose.orientation.z, 0.00001);
-  ASSERT_NEAR(result.predicted_position.orientation.w, pose.orientation.w, 0.00001);
+  // The predicted orientation is the object's own propagated heading: state.yaw with the
+  // local velocity vector's slip angle (atan2(2, 4.5)) subtracted back out. Here that
+  // recovers ~90 deg, i.e. the original pose's yaw, expressed as a pure-yaw quaternion
+  // (any roll/pitch noise in the original orientation is not carried through).
+  ASSERT_NEAR(result.predicted_position.orientation.x, 0.0, 0.00001);
+  ASSERT_NEAR(result.predicted_position.orientation.y, 0.0, 0.00001);
+  ASSERT_NEAR(result.predicted_position.orientation.z, 0.70711, 0.00001);
+  ASSERT_NEAR(result.predicted_position.orientation.w, 0.70710, 0.00001);
 
   ASSERT_NEAR(result.predicted_velocity.linear.x, twist.linear.x, 0.00001);
   ASSERT_NEAR(result.predicted_velocity.linear.y, twist.linear.y, 0.00001);
@@ -148,8 +155,11 @@ TEST(predict_ctrv, predictStepExternal)
   obj.pose.covariance[0] = 1;
   obj.pose.covariance[7] = 1;
   obj.pose.covariance[35] = 1;
-  obj.velocity.twist.linear.x = 4.9244289009 * cos(yaw_angle); // Matching velocity to orientation, as currently map frame is expected in the velocity
-  obj.velocity.twist.linear.y = 4.9244289009 * sin(yaw_angle); // Matching velocity to orientation,  as currently map frame is expected in the velocity
+  // velocity.twist.linear is expected in the object's own body frame (x = forward, y = left),
+  // matching pose.orientation. Driving straight forward with no lateral slip is therefore
+  // expressed as pure x speed, regardless of the object's heading in the map.
+  obj.velocity.twist.linear.x = 4.9244289009;
+  obj.velocity.twist.linear.y = 0.0;
   obj.velocity.covariance[0] = 999;
   obj.velocity.covariance[7] = 999;
   obj.velocity.covariance[35] = 999;
@@ -158,8 +168,11 @@ TEST(predict_ctrv, predictStepExternal)
 
   EXPECT_NEAR(5.3466, result.predicted_position.position.x, 0.00001);  // Verify x position update
   EXPECT_NEAR(1.7498, result.predicted_position.position.y, 0.00001);  // Verify y position update
-  EXPECT_NEAR(4.9244289009 * cos(yaw_angle), result.predicted_velocity.linear.x, 0.00001); // Verify velocity speed
-  EXPECT_NEAR(4.9244289009 * sin(yaw_angle), result.predicted_velocity.linear.y, 0.00001); // Verify velocity speed
+  EXPECT_NEAR(4.9244289009, result.predicted_velocity.linear.x, 0.00001); // Verify velocity speed
+  EXPECT_NEAR(0.0, result.predicted_velocity.linear.y, 0.00001); // Verify velocity speed
+  // No lateral slip and zero yaw rate, so the predicted heading should match the original.
+  EXPECT_NEAR(obj.pose.pose.orientation.z, result.predicted_position.orientation.z, 0.00001);
+  EXPECT_NEAR(obj.pose.pose.orientation.w, result.predicted_position.orientation.w, 0.00001);
   EXPECT_NEAR(0.99, result.predicted_position_confidence, 0.01);
   EXPECT_NEAR(0.001, result.predicted_velocity_confidence, 0.001);
 

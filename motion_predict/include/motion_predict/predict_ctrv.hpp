@@ -28,7 +28,9 @@ namespace ctrv
  * \brief Generates a set of motion predictions seperated by the given time step size for the given period.
  *        Predictions are made using a CTRV motion model.
  *
- * \param  obj external object to predict whose twist and pose are expected in map frame
+ * \param  obj external object to predict whose pose is expected in map frame and whose
+ *             twist.linear is expected in the object's own body frame (x = forward, y = left),
+ *             matching its pose.orientation
  * \param  delta_t prediction time step size in seconds
  * \param  period The total prediction period in seconds
  * \param  process_noise_max is the maximum process noise of the system
@@ -41,7 +43,9 @@ std::vector<carma_perception_msgs::msg::PredictedState> predictPeriod(const carm
  * \brief predictStep populates motion prediction with future pose and velocity.
  *     The predicted motion is created using a CTRV motion model
  *
- * \param  obj external object whose twist and pose are expected in map frame
+ * \param  obj external object whose pose is expected in map frame and whose twist.linear is
+ *             expected in the object's own body frame (x = forward, y = left), matching its
+ *             pose.orientation
  * \param  delta_t prediction time into the future in seconds
  * \param  process_noise_max is the maximum process noise of the system
  * \return The predicted state of the external object at time t + delta_t
@@ -54,7 +58,9 @@ carma_perception_msgs::msg::PredictedState predictStep(const carma_perception_ms
  * \brief predictStep populates motion prediction with future pose and velocity.
  *     The predicted motion is created using a CTRV motion model.
  *
- * \param  obj previous prediction object whose twist and pose are expected in map frame
+ * \param  obj previous prediction object whose predicted_position is expected in map frame and
+ *             whose predicted_velocity.linear is expected in the object's own body frame
+ *             (x = forward, y = left), matching its predicted_position.orientation
  * \param  delta_t prediction time into the future in seconds
  * \param  process_noise_max is the maximum process noise of the system
  * \return The predicted state of the external object at time t + delta_t
