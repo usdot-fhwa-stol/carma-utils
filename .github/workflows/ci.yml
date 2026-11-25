@@ -58,12 +58,22 @@ jobs:
         sed -i '/colcon build/ s/$/ --continue-on-error --parallel-workers 4 --packages-up-to $PACKAGES/' /home/carma/.ci-image/engineering_tools/code_coverage/make_with_coverage.bash
         make_with_coverage.bash -m -e /opt/carma/ -o ./coverage_reports/gcov        
     - name: Run ROS2 C++ Tests
+      id: run-tests
       continue-on-error: true
       run: |
         source "$INIT_ENV"
         source "$ROS_2_ENV"
         sed -i '/colcon test/ s/$/ --parallel-workers 4 --packages-above $PACKAGES/' /home/carma/.ci-image/engineering_tools/code_coverage/make_with_coverage.bash
         make_with_coverage.bash -t -e /opt/carma/ -o ./coverage_reports/gcov
+    # make_with_coverage.bash runs with `set -e` and `colcon test --return-code-on-test-failure`,
+    # so a single failing test exits the script before it collects coverage. Sonar then finds no
+    # .gcov files and reports 0% coverage. Collect coverage here when that happens, so the tests
+    # that did run still count.
+    - name: Collect coverage after test failures
+      if: steps.run-tests.outcome == 'failure'
+      run: |
+        source "$INIT_ENV"
+        bash /home/carma/.ci-image/engineering_tools/code_coverage/collect_gcovr.bash /opt/carma/ /opt/carma/coverage_reports/gcov
     - name: Run SonarScanner
       uses: usdot-fhwa-stol/actions/sonar-scanner@main
       with:
