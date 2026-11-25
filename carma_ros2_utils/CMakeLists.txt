@@ -43,10 +43,12 @@ ament_auto_add_library(carma_ros2_utils_timers SHARED
 
 ament_auto_add_library(lifecycle_component_wrapper SHARED
   src/lifecycle_component_wrapper.cpp
+  src/logging_utils.cpp
 )
 
 ament_auto_add_library(carma_component_manager SHARED
   src/component_manager.cpp
+  src/logging_utils.cpp
 )
 
 ament_auto_add_executable(lifecycle_component_wrapper_st

@@ -13,19 +13,20 @@
 // limitations under the License.
 
 /**
- * Modifications copyright (C) 2021 Leidos
+ * Modifications copyright (C) 2021-2026 Leidos
  * - Converted into Lifecycle Component Wrapper
- *
+ * - Added support for full namespace (dot separated) logger name, leaf
+ *  node name, and default_level in CARMA_ROS_LOGGING_CONFIG
  */
 
 #include "carma_ros2_utils/lifecycle_component_wrapper.hpp"
+#include "carma_ros2_utils/logging_utils.hpp" // CARMA CHANGE
 
 #include <functional>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
-#include <boost/algorithm/string.hpp> // CARMA CHANGE
 
 #include <ament_index_cpp/get_resource.hpp>
 #include <class_loader/class_loader.hpp>
@@ -41,7 +42,16 @@ namespace carma_ros2_utils
 LifecycleComponentWrapper::LifecycleComponentWrapper(const rclcpp::NodeOptions & node_options)
 : carma_ros2_utils::CarmaLifecycleNode(node_options)
 {
-  // Do nothing
+  /////
+  // CARMA CHANGE START
+  /////
+  // Apply all logger levels from CARMA_ROS_LOGGING_CONFIG at startup so that
+  // library loggers (e.g. carma_wm, basic_autonomy) that are not
+  // associated with any ROS node also receive the configured level.
+  apply_logger_levels_from_env();
+  /////
+  // CARMA CHANGE END
+  /////
 }
 
 void LifecycleComponentWrapper::initialize(std::weak_ptr<rclcpp::Executor> executor) {
@@ -274,41 +284,29 @@ LifecycleComponentWrapper::on_load_node(
         /////
         // CARMA CHANGE START
         /////
-        // Here we check if the log-level argument has been set on this component's options
-        // If the argument has been set then we set the log level for the default logger of this component
-        auto log_level_arg_it = std::find(options.arguments().begin(), options.arguments().end(), "--log-level");
+        // Resolve and apply the configured log level for this node.
+        // Lookup order in CARMA_ROS_LOGGING_CONFIG:
+        //   1. Fully-qualified dot name  (e.g. guidance.plugins.yield_plugin)
+        //   2. Leaf node name            (e.g. yield_plugin) — one conf entry covers all namespaces
+        //                                Because it is convenient to use only the node name instead
+        //                                of the fully-qualified name. Typically, node name is
+        //                                unique enough to avoid collisions.
+        //   3. default_level
+        {
+          const std::string fqn_logger = fqn_to_logger_name(
+            node_wrappers_[node_id].get_node_base_interface()->get_fully_qualified_name());
+          const std::string leaf_name =
+            node_wrappers_[node_id].get_node_base_interface()->get_name();
 
-        if (log_level_arg_it == options.arguments().end()) {
-          RCLCPP_DEBUG(get_logger(), "--log-level arg does not appear to be set");
-
-        } else if (log_level_arg_it + 1 == options.arguments().end()) {
-          RCLCPP_ERROR(get_logger(), "--log-level arg option provided but the log level itself was not");
-
-        } else {
-          // If the log-level has been set on this component then try to set it for the specific logger
-          RCUTILS_LOG_SEVERITY sev = RCUTILS_LOG_SEVERITY_WARN;
-
-          std::advance(log_level_arg_it, 1);
-          std::string log_level = *log_level_arg_it;
-          boost::algorithm::to_lower(log_level);
-
-          // Identify the severity with warning as default
-          if (log_level == "debug") {
-            sev = RCUTILS_LOG_SEVERITY_DEBUG;
-          } else if (log_level == "info") {
-            sev = RCUTILS_LOG_SEVERITY_INFO;
-          } else if (log_level == "error") {
-            sev = RCUTILS_LOG_SEVERITY_ERROR;
-          } else if (log_level == "fatal") {
-            sev = RCUTILS_LOG_SEVERITY_FATAL;
-          } else {
-            sev = RCUTILS_LOG_SEVERITY_WARN;
-          }
-          // Set the log level
-          auto result = rcutils_logging_set_logger_level(node_wrappers_[node_id].get_node_base_interface()->get_name(), sev);
-
-          if (result != RCUTILS_RET_OK) {
-            RCLCPP_ERROR(get_logger(), "FAILED to set log level when provided with --log-level argument");
+          const char * env_val = std::getenv("CARMA_ROS_LOGGING_CONFIG");
+          if (env_val) {
+            const auto levels = parse_log_levels_json(std::string(env_val));
+            const auto sev = resolve_node_log_level(levels, fqn_logger, leaf_name);
+            if (rcutils_logging_set_logger_level(fqn_logger.c_str(), sev) != RCUTILS_RET_OK) {
+              RCLCPP_ERROR(get_logger(), "FAILED to set log level for node: %s", fqn_logger.c_str());
+            }
+            apply_library_logger_levels_for_node(levels, fqn_logger, leaf_name);
+            apply_scoped_child_logger_levels(levels, fqn_logger, leaf_name);
           }
         }
         /////
