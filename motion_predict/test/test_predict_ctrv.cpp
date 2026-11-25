@@ -248,5 +248,190 @@ TEST(predict_ctrv, predictPeriod)
   ASSERT_EQ(results[1].header.frame_id, obj.header.frame_id);
 }
 
+TEST(predict_ctrv, yawQuaternionConversions)
+{
+  // Round trip yaw -> quaternion -> yaw, including negative angles and angles near +/- pi
+  for (double yaw : { 0.0, 0.79, M_PI / 2, -M_PI / 2, 3.0, -3.0 })
+  {
+    geometry_msgs::msg::Quaternion q = getQuaternionFromYaw(yaw);
+    EXPECT_NEAR(0.0, q.x, 0.000001);
+    EXPECT_NEAR(0.0, q.y, 0.000001);
+    EXPECT_NEAR(1.0, q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w, 0.000001);  // unit quaternion
+    EXPECT_NEAR(yaw, getYawFromQuaternion(q), 0.000001);
+  }
+
+  // Yaw is still extracted correctly from a quaternion with a little roll/pitch noise
+  geometry_msgs::msg::Quaternion noisy;
+  noisy.x = 0.0012341;
+  noisy.y = 0;
+  noisy.z = 0.7071068;
+  noisy.w = 0.7071057;
+  EXPECT_NEAR(M_PI / 2, getYawFromQuaternion(noisy), 0.00001);
+}
+
+TEST(predict_ctrv, buildCTRVStateBodyFrameVelocity)
+{
+  geometry_msgs::msg::Pose pose;
+  pose.position.x = 2.0;
+  pose.position.y = -1.0;
+  pose.orientation = getQuaternionFromYaw(-M_PI / 2);  // facing -y in the map
+
+  geometry_msgs::msg::Twist twist;
+
+  // Pure forward body velocity: travel direction equals the object's heading
+  twist.linear.x = 3.0;
+  twist.linear.y = 0.0;
+  CTRV_State result = buildCTRVState(pose, twist);
+  EXPECT_NEAR(-M_PI / 2, result.yaw, 0.00001);
+  EXPECT_NEAR(3.0, result.v, 0.00001);
+
+  // Pure leftward body velocity (sliding sideways): travel direction is heading + 90 deg
+  twist.linear.x = 0.0;
+  twist.linear.y = 1.5;
+  result = buildCTRVState(pose, twist);
+  EXPECT_NEAR(0.0, result.yaw, 0.00001);
+  EXPECT_NEAR(1.5, result.v, 0.00001);
+
+  // Reversing: travel direction is opposite the heading
+  twist.linear.x = -2.0;
+  twist.linear.y = 0.0;
+  result = buildCTRVState(pose, twist);
+  EXPECT_NEAR(M_PI / 2, result.yaw, 0.00001);
+  EXPECT_NEAR(2.0, result.v, 0.00001);
+
+  // Stationary: no velocity direction, so the yaw falls back to the object's heading
+  twist.linear.x = 0.0;
+  twist.linear.y = 0.0;
+  result = buildCTRVState(pose, twist);
+  EXPECT_NEAR(-M_PI / 2, result.yaw, 0.00001);
+  EXPECT_NEAR(0.0, result.v, 0.00001);
+}
+
+TEST(predict_ctrv, buildPredictionFromCTRVStateRemovesSlip)
+{
+  geometry_msgs::msg::Pose pose;
+  pose.position.z = 1.0;
+  pose.orientation = getQuaternionFromYaw(0.0);
+
+  // Object is sliding directly left (slip angle of 90 deg) and its propagated
+  // direction of travel is 1.0 rad, so its own heading should be 1.0 - pi/2.
+  geometry_msgs::msg::Twist twist;
+  twist.linear.x = 0.0;
+  twist.linear.y = 2.0;
+
+  CTRV_State state;
+  state.x = 3.0;
+  state.y = 4.0;
+  state.yaw = 1.0;
+  state.v = 2.0;
+
+  carma_perception_msgs::msg::PredictedState result = buildPredictionFromCTRVState(state, pose, twist);
+  EXPECT_NEAR(3.0, result.predicted_position.position.x, 0.00001);
+  EXPECT_NEAR(4.0, result.predicted_position.position.y, 0.00001);
+  EXPECT_NEAR(1.0, result.predicted_position.position.z, 0.00001);
+  EXPECT_NEAR(1.0 - M_PI / 2, getYawFromQuaternion(result.predicted_position.orientation), 0.00001);
+}
+
+TEST(predict_ctrv, predictStepExternalForwardUsesHeading)
+{
+  // Regression test for carma-platform#2407: a body-frame forward velocity must be
+  // propagated along the object's heading, not along the map x axis.
+  carma_perception_msgs::msg::ExternalObject obj;
+  obj.header.stamp = builtin_interfaces::msg::Time(rclcpp::Time(5, 0));
+  obj.pose.pose.position.x = 5.0;
+  obj.pose.pose.position.y = 1.4;
+  obj.pose.pose.orientation = getQuaternionFromYaw(M_PI / 2);  // facing +y in the map
+  obj.velocity.twist.linear.x = 2.0;                            // 2 m/s forward
+  obj.velocity.twist.linear.y = 0.0;
+
+  carma_perception_msgs::msg::PredictedState result = predictStep(obj, 0.1, 1000, 0.99);
+
+  EXPECT_NEAR(5.0, result.predicted_position.position.x, 0.00001);
+  EXPECT_NEAR(1.6, result.predicted_position.position.y, 0.00001);
+  EXPECT_NEAR(M_PI / 2, getYawFromQuaternion(result.predicted_position.orientation), 0.00001);
+}
+
+TEST(predict_ctrv, predictStepExternalSidewaysDrift)
+{
+  // Object faces +x but slides left (+y). It should move along +y while keeping its heading.
+  carma_perception_msgs::msg::ExternalObject obj;
+  obj.header.stamp = builtin_interfaces::msg::Time(rclcpp::Time(5, 0));
+  obj.pose.pose.position.x = 1.0;
+  obj.pose.pose.position.y = 2.0;
+  obj.pose.pose.orientation = getQuaternionFromYaw(0.0);
+  obj.velocity.twist.linear.x = 0.0;
+  obj.velocity.twist.linear.y = 1.5;
+
+  carma_perception_msgs::msg::PredictedState result = predictStep(obj, 0.2, 1000, 0.99);
+
+  EXPECT_NEAR(1.0, result.predicted_position.position.x, 0.00001);
+  EXPECT_NEAR(2.3, result.predicted_position.position.y, 0.00001);
+  EXPECT_NEAR(0.0, getYawFromQuaternion(result.predicted_position.orientation), 0.00001);
+  EXPECT_NEAR(0.0, result.predicted_velocity.linear.x, 0.00001);  // body-frame velocity is unchanged
+  EXPECT_NEAR(1.5, result.predicted_velocity.linear.y, 0.00001);
+}
+
+TEST(predict_ctrv, predictStepExternalReversing)
+{
+  // Object faces +x but drives backwards. It should move along -x while keeping its heading.
+  carma_perception_msgs::msg::ExternalObject obj;
+  obj.header.stamp = builtin_interfaces::msg::Time(rclcpp::Time(5, 0));
+  obj.pose.pose.orientation = getQuaternionFromYaw(0.0);
+  obj.velocity.twist.linear.x = -2.0;
+
+  carma_perception_msgs::msg::PredictedState result = predictStep(obj, 0.5, 1000, 0.99);
+
+  EXPECT_NEAR(-1.0, result.predicted_position.position.x, 0.00001);
+  EXPECT_NEAR(0.0, result.predicted_position.position.y, 0.00001);
+  EXPECT_NEAR(0.0, getYawFromQuaternion(result.predicted_position.orientation), 0.00001);
+}
+
+TEST(predict_ctrv, predictStepExternalYawRateRotatesOrientation)
+{
+  // Previously the predicted orientation was copied from the input. With a non-zero yaw
+  // rate it should now rotate by yaw_rate * delta_t.
+  carma_perception_msgs::msg::ExternalObject obj;
+  obj.header.stamp = builtin_interfaces::msg::Time(rclcpp::Time(5, 0));
+  obj.pose.pose.orientation = getQuaternionFromYaw(0.0);
+  obj.velocity.twist.linear.x = 3.0;
+  obj.velocity.twist.angular.z = 0.5;
+
+  carma_perception_msgs::msg::PredictedState result = predictStep(obj, 0.4, 1000, 0.99);
+
+  EXPECT_NEAR(1.19202, result.predicted_position.position.x, 0.00001);
+  EXPECT_NEAR(0.11960, result.predicted_position.position.y, 0.00001);
+  EXPECT_NEAR(0.2, getYawFromQuaternion(result.predicted_position.orientation), 0.00001);
+  EXPECT_NEAR(0.0998334, result.predicted_position.orientation.z, 0.00001);
+  EXPECT_NEAR(0.9950042, result.predicted_position.orientation.w, 0.00001);
+}
+
+TEST(predict_ctrv, predictPeriodWithSlipAndYawRate)
+{
+  // Chained predictions must keep the slip angle out of the reported heading at every step,
+  // so the heading grows by exactly yaw_rate * delta_t per step.
+  carma_perception_msgs::msg::ExternalObject obj;
+  obj.header.stamp = builtin_interfaces::msg::Time(rclcpp::Time(5, 0));
+  obj.pose.pose.orientation = getQuaternionFromYaw(0.3);
+  obj.velocity.twist.linear.x = 2.0;
+  obj.velocity.twist.linear.y = 1.0;
+  obj.velocity.twist.angular.z = 0.2;
+
+  std::vector<carma_perception_msgs::msg::PredictedState> results = predictPeriod(obj, 0.1, 0.25, 1000, 0.99);
+
+  ASSERT_EQ(3u, results.size());
+
+  EXPECT_NEAR(0.15996, results[0].predicted_position.position.x, 0.00001);
+  EXPECT_NEAR(0.15624, results[0].predicted_position.position.y, 0.00001);
+  EXPECT_NEAR(0.32, getYawFromQuaternion(results[0].predicted_position.orientation), 0.00001);
+
+  EXPECT_NEAR(0.31676, results[1].predicted_position.position.x, 0.00001);
+  EXPECT_NEAR(0.31565, results[1].predicted_position.position.y, 0.00001);
+  EXPECT_NEAR(0.34, getYawFromQuaternion(results[1].predicted_position.orientation), 0.00001);
+
+  EXPECT_NEAR(0.47034, results[2].predicted_position.position.x, 0.00001);
+  EXPECT_NEAR(0.47817, results[2].predicted_position.position.y, 0.00001);
+  EXPECT_NEAR(0.36, getYawFromQuaternion(results[2].predicted_position.orientation), 0.00001);
+}
+
 }  // namespace ctrv
 }  // namespace motion_predict
